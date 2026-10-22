@@ -18,7 +18,6 @@ internal sealed class ScoreboardService(BasePlugin plugin, PluginConfig config, 
 	private Timer? revealTimer;
 	private bool updatesAllowed;
 
-	public bool IsEnabled => tickListener is not null;
 
 	public void Start(bool hotReload)
 	{

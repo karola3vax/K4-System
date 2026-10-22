@@ -143,7 +143,12 @@ public class ConfigTests
 			Assert.Contains(ConfigFile.LegacyFileName, result.Error);
 			Assert.True(File.Exists(Path.Combine(directory, ConfigFile.FileName)));
 
-			// Once the new file exists, it is used and the old one is ignored.
+			// A restart without editing the new file still stops K4, so it never runs on an empty database by mistake.
+			Assert.Null(ConfigFile.Load(directory).Config);
+
+			// Once the new file is filled in, it is used and the old one is ignored.
+			string path = Path.Combine(directory, ConfigFile.FileName);
+			File.WriteAllText(path, File.ReadAllText(path).Replace("\"start-points\": 0", "\"start-points\": 10", StringComparison.Ordinal));
 			Assert.NotNull(ConfigFile.Load(directory).Config);
 		}
 		finally

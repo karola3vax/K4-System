@@ -7,7 +7,7 @@
   <p>A maintained CounterStrikeSharp fork built for modern community servers.</p>
 
   <p>
-    <a href="https://github.com/karola3vax/K4-System/releases"><img src="https://img.shields.io/badge/release-v6.3.2-1f75cb?style=for-the-badge" alt="Latest release: v6.3.2"></a>
+    <a href="https://github.com/karola3vax/K4-System/releases"><img src="https://img.shields.io/github/v/release/karola3vax/K4-System?style=for-the-badge&color=1f75cb" alt="Latest release"></a>
     <a href="LICENSE.md"><img src="https://img.shields.io/badge/license-GPL--3.0-1f75cb?style=for-the-badge" alt="GPL-3.0 license"></a>
   </p>
 
@@ -71,14 +71,14 @@
 
 <table>
   <tr>
-    <td width="33%" valign="top"><strong>🏅 Configurable progression</strong><br><br>Build any rank ladder, tune every point event, and show promotions, demotions, and top-list placement.</td>
-    <td width="33%" valign="top"><strong>📊 Persistent player history</strong><br><br>Store ranks, detailed statistics, and playtime in MySQL or SQLite across reconnects and map changes.</td>
-    <td width="33%" valign="top"><strong>🚩 Three rank modes</strong><br><br>Run regular progression, permission-gated ranks only, or a ladder with no flagged ranks.</td>
+    <td width="33%" valign="top"><strong>Configurable progression</strong><br><br>Build any rank ladder, tune every point event, and show promotions, demotions, and top-list placement.</td>
+    <td width="33%" valign="top"><strong>Persistent player history</strong><br><br>Store ranks, detailed statistics, and playtime in MySQL or SQLite across reconnects and map changes.</td>
+    <td width="33%" valign="top"><strong>Three rank modes</strong><br><br>Run regular progression, permission-gated ranks only, or a ladder without permission-only ranks.</td>
   </tr>
   <tr>
-    <td width="33%" valign="top"><strong>🎁 One-time rank rewards</strong><br><br>Run configured server commands once when a player reaches a rank, with multiline colored descriptions.</td>
-    <td width="33%" valign="top"><strong>🏷️ Visible server identity</strong><br><br>Display rank tags, admin tags, country tags, and optional matchmaking-style scoreboard icons.</td>
-    <td width="33%" valign="top"><strong>🌍 Community ready</strong><br><br>Use 36 languages, per-player language choice, configurable aliases, bot and FFA rules, shared API access, and LevelRanks compatibility.</td>
+    <td width="33%" valign="top"><strong>One-time rank rewards</strong><br><br>Run configured server commands once when a player reaches a rank, with multiline colored descriptions.</td>
+    <td width="33%" valign="top"><strong>Visible server identity</strong><br><br>Display rank tags, admin tags, country tags, and optional matchmaking-style scoreboard icons.</td>
+    <td width="33%" valign="top"><strong>Community ready</strong><br><br>Use 36 languages, per-player language choice, configurable aliases, bot and FFA rules, shared API access, and LevelRanks compatibility.</td>
   </tr>
 </table>
 
@@ -97,7 +97,7 @@
 - Configurable modules, commands, point values, ranks, and messages
 - Permission-aware progression and admin targeting
 - MySQL or built-in SQLite storage, optional LevelRanks tables, and a shared player API
-- CounterStrikeSharp.API `1.0.376`, .NET 10, hot-reload, and map-change fixes
+- Works with CounterStrikeSharp API 1.0.376 or newer, and keeps player data safe through plugin reloads and map changes
 
 ## How it works
 
@@ -125,13 +125,14 @@ Gameplay events update the enabled modules. K4-System caches active players, sav
 | Plugin framework | [CounterStrikeSharp](https://github.com/roflmuffin/CounterStrikeSharp), built against and requiring API `1.0.376` or newer |
 | Runtime | .NET `10` |
 | Storage | MySQL-compatible database, or the built-in SQLite option |
-| Optional GeoIP | `GeoLite2-Country.mmdb` for country tags |
+| Optional GeoIP | `GeoLite2-Country.mmdb` for country tags, from [P3TERX/GeoLite.mmdb](https://github.com/P3TERX/GeoLite.mmdb/releases) |
+| Optional panel | [MultiAddonManager](https://github.com/Source2ZE/MultiAddonManager) and the K4 Workshop addon `3811667212` |
 
 ### Install in six steps
 
 1. Download the [current K4-System package](https://github.com/karola3vax/K4-System/releases).
 2. Extract the ZIP into `game/csgo/addons/counterstrikesharp/` and keep its folder structure intact.
-3. Start the server once. K4 creates `k4-system.jsonc` and `ranks.jsonc` and runs on SQLite right away.
+3. Start the server once. K4 creates `k4-system.jsonc`, `ranks.jsonc`, and `missions.jsonc`, and runs on SQLite right away.
 4. To use MySQL instead, set `storage.type` to `mysql` and fill in `storage.mysql`.
 5. Pick a point preset and review modules, tags, scoreboard display, commands, and the rank ladder.
 6. Restart K4-System and confirm that it loads without errors.
@@ -143,7 +144,7 @@ Gameplay events update the enabled modules. K4-System caches active players, sav
 | Mission list | `addons/counterstrikesharp/plugins/K4-System/missions.jsonc` |
 | Language files (replaced by updates) | `addons/counterstrikesharp/plugins/K4-System/lang/` |
 | Your own wording (kept by updates) | `addons/counterstrikesharp/configs/plugins/K4-System/lang/` |
-| Optional GeoIP database | Beside `K4-System.dll` |
+| Optional GeoIP database | `addons/counterstrikesharp/plugins/K4-System/GeoLite2-Country.mmdb` |
 
 <details>
 <summary><strong>Expected release package layout</strong></summary>
@@ -159,6 +160,7 @@ addons/counterstrikesharp/
 │       ├── K4-System.deps.json
 │       ├── Microsoft.Data.Sqlite.dll
 │       ├── MySqlConnector.dll
+│       ├── Microsoft.Extensions.*.dll
 │       ├── SQLitePCLRaw.*.dll
 │       ├── runtimes/
 │       │   ├── linux-x64/native/libe_sqlite3.so
@@ -181,10 +183,12 @@ All settings live in one commented file, `configs/plugins/K4-System/k4-system.js
 | Section | What it controls |
 | --- | --- |
 | `storage` | SQLite or MySQL, table prefix, purge of inactive players, optional LevelRanks table |
-| `modules` | Turn ranks, stats, playtime, and the admin list on or off |
+| `modules` | Turn ranks, stats, playtime, missions, and the admin list on or off |
 | `tracking` | Minimum players, warmup, bots, and free-for-all. Applies to points and stats alike |
 | `ranks` | Rank mode, start points, VIP multiplier, round summary, kill streaks, reset cooldown, dynamic death points, team balance, playtime reward |
 | `points` | A point preset plus your own overrides |
+| `missions` | Time zone, rewards per difficulty, streak bonus, rerolls per day, bots, and map rules |
+| `panorama` | The clickable panel and its rank icons (competitive, wingman, or text) |
 | `scoreboard` | What the CS2 rank area shows, custom icons, points in the score column |
 | `tags` | Rank tags, top-placement tag, country tag, admin tags and `!admins` colors |
 | `messages` | Join hint, connect and disconnect announcements |
@@ -207,6 +211,8 @@ All settings live in one commented file, `configs/plugins/K4-System/k4-system.js
 | `mysql` | You run several servers on one database, use a web panel, or need the LevelRanks table for an external tool |
 
 Both use the same tables, so commands, top lists, rewards, and resets behave the same. K4 does not copy data between the two. If you replace the whole plugin folder when updating, keep `k4system.db`.
+
+By default K4 deletes players who have not joined for 30 days (`storage.purge-after-days`). Set it to `0` to keep everyone.
 
 ### Point presets
 
@@ -237,7 +243,7 @@ Choose a preset, then change single values in `overrides`:
 | `hostage-rescue` / `hostage-rescue-all` / `hostage-hurt` / `hostage-kill` | 30 / 25 / -10 / -40 | 10 / 10 / -5 / -20 | 0 |
 | `playtime` (every `ranks.playtime-reward.every-minutes`) | 15 | 0 | 0 |
 
-`casual` is the 5.x default economy: about 250 to 300 hours of normal play to reach Global Elite at 100,000 points. `competitive` rewards winning rounds and clean play over flashy kills. `deathmatch` counts only kills, in small steps, for servers without rounds or objectives.
+`casual` is the default and uses the same values as K4-System 5.x. `competitive` rewards winning rounds and clean play over flashy kills. `deathmatch` counts only kills, in small steps, for servers without rounds or objectives.
 
 Bots are never stored as persistent ranked players. Bot settings only decide whether eligible human interactions with bots count.
 
@@ -254,14 +260,14 @@ Set `mode` inside `ranks`:
 | Mode | Active ranks | Automatic scoring |
 | --- | --- | --- |
 | `Normal` | Regular and permission-gated ranks | No additional game-mode restriction |
-| `FlagsOnly` | Default rank plus ranks with nonblank `RequiredPermissions` | Waits until the player matches an active flag |
+| `FlagsOnly` | The starting rank plus ranks that have `RequiredPermissions` | Waits until the player has one of those permissions |
 | `NoFlags` | Default rank plus ranks without requirements | No additional game-mode restriction |
 
-In `FlagsOnly`, automatic gains and losses wait until the player has a matching permission, group, or command override. Saved points remain unchanged while scoring is blocked. Admin commands and Shared API point setters remain manual overrides.
+In `FlagsOnly`, automatic gains and losses wait until the player has a matching permission, group, or command override. Saved points stay as they are while scoring is blocked. Admin commands and other plugins can still change points.
 
-Flags are rechecked after player data loads and on the next round, score attempt, spawn, team change, manual point update, or `!rank` command. The highest eligible rank wins, lower ranks are skipped, and only the final higher-rank reward runs. Load and permission-only corrections do not backfill rewards.
+Flags are rechecked after player data loads and on the next round, score attempt, spawn, team change, manual point update, or `!rank` command. The highest rank the player may hold wins. If a player skips ranks, only the reward of the rank they land on is paid, and rewards are not paid when a rank changes only because data loaded or a permission changed.
 
-Changing modes does not rewrite `ranks.jsonc`, stored points, or database tables. Active ranks receive sequential runtime IDs after filtering, so built-in scoreboard icons have no gaps. Restart K4-System after changing the mode.
+Changing modes does not rewrite `ranks.jsonc`, stored points, or database tables. Ranks switched off by the mode are left out of the scoreboard icons, so there are no gaps. Restart K4-System after changing the mode.
 
 ## Permission-gated ranks
 
@@ -331,31 +337,31 @@ Run one or more server commands when a player first reaches a rank:
 ```
 
 - Only `command` rewards are supported.
-- Commands run through `Server.ExecuteCommand`.
+- Commands run in the server console.
 - Pending and completed commands are stored in `k4rankrewards`, preventing the same SteamID from normally receiving the same configured reward twice.
 - Supported placeholders: `{steamid}`, `{userid}`, `{name}`, `{rank}`, `{rankid}`, and `{points}`.
 - Rewards are not backfilled on initial load or for skipped intermediate ranks.
 
-Interrupted pending rewards resume when the player reconnects. A server crash after the external command runs but before completion is saved can repeat that command, so reward commands should be safe to run twice. K4 automatically adds the completion column and marks all historical claims as already completed during the first 5.1 startup.
+Interrupted pending rewards resume when the player reconnects. A server crash after the external command runs but before completion is saved can repeat that command, so reward commands should be safe to run twice.
 
 `RewardDescription` appears for ranks that contain at least one valid command reward. Use JSON's `\n` escape for a new chat line. `/n` remains ordinary text. CounterStrikeSharp color tags such as `{green}`, `{gold}`, and `{red}` are case-insensitive; unknown tags remain visible.
 
 ## Commands
 
-Player aliases are configurable. These are the defaults:
+Command names are set in `commands` in `k4-system.jsonc`. These are the defaults:
 
 | Purpose | Commands |
 | --- | --- |
 | Help and panel | `!k4` (`commands.main`, for example `["k4", "lvl"]`) |
 | Rank | `!rank`, `!myrank` |
-| Top list | `!top`, `!ranktop`, `!toplist` |
+| Top list | `!top`, `!ranktop`, `!toplist` (add a number up to 25; default 5) |
 | Rank list | `!ranks`, `!ranklist` |
 | Stats | `!stats`, `!mystats`, `!stat`, `!mystat`, `!statistic`, `!statistics` |
 | Playtime | `!time`, `!mytime`, `!playtime` |
 | Admin list | `!admins`, `!listadmins` |
 | Personal reset | `!resetmydata <all\|time\|stat\|rank>` |
-| Toggles | `!toggletag`, `!togglepointmsg` |
-| Daily missions | `!missions`, `!mission`, `!daily`; `!missions reroll <1-3>` (daily missions only) |
+| Toggles | `!toggletag`, `!togglepointmsg` (fixed names, ranks module only) |
+| Missions | `!missions`, `!mission`, `!daily`; `!missions reroll <1-3>` (daily missions only) |
 
 Set `commands.rank-to-everyone` to `true` to make `!rank` work like LVL Ranks: everyone in chat then sees the player's leaderboard place, points, kills, deaths and KDR (each reader in their own language). Without the stats module the line shows the place and points only. `!rank` then only posts that one line, which the player sees too, and does not open the panel (`!k4` still does), and the usual `commands.cooldown-seconds` limits how often the line can be posted. The default is `false`.
 
@@ -370,7 +376,10 @@ css_givepoints <target> <amount>
 css_removepoints <target> <amount>
 css_setpoints <target> <amount>
 css_resetdata <target> [all|time|stat|rank]
+css_k4_hud        (server console only) shows whether the panel works for each player
 ```
+
+Without a section, `css_resetdata` resets everything. Admin resets keep the reward history, so rewards are not paid twice.
 
 CounterStrikeSharp targets include player names, `#userid`, `@all`, `@t`, `@ct`, and `@alive`.
 
@@ -387,14 +396,14 @@ css_resetdata "PlayerName" rank
 
 ## Panorama panel
 
-K4 can replace chat output with a clickable in-game panel. `!k4`, `!rank`, `!missions`, `!top`, `!ranks`, and `!stats` then open the matching tab, and promotions, demotions, and finished missions appear as small pop-ups at the right side of the screen. Players click with the mouse and close the panel with **✕** or the scoreboard key. The panel is styled after CS2's own scoreboard and menus and uses the game's own images and sounds; the only images in the addon are sharp copies of CS2's rank emblems.
+K4 can replace chat output with a clickable in-game panel. `!k4`, `!rank`, `!missions`, `!top`, `!ranks`, `!stats`, and `!time` then open the matching tab, and promotions, demotions, and finished missions appear as small pop-ups at the right side of the screen. Players click with the mouse and close the panel with **✕**. It also closes by itself when freeze time ends and after 45 seconds without a click. The panel is styled after CS2's own scoreboard and menus and uses the game's own images and sounds; the only images in the addon are sharp copies of CS2's rank emblems.
 
 The panel is a Panorama layout that ships to players as a Steam Workshop addon through MultiAddonManager, so it needs a one-time setup and is off by default:
 
 1. Add the official K4 addon, Workshop ID [`3811667212`](https://steamcommunity.com/sharedfiles/filedetails/?id=3811667212), to MultiAddonManager. If you changed the layout, publish your own copy instead. The steps for both are in [`panorama/README.md`](panorama/README.md).
 2. Set `"panorama": { "enabled": true }` in `k4-system.jsonc` and restart.
 
-Without the addon, or with `enabled` set to `false`, every command keeps its chat output.
+With `enabled` set to `false`, every command keeps its chat output. Turn it on only after the addon is in MultiAddonManager: K4 cannot see whether a player has the addon, so a player without it sees nothing when a command opens the panel.
 
 ## Missions
 
@@ -432,9 +441,9 @@ When K4 reads a map wrong, correct it in `missions.map-rules` in `k4-system.json
 
 | Rule | Default |
 | --- | --- |
-| Rewards | Easy 150, medium 300, hard 600, weekly 2500 points (about a quarter extra on an evening of play) |
-| Streak | Finish all three daily missions on consecutive days: +10% of the day's rewards per streak day, up to +70% on day 7. Missing a day starts over. The weekly mission does not count for the streak |
-| Reroll | `!missions reroll 2` swaps daily mission 2 for another of the same difficulty, once a day, if it has no progress yet. The weekly mission is not rerolled |
+| Rewards | `missions.rewards`: easy 150, medium 300, hard 600, weekly 2500 points |
+| Streak | `missions.streak-bonus-percent` and `missions.streak-max-days`. Finish all three daily missions on consecutive days: +10% of the day's rewards per streak day, up to +70% on day 7. Missing a day starts over. The weekly mission does not count for the streak |
+| Reroll | `!missions reroll 2` swaps daily mission 2 for another of the same difficulty if it has no progress yet, `missions.rerolls-per-day` times a day (default 1). The weekly mission is not rerolled |
 | Reset | Midnight in `missions.timezone` (`Europe/Istanbul`); the weekly mission on Monday at midnight. If the server has no timezone data, use an offset such as `"+03:00"` |
 | Counting | `tracking.minimum-players` and warmup apply, as for stats. Team kills never count |
 | Fair play | Kills and assists on bots do not count (`missions.count-bots`). AFK minutes do not count for playtime missions. Round wins only count for players who played the whole round on that team |
@@ -529,7 +538,7 @@ For custom icons, configure the first skillgroup ID, the number of available ico
 "custom-icons": { "first-id": 19000051, "count": 20, "offset": 0 }
 ```
 
-Custom SVG files still belong under `panorama/images/icons/skillgroups/` and use names such as `skillgroup19000051.svg`. With the example above, `skillgroup19000051.svg` is `None`, `skillgroup19000052.svg` is the first active K4 rank, and `skillgroup19000070.svg` is the nineteenth active rank. The default 18-rank ladder only needs a count of `19`; use `20` when `ranks.jsonc` contains an additional active rank.
+Custom SVG files go under `panorama/images/icons/skillgroups/` and use names such as `skillgroup19000051.svg`. With the example above, `skillgroup19000051.svg` is `None`, `skillgroup19000052.svg` is the first active K4 rank, and `skillgroup19000070.svg` is the nineteenth active rank. The default 18-rank ladder only needs a count of `19`; use `20` when `ranks.jsonc` contains an additional active rank.
 
 > [!CAUTION]
 > CounterStrikeSharp blocks matchmaking-rank fields while `FollowCS2ServerGuidelines` is `true`. K4-System will leave scoreboard ranks disabled and log the exact setting to review in `addons/counterstrikesharp/configs/core.json`. CounterStrikeSharp documents that disabling this protection is at the server owner's own risk. K4-System never changes it automatically.
@@ -547,23 +556,24 @@ Server.ExecuteCommand($"css_resetdata #{player.UserId} rank");
 ## Updating
 
 1. Download the [newest release](https://github.com/karola3vax/K4-System/releases).
-2. Replace the old plugin files with the new package.
-3. Update `shared/K4-SharedApi/K4-SharedApi.dll`.
-4. Replace the whole `lang` folder. Your own wording in `configs/plugins/K4-System/lang/` stays as it is.
-5. Remove K4-System-MMRanks and FakeRanks RevealAll if they were previously installed.
-6. Fully restart the server.
+2. Extract it into `game/csgo/addons/counterstrikesharp/` over the old files. Do not delete `plugins/K4-System/` first: your `ranks.jsonc`, `missions.jsonc`, `k4system.db`, and GeoIP file are there. The package also updates `shared/K4-SharedApi/` and the `lang` folder; your own wording in `configs/plugins/K4-System/lang/` stays as it is.
+3. Remove K4-System-MMRanks and FakeRanks RevealAll if they were installed. FakeRanks is a Metamod plugin, so this needs a full server restart.
+4. Restart the server.
 
-### Upgrading from 5.x to 6.0
+### Upgrading from 5.x
 
-6.0 has a new config file and new language keys. Your database and `ranks.jsonc` keep working unchanged.
+<details>
+<summary><strong>Only for servers still on K4-System 5.x</strong></summary>
 
-1. Install 6.0 and start the server once. K4 writes `configs/plugins/K4-System/k4-system.jsonc` and, because it finds your old `K4-System.json`, **does not start tracking yet**. The server log names both files.
+Since 6.0, K4 uses a new config file and new language keys. Your database and `ranks.jsonc` keep working unchanged.
+
+1. Install the current version and start the server once. K4 writes `configs/plugins/K4-System/k4-system.jsonc` and, because it finds your old `K4-System.json`, **does not start tracking yet**. The server log names both files.
 2. Copy your settings into the new file. For MySQL set `storage.type` to `mysql` and fill in `storage.mysql`; use the same `table-prefix` as before.
 3. Point values now come from a preset. `casual` equals the old defaults; put any values you had changed into `points.overrides`.
 4. If you translated or edited language files, redo them from the new `lang/en.json`; the old keys are not read.
 5. Restart. You can delete the old `K4-System.json` afterwards.
 
-On its first 6.0 start, K4 adds a points index to the ranks table and a small `k4schema` table that records database upgrades. No data is changed.
+On its first start after 5.x, K4 adds a points index to the ranks table and a small `k4schema` table that records database upgrades. No data is changed.
 
 | 5.x setting | 6.0 setting |
 | --- | --- |
@@ -586,7 +596,7 @@ On its first 6.0 start, K4 adds a points index to the ranks table and a small `k
 | `*-commands`, `expensive-command-cooldown` | `commands.*` |
 | `load-messages` | removed |
 
-A full restart is required when removing FakeRanks RevealAll because it is a Metamod plugin.
+</details>
 
 ## Common problems
 
@@ -594,11 +604,22 @@ A full restart is required when removing FakeRanks RevealAll because it is a Met
 | --- | --- |
 | Plugin does not load | CounterStrikeSharp, .NET 10, and the release folder structure |
 | Database errors | `storage.mysql` host, credentials, database, port, and SSL mode; or, for SQLite, write access to the `sqlite-file` location |
-| Points do not change | Rank module, game mode, flags, warmup, minimum players, bots, and point values |
+| Points do not change | `modules.ranks`, `ranks.mode`, permissions, warmup, minimum players, bots, and point values |
+| Missions missing | `modules.ranks` must be on. The log says "Daily missions are off because..." when `missions.jsonc` has an error |
+| Panel shows nothing | See [panorama/README.md](panorama/README.md#if-something-does-not-work) |
 | Admin command denied | `@k4system/admin` or server-console execution |
 | Rank or tag missing | Player load, permission gates, scoreboard settings, and `FollowCS2ServerGuidelines` |
-| Country tag missing | `GeoLite2-Country.mmdb` beside `K4-System.dll` |
+| Country tag missing | `GeoLite2-Country.mmdb` in `plugins/K4-System/` |
 | K4 says it is not running | The log names the setting to fix in `k4-system.jsonc`, or asks you to move 5.x settings into the new file |
+
+## Building from source
+
+```bash
+dotnet build K4-System/src/K4-System.csproj -c Release
+dotnet test K4-System.Tests/K4-System.Tests.csproj -c Release
+```
+
+The server package is written to `K4-System/src/bin/K4-System/`. The MySQL tests run only when `K4_TEST_MYSQL` holds a connection string; without it they are skipped. A tag `vX.Y.Z` on GitHub builds the release package and publishes it.
 
 ## Maintained fork
 
@@ -612,6 +633,6 @@ Distributed under the [GPL-3.0 License](LICENSE.md).
 
 ### Artwork credit
 
-Rank and Premier artwork is displayed from [ItzArty/csgo-rank-icons](https://github.com/ItzArty/csgo-rank-icons/tree/29cde4ddd2758458f1c67653ad32e0198b5484f9), pinned to commit `29cde4d`. The artwork is not bundled with K4-System. Counter-Strike and its assets belong to Valve.
+Rank and Premier artwork is displayed from [ItzArty/csgo-rank-icons](https://github.com/ItzArty/csgo-rank-icons/tree/29cde4ddd2758458f1c67653ad32e0198b5484f9), pinned to commit `29cde4d`. The Workshop addon carries sharp copies of CS2's own rank emblems (`panorama/k4system/panorama/images/custom_game/k4/ranks/`). Counter-Strike and its assets, including these emblems, belong to Valve and are not covered by the GPL.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>

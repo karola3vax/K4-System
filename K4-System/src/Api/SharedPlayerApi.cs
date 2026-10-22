@@ -1,6 +1,7 @@
 namespace K4System.Api;
 
 using System.Reflection;
+using CounterStrikeSharp.API;
 using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Core.Capabilities;
 using K4SharedApi;
@@ -20,7 +21,8 @@ internal static class SharedPlayerApi
 	private static Source? current;
 
 	/// <summary>What the API reads from the running plugin.</summary>
-	internal sealed record Source(PlayerRegistry Players, Func<bool> IsActive, Action<K4Player, int> SetPoints);
+	/// <param name="SetPoints">Game thread only.</param>
+	internal sealed record Source(PlayerRegistry Players, Func<bool> IsActive, Func<bool> IsGameThread, Action<K4Player, int> SetPoints);
 
 	private static readonly Func<CCSPlayerController, IPlayerAPI> Provider = controller =>
 	{
@@ -111,7 +113,22 @@ internal sealed class PlayerApi(CCSPlayerController controller, SharedPlayerApi.
 	public int Points
 	{
 		get => Require("Points (get)").Rank!.Points;
-		set => source.SetPoints(Require("Points (set)"), value);
+		set
+		{
+			// Other plugins often set points from an async continuation. The player list and CS2 entities are game-thread
+			// only, so off that thread the whole lookup runs on the next frame, and a player who left by then is skipped.
+			if (source.IsGameThread())
+			{
+				source.SetPoints(Require("Points (set)"), value);
+				return;
+			}
+
+			Server.NextFrame(() =>
+			{
+				if (source.IsActive() && Player is { IsValid: true, IsHuman: true, Rank: not null } player)
+					source.SetPoints(player, value);
+			});
+		}
 	}
 
 	/// <summary>One-based: the default rank reports 0.</summary>

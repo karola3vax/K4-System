@@ -1,19 +1,14 @@
 ---
 name: Feature request
-about: Suggest something new for K4-System
-labels: feature
+about: Suggest something new for K4-System, or a better version of an existing feature
+labels: enhancement
 ---
 
-**Is your feature request related to a problem? Please describe.**
-A clear and concise description of what the problem is. Ex. I'm always frustrated when [...]
+**What you want**
+What K4-System should do.
 
-**Describe the solution you'd like**
-A clear and concise description of what you want to happen.
+**Why**
+The problem it solves for your server or your players.
 
-**Describe alternatives you've considered**
-A clear and concise description of any alternative solutions or features you've considered.
-
-**Additional context**
-Add any other context or screenshots about the feature request here.
-
-/label ~"Feature Request" ~"Priority: Low"
+**How it could work**
+Optional: commands, settings or examples from other plugins.

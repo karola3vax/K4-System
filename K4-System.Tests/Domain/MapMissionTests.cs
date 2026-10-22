@@ -351,6 +351,17 @@ public class MapMissionTests
 	}
 
 	[Fact]
+	public void Damage_counts_only_the_health_the_victim_still_had()
+	{
+		MissionService service = new(new PluginConfig(), DefaultPool, TimeZoneInfo.Utc, null!, null!, null!, null!, null!, null!, null!, null!, null!);
+
+		Assert.Equal(90, service.TrackHealth(victimSlot: 5, damage: 90, healthAfter: 10)); // fall damage, a bot or a teammate
+		Assert.Equal(10, service.TrackHealth(victimSlot: 5, damage: 100, healthAfter: 0)); // the killing shot reports 100
+		service.OnSpawn(5);
+		Assert.Equal(100, service.TrackHealth(victimSlot: 5, damage: 448, healthAfter: 0)); // fresh life: 100 health
+	}
+
+	[Fact]
 	public void Kills_in_one_round_or_life_count_the_best_try()
 	{
 		Assert.True(Mission(MissionType.RoundKills).CountsBestTry);

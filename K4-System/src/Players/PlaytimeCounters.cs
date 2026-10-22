@@ -55,6 +55,12 @@ public sealed class PlaytimeCounters
 
 	public void SetAnchor(PlaytimeAnchor anchor, DateTime nowUtc) => anchors[(int)anchor] = nowUtc;
 
+	/// <summary>
+	/// True from a death (or joining a team) until the next spawn. CS2 respawns survivors at every round start,
+	/// so a spawn alone does not mean the time before it was spent dead.
+	/// </summary>
+	public bool WaitingToSpawn { get; set; }
+
 	public void RestartAnchors(DateTime nowUtc)
 	{
 		anchors[(int)PlaytimeAnchor.Connect] = nowUtc;

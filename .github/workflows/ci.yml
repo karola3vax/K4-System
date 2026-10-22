@@ -25,23 +25,15 @@ jobs:
     env:
       K4_TEST_MYSQL: "Server=127.0.0.1;Port=3306;User ID=root;Password=k4test;Database=k4test;SslMode=None;AllowPublicKeyRetrieval=True"
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-dotnet@v6
         with:
           global-json-file: global.json
       - run: dotnet restore K4-System.Tests/K4-System.Tests.csproj --locked-mode
       - run: dotnet format K4-System.Tests/K4-System.Tests.csproj --verify-no-changes --no-restore
       - run: dotnet test K4-System.Tests/K4-System.Tests.csproj --configuration Release --no-restore
       - run: dotnet build K4-System/src/K4-System.csproj --configuration Release --no-restore -warnaserror
-      - name: Check the package contents
-        run: |
-          P=K4-System/src/bin/K4-System
-          for f in plugins/K4-System/K4-System.dll plugins/K4-System/MaxMind.GeoIP2.dll plugins/K4-System/MaxMind.Db.dll \
-                   plugins/K4-System/K4-System.deps.json plugins/K4-System/Microsoft.Data.Sqlite.dll \
-                   plugins/K4-System/runtimes/linux-x64/native/libe_sqlite3.so plugins/K4-System/runtimes/win-x64/native/e_sqlite3.dll \
-                   shared/K4-SharedApi/K4-SharedApi.dll; do
-            test -f "$P/$f" || { echo "Missing $f" >&2; exit 1; }
-          done
+      - run: bash .github/scripts/check-package.sh
 
   # A version tag (vX.Y.Z) builds the zip and publishes the GitHub release. A release that already exists is left alone,
   # so re-running a tag never uploads a second, different zip.
@@ -55,8 +47,8 @@ jobs:
       GH_TOKEN: ${{ github.token }}
       RELEASE_TAG: ${{ github.ref_name }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-dotnet@v6
         with:
           global-json-file: global.json
       - name: Skip when the release already exists
@@ -76,19 +68,8 @@ jobs:
           dotnet restore K4-System.Tests/K4-System.Tests.csproj --locked-mode
           dotnet build K4-System/src/K4-System.csproj --configuration Release --no-restore --nologo -warnaserror
 
+          bash .github/scripts/check-package.sh
           P=K4-System/src/bin/K4-System
-          for f in plugins/K4-System/K4-System.dll plugins/K4-System/Dapper.dll plugins/K4-System/MySqlConnector.dll \
-                   plugins/K4-System/K4-System.deps.json plugins/K4-System/Microsoft.Data.Sqlite.dll plugins/K4-System/SQLitePCLRaw.core.dll \
-                   plugins/K4-System/SQLitePCLRaw.provider.e_sqlite3.dll plugins/K4-System/runtimes/linux-x64/native/libe_sqlite3.so \
-                   plugins/K4-System/runtimes/win-x64/native/e_sqlite3.dll plugins/K4-System/MaxMind.GeoIP2.dll \
-                   plugins/K4-System/MaxMind.Db.dll shared/K4-SharedApi/K4-SharedApi.dll; do
-            test -f "$P/$f" || { echo "Missing $f" >&2; exit 1; }
-          done
-          test "$(find "$P/plugins/K4-System/lang" -maxdepth 1 -type f -name '*.json' | wc -l)" -ge 13
-          if find "$P" -type f | grep -Eq 'MMRanks|FakeRanks'; then
-            echo "Release package contains an old companion plugin." >&2
-            exit 1
-          fi
 
           ZIP="K4-System-v${VERSION}.zip"
           (cd "$P" && zip -qr "$GITHUB_WORKSPACE/$ZIP" .)

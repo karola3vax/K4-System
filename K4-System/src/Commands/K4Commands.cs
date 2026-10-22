@@ -117,16 +117,14 @@ internal sealed class K4Commands(
 	}
 
 	/// <summary>Shared cooldown of the database-backed !rank and !top commands.</summary>
-	/// <param name="quiet">No cooldown message: the player already got an answer (the panel opened).</param>
-	private bool TryStartExpensiveCommand(K4Player player, CommandInfo info, bool quiet = false)
+	private bool TryStartExpensiveCommand(K4Player player, CommandInfo info)
 	{
 		DateTime now = DateTime.UtcNow;
 		TimeSpan remaining = ResetPolicy.CommandCooldownRemaining(now, player.LastExpensiveCommandUtc, General.Commands.CooldownSeconds);
 
 		if (remaining > TimeSpan.Zero)
 		{
-			if (!quiet)
-				info.ReplyToCommand(chat.Prefixed("error.cooldown", (int)Math.Ceiling(remaining.TotalSeconds)));
+			info.ReplyToCommand(chat.Prefixed("error.cooldown", (int)Math.Ceiling(remaining.TotalSeconds)));
 			return false;
 		}
 
@@ -401,11 +399,10 @@ internal sealed class K4Commands(
 	{
 		// With "rank-to-everyone", !rank only posts to chat, like LVL Ranks; !k4 still opens the panel.
 		bool everyone = General.Commands.RankToEveryone;
-		bool panel = !everyone && TryOpenPanel(player, HudTab.Rank);
-		if (panel)
+		if (!everyone && TryOpenPanel(player, HudTab.Rank))
 			return;
 
-		if (!guard.Check(player, info, CommandUsage.CLIENT_ONLY) || LoadedPlayer(player!, info) is not K4Player k4player || !TryStartExpensiveCommand(k4player, info, quiet: panel))
+		if (!guard.Check(player, info, CommandUsage.CLIENT_ONLY) || LoadedPlayer(player!, info) is not K4Player k4player || !TryStartExpensiveCommand(k4player, info))
 			return;
 
 		ulong steamId = k4player.SteamId;
@@ -416,10 +413,10 @@ internal sealed class K4Commands(
 			gameThread.Post(() =>
 			{
 				// With "rank-to-everyone" the player reads the same public line as everyone else, like LVL Ranks.
-				if (!panel && !everyone)
-					PrintRank(steamId, placement, total);
 				if (everyone)
 					AnnounceRank(steamId, placement, total);
+				else
+					PrintRank(steamId, placement, total);
 			});
 		}, "Preparing rank information");
 	}

@@ -429,14 +429,14 @@ internal sealed class MissionService(
 		=> Record(assister, flash ? MissionType.FlashAssists : MissionType.Assists);
 
 	/// <summary>
-	/// Health damage to an enemy. The killing hit can report more than the health that was left, so only what
-	/// the victim still had counts.
+	/// Every hit on a player, from anyone (fall damage, bots and teammates too), so the health before the next hit is known.
+	/// Returns the health this hit really took: the killing hit can report more than the health that was left.
 	/// </summary>
-	public void OnDamage(K4Player attacker, int victimSlot, int damage, int healthAfter)
+	public int TrackHealth(int victimSlot, int damage, int healthAfter)
 	{
 		int before = healthAfter > 0 ? healthAfter + damage : healthBefore.GetValueOrDefault(victimSlot, 100);
 		healthBefore[victimSlot] = healthAfter;
-		Record(attacker, MissionType.Damage, Math.Clamp(before - healthAfter, 0, Math.Max(0, damage)));
+		return Math.Clamp(before - healthAfter, 0, Math.Max(0, damage));
 	}
 
 	/// <summary>

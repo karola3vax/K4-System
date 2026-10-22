@@ -37,7 +37,7 @@
   <!--
     CVE-2025-6965 (GHSA-2m69-gcr7-jv3q) needs attacker-written SQL with crafted aggregate queries. K4 only runs its
     own fixed, parameterized statements, so it cannot be reached through K4. The patched SQLite builds need glibc 2.34,
-    which CS2's Linux runtime (glibc 2.31) does not have; see the SQLite package note in K4-System.csproj.
+    which CS2's Linux runtime (glibc 2.31) does not have; see the SQLite note above.
     Remove this once a patched SQLitePCLRaw.lib.e_sqlite3 runs on glibc 2.31 (SqliteNativeLibraryTests checks it).
   -->
   <ItemGroup>
@@ -63,7 +63,7 @@
     </ItemGroup>
     <RemoveDir Directories="@(UnusedRuntimeDirectories)" />
   </Target>
-  <Target Name="CopySharedApiToOutput" AfterTargets="Build">
+  <Target Name="CopySharedApiToOutput" AfterTargets="Build" Condition="'$(Configuration)'=='Release'">
     <Copy SourceFiles="../../K4-SharedApi/src/bin/$(Configuration)/$(TargetFramework)/K4-SharedApi.dll"
       DestinationFolder="./bin/K4-System/shared/K4-SharedApi/" />
   </Target>

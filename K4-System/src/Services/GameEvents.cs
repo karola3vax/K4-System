@@ -280,12 +280,17 @@ internal sealed class GameEvents(
 			DeathActor? attacker = Actor(@event.Attacker);
 			stats?.OnPlayerHurt(@event, victim, attacker);
 
-			if (missions?.IsTrackingAllowed() == true && victim is DeathActor hurt && attacker is DeathActor { IsHuman: true } shooter
-				&& !DeathRules.IsSameActor(shooter, hurt) && (hurt.IsHuman || config.Missions.CountBots)
-				&& (hurt.Team != shooter.Team || config.Tracking.FreeForAll || missions.Map is { Teams: false })
-				&& ValidHuman(@event.Attacker) is K4Player damager)
+			if (missions is not null && victim is DeathActor hurt)
 			{
-				missions.OnDamage(damager, hurt.Slot, @event.DmgHealth, @event.Health);
+				int taken = missions.TrackHealth(hurt.Slot, @event.DmgHealth, @event.Health);
+
+				if (missions.IsTrackingAllowed() && attacker is DeathActor { IsHuman: true } shooter
+					&& !DeathRules.IsSameActor(shooter, hurt) && (hurt.IsHuman || config.Missions.CountBots)
+					&& (hurt.Team != shooter.Team || config.Tracking.FreeForAll || missions.Map is { Teams: false })
+					&& ValidHuman(@event.Attacker) is K4Player damager)
+				{
+					missions.Record(damager, MissionType.Damage, taken);
+				}
 			}
 
 			return HookResult.Continue;

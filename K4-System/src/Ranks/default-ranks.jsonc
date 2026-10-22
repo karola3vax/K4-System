@@ -1,13 +1,13 @@
 {
-	"None": { // Whatever you set here, be unique. Not read by plugin
- 		"Name": "None", // This name is set in MySQL and also if not Tag is preset, this is the Tag
+	"None": { // Unique key. K4 uses it to remember which rewards were paid, so renaming it lets the reward be paid again
+ 		"Name": "None", // Shown to players and saved in the database. Must be unique
  		"Point": -1, // Whatever you set to -1 is the default rank
  		"Color": "default"
  	},
 	"Silver I": {
 		"Name": "Silver I",
-		"Tag": "[SI]", // Clan tag (scoreboard) of the rank. If not set, it uses the key instead
-		"Point": 500, // From this amount of experience, the player is Silver I
+		"Tag": "[SI]", // Clan tag on the scoreboard. If left out, K4 shows [Name]
+		"Point": 500, // From this many points, the player is Silver I
 		"Color": "silver", // Color code for the rank. Find color names here: https://github.com/roflmuffin/CounterStrikeSharp/blob/main/managed/CounterStrikeSharp.API/Modules/Utils/ChatColors.cs
 		// "RequiredPermissions": ["@css/test"], // Optional. Player needs any one listed permission, group, or command override to receive this rank
 		// "RewardDescription": "{green}500 credits\n{gold}VIP access", // Optional multiline/color text shown when at least one valid command reward is configured

@@ -75,7 +75,8 @@ internal sealed class RankService(
 		state.Points = PointMath.AddToStored(oldPoints, amount);
 		int applied = state.Points - oldPoints;
 
-		if (Settings.RoundSummary && game.HasRules && !game.IsWarmup)
+		// Points after the summary was printed (MVP, exit frags) get their own message instead of waiting a round.
+		if (Settings.RoundSummary && game.HasRules && !game.IsWarmup && !roundSummarized)
 		{
 			state.RoundPoints = PointMath.AddClamped(state.RoundPoints, applied);
 			if (applied != 0)
@@ -362,8 +363,12 @@ internal sealed class RankService(
 			ApplyPoints(player, Points.MVP, "reason.mvp");
 	}
 
+	private bool roundSummarized;
+
 	public void OnRoundStart()
 	{
+		roundSummarized = false;
+
 		foreach (K4Player player in players.ValidHumans.ToArray())
 		{
 			if (player.Rank is null)
@@ -443,6 +448,8 @@ internal sealed class RankService(
 			state.RoundPoints = 0;
 			state.RoundReasons.Clear();
 		}
+
+		roundSummarized = Settings.RoundSummary;
 	}
 
 	/// <summary>" 5× Kill: +100" in the player's language; the count and sign need no translation.</summary>

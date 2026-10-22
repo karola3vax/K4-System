@@ -157,7 +157,7 @@ internal sealed class PanoramaHud(
 
 		try
 		{
-			// After a hot reload the previous instance's entity still exists; reuse it instead of adding another.
+			// Reuse a leftover layout entity (for example after an unload that could not remove it) instead of adding another.
 			layout = Utilities.FindAllEntitiesByDesignerName<CCSCustomHudLayout>("custom_hud_layout")
 				.FirstOrDefault(entity => entity.IsValid && entity.StrLayout == LayoutPath);
 			if (layout is not null)
@@ -526,9 +526,7 @@ internal sealed class PanoramaHud(
 
 	internal static string WeaponIcon(string? weapon)
 	{
-		string name = (weapon ?? string.Empty).Trim().ToLowerInvariant();
-		if (name.StartsWith("weapon_", StringComparison.Ordinal))
-			name = name["weapon_".Length..];
+		string name = WeaponCatalog.Normalize(weapon);
 		return WeaponIcons.Contains(name) ? $"eq-{name}" : "ic-bullet";
 	}
 
@@ -809,7 +807,7 @@ internal sealed class PanoramaHud(
 
 			tiles.Add((Text(player, "hud.stat.kills"), Number(kills), "ic-kill"));
 			tiles.Add((Text(player, "hud.stat.deaths"), Number(deaths), "ic-map_death"));
-			tiles.Add((Text(player, "hud.stat.kd"), (deaths > 0 ? (double)kills / deaths : kills).ToString("0.00", invariant), "ic-stats"));
+			tiles.Add((Text(player, "hud.stat.kd"), StatCounters.KillDeathRatio(kills, deaths).ToString("0.00", invariant), "ic-stats"));
 			tiles.Add((Text(player, "hud.stat.headshots"), $"{StatService.HeadshotPercentage(stats[StatField.Headshots], kills).ToString("0", invariant)}%", "ic-stat_headshots"));
 			tiles.Add((Text(player, "hud.stat.assists"), Number(stats[StatField.Assists]), "ic-stat_assists"));
 			tiles.Add((Text(player, "hud.stat.winrate"), $"{(rounds > 0 ? stats[StatField.RoundWin] * 100.0 / rounds : 0).ToString("0", invariant)}%", "ic-trophy"));

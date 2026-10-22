@@ -28,20 +28,31 @@ internal sealed class PlaytimeService(Chat chat)
 
 		playtime.SetAnchor(PlaytimeAnchor.Team, now);
 		playtime.SetAnchor(PlaytimeAnchor.Death, now);
+		playtime.WaitingToSpawn = true;
 	}
 
 	public void OnSpawn(K4Player player)
 	{
+		PlaytimeCounters? playtime = player.Playtime;
+		if (playtime is null)
+			return;
+
 		DateTime now = DateTime.UtcNow;
-		player.Playtime?.AddElapsed(PlaytimeField.All, PlaytimeAnchor.Connect, now);
-		player.Playtime?.AddElapsed(PlaytimeField.Dead, PlaytimeAnchor.Death, now);
+		playtime.AddElapsed(PlaytimeField.All, PlaytimeAnchor.Connect, now);
+		playtime.AddElapsed(playtime.WaitingToSpawn ? PlaytimeField.Dead : PlaytimeField.Alive, PlaytimeAnchor.Death, now);
+		playtime.WaitingToSpawn = false;
 	}
 
 	public void OnDeath(K4Player player)
 	{
+		PlaytimeCounters? playtime = player.Playtime;
+		if (playtime is null)
+			return;
+
 		DateTime now = DateTime.UtcNow;
-		player.Playtime?.AddElapsed(PlaytimeField.All, PlaytimeAnchor.Connect, now);
-		player.Playtime?.AddElapsed(PlaytimeField.Alive, PlaytimeAnchor.Death, now);
+		playtime.AddElapsed(PlaytimeField.All, PlaytimeAnchor.Connect, now);
+		playtime.AddElapsed(PlaytimeField.Alive, PlaytimeAnchor.Death, now);
+		playtime.WaitingToSpawn = true;
 	}
 
 	/// <summary>Adds all running time, then restarts the counters. Used on disconnect, map end, and unload.</summary>
