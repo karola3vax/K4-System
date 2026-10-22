@@ -1,0 +1,78 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup Condition="'$(Configuration)'=='Release'">
+    <DebugSymbols>False</DebugSymbols>
+    <DebugType>None</DebugType>
+    <PublishDir>./bin/K4-System/plugins/K4-System</PublishDir>
+    <DefineConstants>$(DefineConstants);RELEASE</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <RootNamespace>K4System</RootNamespace>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+    <!-- CounterStrikeSharp finds SQLite's native library through K4-System.deps.json. -->
+    <GenerateDependencyFile>true</GenerateDependencyFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="CounterStrikeSharp.API" Version="1.0.376">
+      <PrivateAssets>none</PrivateAssets>
+      <ExcludeAssets>runtime</ExcludeAssets>
+      <IncludeAssets>compile; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Dapper" Version="2.1.89" />
+    <PackageReference Include="MaxMind.GeoIP2" Version="6.1.0" />
+    <!--
+      SQLite without Microsoft's bundle, so the native library can be pinned. CS2's Linux servers run inside
+      Valve's Steam Runtime 3 "sniper" (glibc 2.31). SQLitePCLRaw.lib.e_sqlite3 2.1.12 and later need glibc 2.34
+      and fail to load there; 2.1.11 needs 2.28. SqliteDialect selects the provider itself.
+    -->
+    <PackageReference Include="Microsoft.Data.Sqlite.Core" Version="10.0.12" />
+    <PackageReference Include="SQLitePCLRaw.provider.e_sqlite3" Version="2.1.12" />
+    <PackageReference Include="SQLitePCLRaw.lib.e_sqlite3" Version="2.1.11" />
+    <PackageReference Include="MySqlConnector" Version="2.6.2" />
+    <ProjectReference Include="..\..\K4-SharedApi\src\K4-SharedApi.csproj" Private="false" />
+  </ItemGroup>
+  <!--
+    CVE-2025-6965 (GHSA-2m69-gcr7-jv3q) needs attacker-written SQL with crafted aggregate queries. K4 only runs its
+    own fixed, parameterized statements, so it cannot be reached through K4. The patched SQLite builds need glibc 2.34,
+    which CS2's Linux runtime (glibc 2.31) does not have; see the SQLite package note in K4-System.csproj.
+    Remove this once a patched SQLitePCLRaw.lib.e_sqlite3 runs on glibc 2.31 (SqliteNativeLibraryTests checks it).
+  -->
+  <ItemGroup>
+    <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-2m69-gcr7-jv3q" />
+  </ItemGroup>
+  <ItemGroup>
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
+      <_Parameter1>K4-System.Tests</_Parameter1>
+    </AssemblyAttribute>
+  </ItemGroup>
+  <ItemGroup>
+    <None Update="lang\**\*.*" CopyToOutputDirectory="PreserveNewest" />
+    <EmbeddedResource Include="Ranks\default-ranks.jsonc" LogicalName="K4System.Ranks.default-ranks.jsonc" />
+    <EmbeddedResource Include="Config\default-config.jsonc" LogicalName="K4System.Config.default-config.jsonc" />
+    <EmbeddedResource Include="Missions\default-missions.jsonc" LogicalName="K4System.Missions.default-missions.jsonc" />
+  </ItemGroup>
+  <!-- CS2 dedicated servers run on Linux or Windows x64, so other SQLite native builds are left out. -->
+  <Target Name="RemoveUnusedNativeRuntimes" AfterTargets="Build">
+    <ItemGroup>
+      <UnusedRuntimeDirectories Include="$([System.IO.Directory]::GetDirectories('$(OutputPath)runtimes'))"
+        Condition="Exists('$(OutputPath)runtimes')"
+        Exclude="$(OutputPath)runtimes\linux-x64;$(OutputPath)runtimes\win-x64" />
+    </ItemGroup>
+    <RemoveDir Directories="@(UnusedRuntimeDirectories)" />
+  </Target>
+  <Target Name="CopySharedApiToOutput" AfterTargets="Build">
+    <Copy SourceFiles="../../K4-SharedApi/src/bin/$(Configuration)/$(TargetFramework)/K4-SharedApi.dll"
+      DestinationFolder="./bin/K4-System/shared/K4-SharedApi/" />
+  </Target>
+  <Target Name="CopyPluginToOutput" AfterTargets="RemoveUnusedNativeRuntimes" Condition="'$(Configuration)'=='Release'">
+    <RemoveDir Directories="$(PublishDir)" />
+    <ItemGroup>
+      <PluginReleaseFiles Include="$(OutputPath)**\*.*" />
+    </ItemGroup>
+    <Copy SourceFiles="@(PluginReleaseFiles)"
+      DestinationFiles="@(PluginReleaseFiles->'$(PublishDir)/%(RecursiveDir)%(Filename)%(Extension)')" />
+  </Target>
+</Project>

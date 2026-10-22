@@ -1,0 +1,81 @@
+[
+  {
+    "Name": "human kills uncached bot with bot tracking",
+    "Victim": { "Slot": 4, "SteamId": 0, "IsHuman": false, "Team": 3 },
+    "Attacker": { "Slot": 1, "SteamId": 76561198000000001, "IsHuman": true, "Team": 2 },
+    "IncludeBots": true,
+    "FfaMode": true,
+    "ExpectedVictimPoint": "None",
+    "ExpectedAttackerPoint": "Kill",
+    "ExpectedCountVictimStats": true,
+    "ExpectedCountAttackerStats": true,
+    "ExpectedCountAssister": false,
+    "ExpectedAssisterVictimIsEnemy": true
+  },
+  {
+    "Name": "human kills uncached bot without bot tracking",
+    "Victim": { "Slot": 4, "SteamId": 0, "IsHuman": false, "Team": 3 },
+    "Attacker": { "Slot": 1, "SteamId": 76561198000000001, "IsHuman": true, "Team": 2 },
+    "IncludeBots": false,
+    "FfaMode": true,
+    "ExpectedVictimPoint": "None",
+    "ExpectedAttackerPoint": "None",
+    "ExpectedCountVictimStats": false,
+    "ExpectedCountAttackerStats": false,
+    "ExpectedCountAssister": false,
+    "ExpectedAssisterVictimIsEnemy": true
+  },
+  {
+    "Name": "uncached bot kills human with bot tracking",
+    "Victim": { "Slot": 1, "SteamId": 76561198000000001, "IsHuman": true, "Team": 2 },
+    "Attacker": { "Slot": 4, "SteamId": 0, "IsHuman": false, "Team": 3 },
+    "IncludeBots": true,
+    "FfaMode": true,
+    "ExpectedVictimPoint": "Death",
+    "ExpectedAttackerPoint": "None",
+    "ExpectedCountVictimStats": true,
+    "ExpectedCountAttackerStats": false,
+    "ExpectedCountAssister": false,
+    "ExpectedAssisterVictimIsEnemy": true
+  },
+  {
+    "Name": "world kills human",
+    "Victim": { "Slot": 1, "SteamId": 76561198000000001, "IsHuman": true, "Team": 2 },
+    "Attacker": null,
+    "IncludeBots": true,
+    "FfaMode": false,
+    "ExpectedVictimPoint": "Suicide",
+    "ExpectedAttackerPoint": "None",
+    "ExpectedCountVictimStats": true,
+    "ExpectedCountAttackerStats": false,
+    "ExpectedCountAssister": false,
+    "ExpectedAssisterVictimIsEnemy": false
+  },
+  {
+    "Name": "same team human kill in team mode",
+    "Victim": { "Slot": 1, "SteamId": 76561198000000001, "IsHuman": true, "Team": 2 },
+    "Attacker": { "Slot": 2, "SteamId": 76561198000000002, "IsHuman": true, "Team": 2 },
+    "IncludeBots": true,
+    "FfaMode": false,
+    "ExpectedVictimPoint": "Death",
+    "ExpectedAttackerPoint": "TeamKill",
+    "ExpectedCountVictimStats": true,
+    "ExpectedCountAttackerStats": true,
+    "ExpectedCountAssister": false,
+    "ExpectedAssisterVictimIsEnemy": false
+  },
+  {
+    "Name": "same team human kill in ffa mode",
+    "Victim": { "Slot": 1, "SteamId": 76561198000000001, "IsHuman": true, "Team": 2 },
+    "Attacker": { "Slot": 2, "SteamId": 76561198000000002, "IsHuman": true, "Team": 2 },
+    "Assister": { "Slot": 3, "SteamId": 76561198000000003, "IsHuman": true, "Team": 2 },
+    "IncludeBots": true,
+    "FfaMode": true,
+    "ExpectedVictimPoint": "Death",
+    "ExpectedAttackerPoint": "Kill",
+    "ExpectedCountVictimStats": true,
+    "ExpectedCountAttackerStats": true,
+    "ExpectedCountAssister": true,
+    "ExpectedAssisterVictimIsEnemy": true
+  }
+]

@@ -1,0 +1,117 @@
+[
+  {
+    "Name": "regular path with equal-point alternatives",
+    "Points": 150,
+    "GeneratedParallelLevels": 3,
+    "PointStep": 100,
+    "GatedPermission": "@css/vip",
+    "GameMode": "Normal",
+    "GrantedPermissions": [],
+    "ExpectedCurrent": "Level 1",
+    "ExpectedNext": "Level 2",
+    "ExpectedScoringAllowed": true
+  },
+  {
+    "Name": "VIP path with equal-point alternatives",
+    "Points": 150,
+    "GeneratedParallelLevels": 3,
+    "PointStep": 100,
+    "GatedPermission": "@css/vip",
+    "GameMode": "Normal",
+    "GrantedPermissions": ["@css/vip"],
+    "ExpectedCurrent": "VIP Level 1",
+    "ExpectedNext": "VIP Level 2",
+    "ExpectedScoringAllowed": true
+  },
+  {
+    "Name": "mixed permission paths",
+    "Points": 150,
+    "GameMode": "Normal",
+    "GrantedPermissions": ["@css/vip", "@css/other"],
+    "Ranks": [
+      { "Key": "None", "Point": -1 },
+      { "Key": "Bronze", "Point": 100 },
+      { "Key": "VIP Bronze", "Point": 100, "RequiredPermissions": ["@css/vip"] },
+      { "Key": "Premium Bronze", "Point": 100, "RequiredPermissions": ["@css/premium"] },
+      { "Key": "Silver", "Point": 200 },
+      { "Key": "VIP Silver", "Point": 200, "RequiredPermissions": ["@css/vip"] },
+      { "Key": "Premium Silver", "Point": 200, "RequiredPermissions": ["@css/premium"] }
+    ],
+    "ExpectedCurrent": "VIP Bronze",
+    "ExpectedNext": "VIP Silver",
+    "ExpectedScoringAllowed": true
+  },
+  {
+    "Name": "inaccessible-only threshold",
+    "Points": 150,
+    "GameMode": "Normal",
+    "GrantedPermissions": [],
+    "Ranks": [
+      { "Key": "None", "Point": -1 },
+      { "Key": "Bronze", "Point": 100 },
+      { "Key": "VIP Silver", "Point": 200, "RequiredPermissions": ["@css/vip"] },
+      { "Key": "Gold", "Point": 300 }
+    ],
+    "ExpectedCurrent": "Bronze",
+    "ExpectedNext": "Gold",
+    "ExpectedScoringAllowed": true
+  },
+  {
+    "Name": "50-level VIP path",
+    "Points": 4950,
+    "GeneratedParallelLevels": 50,
+    "PointStep": 100,
+    "GatedPermission": "@css/vip",
+    "GameMode": "Normal",
+    "GrantedPermissions": ["@css/vip"],
+    "ExpectedCurrent": "VIP Level 49",
+    "ExpectedNext": "VIP Level 50",
+    "ExpectedScoringAllowed": true
+  },
+  {
+    "Name": "flags only waits for a matching flag",
+    "Points": 600,
+    "GameMode": "FlagsOnly",
+    "GrantedPermissions": [],
+    "Ranks": [
+      { "Key": "None", "Point": -1 },
+      { "Key": "Regular", "Point": 100 },
+      { "Key": "VIP Bronze", "Point": 100, "RequiredPermissions": ["@css/bronze"] },
+      { "Key": "VIP Global", "Point": 500, "RequiredPermissions": ["@css/global"] }
+    ],
+    "ExpectedCurrent": "None",
+    "ExpectedNext": null,
+    "ExpectedScoringAllowed": false
+  },
+  {
+    "Name": "flags only jumps to the highest eligible flag",
+    "Points": 600,
+    "GameMode": "FlagsOnly",
+    "GrantedPermissions": ["@css/global"],
+    "Ranks": [
+      { "Key": "None", "Point": -1 },
+      { "Key": "Regular", "Point": 100 },
+      { "Key": "VIP Bronze", "Point": 100, "RequiredPermissions": ["@css/bronze"] },
+      { "Key": "VIP Global", "Point": 500, "RequiredPermissions": ["@css/global"] }
+    ],
+    "ExpectedCurrent": "VIP Global",
+    "ExpectedNext": null,
+    "ExpectedScoringAllowed": true
+  },
+  {
+    "Name": "no flags ignores permission-gated ranks",
+    "Points": 150,
+    "GameMode": "NoFlags",
+    "GrantedPermissions": ["@css/vip"],
+    "Ranks": [
+      { "Key": "None", "Point": -1 },
+      { "Key": "Regular Bronze", "Point": 100 },
+      { "Key": "VIP Bronze", "Point": 100, "RequiredPermissions": ["@css/vip"] },
+      { "Key": "Regular Silver", "Point": 200 },
+      { "Key": "VIP Silver", "Point": 200, "RequiredPermissions": ["@css/vip"] }
+    ],
+    "ExpectedCurrent": "Regular Bronze",
+    "ExpectedNext": "Regular Silver",
+    "ExpectedScoringAllowed": true
+  }
+]

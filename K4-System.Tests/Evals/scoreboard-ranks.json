@@ -1,0 +1,136 @@
+[
+  {
+    "Name": "disabled mode registers nothing",
+    "Mode": "Disabled",
+    "FollowsServerGuidelines": false,
+    "ExpectedEnabled": false
+  },
+  {
+    "Name": "server guidelines block scoreboard ranks",
+    "Mode": "Premier",
+    "FollowsServerGuidelines": true,
+    "ExpectedEnabled": false
+  },
+  {
+    "Name": "premier keeps a zero-point player visible",
+    "Mode": "Premier",
+    "FollowsServerGuidelines": false,
+    "ExpectedEnabled": true,
+    "InternalRankId": -1,
+    "Points": 0,
+    "ExpectedRankType": 11,
+    "ExpectedRanking": 1
+  },
+  {
+    "Name": "premier displays live points",
+    "Mode": "Premier",
+    "FollowsServerGuidelines": false,
+    "ExpectedEnabled": true,
+    "InternalRankId": 8,
+    "Points": 12500,
+    "ExpectedRankType": 11,
+    "ExpectedRanking": 12500
+  },
+  {
+    "Name": "competitive None is unranked",
+    "Mode": "Competitive",
+    "FollowsServerGuidelines": false,
+    "ExpectedEnabled": true,
+    "InternalRankId": -1,
+    "ExpectedRankType": 12,
+    "ExpectedRanking": 0
+  },
+  {
+    "Name": "competitive first active K4 rank is Silver I",
+    "Mode": "Competitive",
+    "FollowsServerGuidelines": false,
+    "ExpectedEnabled": true,
+    "InternalRankId": 0,
+    "ExpectedRankType": 12,
+    "ExpectedRanking": 1
+  },
+  {
+    "Name": "competitive eighteenth active K4 rank is Global Elite",
+    "Mode": "Competitive",
+    "FollowsServerGuidelines": false,
+    "ExpectedEnabled": true,
+    "InternalRankId": 17,
+    "ExpectedRankType": 12,
+    "ExpectedRanking": 18
+  },
+  {
+    "Name": "competitive ranks clamp above Global Elite",
+    "Mode": "Competitive",
+    "FollowsServerGuidelines": false,
+    "ExpectedEnabled": true,
+    "InternalRankId": 30,
+    "ExpectedRankType": 12,
+    "ExpectedRanking": 18
+  },
+  {
+    "Name": "wingman uses the first active K4 rank",
+    "Mode": "Wingman",
+    "FollowsServerGuidelines": false,
+    "ExpectedEnabled": true,
+    "InternalRankId": 0,
+    "ExpectedRankType": 7,
+    "ExpectedRanking": 1
+  },
+  {
+    "Name": "custom None uses the base icon",
+    "Mode": "Custom",
+    "FollowsServerGuidelines": false,
+    "ExpectedEnabled": true,
+    "InternalRankId": -1,
+    "CustomRankBase": 19000051,
+    "CustomRankCount": 20,
+    "ExpectedRankType": 12,
+    "ExpectedRanking": 19000051
+  },
+  {
+    "Name": "custom first active K4 rank uses the icon after the base",
+    "Mode": "Custom",
+    "FollowsServerGuidelines": false,
+    "ExpectedEnabled": true,
+    "InternalRankId": 0,
+    "CustomRankBase": 19000051,
+    "CustomRankCount": 20,
+    "ExpectedRankType": 12,
+    "ExpectedRanking": 19000052
+  },
+  {
+    "Name": "custom offset keeps skipped K4 ranks on the base icon",
+    "Mode": "Custom",
+    "FollowsServerGuidelines": false,
+    "ExpectedEnabled": true,
+    "InternalRankId": 1,
+    "CustomRankBase": 19000051,
+    "CustomRankCount": 20,
+    "CustomRankOffset": 2,
+    "ExpectedRankType": 12,
+    "ExpectedRanking": 19000051
+  },
+  {
+    "Name": "custom offset advances after skipped K4 ranks",
+    "Mode": "Custom",
+    "FollowsServerGuidelines": false,
+    "ExpectedEnabled": true,
+    "InternalRankId": 2,
+    "CustomRankBase": 19000051,
+    "CustomRankCount": 20,
+    "CustomRankOffset": 2,
+    "ExpectedRankType": 12,
+    "ExpectedRanking": 19000052
+  },
+  {
+    "Name": "custom ranks clamp to the last configured icon",
+    "Mode": "Custom",
+    "FollowsServerGuidelines": false,
+    "ExpectedEnabled": true,
+    "InternalRankId": 99,
+    "CustomRankBase": 19000051,
+    "CustomRankCount": 20,
+    "ExpectedRankType": 12,
+    "ExpectedRanking": 19000070
+  }
+]

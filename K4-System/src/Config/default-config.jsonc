@@ -1,0 +1,165 @@
+// K4-System configuration.
+// Restart the server (or reload K4-System) after changing this file.
+// Delete this file to get a fresh copy with the default values.
+{
+  "version": 1, // File format version. Do not change it.
+
+  // Where player data is stored.
+  "storage": {
+    "type": "sqlite", // "sqlite" (one file, no setup) or "mysql" (shared database, web panels)
+    "sqlite-file": "k4system.db", // SQLite only. Relative paths start in plugins/K4-System/
+    "mysql": {
+      "host": "localhost",
+      "port": 3306,
+      "database": "cs2",
+      "username": "root",
+      "password": "",
+      "ssl-mode": "None" // None, Preferred, Required, VerifyCA, or VerifyFull
+    },
+    "table-prefix": "", // Added in front of every table name. Letters, numbers, and _ only
+    "purge-after-days": 30, // Delete players not seen for this many days. 0 keeps everyone
+    "levelranks": {
+      "enabled": false, // Also write a LevelRanks-style table for older web panels
+      "table": "lvl_base"
+    }
+  },
+
+  // Turn whole features on or off.
+  "modules": {
+    "ranks": true, // Points, ranks, rewards, top list, scoreboard ranks
+    "stats": true, // Kills, deaths, hits, rounds, and more (!stats)
+    "playtime": true, // Time played per team and alive/dead (!time)
+    "admin-list": true, // !admins shows online admins from tags.admins
+    "missions": true // Daily missions (!missions). Needs "ranks", because missions reward points
+  },
+
+  // When points and stats count.
+  "tracking": {
+    "minimum-players": 1, // Real players needed before anything counts
+    "count-warmup": false, // Count points and stats during warmup
+    "count-bots": true, // Count kills, deaths, and hits involving bots
+    "free-for-all": false // Treat everyone as an enemy (deathmatch servers)
+  },
+
+  "ranks": {
+    "mode": "Normal", // Normal: all ranks. FlagsOnly: only ranks with RequiredPermissions. NoFlags: only ranks without
+    "start-points": 0, // Points a new player starts with
+    "vip-multiplier": 1.25, // Point gains are multiplied for players with @k4system/vip/points-multiplier
+    "round-summary": false, // One point message per round instead of one per event, with a line per reason such as "5× Kill: +100"
+    "names-in-kill-messages": false, // Show the other player's name and points in kill and death messages
+    "killstreak-window-seconds": 0, // Kills must be this close together to build a streak. 0 means any time in the round
+    "reset-killstreak-on-round-end": true,
+    "reset-cooldown-hours": 24, // Hours between personal !resetmydata rank resets. 0 turns the cooldown off
+    "dynamic-death-points": {
+      "enabled": false, // Scale kill and death points by how strong the opponent is
+      "min-multiplier": 0.5,
+      "max-multiplier": 3.0
+    },
+    "team-balance": {
+      "enabled": false, // Swap players before each round so both teams have similar points
+      "max-difference": 200 // Point gap between the teams that is still accepted
+    },
+    "playtime-reward": {
+      "every-minutes": 10, // Give the "playtime" points this often. 0 turns it off
+      "include-afk": false // Also reward players who are not moving or are spectating
+    }
+  },
+
+  // How many points each event gives or takes.
+  "points": {
+    "preset": "casual", // casual, competitive, or deathmatch. The README lists every value of each preset
+    // Change single values here. Names:
+    //   kill, death, headshot, assist, flash-assist, team-kill, team-assist, team-flash-assist, suicide,
+    //   noscope, through-smoke, blind-kill, wallbang, long-distance-kill, long-distance-meters,
+    //   grenade-kill, fire-kill, impact-kill, knife-kill, taser-kill,
+    //   double-kill, triple-kill, domination, rampage, mega-kill, ownage, ultra-kill, killing-spree, monster-kill, unstoppable, godlike,
+    //   round-win, round-loss, mvp,
+    //   bomb-plant, bomb-defuse, bomb-defuse-team, bomb-explode, bomb-pickup, bomb-drop,
+    //   hostage-rescue, hostage-rescue-all, hostage-hurt, hostage-kill, playtime
+    "overrides": {
+      // "kill": 25,
+      // "bomb-drop": 0
+    }
+  },
+
+  // Daily missions and one weekly mission. The mission list is in plugins/K4-System/missions.jsonc.
+  // K4 checks every map and only gives missions that can be done there: no bomb missions without bomb sites,
+  // no round missions in deathmatch, no grenade or weapon missions where players cannot get them.
+  "missions": {
+    "timezone": "Europe/Istanbul", // Missions reset at midnight here, the weekly one on Monday. Also accepts "UTC" or an offset such as "+03:00"
+    "rewards": {
+      "easy": 150, // Points for each finished mission, by difficulty
+      "medium": 300,
+      "hard": 600,
+      "weekly": 2500
+    },
+    "streak-bonus-percent": 10, // Finishing all three on consecutive days adds this much of the day's rewards per streak day
+    "streak-max-days": 7, // The bonus stops growing after this many days (7 days = +70%)
+    "rerolls-per-day": 1, // How many unstarted missions a player may swap each day
+    "count-bots": false, // Let kills and assists on bots count for missions. Off so missions cannot be farmed on bots
+    // Corrections for maps K4 reads wrong, by map name (* matches any text; later lines win). Every value is optional:
+    // "rounds", "bomb", "hostages", "grenades": true or false. "weapons": the only weapons there, or ["all"].
+    // "never": mission types never given there, such as ["BombPlants", "ZeusKills"].
+    "map-rules": {
+      "aim_*": { "grenades": false },
+      "awp_*": { "grenades": false, "weapons": ["awp"] }
+    }
+  },
+
+  // A clickable K4 panel (!k4, !rank, !missions, !top, !ranks, !stats) and toast pop-ups instead of chat.
+  // Needs the K4 workshop addon on players' clients through MultiAddonManager. See the README before enabling.
+  "panorama": {
+    "enabled": false,
+    "rank-icons": "competitive" // CS2 rank icons in the panel: competitive, wingman, or text (shows the rank tag)
+  },
+
+  // CS2's matchmaking rank area on the scoreboard.
+  "scoreboard": {
+    "rank-display": "Premier", // Disabled, Premier (shows points), Competitive, Wingman, or Custom
+    "custom-icons": {
+      "first-id": 0, // Custom only: skillgroup id of the icon shown for the starting rank
+      "count": 0, // Custom only: how many icons you have
+      "offset": 0 // Custom only: skip this many ranks before the first icon
+    },
+    "score-shows-points": false // Replace the scoreboard score column with K4 points
+  },
+
+  // Clan tags shown next to player names.
+  "tags": {
+    "rank-tags": false, // Show the rank tag from ranks.jsonc
+    "top-placement": {
+      "enabled": true, // Show the leaderboard position for top players
+      "max": 100, // Only for positions up to this number
+      "format": "TOP #{placement}"
+    },
+    "country": false, // Add the country code. Needs GeoLite2-Country.mmdb beside K4-System.dll
+    // Admin tags and !admins list colors. The first matching entry wins.
+    // permission: "@flag", "#group", or a command override name.
+    "admins": [
+      { "permission": "@css/root", "tag": "[Owner]", "list-color": "red" },
+      { "permission": "@css/generic", "tag": "[Admin]", "list-color": "lightblue" }
+    ]
+  },
+
+  // Chat announcements. Texts are in the lang folder.
+  "messages": {
+    "join-hint": true, // At round start, remind players that !k4 lists the commands
+    "connect": false, // Announce players joining
+    "disconnect": false // Announce players leaving
+  },
+
+  // Chat command names, without the ! or css_ prefix.
+  "commands": {
+    "cooldown-seconds": 3, // Wait between !rank, !top, and !resetmydata uses
+    "rank-to-everyone": false, // !rank also shows your place, points, kills, deaths and KDR to everyone in chat, like LVL Ranks
+    "main": ["k4"], // Opens the panel, or the command list without it. Add "lvl" here for players used to LVL Ranks (and remove it from any other list)
+    "rank": ["rank", "myrank"],
+    "top": ["top", "ranktop", "toplist"],
+    "ranks": ["ranks", "ranklist"],
+    "stats": ["stats", "mystats", "stat", "mystat", "statistic", "statistics"],
+    "playtime": ["time", "mytime", "playtime"],
+    "reset": ["resetmydata"],
+    "admins": ["admins", "listadmins"],
+    "missions": ["missions", "mission", "daily"]
+  }
+}

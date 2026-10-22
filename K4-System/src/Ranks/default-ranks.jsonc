@@ -1,0 +1,129 @@
+{
+	"None": { // Whatever you set here, be unique. Not read by plugin
+ 		"Name": "None", // This name is set in MySQL and also if not Tag is preset, this is the Tag
+ 		"Point": -1, // Whatever you set to -1 is the default rank
+ 		"Color": "default"
+ 	},
+	"Silver I": {
+		"Name": "Silver I",
+		"Tag": "[SI]", // Clan tag (scoreboard) of the rank. If not set, it uses the key instead
+		"Point": 500, // From this amount of experience, the player is Silver I
+		"Color": "silver", // Color code for the rank. Find color names here: https://github.com/roflmuffin/CounterStrikeSharp/blob/main/managed/CounterStrikeSharp.API/Modules/Utils/ChatColors.cs
+		// "RequiredPermissions": ["@css/test"], // Optional. Player needs any one listed permission, group, or command override to receive this rank
+		// "RewardDescription": "{green}500 credits\n{gold}VIP access", // Optional multiline/color text shown when at least one valid command reward is configured
+		// "Rewards": [
+		// 	{
+		// 		"Type": "command",
+		// 		"Value": "css_store_givecredits {steamid} 500"
+		// 	}
+		// ],
+		// "Permissions": [
+		// 	{
+		// 		"DisplayName": "Super Permission", // Displayed in the rank menu as a benefit of this rank
+		// 		"PermissionName": "@k4system/rank/super" // Use a K4-owned @flag so other permission sources remain untouched
+		// 	}
+		// ]
+	},
+	"Silver II": {
+		"Name": "Silver II",
+		"Tag": "[SII]",
+		"Point": 1500,
+		"Color": "silver"
+	},
+	"Silver III": {
+		"Name": "Silver III",
+		"Tag": "[SIII]",
+		"Point": 3000,
+		"Color": "silver"
+	},
+	"Silver IV": {
+		"Name": "Silver IV",
+		"Tag": "[SIV]",
+		"Point": 5000,
+		"Color": "silver"
+	},
+	"Silver Elite": {
+		"Name": "Silver Elite",
+		"Tag": "[SE]",
+		"Point": 7500,
+		"Color": "silver"
+	},
+	"Silver Elite Master": {
+		"Name": "Silver Elite Master",
+		"Tag": "[SEM]",
+		"Point": 10000,
+		"Color": "silver"
+	},
+	"Gold Nova I": {
+		"Name": "Gold Nova I",
+		"Tag": "[GNI]",
+		"Point": 15000,
+		"Color": "gold"
+	},
+	"Gold Nova II": {
+		"Name": "Gold Nova II",
+		"Tag": "[GNII]",
+		"Point": 20000,
+		"Color": "gold"
+	},
+	"Gold Nova III": {
+		"Name": "Gold Nova III",
+		"Tag": "[GNIII]",
+		"Point": 25000,
+		"Color": "gold"
+	},
+	"Gold Nova Master": {
+		"Name": "Gold Nova Master",
+		"Tag": "[GNM]",
+		"Point": 30000,
+		"Color": "gold"
+	},
+	"Master Guardian I": {
+		"Name": "Master Guardian I",
+		"Tag": "[MGI]",
+		"Point": 35000,
+		"Color": "green"
+	},
+	"Master Guardian II": {
+		"Name": "Master Guardian II",
+		"Tag": "[MGII]",
+		"Point": 40000,
+		"Color": "green"
+	},
+	"Master Guardian Elite": {
+		"Name": "Master Guardian Elite",
+		"Tag": "[MGE]",
+		"Point": 50000,
+		"Color": "green"
+	},
+	"Distinguished Master Guardian": {
+		"Name": "Distinguished Master Guardian",
+		"Tag": "[DMG]",
+		"Point": 60000,
+		"Color": "green"
+	},
+	"Legendary Eagle": {
+		"Name": "Legendary Eagle",
+		"Tag": "[LE]",
+		"Point": 70000,
+		"Color": "blue"
+	},
+	"Legendary Eagle Master": {
+		"Name": "Legendary Eagle Master",
+		"Tag": "[LEM]",
+		"Point": 80000,
+		"Color": "blue"
+	},
+	"Supreme Master First Class": {
+		"Name": "Supreme Master First Class",
+		"Tag": "[SMFC]",
+		"Point": 90000,
+		"Color": "purple"
+	},
+	"Global Elite": {
+		"Name": "Global Elite",
+		"Tag": "[GE]",
+		"Point": 100000,
+		"Color": "lightred"
+	}
+}

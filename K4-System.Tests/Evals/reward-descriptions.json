@@ -1,0 +1,41 @@
+[
+  {
+    "Name": "LF lines and blank lines",
+    "RewardDescription": "{green}500 credits\n   \n{gold}VIP access",
+    "ExpectedLines": ["{green}500 credits", "{gold}VIP access"]
+  },
+  {
+    "Name": "CRLF lines",
+    "RewardDescription": "First\r\nSecond",
+    "ExpectedLines": ["First", "Second"]
+  },
+  {
+    "Name": "CR lines",
+    "RewardDescription": "First\rSecond",
+    "ExpectedLines": ["First", "Second"]
+  },
+  {
+    "Name": "multiple case-insensitive native colors",
+    "RewardDescription": "{GrEeN}Credits {GOLD}and {red}VIP",
+    "ExpectedLines": ["{GrEeN}Credits {GOLD}and {red}VIP"]
+  },
+  {
+    "Name": "unknown color remains literal",
+    "RewardDescription": "Keep {futurecolor}this",
+    "ExpectedLines": ["Keep {futurecolor}this"]
+  },
+  {
+    "Name": "description requires command reward",
+    "RewardDescription": "Hidden",
+    "RewardType": "item",
+    "RewardValue": "crate",
+    "ExpectedLines": []
+  },
+  {
+    "Name": "description requires nonblank command",
+    "RewardDescription": "Hidden",
+    "RewardType": "command",
+    "RewardValue": " ",
+    "ExpectedLines": []
+  }
+]

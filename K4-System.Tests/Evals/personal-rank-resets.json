@@ -1,0 +1,65 @@
+[
+  {
+    "Name": "first rank reset is allowed",
+    "Target": "rank",
+    "CooldownHours": 24,
+    "ElapsedHours": null,
+    "ExpectedClearRewardClaims": true,
+    "ExpectedAllowed": true,
+    "ExpectedRemainingSeconds": 0
+  },
+  {
+    "Name": "rank reset remains blocked after one hour",
+    "Target": "rank",
+    "CooldownHours": 24,
+    "ElapsedHours": 1,
+    "ExpectedClearRewardClaims": true,
+    "ExpectedAllowed": false,
+    "ExpectedRemainingSeconds": 82800
+  },
+  {
+    "Name": "all reset shares the rank cooldown",
+    "Target": "all",
+    "CooldownHours": 24,
+    "ElapsedHours": 23.5,
+    "ExpectedClearRewardClaims": true,
+    "ExpectedAllowed": false,
+    "ExpectedRemainingSeconds": 1800
+  },
+  {
+    "Name": "rank reset is allowed after the full cooldown",
+    "Target": "rank",
+    "CooldownHours": 24,
+    "ElapsedHours": 24,
+    "ExpectedClearRewardClaims": true,
+    "ExpectedAllowed": true,
+    "ExpectedRemainingSeconds": 0
+  },
+  {
+    "Name": "stat reset ignores rank reward policy",
+    "Target": "stat",
+    "CooldownHours": 24,
+    "ElapsedHours": 1,
+    "ExpectedClearRewardClaims": false,
+    "ExpectedAllowed": true,
+    "ExpectedRemainingSeconds": 0
+  },
+  {
+    "Name": "time reset ignores rank reward policy",
+    "Target": "time",
+    "CooldownHours": 24,
+    "ElapsedHours": 1,
+    "ExpectedClearRewardClaims": false,
+    "ExpectedAllowed": true,
+    "ExpectedRemainingSeconds": 0
+  },
+  {
+    "Name": "zero disables the rank reset cooldown",
+    "Target": "rank",
+    "CooldownHours": 0,
+    "ElapsedHours": 0,
+    "ExpectedClearRewardClaims": true,
+    "ExpectedAllowed": true,
+    "ExpectedRemainingSeconds": 0
+  }
+]
