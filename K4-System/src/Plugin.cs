@@ -284,7 +284,7 @@ public sealed class Plugin : BasePlugin
 			int weekly = pool.Of(MissionDifficulty.Weekly).Count;
 			Logger.LogInformation("Missions loaded: {Count} daily, {Weekly} weekly.", pool.Missions.Count - weekly, weekly);
 			if (weekly == 0)
-				Logger.LogInformation("{File} has no Weekly missions, so there is no weekly mission. The README shows how to add some.", MissionFile.FileName);
+				Logger.LogInformation("{File} has no Weekly missions, so there is no weekly mission. github.com/karola3vax/K4-System/blob/main/docs/missions.md shows how to add some.", MissionFile.FileName);
 			foreach (string warning in MissionFile.WeaponWarnings(pool))
 				Logger.LogWarning("{Warning}", warning);
 			return pool;
