@@ -1,0 +1,24 @@
+[
+  {
+    "Name": "casual mixed 0.8 kd full-bonus profile",
+    "GlobalElitePoints": 100000,
+    "MatchMinutes": 40,
+    "ActiveMinutes": 40,
+    "Kills": 12,
+    "Deaths": 15,
+    "Headshots": 4,
+    "Assists": 4,
+    "RoundWins": 10,
+    "Mvps": 0.5,
+    "BombPlants": 0.2,
+    "BombDefuses": 0.1,
+    "BombExplodes": 0.1,
+    "RareBonuses": 0.2,
+    "DoubleKills": 0.5,
+    "TripleKills": 0.15,
+    "TargetMinHours": 250,
+    "TargetMaxHours": 300,
+    "PlaytimeOnlyMinHours": 1050,
+    "PlaytimeOnlyMaxHours": 1150
+  }
+]

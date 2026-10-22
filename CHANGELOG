@@ -1,0 +1,818 @@
+-- 2026.10.22 - V6.3.2
+
+- change: With `commands.rank-to-everyone` on, `!rank` posts only the one public line, which the player sees too, like LVL Ranks. The player's own rank block is no longer sent as well
+- feat: The console warns at startup about command names that cannot work: a name with a comma or space in it (such as `"k4, lvl"` instead of `"k4", "lvl"`), and a name that is in two command lists, which runs both commands at once
+- setup: No config, language or database changes
+
+-- 2026.10.21 - V6.3.1
+
+- feat: `ranks.round-summary` now shows what the round's points came from: after the total, one line per reason, such as "5× Kill: +100" and "2× Headshot: +10" (Quinella's request). A round with only one reason keeps the single line
+- change: With `commands.rank-to-everyone` on, `!rank` only posts the line to chat and no longer opens the panel, like LVL Ranks. `!k4` still opens the panel on the Rank tab
+- feat: `commands.main` sets the names of the main command (`!k4` by default), so `!lvl` can open the panel for players used to LVL Ranks: `"main": ["k4", "lvl"]` (Quinella's request)
+- setup: No language or database changes. `commands.main` is optional; without it, `!k4` works as before
+
+-- 2026.10.14 - V6.3.0
+
+- feat: Missions follow the map. K4 reads every map (bomb sites, hostages, game mode, respawns, free-for-all, what the buy menu sells, and the weapons players carry or use) and only gives missions that can be done there: no grenade missions on aim maps, no rifle missions on AWP maps, no round or clutch missions in deathmatch, no bomb plants in Retakes
+- feat: An untouched mission that does not fit the current map is swapped for free for one that does, with a chat message; it does not use the daily reroll. A started one is kept and marked "not on this map", so it can be finished elsewhere
+- feat: `missions.map-rules` corrects maps K4 reads wrong, by map name pattern (`aim_*`, `awp_*` are set by default): rounds, bomb, hostages, grenades, the only weapons, and mission types to never give
+- feat: One weekly mission next to the three daily ones. It resets on Monday at midnight, pays `missions.rewards.weekly` (2500), shows its time left, and does not count for the daily streak. Add or remove `Weekly` missions in `missions.jsonc`; without any, there is no weekly mission
+- feat: 18 new mission types: wallbang, through-smoke, in-air, while-flashed, long-range, Zeus and revenge kills; pistol, SMG, shotgun, rifle and sniper kills; opening kills, clutch wins, kills in one round, kills in one life, surviving rounds, and damage dealt
+- feat: The default list grows from 24 to 54 missions, including 8 weekly ones. A `missions.jsonc` that was never edited is updated automatically; an edited one is left alone
+- feat: The panel shows the weekly mission as a fourth card, dims missions that are not possible on the current map, and uses CS2's kill-feed markers as icons for the new kill missions
+- setup: The fourth card and the new icons are in the Workshop addon `3811667212`, already updated; players and servers get it automatically
+- setup: No database changes. The weekly mission is stored in the existing missions table
+
+-- 2026.10.14 - V6.2.3
+
+- feat: `!rank` can post to everyone, like LVL Ranks. Set `commands.rank-to-everyone` to `true` and everyone in chat sees the player's leaderboard place, points, kills, deaths and KDR, each reader in their own language. Without the stats module the line shows the place and points. The player still gets their own answer or panel, and `commands.cooldown-seconds` limits the posts. Off by default
+- fix: K4's panel no longer blocks the mouse for other plugins' menus (their hover effects and sounds work again while K4 runs). Already delivered through the Workshop addon `3811667212` on 2026-10-08
+- setup: The new line is `rank.public` (and `rank.public-points` without stats) in the language files; change it in `configs/plugins/K4-System/lang/` to keep your wording through updates
+
+-- 2026.10.04 - V6.2.2
+
+- fix: K4 starts on older MySQL servers again. MySQL before 5.6.5 refused the rank rewards table (a date column defaulted to the current time), and every table after it, such as the rank resets and missions tables, was then never created
+- fix: A table the database refuses no longer stops the other tables from being created; the console names the table and the database's reason
+- fix: The rank rewards index fits servers without large index prefixes (767 bytes)
+- fix: Panel toasts (promotions, finished missions, streak bonus) appear at the right side, vertically centred, instead of over the kill feed in the top right corner
+- feat: Your own wording survives updates. Put only the lines you change in `configs/plugins/K4-System/lang/<language>.json` (for example `en.json`); they win over the shipped text, and every other line keeps the shipped text. Updates never touch that folder, so there is nothing to redo after pasting a new release. K4 creates the folder with a short how-to file, and names any file it can't read in the console
+- setup: Existing databases need nothing; the missing tables are created on the next start
+- setup: Edited `plugins/K4-System/lang` files? Copy just the lines you changed into `configs/plugins/K4-System/lang/` once; after that, updates can replace the `lang` folder freely
+- setup: The toast position is in the Workshop addon `3811667212`; players and servers get it automatically once the update is approved
+
+-- 2026.10.02 - V6.2.1
+
+- fix: The panel's rank emblems are sharp. CS2's own emblems are 32×13 pictures and were stretched to the panel's size; the Workshop addon now carries copies of Valve's emblems drawn ten times larger
+- setup: The fix is in the Workshop addon `3811667212`; players and servers get it automatically. No config or database changes
+
+-- 2026.10.02 - V6.2.0
+
+- feat: Add an optional Panorama panel. `!k4`, `!rank`, `!missions`, `!top`, `!ranks`, and `!stats` open a clickable panel with Rank, Missions, Top, Ranks, and Stats tabs instead of chat lines
+- feat: Show promotions, demotions, finished missions, and the daily streak bonus as toast pop-ups when the panel is on
+- feat: Swap a daily mission with a button on the Missions tab
+- feat: The panel looks like CS2's own UI: the scoreboard frame, main-menu tabs, CS2's rank icons, stat and weapon icons, laurels for the top three, and the game's own UI sounds. It uses only images that ship with CS2
+- fix: SQLite storage works on Linux servers again. CS2 runs inside Valve's Steam Runtime (glibc 2.31), and the bundled SQLite library needed glibc 2.34, so K4 could not open its database there
+- fix: The panel no longer gets rejected by CS2. Server-driven HUD layouts may only use Panel, Label, and Button elements with id, class, and text; the panel's icons are now drawn by the stylesheet
+- fix: Join and leave announcements no longer fail; a failed leave announcement no longer skips saving the player, and leave messages no longer need the admin-list module
+- fix: A drawn round no longer costs everyone the round-loss points, and admin point grants no longer show up in the round summary
+- fix: Team balance moves players without killing them (no suicide penalty)
+- fix: A rank reached through a permission mid-session now pays its reward
+- fix: Missions: the day can no longer step backwards (daylight-saving zones), match missions need at least half the match played, held keys no longer count as active playtime, loading keeps retrying, and timezone offsets beyond ±14 hours fall back to UTC instead of stopping the plugin
+- fix: Old mission days are purged even when `purge-after-days` is 0
+- fix: Saving: one bad row no longer blocks everyone's saves, the final save on unload is always attempted, failed saves retry on their own, and a hot reload waits for the previous instance's unfinished saves
+- fix: The LevelRanks mirror no longer overwrites stats, points, or playtime with zeros when those modules are off
+- fix: A delayed personal-reset save no longer deletes rewards claimed after the reset
+- fix: Points set through the shared API from another thread are applied on the game thread
+- fix: Panel: a reopened panel is no longer closed by an earlier timer, the Top tab cannot page past the end, and the Missions tab refreshes after a completion or reroll
+- fix: Unknown rank or admin-list colors are reported and replaced with the default color instead of being printed as words; weapon missions with unknown weapon names are reported
+- config: The default top-placement tag is now `TOP #{placement}` (for example `TOP #3`); existing configs keep their own format
+- feat: `css_k4_hud` (server console) reports the panel entity and each player's panel state, for troubleshooting
+- setup: The panel needs the K4 workshop addon on players' clients through MultiAddonManager; it is off until `panorama.enabled` is set. Without it everything stays in chat
+- docs: Add `panorama/README.md` with the layout source and the compile, upload, and server setup steps
+- i18n: Translate the panel texts into all 36 languages
+
+-- 2026.10.01 - V6.1.0
+
+- feat: Add daily missions. Every day each player gets one easy, one medium, and one hard mission (150, 300, and 600 points by default)
+- feat: Finishing all three missions on consecutive days builds a streak that adds 10% of the day's rewards per day, up to +70% on day 7
+- feat: `!missions` shows a center-screen mission card and a chat list with progress bars; `!missions reroll <1-3>` swaps one unstarted mission per day
+- feat: Missions cover kills, headshots, knife, grenade, no-scope, and weapon kills, assists, flash assists, MVPs, round wins, bomb plants and defuses, hostage rescues, playtime, and matches played or won
+- feat: The mission list lives in `plugins/K4-System/missions.jsonc`; rewards, streak, rerolls, and the reset timezone are under `missions` in `k4-system.jsonc`
+- feat: Missions reset at midnight in a configurable timezone (default Europe/Istanbul; offsets such as `+03:00` also work)
+- feat: Keep missions fair: bot kills do not count by default (`missions.count-bots`), AFK minutes do not count, and round wins need the whole round on that team
+- fix: Count match losses again when no human is left on the winning team
+- db: Add the `k4missions` and `k4missionstate` tables; mission days older than two weeks are purged
+- i18n: Translate the mission texts into all 36 languages
+
+-- 2026.10.01 - V6.0.0
+
+- rewrite: Rebuild K4-System from scratch with the same features, commands, permissions, database tables, and shared API
+- breaking: Replace the config with one commented file, `configs/plugins/K4-System/k4-system.jsonc`, with grouped sections and consistent names. 5.x configs are not migrated; K4 stops with clear instructions until the new file is filled in. See the README upgrade table
+- feat: Add point presets (`casual`, `competitive`, `deathmatch`) with per-value overrides; `casual` equals the 5.x defaults
+- changed: Merge the separate rank and stat settings for minimum players, warmup, and bots into one `tracking` section, and drop `load-messages`
+- changed: Default to SQLite storage, real CounterStrikeSharp admin permissions for the example admin tags, and a short `#15` top-placement tag for the top 100
+- breaking: Rewrite all chat messages with a shorter, consistent style and new key names, and retranslate all languages from the new English; custom language files must be redone
+- feat: Localize the rank menu title and add a header to the top list
+- feat: Add 23 languages: Arabic, Azerbaijani, Bulgarian, Danish, Dutch, Estonian, Finnish, Greek, Hungarian, Indonesian, Japanese, Kazakh, Korean, Lithuanian, Norwegian, Polish, European Portuguese, Serbian, Slovak, Swedish, Thai, Traditional Chinese, and Vietnamese (36 in total)
+- fix: Send every message in the language each player chose with `!lang`. Point messages, promotions, `!rank` and `!top` results, the rank menu, and announcements always used the server language before
+- changed: Reject unknown or misspelled config settings with a message that names them
+- feat: Add SQLite storage, used by default; the database file is `plugins/K4-System/k4system.db`. Set `storage.type` to `mysql` for MySQL
+- compatibility: Update K4-System, K4-SharedApi, and tests to CounterStrikeSharp.API 1.0.376 and require runtime API 376
+- compatibility: Existing MySQL databases and ranks.jsonc files load unchanged
+- performance: Never block the game thread on the database while loading, and save all player data from one background writer
+- performance: Look players up directly instead of copying the player list for every event and every tick
+- performance: Bind SteamIDs as text so MySQL uses the primary key, and add a points index for leaderboard positions
+- reliability: Wait only for the joining player's own unsaved data before loading them, instead of every pending task
+- reliability: Keep K4-granted rank permissions removable after a map change, and drop players who left during a map change
+- reliability: Run a reward command at most once per session even when saving its completion fails
+- fix: Release rank permissions of a player whose slot is taken over after a map change, so they cannot stay granted until restart
+- fix: Discard a reward claim that finishes after the player's personal rank reset, so it cannot run later for a rank they no longer hold
+- fix: Stop re-checking already delivered rewards every round, and retry a player load that failed instead of leaving them untracked for the map
+- reliability: Bound the final save on unload to 15 seconds instead of waiting forever
+- changed: Read ranks.jsonc with System.Text.Json; comments, trailing commas, any property-name casing, and points written as text or as 500.0 still work. Newtonsoft.Json is no longer shipped
+- changed: Retry unfinished rank rewards at round start and on join instead of after every kill
+- changed: Command cooldown messages show the seconds actually remaining
+- fix: Add the missing space between a point message and the attacker or victim name
+- db: Add a `k4schema` table that records applied database upgrades
+- ci: Make GitLab the only home: remove the GitHub release workflow and move the issue templates to GitLab
+- test: Replace the console gate with an xUnit suite of 204 tests, including SQLite and MySQL storage tests and a 5.0 database upgrade test
+
+-- 2026.08.22 - V5.1.0
+
+- fix: Restore FlagsOnly ranks after cache and permission load without changing stored points or backfilling initial-load rewards
+- fix: Track K4-owned clan tags and rank permissions so disabled features no longer erase values owned by other plugins
+- security: Respect the actual command-override state and reject rank-granted permissions outside the K4-owned `@k4system/` flag domain
+- reliability: Keep failed player snapshots in memory, retry transient database failures, and preserve pending reset metadata across later saves
+- reliability: Track pending and completed reward commands so interrupted rewards resume after reconnect; existing historical claims are marked completed during the automatic schema update
+- fix: Aggregate one death's point bonuses into one final rank transition and clamp every point, round, multiplier, and team-balance calculation
+- fix: Reset time anchors with counters, settle life state during team changes, and repair disconnect announcements
+- fix: Determine FFA winners from active players' match kills and calculate headshot percentage from kills
+- fix: Make playtime rewards per-player and require recent button activity when AFK rewards are disabled
+- fix: Validate rank identity, defaults, permissions, rewards, names, multipliers, config sections, enum strings, and unsafe numeric values at startup
+- fix: Isolate optional LevelRanks mirror failures from K4's own transaction and refresh top placement after successful individual saves
+- fix: Cache GeoIP results, parse IPv4 and IPv6 endpoints correctly, avoid stale controllers in async menus, and report async command failures
+- fix: Correct five malformed German statistics messages and validate every language key, placeholder, and stats format
+- compatibility: Update K4-System, K4-SharedApi, and tests to CounterStrikeSharp.API 1.0.372; bump ConfigVersion to 19
+- db: Add `executed_at` to the reward table automatically; old reward claims are preserved and are not replayed
+- test: Expand the console gate to 64 deterministic tests plus an audit-regression eval covering lifecycle and ownership contracts
+- ci: Add GitLab verification, locked NuGet restores, pinned .NET SDK, formatting policy, release version assertions, and complete package checks
+- cleanup: Remove unused module interfaces, dead helpers, stale player-name capture, and unsafe background task wrappers
+
+-- 2026.08.04 - V5.0.1
+
+- fix: Reserve the base custom scoreboard icon for `None` and start active K4 ranks at the following icon
+- test: Cover distinct unranked, active, offset, and 20-icon custom scoreboard mappings
+- docs: Document the custom icon count and filename sequence for an optional rank after Global Elite
+
+-- 2026.08.03 - V5.0.0
+
+- feat: Build Premier, competitive, Wingman, and custom scoreboard ranks directly into K4-System
+- feat: Reveal scoreboard ranks from K4-System every five seconds, removing the FakeRanks RevealAll dependency
+- changed: Make K4-System the only plugin required for ranks, points, and scoreboard display
+- changed: Replace numeric scoreboard modes with Disabled, Premier, Competitive, Wingman, and Custom names
+- changed: Drop the nonworking Danger Zone scoreboard mode and all legacy MMRanks configuration handling
+- changed: Bump ConfigVersion to 18 for the built-in scoreboard settings
+- safety: Respect CounterStrikeSharp's FollowCS2ServerGuidelines protection and never change its core configuration automatically
+- fix: Dispose every reveal user message and stop the timer after a reveal failure
+- fix: Map K4's zero-based runtime ranks to one-based CS2 icons and clamp custom icons to the configured count
+- test: Add gate and eval coverage for defaults, validation, guidelines, built-in mappings, custom ranges, and reveal policy
+- docs: Replace the three-plugin installation guide with the standalone K4-System setup
+
+-- 2026.08.03 - V4.9.2
+
+- compatibility: Update K4-System, K4-SharedApi, and the gate project to CounterStrikeSharp.API 1.0.371
+- compatibility: Require CounterStrikeSharp runtime API 371 or newer for current CS2 game-update support
+- validation: Add a compatibility eval that verifies the loaded API assembly and declared minimum runtime version
+
+-- 2026.08.03 - V4.9.1
+
+- feat: Make personal `rank` and `all` resets clear rank-reward claim history so players can earn configured rewards again
+- feat: Add a persistent, configurable personal rank-reset cooldown with a 24-hour default and remaining-time chat feedback
+- db: Add the automatically created `k4rankresets` table so cooldowns survive reconnects, map changes, and server restarts
+- compatibility: Keep `stat` and `time` resets independent; setting `personal-rank-reset-cooldown-hours` to `0` disables the cooldown
+- test: Add gate and eval coverage for reset scope, cooldown expiry, disabled cooldowns, duration formatting, defaults, and all 13 localizations
+
+-- 2026.07.14 - V4.9.0
+
+- feat: Add `Normal`, `FlagsOnly`, and `NoFlags` rank game modes with sequential active rank IDs
+- feat: Pause automatic point gains and losses in `FlagsOnly` until the player has a matching rank flag while preserving stored points and manual overrides
+- feat: Support multiline `RewardDescription` values through `\n` and native CounterStrikeSharp color tags
+- compatibility: Keep existing configs on `Normal`; do not rewrite ranks, migrate database tables, or reset player points
+- test: Add gate and eval coverage for mode filtering, flag eligibility, rank skipping, scoring policy, reward lines, and colors
+
+-- 2026.07.06 - V4.8.3
+
+- changed: Adjust generated default 100k rank thresholds to the cleaner owner-approved sequence while keeping point rewards unchanged
+
+-- 2026.07.06 - V4.8.2
+
+- changed: Raise generated Global Elite to 100,000 points with a smoother default rank threshold ladder
+- changed: Retune default point rewards so the modeled active player still reaches Global Elite in roughly the 250-300 hour window
+- changed: Bump ConfigVersion to 15 so existing owners get a clear warning for the new default point preset
+- compatibility: Existing ranks.jsonc files, player points, database schemas, and Shared API behavior are not migrated or rewritten
+- test: Update default rank, point economy, config-version, and balance-eval coverage for the 100k ladder
+
+-- 2026.07.06 - V4.8.1
+
+- changed: Round the generated default rank thresholds to cleaner values while keeping Global Elite at 50,000 points
+- changed: Set Supreme Master First Class to 45,000 points so the final Global Elite gap is a clear 5,000 points
+- compatibility: Existing ranks.jsonc files, point rewards, ConfigVersion, database schemas, and Shared API behavior are unchanged
+- test: Update generated-rank regression coverage for the rounded 50k ladder and final-rank gap
+
+-- 2026.07.06 - V4.8.0
+
+- changed: Rework generated default rank thresholds into a 50,000-point Global Elite ladder with faster early ranks and longer late-rank progression
+- changed: Rebalance default point rewards for casual mixed servers with visible kill, objective, special-kill, streak, and active-playtime rewards
+- changed: Enable bot rank-point interactions by default for new configs and reset killstreak rewards each round by default
+- compatibility: Existing server configs, existing ranks.jsonc files, player points, database schemas, and Shared API behavior are not migrated or rewritten
+- docs: Keep generated permission gates, reward descriptions, command rewards, and rank-granted permissions as commented examples only
+- test: Add default economy regression coverage and a balance eval for the new 50k ladder
+
+-- 2026.07.04 - V4.7.2
+
+- fix: Count bot death-event interactions correctly for human rank points and stats when `points-for-bots` or `stats-for-bots` are enabled
+- changed: Make bundled language defaults use the cleaner lime prefix, white leaderboard names, grey leaderboard points, and white point-message labels across all 13 localizations
+
+-- 2026.06.28 - V4.7.1
+
+- feat: Make `!rank` show the next rank and progression position from the player's permission-eligible rank path, including regular and gated ranks at the same point threshold
+- feat: Add optional rank-level `RewardDescription` text to `!rank` and selected `!ranks` details
+- compatibility: Keep existing rank configurations, reward claims, database tables, and Shared API behavior unchanged
+- docs: Document parallel regular/gated rank ordering and reward descriptions
+- test: Add regression and table-driven eval coverage for permission-aware progression, 50-level gated paths, reward descriptions, and all 13 localizations
+
+-- 2026.06.27 - V4.7.0
+
+- feat: Add permission-gated ranks through `RequiredPermissions` in `ranks.jsonc`
+- feat: Add one-time command rewards for ranks through `Rewards` entries in `ranks.jsonc`
+- db: Add `k4rankrewards` claim storage so command rewards are not repeated for the same SteamID
+- docs: Document rank gates, command rewards, placeholders, and reward claim behavior
+- test: Add regression coverage for gated rank resolution, reward triggering, duplicate claims, and reward placeholders
+
+-- 2026.06.27 - V4.6.1
+
+- fix: Correct css_resetdata target/type parsing and default omitted reset type to all
+- fix: Continue reset-all work for available rank, stat, and playtime data when one optional module cache is missing
+- fix: Replace stale shared API providers during hot reload so companion plugins use the current K4 instance
+- fix: Preserve disconnect and map-end playtime saves when a player controller is valid but the pawn is already gone
+- fix: Reject negative admin point amounts instead of allowing givepoints, removepoints, or setpoints intent to be inverted
+- test: Add regression coverage for reset command parsing, reset section selection, negative point amounts, and shared API provider replacement
+
+-- 2026.06.13 - V4.6.0
+
+- hardening: Keep CounterStrikeSharp native access on the game thread and save immutable player snapshots in background database work
+- fix: Order map-change loads, saves, purges, and unload draining to prevent stale writes and lost player data
+- fix: Use the normal load-or-create flow for hot reload players and reject stale delayed lifecycle work
+- fix: Correct bot point rewards, suicide scoring, flash-assist ownership, hit-group stats, and bot-hit filtering
+- fix: Apply rank and stat minimum-player rules consistently across gameplay and objective events
+- fix: Keep admin and shared-API point changes synchronized with rank, permissions, score, and clan tag state
+- fix: Preserve invalid ranks.jsonc files and normalize unsafe runtime configuration values without changing generated config
+- fix: Preserve team sizes during rank-based balancing and only perform point-improving swaps
+- perf: Deduplicate clan-tag and announcement work, move placement updates to the game thread, and reduce repeated eligibility scans
+- validation: Automated Debug, Release, package-layout, language, and dependency checks completed; live CS2 runtime validation is still recommended
+
+-- 2026.06.13 - V4.5.6
+
+- fix: Ignore invalid bot MVP events instead of spamming CounterStrikeSharp callback errors
+- fix: Guard MVP point and stat handlers before reading unsafe event player data
+
+-- 2026.06.01 - V4.5.5
+
+- fix: Refresh connected player caches after map changes so ranks keep working without reconnecting
+- fix: Replace stale same-SteamID cache entries when CS2 gives a player a new controller
+- fix: Queue a full player-data save during map end before map-change cache cleanup
+
+-- 2026.06.01 - V4.5.4
+
+- fix: Use the same live connected-player count for rank points and minimum-player warnings
+- fix: Retry player cache loading when a player activates before their pawn is ready
+- chore: Adjust generated config defaults and point economy for casual public servers
+
+-- 2026.05.31 - V4.5.3
+
+- fix: Defer CS game-rules lookup until the world update loop is active
+- fix: Defer player activation cache loading to avoid early entity-system access
+- fix: Make stat and rank min-player checks fail closed while the entity system is unavailable
+
+-- 2026.05.31 - V4.5.2
+
+- fix: Prevent game-rules lookup from failing plugin load before the CS2 entity system is ready
+
+-- 2026.05.31 - V4.5.1
+
+- fix: Save player data before plugin unload releases modules
+- fix: Handle database startup failures with clear logging
+- fix: Safely initialize CS game rules during normal loads and map starts
+- fix: Save correct values from admin setpoints commands
+- fix: Stop rank timers during module release
+- fix: Track pending player cache loads to avoid stale entries on quick disconnects
+- fix: Serialize player save operations and log queued save failures
+- fix: Correct death stat accounting for world, suicide, and missing-attacker cases
+- fix: Validate configured database table identifiers before SQL is built
+- fix: Cache GeoIP country database lookups and avoid repeated missing-file logs
+- fix: Make the time command display-only instead of mutating counters
+- fix: Use player cache snapshots during event and timer iteration
+- fix: Capture announcement placeholders before async country lookup
+
+-- 2026.05.31 - V4.5.0
+
+- chore: Retarget K4-System and K4-SharedApi to .NET 10
+- chore: Update CounterStrikeSharp.API to 1.0.369
+- chore: Pin NuGet package versions for deterministic builds
+- chore: Build K4-SharedApi from source with a ProjectReference
+- chore: Refresh all language JSON files to the current key set
+- fix: Package release output with plugin dependencies, language files, and shared K4 API
+
+-- 2024.07.24 - V4.4.1
+
+- feat: ranks config self-repair added to prevent issues with them
+- fix: death statistics counter from bots even if disabled
+- fix: remove unused code part
+- fix: disconnect message not shown even if enabled
+- fix: team-balance freeze/crash the server
+- fix: error log on connect message due to clantag getter
+- chore: update README.md to use new team standards and fix broken links
+
+-- 2024.06.03 - V4.4.0
+
+- feat: New config to decide whther or not to give points for playtime for AFK players
+- fix: Playtime points not counted properly for Counter-Terrorists
+- chore: Fixed CHANGELOG dates
+
+-- 2024.06.03 - V4.3.4
+
+- fix: Country tag performance issues
+- fix: Disconnect announcement not shown
+- fix: Fixed the resetrank problem
+- fix: Color replacing problems with DarkRed or DarkBlue and so
+
+-- 2024.05.18 - V4.3.3
+
+- fix: Threading problems
+- fix: All player load was full bad and caused too much resource usage on map changes
+
+-- 2024.05.18 - V4.3.2
+
+- fix: Connect message shown even if its disabled
+- fix: Placeholder replaced error logs
+- fix: Player top placement is not fetched on join
+- fix: Load all player cache is running the query two times
+
+-- 2024.05.17 - V4.3.1
+
+- fix: Connect/Disconnect message parentheses
+
+-- 2024.05.16 - V4.3.0
+
+- feat: Added connect and disconnect messages with variables (if you need some other variable let me know)
+- fix: Add current points to round summary
+- fix: Error log on round start because of team balance
+- fix: Enumeration problems on getting k4players
+- fix: AutoTeamBalance error logs
+- remove: Removed round summary translations. Now the regular gain/loss is used instead
+- remove: CallbackAnonymizer removed since that bug was fixed in CSS
+- remove: Debug logs on fetch
+
+-- 2024.05.11 - V4.2.1
+
+- fix: Toplist placements is now fetched every 5 minutes instead of the mistake 5 seconds
+- fix: Do not try to fetch placements if noone is online to do for
+- fix: Removed a duplicated save
+- fix: Removed a debug message leftover
+
+-- 2024.05.09 - V4.2.0
+
+- feat: Toplist placement for ranks can now be displayed on scoreboard with new settings
+- feat: Auto team balancer by rank points (experimental)
+- fix: Removed debug messages lefover
+- fix: Commands show up even if the module disabled
+- fix: Compile warning from CSS updates
+- fix: Headshot is now only counted if it was a kill
+- fix: Points by playtime not counts anymore after 2-3 ticks
+- fix: Game win and lose stats not counted properly
+
+-- 2024.04.16 - V4.1.9
+
+- fix: Collection was modified
+
+-- 2024.04.16 - V4.1.7
+
+- fix: Expensive command crash exploit
+
+-- 2024.04.16 - V4.1.6
+
+- fix: Stats/Points not counted for bots even if they are enabled
+- fix: Hotreload MySQL problems when loading all players
+- fix: Compatibility issues with Multi Addon Manager
+- fix: Bots being processed by MySQL join check
+- fix: HTLV processed to K4Players
+- fix: SaveAllPlayers blocked by bots
+
+-- 2024.04.16 - V4.1.5
+
+- fix: Clantag set if its empty or disabled
+- fix: Scoreboard rank missmatch of flag based ones
+- fix: LVLRanks MySQL SteamIDs
+- fix: Death stats not counted properly
+
+-- 2024.04.14 - V4.1.4
+
+- fix: MySQL error logging non-thread problems
+- fix: SaveAllPlayers MySQL transaction problems
+
+-- 2024.04.13 - V4.1.3
+
+- feat: Option to reset killstreaks for alive players
+- fix: Top command not prints properly
+- fix: Points for dying not working
+
+-- 2024.04.12 - V4.1.2
+
+- fix: AutoPurge query
+- fix: RoundStart error log (#166)
+- fix: Delete invalid players on save-all
+- fix: RankTop not updating instantly (#166)
+- fix: RankTop position display problems (#166)
+
+-- 2024.04.11 - V4.1.1
+
+- fix: Upgrade MySQL to primary key instead of UNIQUE
+- fix: Player couldnt load
+- fix: Rank command not prints
+- fix: Player data process
+
+-- 2024.04.11 - V4.1.0
+
+- feat: Add Reset option for all module
+- feat: Add 25 new statistics
+- feat: Add new API endpoints
+- fix: Rank name not updating in MySQL
+- fix: Admin shows a user multiple times
+- fix: Toplist and Rank command lag spikes
+- fix: Rank resets sets 0 instead of starting points
+- fix: AutoPurge delete freshly moved database
+- fix: Add loading message to commands where needed
+- optimise: The full plugins code
+- upgrade: Changed support from NET7 to NET8
+
+-- 2024.03.28 - V4.0.4
+
+- fix: Table generation problems because of lastseen default value
+- fix: Add validation for country database
+
+-- 2024.03.26 - V4.0.3
+
+- feat: Add proper MySQL error logging to keep track of queries
+- fix: Save query problems at some table, which block full save mechanism
+- fix: Point modifications show new poont instead of old (#155)
+- fix: AutPurge - LVLBase wrong column name to check date
+- fix: AutoPurge - LVLBase error if module not used
+
+-- 2024.03.25 - V4.0.2
+
+- fix: Console warnings about missing keys
+
+-- 2024.03.25 - V4.0.1
+
+- feat: Initiated API
+- remove: Removed scoreboard ranks (read release description)
+
+-- 2024.03.24 - V4.0.0
+
+- feat: Scoreboard premier point support
+- feat: Auto delete inactive player data from db (day based settings)
+- feat: Scoreboard mm rank support
+- feat: Scoreboard country clantag addon
+- feat: Player mute point messages for themselves (!togglepointmsg)
+- feat: Possibility to hide permission based tags (!toggletag)
+- fix: Possibly fix player count based bug
+- fix: MySQL crash problem by @daffyy
+
+-- 2024.03.08 - V3.3.10
+
+- fix: RoundEndPoints duplicated print amount (visual bug)
+- fix: Possible fix for the log about Entity is not valid (bug since last week)
+- fix: Possible fix for time not saved properly
+- fix: Not enough players print bug
+- fix: Scoreboard rank not getting synced instantly
+
+-- 2024.02.13 - V3.3.9
+
+- refactor: Disable MySQL pooling limitations
+- refactor: Remove load repetative code
+- refactor: Offline MySQL reader to some places (use the connections less)
+- fix: MySQL connection is closed before data read
+- fix: Round start message printed twice or more
+- fix: Points not always saved properly (one symbol miss-typo, so sorry...)
+- fix: On some servers the plugin stay in LOADING state (rare bug)
+- fix: Duplicated point messages (rare bug)
+- chore: Rename outdated translations to .outdated
+
+-- 2024.02.13 - V3.3.8
+
+- refactor: New global cache has been added
+- fix: MySQL connection pool adjust was unable to run
+- fix: MapChange will no longed reload cache
+- fix: MapChange will no longer dupe save cache
+- fix: MapChange will no longer delete cache
+- fix: MapChange lose points because of misstypo in last release
+
+-- 2024.02.13 - V3.3.7
+
+- refactor: Adjust MySQL connection pool sizes better
+- refactor: MySQL connection pool prepare to all players join at once
+- fix: MySQL pool size nulled on mapchange, blocking player load
+- fix: Block triple save on mapchange causing query timeout (RoundEnd, MapChange, Disconnect)
+
+-- 2024.02.10 - V3.3.6
+
+- fix: Points not changed because of misstypo
+
+-- 2024.02.10 - V3.3.5
+
+- fix: Invalid player blocked from functions (problem by GetPlayers)
+
+-- 2024.02.10 - V3.3.4
+
+- fix: Bomb explode using HostageRescueAll points
+- fix: Round win/loss not changing points
+- fix: Invalid SteamID saves
+
+-- 2024.02.09 - V3.3.3
+
+- fix: Crash on mapchange because of gamedata change (SetStateChanged)
+- fix: Error log if rank module disabled
+- fix: Remove LevelRanksCompatibility disable if any of the required modules are not running
+- fix: Data load for not used modules
+- fix: Lag spikes on !top command
+- fix: T gets point for EventHostageRescuedAll
+- refactor: Removed unnecessary operators from ranks module
+- refactor: Optimised rank module player loops
+
+-- 2024.02.06 - V3.3.2
+
+- feat: Add MySQL pooling support fully
+- feat: Change MySQL wrapper for multiple connections
+- feat: Dynamically adjusting MySQL connection pool by online players
+- fix: Commands not working
+- fix: MySQL problems
+- fix: Add back lvlranks support
+
+-- 2024.02.06 - V3.3.1
+
+- fix: Missing CallbackAnonymizer
+- fix: MySQL deadlocks (already in use)
+
+-- 2024.01.30 - V3.3.0
+
+- feat: Add MySQL pooling support
+- feat: Add custom MySQL wrapper
+- feat: Add transaction support for save/load
+- feat: Customizable no permission message
+- feat: Customizable client only command message
+- feat: Customizable server only command message
+- fix: Commands not deleted on hotReload
+- refactor: Create global cache loader
+- refactor: Create global cache saver
+- refactor: Use reusable MySQL connection
+- refactor: Replace lambda command helpers with custom logic
+
+-- 2024.01.30 - V3.2.0
+
+- feat: Add starting point settings for new players ([#129](https://github.com/K4ryuu/K4-System/issues/129))
+- feat: Option to show playernames in kill/death messages ([#128](https://github.com/K4ryuu/K4-System/issues/128))
+- feat: Add notification for not enough players to gain points ([#127](https://github.com/K4ryuu/K4-System/issues/127))
+- fix: Admin list problems ([#131](https://github.com/K4ryuu/K4-System/issues/131))
+- fix: Round summary for WarmupPeriod disabled ([#115](https://github.com/K4ryuu/K4-System/issues/115))
+
+-- 2024.01.29 - V3.1.5
+
+- fix: points only for T's if bomb explode (by stefanx111)
+- fix: !ranks command not working
+
+-- 2024.01.29 - V3.1.4
+
+- feat: Added database connection config option SSLMode (by Sandy-Garrido)
+- fix: Fixed lastconnect giving out of range error during LR player stats save query (by Cruze03)
+- fix: Added try-catch in LR player stats save queries (by Cruze03)
+- fix: shoots will no longer increase on knife swings (by Cruze03)
+- fix: Mute Server commands (Private K4-Missions Support)
+
+-- 2024.01.28 - V3.1.3
+
+- fix: Added min and max to the toplist by @Whaliin
+- fix: Miss-Type in bomb-exploded config attribute
+- fix: Every log and crash solved
+
+-- 2024.01.24 - V3.1.2
+
+- feat: Add support for admin groups and command overrides
+- fix: Use of cache, where player not loaded yet
+- fix: Player not loaded on mapchange
+- fix: Add Gabriel 'sopax' Lima as translator to README
+
+-- 2024.01.23 - V3.1.1
+
+- feat: Add Brazilian Portuguese translation (by Gabriel 'sopax' Lima)
+- fix: ClanTag problems on players with no permissions (#112)
+- fix: Add TianxSky as translator to README
+- fix: Cache gets deleted before saved sometimes
+- fix: Duplicated load and save for players on map change
+- fix: GameRule was used before it was initiated by the server
+- fix: PlayerDeath caused crash on mapchange
+
+-- 2024.01.22 - V3.1.0
+
+- feat: Add translation for Spanish language (by criskkky)
+- feat: Add translation for Chinese (Simplified, People's Republic of China) language (by TianxSky)
+- feat: CFG to set custom name for LVLRanks Table (#102)
+- feat: Admin list with custom colors for each permission
+- feat: ClanTags by permissions
+- feat: Added arg to top command (!top 8)
+- feat: Add immunity check for targeting commands
+- fix: DynamicPoints integer devision (by TianxSky)
+- fix: Change timestamp to unix timestamp (by stefanx111)
+- fix: Missing prefixes for MySQL queries (by rigE08)
+- fix: Block MySQL save for people with SteamID = 0
+- fix: EventPlayerTeam targets not yet loaded players (#110)
+- fix: Prevent load with wrong database configs
+- fix: Crashes on mapchange
+- fix: Duplicated player load into cache
+- fix: Thread problems
+- fix: Time wont save (Spawn resets it)
+
+-- 2023.12.30 - V3.0.5
+
+- fix: KillStreak resets on spawn
+
+-- 2023.12.29 - V3.0.4
+
+- fix: KillStreaks after bot control
+- fix: Stats not saved
+- fix: Remove debug print
+- fix: NaN values in stats
+
+-- 2023.12.29 - V3.0.3
+
+- feat: Add translation for Latvian language (by rcon420)
+- feat: Killstreak can be now "remembered" until player die (seconds-between-kills = 0)
+- fix: MySQL support for emojis and special characters
+- fix: Add emoji support for player names
+- fix: Replace STEAM_0 with STEAM_1 to match old lvlranks
+- fix: TeamChange to winnerteam before win exploit
+
+-- 2023.12.29 - V3.0.2
+
+- feat: Add translation for Russian language (by ViTamin)
+- refactor: Remove unused imports
+- fix: Invisible player on clantag change
+- fix: Permission giving on player connect
+- fix: Add missing translations
+- fix: Add missing commands to !k4
+- fix: Negative savepoints calulcated as positive
+
+-- 2023.12.29 - V3.0.1
+
+- feat: add tr translate by @onurcanertekin in #95
+- fix: Time command extra symbols
+- fix: Players not loaded after mapchange (#94)
+- fix: DynamicDeathPoints
+- fix: Double negative symbols
+- fix: LevelRanks rank ids
+- fix: Type enforcement
+- fix: LevelRanks steamid changed
+- fix: Italian Translation
+- chore: Update module version to 3.0.1
+- chore: Add Turkish translator name
+- chore: Update README and CHANGELOG
+- upgrade: Better SteamID conversion for LevelRanks
+
+-- 2023.12.29 - V3.0.0
+
+- feat: Check available ranks with details (#91)
+- feat: Translations added (#1)
+- feat: FFA mode support for game win/lose
+- feat: MySQL table validator now tells you which columns are unused by the plugin
+- fix: Translation rank colors
+- fix: Block MySQL validation if no credentials given
+- fix: Plugin context is not needed in main deps
+- fix: Game win/lose statistics count
+- fix: Round and Game based stats
+- fix: Percentage based stats are now calculated correctly
+- fix: Headshot percentage is now calculated correctly
+- fix: KDA is now calculated correctly
+- refactor: Remove unused parts
+- refactor: Remove unused functions
+- refactor: Disable levelranks if required modules not running
+- refactor: Prefix moved to translations
+- refactor: Update K4-System.csproj for Release configuration
+- upgrade: Add targeting functionality to RankCommands.cs
+- chore: Add % symbol to the required fields
+
+-- 2023.12.28 - V2.0.6
+
+- feat: FFA mode support for game win/lose
+- fix: Headshot percentage not counted properly
+- fix: Accuracy not counted properly
+- fix: RoundEnd point changes not counted properly
+- fix: Round win percentage not counted properly
+- fix: Game win percentage not counted properly
+- fix: Shoots not counted properly
+- fix: Game win/loss not counted properly
+
+- -- 2023.12.28 - V2.0.5
+
+- feat: New statistics: Headshot percentage
+- feat: New statistics: Accuracy
+- feat: LevelRanks Compatibility added for webpanels
+- feat: MySQL table validation to prevent errors and crashes
+- fix: Stats Command MissType
+- fix: DynamicDeathPoints calculate problems
+- fix: Bot point calculations (now they are not counted if disabled)
+- refactor: Optimised the compiler options
+
+- -- 2023.12.15 - V2.0.4
+
+- feat: Game win stats
+- feat: Game lose stats
+- feat: Round win percentage stats
+- feat: Game win percentage stats
+- feat: First blood count stats
+- feat: Permissions per ranks (any 3rd party plugin supported)
+- feat: Points for playtime
+- fix: Duplicate promote/demote
+
+-- 2023.12.14 - V2.0.3
+
+- fix: Threading problems
+- fix: Player cant join to server
+- fix: Player cant join to team
+- fix: Watchdog crashes
+- fix: Dynamic-Death-Point unfair changes (min and max added)
+- fix: Dependency Injection problems
+
+-- 2023.12.07 - V2.0.2
+
+- feat: Promote/Demote messages
+- fix: Time module disconnect error
+- fix: Kills shown as Knife Kill, but its not
+- fix: DynamicDeathPoints divide by zero problems
+- refactor: Optimised Grenade and Knife kill detection
+
+-- 2023.12.05 - V2.0.1
+
+- fix: Thread Safety modifications
+- fix: Bomb kill bug
+- fix: Small point losses
+
+-- 2023.12.05 - V2.0.0
+
+- feat: Dynamic death points based on the killer and victim points (new config)
+- feat: Configurable commands
+- feat: New Statistics: KDA, Hits Taken, Hits Given, Assists
+- feat: Adding commands top5, top10 will always show that much player u set as number in the end
+- refactor: New visual appearance
+- refactor: Totally remade the plugin from zero
+
+-- 2023.10.24 - V1.3.5
+
+- fix: Disconnect error in some cases
+- fix: Database resets for undefined players (#58)
+- fix: Commands target the user not the target
+- fix: SpawnMessage config bug
+- fix: Suicide count problems
+- fix: Death player checks (#56, #52)
+
+-- 2023.10.24 - V1.3.4
+
+- refactor: Optimise gamerule based functions (#39)
+- fix: Visual bugs (#43)
+- fix: Disconnect lag spike (#46)
+- fix: Bots being loaded into DB rarely (#45)
+- fix: Data load lag spikes
+- fix: 161 Segmentation fault
+- fix: Time updates on !time command
+- fix: Alive time not saved properly
+- fix: Random errors on client disconnect
+
+- -- 2023.10.21 - V1.3.3
+
+- feat: Last seen value to statistics (#37)
+- fix: Retake bomb plant incompatibility bug (#31,#25)
+- fix: Toplist rank colors (#32, #34)
+- fix: Possible reference problems
+
+-- 2023.10.20 - V1.3.2
+
+- refactor: Optimise EventRoundEnd
+- fix: Headshot not recorded (#23)
+- fix: Some more table prefix fixes
+- fix: Rank top indicates wrong rank colors (#29)
+- fix: Targeting problems (spotted by @skaen)
+
+-- 2023.10.17 - V1.3.1
+
+- Added rank colors to toplist (#22)
+- Fixed loading bug with no config file existing
+- Fixed debug log crash on startup (#21)
+- Fixed config file versioning
+
+-- 2023.10.13 - V1.3.0
+
+- Added customization option to rank scoreboard tags
+- Added save mechanism toplist to show actual data for all online players
+- Added full debug log for the code to let you guys find bugs easier
+- Added option to print summary of point changes in round ends
+- Fixed multiple harmless error log for dictionary
+- Fixed several problematic solution
+
+-- 2023.10.13 - V1.2.0
+
+- Added max rank and current rank id to !rank
+- Added player count to toplist
+- Upgraded save mechanism
+- Upgraded data storing mechanism
+- Upgraded point setter mechanism
+- Fixed missing VIP multiplier sections
+- Fixed several minor bug
+- Cleaned and refactored the full code

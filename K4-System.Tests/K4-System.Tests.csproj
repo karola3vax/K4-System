@@ -1,0 +1,32 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <AssemblyName>K4-System.Tests</AssemblyName>
+    <RootNamespace>K4System.Tests</RootNamespace>
+    <IsPackable>false</IsPackable>
+    <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="CounterStrikeSharp.API" Version="1.0.376" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.10.1" />
+    <PackageReference Include="xunit" Version="2.9.3" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="3.1.5" />
+    <ProjectReference Include="..\K4-System\src\K4-System.csproj" />
+  </ItemGroup>
+  <!--
+    CVE-2025-6965 (GHSA-2m69-gcr7-jv3q) needs attacker-written SQL with crafted aggregate queries. K4 only runs its
+    own fixed, parameterized statements, so it cannot be reached through K4. The patched SQLite builds need glibc 2.34,
+    which CS2's Linux runtime (glibc 2.31) does not have; see K4-System.csproj.
+    Remove this once a patched SQLitePCLRaw.lib.e_sqlite3 runs on glibc 2.31 (SqliteNativeLibraryTests checks it).
+  -->
+  <ItemGroup>
+    <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-2m69-gcr7-jv3q" />
+  </ItemGroup>
+  <ItemGroup>
+    <Using Include="Xunit" />
+    <None Update="Evals\**\*.json" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="..\K4-System\src\lang\*.json" Link="lang\%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+</Project>

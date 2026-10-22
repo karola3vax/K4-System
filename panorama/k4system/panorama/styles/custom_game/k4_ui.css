@@ -1,0 +1,979 @@
+@define k4-text: #FFFFFF;
+@define k4-base: #CCCCCC;
+@define k4-muted: #8F98A1;
+@define k4-accent: #82D8FF;
+@define k4-gold: #E4AE39;
+@define k4-green: #4CFF6A;
+@define k4-red: #DB4437;
+@define k4-cell: #ffffff08;
+@define k4-cell-dark: #ffffff05;
+@define k4-cell-light: #ffffff10;
+@define k4-line: #ffffff12;
+@define k4-dur: 0.15s;
+
+.k4-root
+{
+	width: 100%;
+	height: 100%;
+	z-index: 2000000000;
+}
+
+/* ---------------------------------------------------------------- panel: the CS2 scoreboard frame */
+
+.k4-panel
+{
+	width: 640px;
+	horizontal-align: center;
+	vertical-align: middle;
+	opacity: 1;
+	transform: scale3d(1, 1, 1);
+	transition-property: opacity, transform;
+	transition-duration: k4-dur;
+	transition-timing-function: ease-out;
+}
+
+.k4-panel.k4-closed
+{
+	opacity: 0;
+	transform: scale3d(0.97, 0.97, 1);
+	visibility: collapse;
+}
+
+.k4-bg
+{
+	width: 100%;
+	height: 100%;
+	background-color: rgba(0, 0, 0, 0.88);
+	background-image: url("s2r://panorama/images/backgrounds/bluedots_large_png.vtex");
+	background-size: 360px 360px;
+	background-img-opacity: 0.015;
+	border-radius: 5px;
+	box-shadow: #00000080 0px 0px 16px 0px;
+}
+
+.k4-content
+{
+	width: 100%;
+	flow-children: down;
+	padding: 0px 0px 18px 0px;
+}
+
+.k4-header
+{
+	width: 100%;
+	height: 52px;
+	flow-children: right;
+	padding: 0px 10px 0px 18px;
+}
+
+/* Static icons are Panels with a game image as background (CS2's custom HUD allows no Image elements). */
+.k4-logo, .k4-tab-icon, .k4-meta-icon, .k4-btn-icon
+{
+	background-size: contain;
+	background-repeat: no-repeat;
+	background-position: center;
+}
+
+.k4-logo
+{
+	width: 22px;
+	height: 22px;
+	vertical-align: center;
+	wash-color: k4-accent;
+	margin-right: 8px;
+}
+
+.k4-brand
+{
+	color: k4-text;
+	font-size: 20px;
+	letter-spacing: 1px;
+	vertical-align: center;
+}
+
+.k4-subtitle
+{
+	white-space: nowrap;
+	color: k4-muted;
+	font-size: 16px;
+	margin-left: 12px;
+	vertical-align: center;
+	width: fill-parent-flow(1.0);
+	text-overflow: ellipsis;
+}
+
+/* The CloseButton class comes from csgostyles; this only places it. */
+.k4-close
+{
+	vertical-align: center;
+	sound: "UIPanorama.generic_button_rollover";
+}
+
+.k4-close:active
+{
+	sound: "UIPanorama.generic_button_press";
+}
+
+/* ---------------------------------------------------------------- tabs: the CS2 main-menu navbar */
+
+.k4-tabs
+{
+	width: 100%;
+	height: 44px;
+	flow-children: right;
+	padding: 0px 12px;
+	background-color: rgba(0, 0, 0, 0.25);
+}
+
+.k4-tab
+{
+	height: 32px;
+	margin: 0px 3px;
+	padding: 0px 8px;
+	flow-children: right;
+	vertical-align: center;
+	border-radius: 3px;
+	transition-property: background-color;
+	transition-duration: k4-dur;
+}
+
+.k4-tab-icon
+{
+	width: 16px;
+	height: 16px;
+	margin-right: 6px;
+	vertical-align: center;
+	wash-color: k4-base;
+}
+
+.k4-tab Label
+{
+	color: k4-text;
+	font-size: 15px;
+	text-transform: uppercase;
+	vertical-align: center;
+}
+
+.k4-tab:hover
+{
+	background-color: rgba(255, 255, 255, 0.04);
+	sound: "UIPanorama.loadout_sector_scroll";
+}
+
+.k4-tab.k4-active
+{
+	background-color: #82d7ff1a;
+}
+
+.k4-tab.k4-active Label
+{
+	color: k4-accent;
+	sound: "UIPanorama.submenu_select";
+}
+
+.k4-tab.k4-active .k4-tab-icon
+{
+	wash-color: k4-accent;
+}
+
+/* ---------------------------------------------------------------- shared */
+
+.k4-view
+{
+	width: 100%;
+	flow-children: down;
+	padding: 16px 18px 0px 18px;
+	visibility: collapse;
+}
+
+.k4-view.k4-show
+{
+	visibility: visible;
+}
+
+.k4-gone
+{
+	visibility: collapse;
+}
+
+.k4-split
+{
+	width: 100%;
+	flow-children: right;
+	margin-bottom: 8px;
+}
+
+.k4-split-last
+{
+	margin-bottom: 0px;
+}
+
+.k4-muted
+{
+	color: k4-muted;
+	font-size: 15px;
+	vertical-align: center;
+}
+
+.k4-fill
+{
+	width: fill-parent-flow(1.0);
+}
+
+.k4-right
+{
+	horizontal-align: right;
+	text-align: right;
+}
+
+.k4-accent
+{
+	color: k4-accent;
+	font-size: 15px;
+	vertical-align: center;
+}
+
+.k4-meta
+{
+	flow-children: right;
+	margin-top: 4px;
+}
+
+.k4-meta-icon
+{
+	width: 16px;
+	height: 16px;
+	margin-right: 7px;
+	vertical-align: center;
+	wash-color: k4-muted;
+}
+
+.k4-section
+{
+	width: 100%;
+	flow-children: down;
+	padding: 12px 14px;
+	border-radius: 3px;
+	background-color: k4-cell;
+}
+
+/* CS2's own progress bar colors (csgostyles .ProgressBarLeft) */
+.k4-bar
+{
+	width: 100%;
+	height: 6px;
+	border-radius: 2px;
+	background-color: #ffffff14;
+}
+
+.k4-bar-large
+{
+	height: 8px;
+	margin: 2px 0px 0px 0px;
+}
+
+.k4-bar-short
+{
+	width: fill-parent-flow(1.0);
+	vertical-align: center;
+	margin-right: 12px;
+}
+
+.k4-bar-fill
+{
+	height: 100%;
+	border-radius: 2px;
+	background-color: gradient( linear, 0% 0%, 100% 0%, from( #134f87 ), to( #1ab8e0 ) );
+}
+
+/* ---------------------------------------------------------------- rank */
+
+.k4-hero
+{
+	width: 100%;
+	flow-children: right;
+	margin-bottom: 14px;
+}
+
+.k4-hero-emblem
+{
+	width: 168px;
+	height: 72px;
+	border-radius: 3px;
+	background-color: k4-cell;
+}
+
+.k4-rank-icon
+{
+	width: 144px;
+	height: 58px;
+	horizontal-align: center;
+	vertical-align: center;
+	background-size: contain;
+	background-repeat: no-repeat;
+	background-position: center;
+}
+
+.k4-badge
+{
+	horizontal-align: center;
+	vertical-align: center;
+	font-size: 22px;
+	text-align: center;
+	color: k4-text;
+}
+
+.k4-hero-text
+{
+	flow-children: down;
+	margin-left: 16px;
+	vertical-align: center;
+}
+
+.k4-eyebrow
+{
+	color: k4-muted;
+	font-size: 13px;
+	text-transform: uppercase;
+	letter-spacing: 1px;
+}
+
+.k4-rank-name
+{
+	font-size: 28px;
+	color: k4-text;
+}
+
+.k4-next
+{
+	color: k4-base;
+	font-size: 15px;
+	vertical-align: center;
+}
+
+.k4-reward
+{
+	margin-top: 10px;
+}
+
+.k4-reward .k4-meta-icon
+{
+	wash-color: k4-accent;
+}
+
+/* The author line at the bottom right of the panel */
+.k4-copyright
+{
+	horizontal-align: right;
+	margin: 6px 18px 0px 0px;
+	font-size: 12px;
+	color: k4-muted;
+}
+
+/* ---------------------------------------------------------------- missions: CS2 mission tiles */
+
+.k4-card
+{
+	width: 100%;
+	flow-children: right;
+	margin-bottom: 8px;
+	border-radius: 3px;
+	background-color: k4-cell;
+	transition-property: wash-color;
+	transition-duration: 0.5s;
+}
+
+.k4-card-stripe
+{
+	width: 3px;
+	height: 100%;
+	background-color: k4-muted;
+	border-radius: 3px 0px 0px 3px;
+}
+
+.k4-card.k4-easy .k4-card-stripe { background-color: k4-green; }
+.k4-card.k4-medium .k4-card-stripe { background-color: k4-gold; }
+.k4-card.k4-hard .k4-card-stripe { background-color: k4-red; }
+.k4-card.k4-weekly .k4-card-stripe { background-color: #B054E8; }
+
+.k4-mission-icon
+{
+	width: 56px;
+	height: 32px;
+	margin: 0px 6px 0px 12px;
+	vertical-align: center;
+	background-size: contain;
+	background-repeat: no-repeat;
+	background-position: center;
+	wash-color: k4-base;
+}
+
+.k4-card-body
+{
+	width: fill-parent-flow(1.0);
+	flow-children: down;
+	padding: 10px 12px 10px 8px;
+}
+
+.k4-diff
+{
+	font-size: 12px;
+	padding: 2px 7px;
+	margin-right: 10px;
+	border-radius: 2px;
+	text-transform: uppercase;
+	vertical-align: center;
+	color: k4-muted;
+	background-color: k4-cell-light;
+}
+
+.k4-card.k4-easy .k4-diff { color: k4-green; background-color: #4cff6a1f; }
+.k4-card.k4-medium .k4-diff { color: k4-gold; background-color: #e4ae391f; }
+.k4-card.k4-hard .k4-diff { color: #FF6B5E; background-color: #db443726; }
+.k4-card.k4-weekly .k4-diff { color: #C99BFF; background-color: #b054e826; }
+
+/* A started mission the current map cannot offer: it waits for another map */
+.k4-card.k4-blocked
+{
+	opacity: 0.55;
+}
+
+.k4-mission-desc
+{
+	white-space: nowrap;
+	color: k4-text;
+	font-size: 17px;
+	vertical-align: center;
+	width: fill-parent-flow(1.0);
+	text-overflow: ellipsis;
+}
+
+.k4-progress
+{
+	color: k4-base;
+	font-size: 14px;
+	vertical-align: center;
+	min-width: 96px;
+	text-align: right;
+}
+
+/* A finished mission: CS2's mission-complete green and check mark, and its sound */
+.k4-card.k4-done
+{
+	background-color: #4cff6a12;
+}
+
+.k4-card.k4-done .k4-mission-icon
+{
+	background-image: url("s2r://panorama/images/icons/ui/check.vsvg");
+	wash-color: k4-green;
+}
+
+.k4-card.k4-done .k4-bar-fill
+{
+	background-color: k4-green;
+}
+
+.k4-card.k4-done .k4-progress
+{
+	color: k4-green;
+}
+
+.k4-small-btn
+{
+	height: 26px;
+	padding: 0px 10px;
+	margin-left: 10px;
+	flow-children: right;
+	vertical-align: center;
+	border-radius: 3px;
+	background-color: #ffffff0f;
+	transition-property: background-color;
+	transition-duration: k4-dur;
+}
+
+.k4-btn-icon
+{
+	width: 14px;
+	height: 14px;
+	margin-right: 6px;
+	vertical-align: center;
+	wash-color: k4-base;
+}
+
+.k4-small-btn Label
+{
+	color: k4-base;
+	font-size: 13px;
+	text-transform: uppercase;
+	vertical-align: center;
+}
+
+.k4-small-btn:hover
+{
+	background-color: #ffffff24;
+	sound: "UIPanorama.generic_button_rollover";
+}
+
+.k4-small-btn:active
+{
+	sound: "UIPanorama.generic_button_press";
+}
+
+.k4-footer
+{
+	flow-children: right;
+	margin-top: 6px;
+}
+
+.k4-footer .k4-meta-icon
+{
+	wash-color: none;
+}
+
+/* ---------------------------------------------------------------- top and ranks: CS2 scoreboard rows */
+
+.k4-table
+{
+	width: 100%;
+	flow-children: down;
+}
+
+.k4-row
+{
+	width: 100%;
+	height: 32px;
+	flow-children: right;
+	margin-bottom: 2px;
+	background-color: k4-cell;
+}
+
+.k4-row Label
+{
+	vertical-align: center;
+}
+
+.k4-row-me
+{
+	margin-top: 6px;
+	background-color: rgba(0, 166, 255, 0.10);
+	border-left: 2px solid k4-accent;
+}
+
+.k4-row.k4-current
+{
+	background-color: rgba(0, 166, 255, 0.10);
+}
+
+.k4-pos-cell
+{
+	width: 52px;
+	height: 100%;
+	background-color: k4-cell-dark;
+	background-size: 44px 22px;
+	background-repeat: no-repeat;
+	background-position: center;
+}
+
+.k4-pos
+{
+	color: k4-base;
+	font-size: 15px;
+	horizontal-align: center;
+	text-align: center;
+}
+
+/* Top three: CS2's laurels around the position */
+.k4-pos-cell.k4-place-1 { background-image: url("s2r://panorama/images/icons/ui/laurel_gold.vsvg"); }
+.k4-pos-cell.k4-place-2 { background-image: url("s2r://panorama/images/icons/ui/laurel_silver.vsvg"); }
+.k4-pos-cell.k4-place-3 { background-image: url("s2r://panorama/images/icons/ui/laurel_bronze.vsvg"); }
+.k4-pos-cell.k4-place-1 .k4-pos { color: #F4D27A; }
+.k4-pos-cell.k4-place-2 .k4-pos { color: #D6DCE4; }
+.k4-pos-cell.k4-place-3 .k4-pos { color: #D9A27A; }
+
+.k4-row-icon
+{
+	width: 60px;
+	height: 24px;
+	margin: 0px 10px;
+	vertical-align: center;
+	background-size: contain;
+	background-repeat: no-repeat;
+	background-position: center;
+}
+
+.k4-name
+{
+	white-space: nowrap;
+	color: k4-text;
+	font-size: 16px;
+	width: fill-parent-flow(1.0);
+	text-overflow: ellipsis;
+}
+
+.k4-row-info
+{
+	color: k4-muted;
+	font-size: 14px;
+	margin: 0px 12px;
+	text-align: right;
+}
+
+.k4-pager
+{
+	width: 100%;
+	flow-children: right;
+	margin-top: 12px;
+}
+
+.k4-page
+{
+	width: fill-parent-flow(1.0);
+	text-align: center;
+}
+
+/* Valve's pagination arrow (csgostyles .PaginationArrow) */
+.k4-arrow
+{
+	width: 28px;
+	height: 28px;
+	border-radius: 3px;
+	background-color: #ffffff0f;
+	background-image: url("s2r://panorama/images/icons/ui/expand.vsvg");
+	background-repeat: no-repeat;
+	background-size: 18px 18px;
+	background-position: 50% 50%;
+	wash-color: k4-base;
+	transition-property: background-color, opacity;
+	transition-duration: k4-dur;
+}
+
+.k4-arrow-left { transform: rotateZ( 90deg ); }
+.k4-arrow-right { transform: rotateZ( -90deg ); }
+
+.k4-arrow:hover
+{
+	background-color: #ffffff24;
+	wash-color: k4-text;
+	sound: "UIPanorama.generic_button_rollover";
+}
+
+.k4-arrow:active
+{
+	sound: "UIPanorama.generic_button_press";
+}
+
+.k4-arrow.k4-disabled
+{
+	opacity: 0.25;
+}
+
+/* ---------------------------------------------------------------- stats */
+
+.k4-tiles
+{
+	width: 100%;
+	flow-children: right-wrap;
+}
+
+.k4-tile
+{
+	width: 190px;
+	height: 64px;
+	flow-children: right;
+	margin: 0px 8px 8px 0px;
+	border-radius: 3px;
+	background-color: k4-cell;
+}
+
+.k4-tile-icon
+{
+	width: 30px;
+	height: 30px;
+	margin: 0px 10px 0px 14px;
+	vertical-align: center;
+	background-size: contain;
+	background-repeat: no-repeat;
+	background-position: center;
+}
+
+.k4-tile-text
+{
+	flow-children: down;
+	vertical-align: center;
+}
+
+.k4-tile-label
+{
+	color: k4-muted;
+	font-size: 12px;
+	text-transform: uppercase;
+	letter-spacing: 1px;
+}
+
+.k4-tile-value
+{
+	color: k4-text;
+	font-size: 24px;
+}
+
+/* ---------------------------------------------------------------- toast: the CS2 HUD mission panel */
+
+.k4-toast
+{
+	/* Right side, vertically centred: the kill feed owns the top right corner, the weapon list the
+	   bottom right. */
+	width: 420px;
+	height: fit-children;
+	horizontal-align: right;
+	vertical-align: center;
+	margin: 0px;
+	opacity: 1;
+	transform: translateX(0px);
+	transition-property: opacity, transform;
+	transition-duration: 0.2s;
+	transition-timing-function: ease-in-out;
+}
+
+.k4-toast.k4-gone
+{
+	visibility: visible;
+	opacity: 0;
+	transform: translateX(200px);
+}
+
+.k4-toast-bg
+{
+	width: 100%;
+	height: 100%;
+	background-color: gradient( linear, 100% 0%, 0% 0%, from( #000000ED ), color-stop( 0.8, #00000020 ), to( #00000000 ) );
+}
+
+.k4-toast-line
+{
+	width: 100%;
+	height: 2px;
+	background-color: gradient( linear, 0% 0%, 100% 0%, from( #00000000 ), to( k4-green ) );
+}
+
+.k4-toast-line-top { vertical-align: top; }
+.k4-toast-line-bottom { vertical-align: bottom; }
+
+.k4-toast-content
+{
+	width: 100%;
+	flow-children: right;
+	padding: 14px 24px 14px 60px;
+}
+
+.k4-toast-icon
+{
+	width: 64px;
+	height: 40px;
+	vertical-align: center;
+	background-size: contain;
+	background-repeat: no-repeat;
+	background-position: center;
+}
+
+.k4-toast-body
+{
+	flow-children: down;
+	margin-left: 14px;
+	width: fill-parent-flow(1.0);
+	vertical-align: center;
+}
+
+.k4-toast-title
+{
+	color: k4-green;
+	font-size: 15px;
+	text-transform: uppercase;
+	letter-spacing: 1px;
+}
+
+.k4-toast-text
+{
+	color: k4-text;
+	font-size: 18px;
+	margin-top: 2px;
+}
+
+.k4-toast.k4-toast-gold .k4-toast-title { color: k4-gold; }
+.k4-toast.k4-toast-red .k4-toast-title { color: #FF6B5E; }
+.k4-toast.k4-toast-gold .k4-toast-line { background-color: gradient( linear, 0% 0%, 100% 0%, from( #00000000 ), to( k4-gold ) ); }
+.k4-toast.k4-toast-red .k4-toast-line { background-color: gradient( linear, 0% 0%, 100% 0%, from( #00000000 ), to( k4-red ) ); }
+
+/* CS2's own sounds when a toast appears */
+.k4-toast.k4-toast-green:not(.k4-gone) { sound: "UI.Mission.Complete"; }
+.k4-toast.k4-toast-gold:not(.k4-gone) { sound: "UIPanorama.EOM.CardReveal"; }
+
+/* ---------------------------------------------------------------- generated */
+
+/* Game icons */
+.ic-kill { background-image: url("s2r://panorama/images/icons/ui/kill.vsvg"); }
+.ic-kill_headshot { background-image: url("s2r://panorama/images/icons/ui/kill_headshot.vsvg"); }
+.ic-map_death { background-image: url("s2r://panorama/images/icons/ui/map_death.vsvg"); }
+.ic-stats { background-image: url("s2r://panorama/images/icons/ui/stats.vsvg"); }
+.ic-stat_headshots { background-image: url("s2r://panorama/images/icons/ui/stat_headshots.vsvg"); }
+.ic-stat_assists { background-image: url("s2r://panorama/images/icons/ui/stat_assists.vsvg"); }
+.ic-stat_mvps { background-image: url("s2r://panorama/images/icons/ui/stat_mvps.vsvg"); }
+.ic-trophy { background-image: url("s2r://panorama/images/icons/ui/trophy.vsvg"); }
+.ic-crosshair_circle { background-image: url("s2r://panorama/images/icons/ui/crosshair_circle.vsvg"); }
+.ic-clock { background-image: url("s2r://panorama/images/icons/ui/clock.vsvg"); }
+.ic-bullet { background-image: url("s2r://panorama/images/icons/ui/bullet.vsvg"); }
+.ic-hostage_rescued { background-image: url("s2r://panorama/images/icons/ui/hostage_rescued.vsvg"); }
+.ic-play { background-image: url("s2r://panorama/images/icons/ui/play.vsvg"); }
+.ic-winner_ribbon { background-image: url("s2r://panorama/images/icons/ui/winner_ribbon.vsvg"); }
+.ic-check { background-image: url("s2r://panorama/images/icons/ui/check.vsvg"); }
+.ic-hot_trend { background-image: url("s2r://panorama/images/icons/ui/hot_trend.vsvg"); }
+.ic-cold_trend { background-image: url("s2r://panorama/images/icons/ui/cold_trend.vsvg"); }
+.ic-trade_up { background-image: url("s2r://panorama/images/icons/ui/trade_up.vsvg"); }
+.ic-mission_star { background-image: url("s2r://panorama/images/icons/ui/mission_star.vsvg"); }
+.ic-bomb_c4 { background-image: url("s2r://panorama/images/icons/ui/bomb_c4.vsvg"); }
+.ic-xp_rank { background-image: url("s2r://panorama/images/icons/ui/xp_rank.vsvg"); }
+.ic-quest { background-image: url("s2r://panorama/images/icons/ui/quest.vsvg"); }
+.ic-leader { background-image: url("s2r://panorama/images/icons/ui/leader.vsvg"); }
+.ic-gift { background-image: url("s2r://panorama/images/icons/ui/gift.vsvg"); }
+.ic-refresh_skinny { background-image: url("s2r://panorama/images/icons/ui/refresh_skinny.vsvg"); }
+.ic-crosshair { background-image: url("s2r://panorama/images/icons/ui/crosshair.vsvg"); }
+.ic-first_person { background-image: url("s2r://panorama/images/icons/ui/first_person.vsvg"); }
+.ic-multipleenemieshere { background-image: url("s2r://panorama/images/icons/ui/multipleenemieshere.vsvg"); }
+.ic-icon_star_multi { background-image: url("s2r://panorama/images/icons/ui/icon_star_multi.vsvg"); }
+.ic-shield { background-image: url("s2r://panorama/images/icons/ui/shield.vsvg"); }
+.ic-health { background-image: url("s2r://panorama/images/icons/ui/health.vsvg"); }
+.eq-knife { background-image: url("s2r://panorama/images/icons/equipment/knife.vsvg"); }
+.eq-hegrenade { background-image: url("s2r://panorama/images/icons/equipment/hegrenade.vsvg"); }
+.eq-flashbang_assist { background-image: url("s2r://panorama/images/icons/equipment/flashbang_assist.vsvg"); }
+.eq-planted_c4 { background-image: url("s2r://panorama/images/icons/equipment/planted_c4.vsvg"); }
+.eq-defuser { background-image: url("s2r://panorama/images/icons/equipment/defuser.vsvg"); }
+.eq-taser { background-image: url("s2r://panorama/images/icons/equipment/taser.vsvg"); }
+.eq-molotov { background-image: url("s2r://panorama/images/icons/equipment/molotov.vsvg"); }
+.eq-incgrenade { background-image: url("s2r://panorama/images/icons/equipment/incgrenade.vsvg"); }
+.eq-ak47 { background-image: url("s2r://panorama/images/icons/equipment/ak47.vsvg"); }
+.eq-aug { background-image: url("s2r://panorama/images/icons/equipment/aug.vsvg"); }
+.eq-awp { background-image: url("s2r://panorama/images/icons/equipment/awp.vsvg"); }
+.eq-bizon { background-image: url("s2r://panorama/images/icons/equipment/bizon.vsvg"); }
+.eq-cz75a { background-image: url("s2r://panorama/images/icons/equipment/cz75a.vsvg"); }
+.eq-deagle { background-image: url("s2r://panorama/images/icons/equipment/deagle.vsvg"); }
+.eq-elite { background-image: url("s2r://panorama/images/icons/equipment/elite.vsvg"); }
+.eq-famas { background-image: url("s2r://panorama/images/icons/equipment/famas.vsvg"); }
+.eq-fiveseven { background-image: url("s2r://panorama/images/icons/equipment/fiveseven.vsvg"); }
+.eq-g3sg1 { background-image: url("s2r://panorama/images/icons/equipment/g3sg1.vsvg"); }
+.eq-galilar { background-image: url("s2r://panorama/images/icons/equipment/galilar.vsvg"); }
+.eq-glock { background-image: url("s2r://panorama/images/icons/equipment/glock.vsvg"); }
+.eq-hkp2000 { background-image: url("s2r://panorama/images/icons/equipment/hkp2000.vsvg"); }
+.eq-m249 { background-image: url("s2r://panorama/images/icons/equipment/m249.vsvg"); }
+.eq-m4a1 { background-image: url("s2r://panorama/images/icons/equipment/m4a1.vsvg"); }
+.eq-m4a1_silencer { background-image: url("s2r://panorama/images/icons/equipment/m4a1_silencer.vsvg"); }
+.eq-mac10 { background-image: url("s2r://panorama/images/icons/equipment/mac10.vsvg"); }
+.eq-mag7 { background-image: url("s2r://panorama/images/icons/equipment/mag7.vsvg"); }
+.eq-mp5sd { background-image: url("s2r://panorama/images/icons/equipment/mp5sd.vsvg"); }
+.eq-mp7 { background-image: url("s2r://panorama/images/icons/equipment/mp7.vsvg"); }
+.eq-mp9 { background-image: url("s2r://panorama/images/icons/equipment/mp9.vsvg"); }
+.eq-negev { background-image: url("s2r://panorama/images/icons/equipment/negev.vsvg"); }
+.eq-nova { background-image: url("s2r://panorama/images/icons/equipment/nova.vsvg"); }
+.eq-p2000 { background-image: url("s2r://panorama/images/icons/equipment/p2000.vsvg"); }
+.eq-p250 { background-image: url("s2r://panorama/images/icons/equipment/p250.vsvg"); }
+.eq-p90 { background-image: url("s2r://panorama/images/icons/equipment/p90.vsvg"); }
+.eq-revolver { background-image: url("s2r://panorama/images/icons/equipment/revolver.vsvg"); }
+.eq-sawedoff { background-image: url("s2r://panorama/images/icons/equipment/sawedoff.vsvg"); }
+.eq-scar20 { background-image: url("s2r://panorama/images/icons/equipment/scar20.vsvg"); }
+.eq-sg556 { background-image: url("s2r://panorama/images/icons/equipment/sg556.vsvg"); }
+.eq-ssg08 { background-image: url("s2r://panorama/images/icons/equipment/ssg08.vsvg"); }
+.eq-tec9 { background-image: url("s2r://panorama/images/icons/equipment/tec9.vsvg"); }
+.eq-ump45 { background-image: url("s2r://panorama/images/icons/equipment/ump45.vsvg"); }
+.eq-usp_silencer { background-image: url("s2r://panorama/images/icons/equipment/usp_silencer.vsvg"); }
+.eq-xm1014 { background-image: url("s2r://panorama/images/icons/equipment/xm1014.vsvg"); }
+.dn-penetrate { background-image: url("s2r://panorama/images/hud/deathnotice/penetrate.vsvg"); }
+.dn-smoke_kill { background-image: url("s2r://panorama/images/hud/deathnotice/smoke_kill.vsvg"); }
+.dn-inairkill { background-image: url("s2r://panorama/images/hud/deathnotice/inairkill.vsvg"); }
+.dn-blind_kill { background-image: url("s2r://panorama/images/hud/deathnotice/blind_kill.vsvg"); }
+.dn-revenge { background-image: url("s2r://panorama/images/hud/deathnotice/revenge.vsvg"); }
+.dn-domination { background-image: url("s2r://panorama/images/hud/deathnotice/domination.vsvg"); }
+
+/* CS2 rank icons, numbered like the scoreboard; sharp copies shipped in the addon (gen_k4_ranks.py) */
+.sg-0 { background-image: url("s2r://panorama/images/custom_game/k4/ranks/skillgroup0.vsvg"); }
+.wg-0 { background-image: url("s2r://panorama/images/custom_game/k4/ranks/wingman0.vsvg"); }
+.sg-1 { background-image: url("s2r://panorama/images/custom_game/k4/ranks/skillgroup1.vsvg"); }
+.wg-1 { background-image: url("s2r://panorama/images/custom_game/k4/ranks/wingman1.vsvg"); }
+.sg-2 { background-image: url("s2r://panorama/images/custom_game/k4/ranks/skillgroup2.vsvg"); }
+.wg-2 { background-image: url("s2r://panorama/images/custom_game/k4/ranks/wingman2.vsvg"); }
+.sg-3 { background-image: url("s2r://panorama/images/custom_game/k4/ranks/skillgroup3.vsvg"); }
+.wg-3 { background-image: url("s2r://panorama/images/custom_game/k4/ranks/wingman3.vsvg"); }
+.sg-4 { background-image: url("s2r://panorama/images/custom_game/k4/ranks/skillgroup4.vsvg"); }
+.wg-4 { background-image: url("s2r://panorama/images/custom_game/k4/ranks/wingman4.vsvg"); }
+.sg-5 { background-image: url("s2r://panorama/images/custom_game/k4/ranks/skillgroup5.vsvg"); }
+.wg-5 { background-image: url("s2r://panorama/images/custom_game/k4/ranks/wingman5.vsvg"); }
+.sg-6 { background-image: url("s2r://panorama/images/custom_game/k4/ranks/skillgroup6.vsvg"); }
+.wg-6 { background-image: url("s2r://panorama/images/custom_game/k4/ranks/wingman6.vsvg"); }
+.sg-7 { background-image: url("s2r://panorama/images/custom_game/k4/ranks/skillgroup7.vsvg"); }
+.wg-7 { background-image: url("s2r://panorama/images/custom_game/k4/ranks/wingman7.vsvg"); }
+.sg-8 { background-image: url("s2r://panorama/images/custom_game/k4/ranks/skillgroup8.vsvg"); }
+.wg-8 { background-image: url("s2r://panorama/images/custom_game/k4/ranks/wingman8.vsvg"); }
+.sg-9 { background-image: url("s2r://panorama/images/custom_game/k4/ranks/skillgroup9.vsvg"); }
+.wg-9 { background-image: url("s2r://panorama/images/custom_game/k4/ranks/wingman9.vsvg"); }
+.sg-10 { background-image: url("s2r://panorama/images/custom_game/k4/ranks/skillgroup10.vsvg"); }
+.wg-10 { background-image: url("s2r://panorama/images/custom_game/k4/ranks/wingman10.vsvg"); }
+.sg-11 { background-image: url("s2r://panorama/images/custom_game/k4/ranks/skillgroup11.vsvg"); }
+.wg-11 { background-image: url("s2r://panorama/images/custom_game/k4/ranks/wingman11.vsvg"); }
+.sg-12 { background-image: url("s2r://panorama/images/custom_game/k4/ranks/skillgroup12.vsvg"); }
+.wg-12 { background-image: url("s2r://panorama/images/custom_game/k4/ranks/wingman12.vsvg"); }
+.sg-13 { background-image: url("s2r://panorama/images/custom_game/k4/ranks/skillgroup13.vsvg"); }
+.wg-13 { background-image: url("s2r://panorama/images/custom_game/k4/ranks/wingman13.vsvg"); }
+.sg-14 { background-image: url("s2r://panorama/images/custom_game/k4/ranks/skillgroup14.vsvg"); }
+.wg-14 { background-image: url("s2r://panorama/images/custom_game/k4/ranks/wingman14.vsvg"); }
+.sg-15 { background-image: url("s2r://panorama/images/custom_game/k4/ranks/skillgroup15.vsvg"); }
+.wg-15 { background-image: url("s2r://panorama/images/custom_game/k4/ranks/wingman15.vsvg"); }
+.sg-16 { background-image: url("s2r://panorama/images/custom_game/k4/ranks/skillgroup16.vsvg"); }
+.wg-16 { background-image: url("s2r://panorama/images/custom_game/k4/ranks/wingman16.vsvg"); }
+.sg-17 { background-image: url("s2r://panorama/images/custom_game/k4/ranks/skillgroup17.vsvg"); }
+.wg-17 { background-image: url("s2r://panorama/images/custom_game/k4/ranks/wingman17.vsvg"); }
+.sg-18 { background-image: url("s2r://panorama/images/custom_game/k4/ranks/skillgroup18.vsvg"); }
+.wg-18 { background-image: url("s2r://panorama/images/custom_game/k4/ranks/wingman18.vsvg"); }
+
+/* Progress bar widths */
+.k4-bar-fill.w0 { width: 0%; }
+.k4-bar-fill.w1 { width: 5%; }
+.k4-bar-fill.w2 { width: 10%; }
+.k4-bar-fill.w3 { width: 15%; }
+.k4-bar-fill.w4 { width: 20%; }
+.k4-bar-fill.w5 { width: 25%; }
+.k4-bar-fill.w6 { width: 30%; }
+.k4-bar-fill.w7 { width: 35%; }
+.k4-bar-fill.w8 { width: 40%; }
+.k4-bar-fill.w9 { width: 45%; }
+.k4-bar-fill.w10 { width: 50%; }
+.k4-bar-fill.w11 { width: 55%; }
+.k4-bar-fill.w12 { width: 60%; }
+.k4-bar-fill.w13 { width: 65%; }
+.k4-bar-fill.w14 { width: 70%; }
+.k4-bar-fill.w15 { width: 75%; }
+.k4-bar-fill.w16 { width: 80%; }
+.k4-bar-fill.w17 { width: 85%; }
+.k4-bar-fill.w18 { width: 90%; }
+.k4-bar-fill.w19 { width: 95%; }
+.k4-bar-fill.w20 { width: 100%; }
+
+/* Rank colors */
+.col-default { color: #FFFFFF; }
+.col-white { color: #FFFFFF; }
+.col-darkred { color: #C83232; }
+.col-green { color: #4CCB4C; }
+.col-lightyellow { color: #EFE47A; }
+.col-lightblue { color: #8FC7FF; }
+.col-olive { color: #A2C24A; }
+.col-lime { color: #9AFF6E; }
+.col-red { color: #FF4D4D; }
+.col-lightpurple { color: #C99BFF; }
+.col-purple { color: #B054E8; }
+.col-grey { color: #B0B0B0; }
+.col-yellow { color: #F2CC60; }
+.col-gold { color: #E6B84C; }
+.col-silver { color: #C0C8D0; }
+.col-blue { color: #5B8DEF; }
+.col-darkblue { color: #3A5BD0; }
+.col-bluegrey { color: #9FB0C8; }
+.col-magenta { color: #E05CC8; }
+.col-lightred { color: #FF7B72; }
+.col-orange { color: #FF9D47; }
