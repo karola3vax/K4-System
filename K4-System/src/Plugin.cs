@@ -25,7 +25,7 @@ public sealed class Plugin : BasePlugin
 
 	public override string ModuleAuthor => "K4ryuu; maintained by karola3vax";
 
-	public override string ModuleVersion => "6.3.2 " +
+	public override string ModuleVersion => "6.3.3 " +
 #if RELEASE
 		"(release)";
 #else
@@ -147,19 +147,8 @@ public sealed class Plugin : BasePlugin
 
 		RankService? rankService = ranks;
 		int gameThreadId = Environment.CurrentManagedThreadId;
-		apiSource = new SharedPlayerApi.Source(players, () => active, (player, points) =>
-		{
-			// Other plugins often set points from an async continuation; rank changes touch CS2 entities,
-			// so anything off the game thread is applied on the next frame.
-			if (Environment.CurrentManagedThreadId == gameThreadId)
-				rankService?.SetPoints(player, points);
-			else
-				Server.NextFrame(() =>
-				{
-					if (active && player.IsValid)
-						rankService?.SetPoints(player, points);
-				});
-		});
+		apiSource = new SharedPlayerApi.Source(players, () => active, () => Environment.CurrentManagedThreadId == gameThreadId,
+			(player, points) => rankService?.SetPoints(player, points));
 		SharedPlayerApi.Register(apiSource, Logger);
 
 		if (Config.Panorama.Enabled)

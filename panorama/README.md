@@ -1,6 +1,6 @@
 # K4 Panorama addon
 
-The clickable K4 panel (`!k4`, `!rank`, `!missions`, `!top`, `!ranks`, `!stats`) and its toast pop-ups are a CS2 Panorama layout. A server plugin cannot add Panorama files, so they ship to players as a Steam Workshop addon. The server mounts that addon with MultiAddonManager, players download it when they join, and K4 fills in the text and handles the clicks.
+The clickable K4 panel (`!k4`, `!rank`, `!missions`, `!top`, `!ranks`, `!stats`, `!time`) and its toast pop-ups are a CS2 Panorama layout. A server plugin cannot add Panorama files, so they ship to players as a Steam Workshop addon. The server mounts that addon with MultiAddonManager, players download it when they join, and K4 fills in the text and handles the clicks.
 
 | File | What it is |
 | --- | --- |
@@ -12,7 +12,7 @@ The clickable K4 panel (`!k4`, `!rank`, `!missions`, `!top`, `!ranks`, `!stats`)
 
 The plugin finds the layout at `panorama/layout/custom_game/k4_ui.xml`. Keep that path.
 
-CS2 checks this layout before showing it: it may only contain `Panel`, `Label`, and `Button` elements with `id`, `class`, and `text` attributes. Anything else (an `Image`, `hittest`, `src`) makes every player's game reject the whole panel without a visible error; the client console then says *Layout xml did not pass CustomHud validation*. The layout tests enforce this.
+CS2 checks this layout before showing it: K4 uses only `Panel`, `Label`, and `Button` elements. `Panel` may have `id`, `class`, and `hittest`; `Label` also `text`; `Button` only `id` and `class`. Any other element or attribute (for example `hittest` on a `Button`) makes every player's game reject the whole panel without a visible error; the client console then says *Layout xml did not pass CustomHud validation*. The layout tests enforce this.
 
 The panel reuses CS2's own stylesheet, icons (`panorama/images/icons/...`), and UI sounds. If a Valve update renames one of those files, that icon goes blank; the rest of the panel keeps working.
 
@@ -63,7 +63,7 @@ To update the panel later, repeat steps 3 to 5 and choose the existing item in t
 
 4. **Restart the server**, join, and type `!k4`.
 
-With the panel on, the K4 commands open their tab instead of printing to chat. Promotions, demotions, and finished missions show as a small pop-up at the right side of the screen, below the kill feed, instead of a chat line. Point messages stay in chat. Click **✕** (top right) to close the panel; the scoreboard key (**Tab**) should close it too, but check that on your server. While it is open the mouse controls the panel, not your aim, so K4 also closes it when freeze time ends and after 45 seconds without a click.
+With the panel on, the K4 commands open their tab instead of printing to chat. Promotions, demotions, and finished missions show as a small pop-up at the right side of the screen, below the kill feed, instead of a chat line. Point messages stay in chat. Click **✕** (top right) to close the panel. While it is open the mouse controls the panel, not your aim, so K4 also closes it when freeze time ends and after 45 seconds without a click.
 
 ## If something does not work
 

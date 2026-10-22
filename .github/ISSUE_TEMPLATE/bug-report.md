@@ -1,28 +1,23 @@
 ---
-name: Bug report
-about: Something in K4-System does not work as described
+name: Bug or crash
+about: Something in K4-System does not work as described, or the server or game crashes
 labels: bug
 ---
 
-**Describe the bug**
-A clear and concise description of what the bug is.
+**What happened**
+What went wrong, and what you expected instead.
 
-**To Reproduce**
-Steps to reproduce the behavior...
+**How to make it happen again**
+1.
+2.
 
-**Expected behavior**
-A clear and concise description of what you expected to happen.
+**Logs and screenshots**
+The server console lines around the problem (`addons/counterstrikesharp/logs/`), and screenshots if they help.
 
-**Logs/Screenshots**
-Please attach logs or screenshots if available.
-
-**Environment (please complete the following information):**
-- OS: [e.g., Ubuntu]
-- CSS Version [e.g., v153]
-- Plugin Version [e.g., v3.1.5]
-- Configs [OPTIONAL depending on the context of the bug]
-
-**Additional context**
-Add any other context about the problem here.
-
-/label ~"Bug" ~"Priority: Medium"
+**Setup**
+- Server OS: (Linux or Windows)
+- CounterStrikeSharp version: (for example 1.0.376)
+- K4-System version: (for example 6.3.2, shown in the console when K4-System loads)
+- Storage: (MySQL or SQLite)
+- Panel on or off: (`panorama.enabled`)
+- The part of `k4-system.jsonc` that matters, if any

@@ -221,8 +221,6 @@ internal sealed class SqliteDialect(string filePath) : SqlDialect
 
 	public override string Name => "SQLite";
 
-	public string FilePath => filePath;
-
 	public override DbConnection CreateConnection() => new SqliteConnection(connectionString);
 
 	public override async Task PrepareAsync(DbConnection connection)

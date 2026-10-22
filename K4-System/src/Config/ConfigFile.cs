@@ -45,23 +45,29 @@ internal static class ConfigFile
 	{
 		string path = Path.Combine(directory, FileName);
 
-		if (!File.Exists(path))
+		bool legacy = File.Exists(Path.Combine(directory, LegacyFileName));
+		bool created = !File.Exists(path);
+		if (created)
 		{
 			Directory.CreateDirectory(directory);
 			File.WriteAllText(path, Template);
-
-			if (File.Exists(Path.Combine(directory, LegacyFileName)))
-			{
-				return new ConfigLoadResult(null, path, true,
-					$"K4-System 6.0 uses a new config file: {path}. Your old {LegacyFileName} is not read. " +
-					"Copy your database and other settings into the new file, then restart. K4 will not track anything until then.");
-			}
-
-			return Parse(File.ReadAllText(path), path, created: true);
 		}
 
-		return Parse(File.ReadAllText(path), path, created: false);
+		string content = File.ReadAllText(path);
+
+		// A restart without editing the new file must not start tracking on an empty database while the old one is ignored.
+		if (legacy && IsTemplate(content))
+		{
+			return new ConfigLoadResult(null, path, created,
+				$"K4-System 6.0 uses a new config file: {path}. Your old {LegacyFileName} is not read. " +
+				"Copy your database and other settings into the new file, then restart. K4 will not track anything until then.");
+		}
+
+		return Parse(content, path, created);
 	}
+
+	internal static bool IsTemplate(string content)
+		=> content.Replace("\r\n", "\n", StringComparison.Ordinal).Trim() == Template.Replace("\r\n", "\n", StringComparison.Ordinal).Trim();
 
 	internal static ConfigLoadResult Parse(string content, string path, bool created)
 	{

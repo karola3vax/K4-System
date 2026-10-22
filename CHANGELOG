@@ -1,3 +1,14 @@
+-- 2026.10.22 - V6.3.3
+
+- fix: Playtime counted the time a player survived a round as dead time. CS2 respawns survivors at every round start, and each of those spawns added the round to "dead"; alive and dead time are now split correctly
+- fix: Points set by another plugin through the shared API from a background thread no longer read K4's player list on that thread, which could fail or crash. The whole change now runs on the game thread
+- fix: Damage missions no longer over-count a kill after fall damage, bot damage or team damage: the killing hit counts only the health the victim still had
+- fix: With `ranks.round-summary` on, points after the round summary (MVP, exit frags) get their own message instead of showing up in the next round's summary or not at all
+- fix: A server that still has the old 5.x `K4-System.json` keeps refusing to track until the new `k4-system.jsonc` is filled in, also after a second restart, so it never runs on an empty database by mistake
+- docs: README brought up to date: panel behavior without the addon, purge of inactive players after 30 days, mission settings, admin and console commands, updating steps, building from source, and Valve artwork credit
+- chore: Repository moved to GitHub (https://github.com/karola3vax/K4-System) with releases built by GitHub Actions; cleaned-up ignore rules, line endings and issue templates
+- setup: No config, language or database changes
+
 -- 2026.10.22 - V6.3.2
 
 - change: With `commands.rank-to-everyone` on, `!rank` posts only the one public line, which the player sees too, like LVL Ranks. The player's own rank block is no longer sent as well

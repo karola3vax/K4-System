@@ -48,12 +48,12 @@
     "round-summary": false, // One point message per round instead of one per event, with a line per reason such as "5× Kill: +100"
     "names-in-kill-messages": false, // Show the other player's name and points in kill and death messages
     "killstreak-window-seconds": 0, // Kills must be this close together to build a streak. 0 means any time in the round
-    "reset-killstreak-on-round-end": true,
+    "reset-killstreak-on-round-end": true, // End kill streaks at round end. false lets players who survive keep their streak into the next round
     "reset-cooldown-hours": 24, // Hours between personal !resetmydata rank resets. 0 turns the cooldown off
     "dynamic-death-points": {
       "enabled": false, // Scale kill and death points by how strong the opponent is
-      "min-multiplier": 0.5,
-      "max-multiplier": 3.0
+      "min-multiplier": 0.5, // Lowest scale, against a much weaker opponent
+      "max-multiplier": 3.0 // Highest scale, against a much stronger opponent
     },
     "team-balance": {
       "enabled": false, // Swap players before each round so both teams have similar points
@@ -106,7 +106,7 @@
     }
   },
 
-  // A clickable K4 panel (!k4, !rank, !missions, !top, !ranks, !stats) and toast pop-ups instead of chat.
+  // A clickable K4 panel (!k4, !rank, !missions, !top, !ranks, !stats, !time) and toast pop-ups instead of chat.
   // Needs the K4 workshop addon on players' clients through MultiAddonManager. See the README before enabling.
   "panorama": {
     "enabled": false,
