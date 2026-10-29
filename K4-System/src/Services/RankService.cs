@@ -142,6 +142,32 @@ internal sealed class RankService(
 		RefreshRank(player, announce: true, allowRewards: true);
 	}
 
+	/// <summary>
+	/// Pays out held points, such as a duel pot or a returned stake. Unlike <see cref="GrantPoints"/> it also
+	/// works when the player has no pawn (spectating, or between maps); the rank catches up on the next spawn.
+	/// Pass refresh: false at map end or unload, when the player's entities must not be touched.
+	/// </summary>
+	public void CreditPoints(K4Player player, int amount, bool refresh = true)
+	{
+		if (player.Rank is not RankState state || amount <= 0 || !player.IsHuman)
+			return;
+
+		state.Points = PointMath.AddToStored(state.Points, amount);
+		if (refresh && player.IsValid)
+			RefreshRank(player, announce: true, allowRewards: true);
+	}
+
+	/// <summary>Holds points back, such as a duel stake. Like <see cref="CreditPoints"/>, it works without a pawn.</summary>
+	public void DebitPoints(K4Player player, int amount)
+	{
+		if (player.Rank is not RankState state || amount <= 0 || !player.IsHuman)
+			return;
+
+		state.Points = PointMath.AddToStored(state.Points, -amount);
+		if (player.IsValid)
+			RefreshRank(player, announce: false, allowRewards: false);
+	}
+
 	/// <summary>Recomputes the rank, then syncs rank permissions and the clan tag.</summary>
 	public void RefreshRank(K4Player player, bool announce, bool allowRewards)
 	{

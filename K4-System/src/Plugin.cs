@@ -25,7 +25,7 @@ public sealed class Plugin : BasePlugin
 
 	public override string ModuleAuthor => "K4ryuu; maintained by karola3vax";
 
-	public override string ModuleVersion => "6.3.3 " +
+	public override string ModuleVersion => "6.4.0 " +
 #if RELEASE
 		"(release)";
 #else
@@ -53,6 +53,7 @@ public sealed class Plugin : BasePlugin
 	private CountryLookup? countries;
 	private PanoramaHud? hud;
 	private SharedPlayerApi.Source? apiSource;
+	private DuelService? duels;
 
 	/// <summary>Reads and checks k4-system.jsonc. Logs the reason and returns false when K4 must not start.</summary>
 	private bool TryLoadConfig()
@@ -143,6 +144,9 @@ public sealed class Plugin : BasePlugin
 			? new MissionService(Config, pool, ResolveMissionTimeZone(), players, ranks, game, store, gameThread, background, chat, hudBridge, (seconds, action) => AddTimer(seconds, action))
 			: null;
 
+		BountyService? bounty = ranks is not null && Config.Bounty.Enabled ? new BountyService(Config, players, ranks, chat, hudBridge) : null;
+		duels = ranks is not null && Config.Duels.Enabled ? new DuelService(Config, players, ranks, game, chat, hudBridge, (seconds, action) => AddTimer(seconds, action)) : null;
+
 		playerService = new PlayerService(this, Config, players, store, saves, storageReady, ranks, rewards, missions, playtime, game, gameThread, background, countries, chat, Logger);
 
 		RankService? rankService = ranks;
@@ -153,14 +157,14 @@ public sealed class Plugin : BasePlugin
 
 		if (Config.Panorama.Enabled)
 		{
-			hud = new PanoramaHud(this, Config, players, ranks, missions, playtime, store, gameThread, background, chat, Logger);
+			hud = new PanoramaHud(this, Config, players, ranks, missions, bounty, duels, playtime, store, gameThread, background, chat, Logger);
 			hudBridge.Hud = hud;
 			RegisterHudListeners(hud, players);
 			hud.Warmup();
 		}
 
-		new GameEvents(this, Config, players, playerService, ranks, stats, Config.Modules.Playtime ? playtime : null, scoreboard, missions, store, game, gameThread, background, chat, Logger).Register();
-		new K4Commands(this, Config, players, playerService, ranks, rewards, missions, playtime, store, gameThread, background, chat, new CommandGuard(chat), hud).Register();
+		new GameEvents(this, Config, players, playerService, ranks, stats, Config.Modules.Playtime ? playtime : null, scoreboard, missions, bounty, duels, store, game, gameThread, background, chat, Logger).Register();
+		new K4Commands(this, Config, players, playerService, ranks, rewards, missions, duels, playtime, store, gameThread, background, chat, new CommandGuard(chat), hud).Register();
 
 		scoreboard?.Start(hotReload);
 
@@ -361,6 +365,8 @@ public sealed class Plugin : BasePlugin
 			if (players is not null && playerService is not null)
 			{
 				playerService.SettleAllPlaytime();
+				// Held duel stakes go back before the final save; a reload starts without duels.
+				duels?.ReturnStakes();
 
 				Task<bool> saved = playerService.SaveAll();
 				if (saves is not null && !saves.Complete(UnloadSaveTimeout))

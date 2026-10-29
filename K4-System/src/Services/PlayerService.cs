@@ -28,7 +28,7 @@ internal sealed class PlayerService(
 	ILogger logger)
 {
 	// CS2 reports this disconnect reason for players moving to the next map.
-	private const int MapChangeDisconnectReason = 1;
+	internal const int MapChangeDisconnectReason = 1;
 	private const int LoadAttempts = 10;
 
 	private PluginConfig General => config;

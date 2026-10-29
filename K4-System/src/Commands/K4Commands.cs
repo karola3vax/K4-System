@@ -26,6 +26,7 @@ internal sealed class K4Commands(
 	RankService? ranks,
 	RewardService? rewards,
 	MissionService? missions,
+	DuelService? duels,
 	PlaytimeService playtime,
 	SqlPlayerStore store,
 	GameThread gameThread,
@@ -105,6 +106,12 @@ internal sealed class K4Commands(
 			foreach (string alias in Aliases.Admins)
 				plugin.AddCommand($"css_{alias}", "Check online admins", OnAdmins);
 		}
+
+		if (duels is not null)
+		{
+			foreach (string alias in Aliases.Duel)
+				plugin.AddCommand($"css_{alias}", "Bet points on who gets more kills this map", OnDuel);
+		}
 	}
 
 	/// <summary>The command's player once loaded. Replies with a loading message otherwise.</summary>
@@ -165,6 +172,8 @@ internal sealed class K4Commands(
 		List<string> other = [.. Aliases.Reset];
 		if (General.Modules.AdminList)
 			other.AddRange(Aliases.Admins);
+		if (duels is not null)
+			other.AddRange(Aliases.Duel);
 		categories[chat["help.other"]] = other;
 
 		StringBuilder line = new();
@@ -193,6 +202,51 @@ internal sealed class K4Commands(
 			info.ReplyToCommand(line.ToString());
 			line.Clear();
 		}
+	}
+
+	// ---------------------------------------------------------------- duels
+
+	/// <summary>!duel &lt;player&gt; &lt;points&gt;, !duel accept, and !duel decline (which also takes back your own challenge).</summary>
+	private void OnDuel(CCSPlayerController? player, CommandInfo info)
+	{
+		const string Help = "<player> <points> | accept | decline";
+		if (duels is null || !guard.Check(player, info, CommandUsage.CLIENT_ONLY, 1, Help) || LoadedPlayer(player!, info) is not K4Player caller)
+			return;
+
+		string first = info.ArgByIndex(1);
+		DuelService.Refusal? refusal;
+
+		if (first.Equals("accept", StringComparison.OrdinalIgnoreCase))
+			refusal = duels.Accept(caller);
+		else if (first.Equals("decline", StringComparison.OrdinalIgnoreCase))
+			refusal = duels.Decline(caller);
+		else
+		{
+			if (info.ArgCount < 3 || !int.TryParse(info.ArgByIndex(2), out int stake) || stake < 0)
+			{
+				info.ReplyToCommand(chat.Prefixed("usage", CommandGuard.CommandName(info), Help));
+				return;
+			}
+
+			List<K4Player> targets = info.GetArgTargetResult(1).Players
+				.Select(target => players.Get(target))
+				.OfType<K4Player>()
+				.Where(target => target.IsHuman && target.IsValid)
+				.ToList();
+
+			if (targets.Count != 1)
+			{
+				info.ReplyToCommand(chat.Prefixed(targets.Count == 0 ? "error.target-not-found" : "duel.error.one-player"));
+				return;
+			}
+
+			refusal = duels.Challenge(caller, targets[0], stake);
+			if (refusal is null)
+				chat.Tell(targets[0].Controller, "duel.how-to", CommandGuard.CommandName(info), duels.AcceptSeconds);
+		}
+
+		if (refusal is DuelService.Refusal reason)
+			info.ReplyToCommand(chat.Prefixed(reason.Key, reason.Args));
 	}
 
 	// ---------------------------------------------------------------- resets

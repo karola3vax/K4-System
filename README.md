@@ -36,6 +36,7 @@ K4-System gives your Counter-Strike 2 server a rank ladder that players climb wi
 
 - **A rank that grows with them.** Points for kills, headshots, objectives and round wins, shown as a CS2 rank icon on the scoreboard.
 - **Missions every day.** Three daily missions and one weekly mission that fit the current map, with a streak bonus for playing several days in a row.
+- **Bounties and duels.** A long kill streak makes a player WANTED, with bonus points for whoever ends it. Players can bet points on who gets more kills this map with `!duel`. Both are rare, so they stay special.
 - **A clickable panel** in CS2's own style for their rank, missions, the top players, all ranks and their stats (optional, through a free Workshop addon).
 - **Their own stats and playtime**, and the server's top list.
 - **Their language.** K4-System speaks 36 languages, and each player can pick their own.

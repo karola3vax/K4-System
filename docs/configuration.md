@@ -14,6 +14,8 @@ All settings live in one commented file, `configs/plugins/K4-System/k4-system.js
 | `ranks` | Rank mode, start points, VIP multiplier, round summary, kill streaks, reset cooldown, dynamic death points, team balance, playtime reward |
 | `points` | A point preset plus your own overrides |
 | `missions` | Time zone, rewards per difficulty, streak bonus, rerolls per day, bots, and map rules |
+| `bounty` | The wanted kill streak, the bounty reward, and the survivor bonus |
+| `duels` | Duel stakes, how long a challenge waits, and the same-connection block |
 | `panorama` | The clickable panel and its rank icons (competitive, wingman, or text) |
 | `scoreboard` | What the CS2 rank area shows, custom icons, points in the score column |
 | `tags` | Rank tags, top-placement tag, country tag, admin tags and `!admins` colors |
@@ -72,6 +74,30 @@ Choose a preset, then change single values in `overrides`:
 `casual` is the default and uses the same values as K4-System 5.x. `competitive` rewards winning rounds and clean play over flashy kills. `deathmatch` counts only kills, in small steps, for servers without rounds or objectives.
 
 Bots are never stored as persistent ranked players. Bot settings only decide whether eligible human interactions with bots count.
+
+## Bounties and duels
+
+Both are on by default and need the ranks module. They are built to be rare, so they stay special.
+
+**Bounty.** A player who gets `kill-streak` kills on real players without dying becomes wanted. Everyone sees it in chat, and as a pop-up when the panel is on. The enemy who kills the wanted player gets `reward` points; the wanted player loses nothing extra. A suicide, a team kill, a bot kill, or leaving the server only ends the bounty. A wanted player who is still wanted when the match ends, or when the map changes, gets `survivor-reward`. Only one player is wanted at a time, and each player at most once per map. Bot kills do not count toward the streak.
+
+**Duel.** `!duel <player> <points>` challenges a player, who has `accept-seconds` to type `!duel accept` or `!duel decline`. On accept, both stakes are taken and held. Whoever gets more kills from then until the match ends wins both stakes; a tie returns them. A player who is not on the server when the match ends loses, so a losing duel cannot be dodged by leaving (reconnecting within the map is fine). On servers that change maps without a match end, the duel is decided when the map changes, without a chat message. Each player can duel once per map. The stake is between `min-stake` and `max-stake-percent` of the poorer player's points. With `block-same-ip`, two players on the same connection cannot duel, so points cannot be moved between accounts. Duels are off during warmup and below `tracking.minimum-players`.
+
+```jsonc
+"bounty": {
+  "enabled": true,
+  "kill-streak": 7,
+  "reward": 150,
+  "survivor-reward": 50
+},
+"duels": {
+  "enabled": true,
+  "min-stake": 10,
+  "max-stake-percent": 10,
+  "accept-seconds": 30,
+  "block-same-ip": true
+}
+```
 
 ## Rank game modes
 

@@ -37,12 +37,12 @@ internal static partial class ConfigValidator
 	{
 		if (config.Storage?.MySql is null || config.Storage.LevelRanks is null || config.Modules is null || config.Tracking is null ||
 			config.Ranks?.DynamicDeathPoints is null || config.Ranks.TeamBalance is null || config.Ranks.PlaytimeReward is null ||
-			config.Points?.Overrides is null || config.Missions?.Rewards is null || config.Panorama is null || config.Scoreboard?.CustomIcons is null ||
+			config.Points?.Overrides is null || config.Missions?.Rewards is null || config.Bounty is null || config.Duels is null || config.Panorama is null || config.Scoreboard?.CustomIcons is null ||
 			config.Tags?.TopPlacement is null || config.Tags.Admins is null || config.Messages is null || config.Commands is null)
 			throw new InvalidDataException("A section of k4-system.jsonc is missing or null. Delete the file to get a fresh one.");
 
 		CommandSettings commands = config.Commands;
-		List<string>?[] aliasLists = [commands.Main, commands.Rank, commands.Top, commands.Ranks, commands.Stats, commands.Playtime, commands.Reset, commands.Admins, commands.Missions];
+		List<string>?[] aliasLists = [commands.Main, commands.Rank, commands.Top, commands.Ranks, commands.Stats, commands.Playtime, commands.Reset, commands.Admins, commands.Missions, commands.Duel];
 		if (aliasLists.Any(list => list is null || list.Any(string.IsNullOrWhiteSpace)))
 			throw new InvalidDataException("commands: every alias list must exist and contain no blank names.");
 
@@ -114,7 +114,8 @@ internal static partial class ConfigValidator
 		(string List, List<string> Names)[] lists =
 		[
 			("main", commands.Main), ("rank", commands.Rank), ("top", commands.Top), ("ranks", commands.Ranks), ("stats", commands.Stats),
-			("playtime", commands.Playtime), ("reset", commands.Reset), ("admins", commands.Admins), ("missions", commands.Missions)
+			("playtime", commands.Playtime), ("reset", commands.Reset), ("admins", commands.Admins), ("missions", commands.Missions),
+			("duel", commands.Duel)
 		];
 
 		Dictionary<string, string> owner = new(StringComparer.OrdinalIgnoreCase);
@@ -236,6 +237,16 @@ internal static partial class ConfigValidator
 
 		if (!float.IsFinite(ranks.PlaytimeReward.EveryMinutes) || ranks.PlaytimeReward.EveryMinutes < 0)
 			ranks.PlaytimeReward.EveryMinutes = 0;
+
+		BountySettings bounty = config.Bounty;
+		bounty.KillStreak = Math.Max(1, bounty.KillStreak);
+		bounty.Reward = Math.Max(0, bounty.Reward);
+		bounty.SurvivorReward = Math.Max(0, bounty.SurvivorReward);
+
+		DuelSettings duels = config.Duels;
+		duels.MinStake = Math.Max(1, duels.MinStake);
+		duels.MaxStakePercent = Math.Clamp(duels.MaxStakePercent, 0, 100);
+		duels.AcceptSeconds = Math.Clamp(duels.AcceptSeconds, 5, 300);
 
 		return warnings;
 	}

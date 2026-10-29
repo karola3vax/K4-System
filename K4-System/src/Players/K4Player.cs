@@ -85,6 +85,9 @@ public sealed class K4Player
 
 	public int MatchKills { get; set; }
 
+	/// <summary>Kills on real players since the last death in this map, for the bounty.</summary>
+	public int LifeKills { get; set; }
+
 	public DateTime LastActivityUtc { get; set; }
 
 	/// <summary>When the player first joined a team in the current match; null while they have not.</summary>
