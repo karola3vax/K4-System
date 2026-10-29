@@ -61,42 +61,25 @@
 .k4-header
 {
 	width: 100%;
-	height: 52px;
+	height: 48px;
 	flow-children: right;
 	padding: 0px 10px 0px 18px;
 }
 
 /* Static icons are Panels with a game image as background (CS2's custom HUD allows no Image elements). */
-.k4-logo, .k4-tab-icon, .k4-meta-icon, .k4-btn-icon
+.k4-tab-icon, .k4-meta-icon, .k4-btn-icon
 {
 	background-size: contain;
 	background-repeat: no-repeat;
 	background-position: center;
 }
 
-.k4-logo
-{
-	width: 22px;
-	height: 22px;
-	vertical-align: center;
-	wash-color: k4-accent;
-	margin-right: 8px;
-}
-
-.k4-brand
-{
-	color: k4-text;
-	font-size: 20px;
-	letter-spacing: 1px;
-	vertical-align: center;
-}
-
 .k4-subtitle
 {
 	white-space: nowrap;
-	color: k4-muted;
-	font-size: 16px;
-	margin-left: 12px;
+	color: k4-text;
+	font-size: 17px;
+	letter-spacing: 0.3px;
 	vertical-align: center;
 	width: fill-parent-flow(1.0);
 	text-overflow: ellipsis;
@@ -123,6 +106,7 @@
 	flow-children: right;
 	padding: 0px 12px;
 	background-color: rgba(0, 0, 0, 0.25);
+	border-bottom: 1px solid k4-line;
 }
 
 .k4-tab
@@ -143,6 +127,11 @@
 	height: 16px;
 	margin-right: 6px;
 	vertical-align: center;
+	wash-color: k4-muted;
+}
+
+.k4-tab:hover .k4-tab-icon
+{
 	wash-color: k4-base;
 }
 
@@ -163,6 +152,7 @@
 .k4-tab.k4-active
 {
 	background-color: #82d7ff1a;
+	border-bottom: 2px solid k4-accent;
 }
 
 .k4-tab.k4-active Label
@@ -253,7 +243,8 @@
 	width: 100%;
 	flow-children: down;
 	padding: 12px 14px;
-	border-radius: 3px;
+	border-radius: 4px;
+	border: 1px solid k4-line;
 	background-color: k4-cell;
 }
 
@@ -262,13 +253,13 @@
 {
 	width: 100%;
 	height: 6px;
-	border-radius: 2px;
+	border-radius: 4px;
 	background-color: #ffffff14;
 }
 
 .k4-bar-large
 {
-	height: 8px;
+	height: 10px;
 	margin: 2px 0px 0px 0px;
 }
 
@@ -282,7 +273,7 @@
 .k4-bar-fill
 {
 	height: 100%;
-	border-radius: 2px;
+	border-radius: 4px;
 	background-color: gradient( linear, 0% 0%, 100% 0%, from( #134f87 ), to( #1ab8e0 ) );
 }
 
@@ -299,8 +290,9 @@
 {
 	width: 168px;
 	height: 72px;
-	border-radius: 3px;
-	background-color: k4-cell;
+	border-radius: 4px;
+	border: 1px solid k4-line;
+	background-color: gradient( linear, 0% 0%, 0% 100%, from( #ffffff0d ), to( #ffffff04 ) );
 }
 
 .k4-rank-icon
@@ -377,7 +369,8 @@
 	width: 100%;
 	flow-children: right;
 	margin-bottom: 8px;
-	border-radius: 3px;
+	border-radius: 4px;
+	border: 1px solid k4-line;
 	background-color: k4-cell;
 	transition-property: wash-color;
 	transition-duration: 0.5s;
@@ -388,7 +381,7 @@
 	width: 3px;
 	height: 100%;
 	background-color: k4-muted;
-	border-radius: 3px 0px 0px 3px;
+	border-radius: 4px 0px 0px 4px;
 }
 
 .k4-card.k4-easy .k4-card-stripe { background-color: k4-green; }
@@ -420,7 +413,7 @@
 	font-size: 12px;
 	padding: 2px 7px;
 	margin-right: 10px;
-	border-radius: 2px;
+	border-radius: 3px;
 	text-transform: uppercase;
 	vertical-align: center;
 	color: k4-muted;
@@ -442,7 +435,7 @@
 {
 	white-space: nowrap;
 	color: k4-text;
-	font-size: 17px;
+	font-size: 16px;
 	vertical-align: center;
 	width: fill-parent-flow(1.0);
 	text-overflow: ellipsis;
@@ -461,6 +454,7 @@
 .k4-card.k4-done
 {
 	background-color: #4cff6a12;
+	border: 1px solid #4cff6a40;
 }
 
 .k4-card.k4-done .k4-mission-icon
@@ -515,6 +509,22 @@
 	sound: "UIPanorama.generic_button_rollover";
 }
 
+/* The main choice of a pair, such as Accept next to Decline */
+.k4-btn-primary
+{
+	background-color: #82d8ff26;
+}
+
+.k4-btn-primary Label
+{
+	color: k4-accent;
+}
+
+.k4-btn-primary:hover
+{
+	background-color: #82d8ff40;
+}
+
 .k4-small-btn:active
 {
 	sound: "UIPanorama.generic_button_press";
@@ -542,10 +552,17 @@
 .k4-row
 {
 	width: 100%;
-	height: 32px;
+	height: 34px;
 	flow-children: right;
 	margin-bottom: 2px;
+	border-radius: 4px;
+	border: 1px solid k4-line;
 	background-color: k4-cell;
+}
+
+.k4-row-alt
+{
+	background-color: k4-cell-dark;
 }
 
 .k4-row Label
@@ -557,7 +574,7 @@
 {
 	margin-top: 6px;
 	background-color: rgba(0, 166, 255, 0.10);
-	border-left: 2px solid k4-accent;
+	border-left: 3px solid k4-accent;
 }
 
 .k4-row.k4-current
@@ -569,6 +586,7 @@
 {
 	width: 52px;
 	height: 100%;
+	border-radius: 4px 0px 0px 4px;
 	background-color: k4-cell-dark;
 	background-size: 44px 22px;
 	background-repeat: no-repeat;
@@ -682,7 +700,8 @@
 	height: 64px;
 	flow-children: right;
 	margin: 0px 8px 8px 0px;
-	border-radius: 3px;
+	border-radius: 4px;
+	border: 1px solid k4-line;
 	background-color: k4-cell;
 }
 
@@ -695,6 +714,7 @@
 	background-size: contain;
 	background-repeat: no-repeat;
 	background-position: center;
+	wash-color: k4-accent;
 }
 
 .k4-tile-text
@@ -714,7 +734,7 @@
 .k4-tile-value
 {
 	color: k4-text;
-	font-size: 24px;
+	font-size: 26px;
 }
 
 /* ---------------------------------------------------------------- toast: the CS2 HUD mission panel */
@@ -803,6 +823,10 @@
 .k4-toast.k4-toast-red .k4-toast-title { color: #FF6B5E; }
 .k4-toast.k4-toast-gold .k4-toast-line { background-color: gradient( linear, 0% 0%, 100% 0%, from( #00000000 ), to( k4-gold ) ); }
 .k4-toast.k4-toast-red .k4-toast-line { background-color: gradient( linear, 0% 0%, 100% 0%, from( #00000000 ), to( k4-red ) ); }
+
+/* Bounty and duels on the Rank tab */
+.k4-showdown { margin-top: 8px; }
+.k4-wanted { color: #EB4B4B; font-size: 15px; vertical-align: center; border-left: 3px solid #EB4B4B; padding-left: 8px; }
 
 /* CS2's own sounds when a toast appears */
 .k4-toast.k4-toast-green:not(.k4-gone) { sound: "UI.Mission.Complete"; }
