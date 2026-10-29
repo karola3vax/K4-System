@@ -106,6 +106,26 @@
     }
   },
 
+  // "Wanted": a player on a long kill streak gets a bounty, and the enemy who ends it gets bonus points.
+  // Only one player is wanted at a time, and each player at most once per map. Needs "ranks".
+  "bounty": {
+    "enabled": true,
+    "kill-streak": 7, // Kills in one life, against real players, that make a player wanted
+    "reward": 150, // Bonus points for the enemy who kills the wanted player. The wanted player loses nothing extra
+    "survivor-reward": 50 // Bonus points for a wanted player who is still alive and wanted when the match ends. 0 turns it off
+  },
+
+  // Duels: "!duel <player> <points>" bets points on who gets more kills from now until the match ends.
+  // The other player accepts with "!duel accept". Both stakes are held, the winner gets both, and a tie returns them.
+  // A player who has left when the match ends loses. Each player can duel once per map. Needs "ranks".
+  "duels": {
+    "enabled": true,
+    "min-stake": 10, // Smallest stake
+    "max-stake-percent": 10, // Largest stake, as a share of the poorer player's points
+    "accept-seconds": 30, // How long a challenge waits for an answer
+    "block-same-ip": true // Players on the same connection cannot duel, so points cannot be moved between accounts
+  },
+
   // A clickable K4 panel (!k4, !rank, !missions, !top, !ranks, !stats, !time) and toast pop-ups instead of chat.
   // Needs the K4 workshop addon on players' clients through MultiAddonManager. Setup: github.com/karola3vax/K4-System/blob/main/panorama/README.md
   "panorama": {
@@ -160,6 +180,7 @@
     "playtime": ["time", "mytime", "playtime"],
     "reset": ["resetmydata"],
     "admins": ["admins", "listadmins"],
-    "missions": ["missions", "mission", "daily"]
+    "missions": ["missions", "mission", "daily"],
+    "duel": ["duel"]
   }
 }

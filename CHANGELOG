@@ -1,3 +1,12 @@
+-- 2026.10.29 - V6.4.0
+
+- feat: Bounties. A player who gets 7 kills on real players in one life becomes WANTED: everyone sees it in chat (and as a pop-up with the panel), and the enemy who ends the streak gets +150 points. The wanted player loses nothing extra. A wanted player who is never caught gets +50 when the match ends. Only one player is wanted at a time, and each player at most once per map, so it stays rare. Settings: `bounty`
+- feat: Duels. `!duel <player> <points>` challenges a player; they answer with `!duel accept` or `!duel decline` within 30 seconds. Both stakes are held, and whoever gets more kills from then until the match ends takes both. A tie returns the stakes, and a player who has left when the match ends loses. Each player can duel once per map, the stake is at most 10% of the poorer player's points, and players on the same connection cannot duel each other, so points cannot be moved between accounts. Settings: `duels`, command names: `commands.duel`
+- feat: The panel's Rank tab shows who is wanted, your running duel with the kill score, and a challenge waiting for you with Accept and Decline buttons. With nothing going on, it shows a short hint. Needs the updated Workshop addon; servers and players on the old addon keep working, they just do not see these lines
+- change: The panel header no longer shows the K4 icon and "K4" text; the player's name starts the header (Workshop addon)
+- change: Panel polish (Workshop addon): the player's name is the header title, the active tab is underlined, boxes and rows get a fine border, the rank progress bar is thicker, "to go" is in the accent color, leaderboard rows alternate shades, stat numbers are larger, finished missions get a green border, and Accept is highlighted next to Decline
+- setup: Both are on by default and need the ranks module. Existing config files get the defaults without changes; add the `bounty` and `duels` sections to change them. New texts in all 36 languages. No database changes
+
 -- 2026.10.22 - V6.3.3
 
 - fix: Playtime counted the time a player survived a round as dead time. CS2 respawns survivors at every round start, and each of those spawns added the round to "dead"; alive and dead time are now split correctly

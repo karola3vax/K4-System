@@ -16,6 +16,7 @@ Command names are set in `commands` in `k4-system.jsonc`. These are the defaults
 | Personal reset | `!resetmydata <all\|time\|stat\|rank>` |
 | Toggles | `!toggletag`, `!togglepointmsg` (fixed names, ranks module only) |
 | Missions | `!missions`, `!mission`, `!daily`; `!missions reroll <1-3>` (daily missions only) |
+| Duels | `!duel <player> <points>`, `!duel accept`, `!duel decline` (`decline` also takes back your own challenge) |
 
 Set `commands.rank-to-everyone` to `true` to make `!rank` work like LVL Ranks: everyone in chat then sees the player's leaderboard place, points, kills, deaths and KDR (each reader in their own language). Without the stats module the line shows the place and points only. `!rank` then only posts that one line, which the player sees too, and does not open the panel (`!k4` still does), and the usual `commands.cooldown-seconds` limits how often the line can be posted. The default is `false`.
 

@@ -40,6 +40,8 @@ internal sealed class PanoramaHud(
 	PlayerRegistry players,
 	RankService? ranks,
 	MissionService? missions,
+	BountyService? bounty,
+	DuelService? duels,
 	PlaytimeService playtime,
 	SqlPlayerStore store,
 	GameThread gameThread,
@@ -306,6 +308,12 @@ internal sealed class PanoramaHud(
 			case "k4-close":
 				Close(player);
 				return;
+			case "k4-duel-accept" when duels is not null:
+				Tell(player, duels.Accept(player));
+				break;
+			case "k4-duel-decline" when duels is not null:
+				Tell(player, duels.Decline(player));
+				break;
 			case "k4-top-prev" when state.TopPage > 0:
 				state.TopPage--;
 				break;
@@ -547,10 +555,52 @@ internal sealed class PanoramaHud(
 
 	private static string Number(long value) => value.ToString("N0", CultureInfo.InvariantCulture);
 
+	private void Tell(K4Player player, DuelService.Refusal? refusal)
+	{
+		if (refusal is DuelService.Refusal reason)
+			chat.Tell(player.Controller, reason.Key, reason.Args);
+	}
+
+	/// <summary>The bounty and duel lines under the rank: who is wanted, the player's duel, a challenge to answer.</summary>
+	private void DrawShowdown(K4Player player)
+	{
+		const string view = "k4-view-rank";
+		SetClass(player, "k4-showdown", "k4-gone", bounty is null && duels is null);
+		if (bounty is null && duels is null)
+			return;
+
+		(string Name, int Reward)? wanted = bounty?.Wanted;
+		(string Opponent, int Mine, int Theirs, int Stake)? duel = duels?.RunningFor(player.SteamId);
+		(string Challenger, int Stake)? incoming = duels?.IncomingFor(player.SteamId);
+
+		SetVar(player, view, "wanted", wanted is { } w ? Text(player, "hud.sd-wanted", StripColors(w.Name), Number(w.Reward)) : "");
+		SetClass(player, "k4-sd-wanted", "k4-gone", wanted is null);
+
+		SetVar(player, view, "duel", duel is { } d ? Text(player, "hud.sd-duel", StripColors(d.Opponent), d.Mine, d.Theirs, Number(d.Stake)) : "");
+		SetClass(player, "k4-sd-duel", "k4-gone", duel is null);
+
+		SetVar(player, view, "challenge", incoming is { } c ? Text(player, "hud.sd-challenge", StripColors(c.Challenger), Number(c.Stake)) : "");
+		SetVar(player, view, "accept", Text(player, "hud.sd-accept"));
+		SetVar(player, view, "decline", Text(player, "hud.sd-decline"));
+		SetClass(player, "k4-sd-challenge", "k4-gone", incoming is null);
+
+		// With nothing going on, a hint says the features exist.
+		bool idle = wanted is null && duel is null && incoming is null;
+		List<string> hint = [];
+		if (bounty is not null)
+			hint.Add(Text(player, "hud.sd-no-bounty"));
+		if (duels is not null && config.Commands.Duel.Count > 0)
+			hint.Add(Text(player, "hud.sd-duel-hint", config.Commands.Duel[0]));
+		SetVar(player, view, "hint", idle ? string.Join(" · ", hint) : "");
+		SetClass(player, "k4-sd-hint", "k4-gone", !idle);
+	}
+
 	private void DrawRank(K4Player player, HudState state)
 	{
 		if (ranks is null || player.Rank is not RankState rank)
 			return;
+
+		DrawShowdown(player);
 
 		const string view = "k4-view-rank";
 		RankDefinition current = rank.Rank;

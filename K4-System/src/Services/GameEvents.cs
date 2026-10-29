@@ -25,6 +25,8 @@ internal sealed class GameEvents(
 	PlaytimeService? playtime,
 	ScoreboardService? scoreboard,
 	MissionService? missions,
+	BountyService? bounty,
+	DuelService? duels,
 	SqlPlayerStore store,
 	GameState game,
 	GameThread gameThread,
@@ -70,6 +72,8 @@ internal sealed class GameEvents(
 
 		plugin.RegisterEventHandler<EventPlayerDisconnect>((@event, _) =>
 		{
+			bounty?.OnDisconnect(@event.Userid, @event.Reason);
+			duels?.OnDisconnect(@event.Userid, @event.Reason);
 			playerService.OnDisconnect(@event.Userid, @event.Reason);
 			return HookResult.Continue;
 		});
@@ -80,6 +84,8 @@ internal sealed class GameEvents(
 			foreach (K4Player player in players.All)
 				player.MatchKills = 0;
 			missions?.OnMapStart();
+			bounty?.OnMapStart();
+			duels?.OnMapStart();
 
 			plugin.AddTimer(5.0f, () => gameThread.PostWorldUpdate(game.TryUpdate));
 			// Missions read the map at the end of freeze time; this covers modes that have none.
@@ -93,6 +99,9 @@ internal sealed class GameEvents(
 		plugin.RegisterListener<Listeners.OnMapEnd>(() =>
 		{
 			playerService.SettleAllPlaytime();
+			// Paid before the save: a map change without a match end still settles bounties and duels.
+			bounty?.OnMapEnd();
+			duels?.OnMapEnd();
 			Task<bool> saved = playerService.SaveAll();
 			game.Clear();
 
@@ -174,6 +183,8 @@ internal sealed class GameEvents(
 			scoreboard?.AllowUpdates(false);
 			stats?.OnMatchEnd();
 			missions?.OnMatchEnd();
+			bounty?.OnMatchEnd();
+			duels?.OnMatchEnd();
 			playerService.SaveAll();
 			return HookResult.Continue;
 		});
@@ -254,6 +265,8 @@ internal sealed class GameEvents(
 
 			ranks?.OnPlayerDeath(@event, victim, attacker, assister);
 			stats?.OnPlayerDeath(@event, victim, attacker, assister);
+			bounty?.OnPlayerDeath(@event, victim, attacker);
+			duels?.OnPlayerDeath(victim, attacker);
 
 			if (!game.IsWarmup
 				&& DeathRules.Classify(victim, attacker, assister, includeBots: true, config.Tracking.FreeForAll).AttackerPoint == AttackerPointAction.Kill

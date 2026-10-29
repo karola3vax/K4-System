@@ -30,6 +30,12 @@ public sealed class PluginConfig
 	[JsonPropertyName("missions")]
 	public MissionSettings Missions { get; set; } = new();
 
+	[JsonPropertyName("bounty")]
+	public BountySettings Bounty { get; set; } = new();
+
+	[JsonPropertyName("duels")]
+	public DuelSettings Duels { get; set; } = new();
+
 	[JsonPropertyName("scoreboard")]
 	public ScoreboardSettings Scoreboard { get; set; } = new();
 
@@ -298,6 +304,44 @@ public sealed class MissionRewardSettings
 	public int Weekly { get; set; } = 2500;
 }
 
+/// <summary>"Wanted": a long kill streak puts a bounty on the player.</summary>
+public sealed class BountySettings
+{
+	[JsonPropertyName("enabled")]
+	public bool Enabled { get; set; } = true;
+
+	/// <summary>Kills in one life, against real players, that make a player wanted.</summary>
+	[JsonPropertyName("kill-streak")]
+	public int KillStreak { get; set; } = 7;
+
+	[JsonPropertyName("reward")]
+	public int Reward { get; set; } = 150;
+
+	/// <summary>Paid to a wanted player who is still wanted when the match ends.</summary>
+	[JsonPropertyName("survivor-reward")]
+	public int SurvivorReward { get; set; } = 50;
+}
+
+/// <summary>Point wagers between two players: most kills until the match ends wins.</summary>
+public sealed class DuelSettings
+{
+	[JsonPropertyName("enabled")]
+	public bool Enabled { get; set; } = true;
+
+	[JsonPropertyName("min-stake")]
+	public int MinStake { get; set; } = 10;
+
+	/// <summary>The stake may be at most this share of the poorer player's points.</summary>
+	[JsonPropertyName("max-stake-percent")]
+	public int MaxStakePercent { get; set; } = 10;
+
+	[JsonPropertyName("accept-seconds")]
+	public int AcceptSeconds { get; set; } = 30;
+
+	[JsonPropertyName("block-same-ip")]
+	public bool BlockSameIp { get; set; } = true;
+}
+
 public sealed class ScoreboardRankModeJsonConverter : JsonStringEnumConverter<ScoreboardRankMode>
 {
 	public ScoreboardRankModeJsonConverter() : base(null, false) { }
@@ -439,4 +483,7 @@ public sealed class CommandSettings
 
 	[JsonPropertyName("missions")]
 	public List<string> Missions { get; set; } = ["missions", "mission", "daily"];
+
+	[JsonPropertyName("duel")]
+	public List<string> Duel { get; set; } = ["duel"];
 }
