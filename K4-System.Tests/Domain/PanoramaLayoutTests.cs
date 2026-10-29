@@ -40,7 +40,8 @@ public partial class PanoramaLayoutTests
 			"k4-panel", "k4-toast", "k4-close", "k4-subtitle",
 			"k4-view-rank", "k4-view-missions", "k4-view-top", "k4-view-ranks", "k4-view-stats",
 			"k4-rank-badge", "k4-rank-icon", "k4-rank-name", "k4-rank-bar", "k4-rank-reward", "k4-toast-icon",
-			"k4-top-me", "k4-top-me-icon", "k4-top-me-pos", "k4-top-prev", "k4-top-next", "k4-rk-prev", "k4-rk-next"
+			"k4-top-me", "k4-top-me-icon", "k4-top-me-pos", "k4-top-prev", "k4-top-next", "k4-rk-prev", "k4-rk-next",
+			"k4-showdown", "k4-sd-wanted", "k4-sd-duel", "k4-sd-challenge", "k4-sd-hint", "k4-duel-accept", "k4-duel-decline"
 		];
 		expected.AddRange(new[] { "rank", "missions", "top", "ranks", "stats" }.Select(tab => $"k4-tab-{tab}"));
 
@@ -59,7 +60,7 @@ public partial class PanoramaLayoutTests
 	[Fact]
 	public void Every_clickable_id_is_a_button()
 	{
-		List<string> clickable = ["k4-close", "k4-top-prev", "k4-top-next", "k4-rk-prev", "k4-rk-next"];
+		List<string> clickable = ["k4-close", "k4-top-prev", "k4-top-next", "k4-rk-prev", "k4-rk-next", "k4-duel-accept", "k4-duel-decline"];
 		clickable.AddRange(Enumerable.Range(0, 3).Select(i => $"k4-reroll-{i}"));
 		clickable.AddRange(new[] { "rank", "missions", "top", "ranks", "stats" }.Select(tab => $"k4-tab-{tab}"));
 		Dictionary<string, string> elements = Layout.Descendants()

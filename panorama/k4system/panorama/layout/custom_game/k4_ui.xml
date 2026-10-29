@@ -20,9 +20,7 @@
 			<Panel class="k4-bg" />
 			<Panel class="k4-content">
 				<Panel class="k4-header">
-					<Panel class="k4-logo ic-xp_rank" />
-					<Label class="k4-brand stratum-bold-tf" text="K4" />
-					<Label id="k4-subtitle" class="k4-subtitle stratum-regular-tf" text="{s:subtitle}" />
+					<Label id="k4-subtitle" class="k4-subtitle stratum-medium-tf" text="{s:subtitle}" />
 					<Button id="k4-close" class="CloseButton k4-close" />
 				</Panel>
 				<Panel class="k4-tabs">
@@ -65,13 +63,27 @@
 					<Panel class="k4-section">
 						<Panel class="k4-split">
 							<Label class="k4-next k4-fill stratum-medium-tf" text="{s:next}" />
-							<Label class="k4-muted k4-right stratum-regular-tf" text="{s:togo}" />
+							<Label class="k4-accent k4-right stratum-regular-tf" text="{s:togo}" />
 						</Panel>
 						<Panel class="k4-bar k4-bar-large"><Panel id="k4-rank-bar" class="k4-bar-fill w0" /></Panel>
 						<Panel id="k4-rank-reward" class="k4-meta k4-reward">
 							<Panel class="k4-meta-icon ic-gift" />
 							<Label class="k4-accent stratum-regular-tf" text="{s:reward}" />
 						</Panel>
+					</Panel>
+					<Panel id="k4-showdown" class="k4-section k4-showdown k4-gone">
+						<Label id="k4-sd-wanted" class="k4-wanted k4-gone stratum-medium-tf" text="{s:wanted}" />
+						<Label id="k4-sd-duel" class="k4-accent k4-gone stratum-regular-tf" text="{s:duel}" />
+						<Panel id="k4-sd-challenge" class="k4-split k4-split-last k4-gone">
+							<Label class="k4-next k4-fill stratum-medium-tf" text="{s:challenge}" />
+							<Button id="k4-duel-accept" class="k4-small-btn k4-btn-primary">
+								<Label class="stratum-medium-tf" text="{s:accept}" />
+							</Button>
+							<Button id="k4-duel-decline" class="k4-small-btn">
+								<Label class="stratum-medium-tf" text="{s:decline}" />
+							</Button>
+						</Panel>
+						<Label id="k4-sd-hint" class="k4-muted k4-gone stratum-regular-tf" text="{s:hint}" />
 					</Panel>
 				</Panel>
 				<Panel id="k4-view-missions" class="k4-view">
@@ -162,7 +174,7 @@
 							<Label class="k4-name stratum-medium-tf" text="{s:name}" />
 							<Label class="k4-row-info stratum-regular-tf" text="{s:info}" />
 						</Panel>
-						<Panel id="k4-top-1" class="k4-row">
+						<Panel id="k4-top-1" class="k4-row k4-row-alt">
 							<Panel id="k4-top-1-pos" class="k4-pos-cell">
 								<Label class="k4-pos stratum-bold-tf" text="{s:pos}" />
 							</Panel>
@@ -178,7 +190,7 @@
 							<Label class="k4-name stratum-medium-tf" text="{s:name}" />
 							<Label class="k4-row-info stratum-regular-tf" text="{s:info}" />
 						</Panel>
-						<Panel id="k4-top-3" class="k4-row">
+						<Panel id="k4-top-3" class="k4-row k4-row-alt">
 							<Panel id="k4-top-3-pos" class="k4-pos-cell">
 								<Label class="k4-pos stratum-bold-tf" text="{s:pos}" />
 							</Panel>
@@ -194,7 +206,7 @@
 							<Label class="k4-name stratum-medium-tf" text="{s:name}" />
 							<Label class="k4-row-info stratum-regular-tf" text="{s:info}" />
 						</Panel>
-						<Panel id="k4-top-5" class="k4-row">
+						<Panel id="k4-top-5" class="k4-row k4-row-alt">
 							<Panel id="k4-top-5-pos" class="k4-pos-cell">
 								<Label class="k4-pos stratum-bold-tf" text="{s:pos}" />
 							</Panel>
@@ -210,7 +222,7 @@
 							<Label class="k4-name stratum-medium-tf" text="{s:name}" />
 							<Label class="k4-row-info stratum-regular-tf" text="{s:info}" />
 						</Panel>
-						<Panel id="k4-top-7" class="k4-row">
+						<Panel id="k4-top-7" class="k4-row k4-row-alt">
 							<Panel id="k4-top-7-pos" class="k4-pos-cell">
 								<Label class="k4-pos stratum-bold-tf" text="{s:pos}" />
 							</Panel>
@@ -226,7 +238,7 @@
 							<Label class="k4-name stratum-medium-tf" text="{s:name}" />
 							<Label class="k4-row-info stratum-regular-tf" text="{s:info}" />
 						</Panel>
-						<Panel id="k4-top-9" class="k4-row">
+						<Panel id="k4-top-9" class="k4-row k4-row-alt">
 							<Panel id="k4-top-9-pos" class="k4-pos-cell">
 								<Label class="k4-pos stratum-bold-tf" text="{s:pos}" />
 							</Panel>
@@ -256,7 +268,7 @@
 							<Label id="k4-rk-0-name" class="k4-name stratum-medium-tf" text="{s:name}" />
 							<Label class="k4-row-info stratum-regular-tf" text="{s:info}" />
 						</Panel>
-						<Panel id="k4-rk-1" class="k4-row">
+						<Panel id="k4-rk-1" class="k4-row k4-row-alt">
 							<Panel id="k4-rk-1-icon" class="k4-row-icon sg-0" />
 							<Label id="k4-rk-1-name" class="k4-name stratum-medium-tf" text="{s:name}" />
 							<Label class="k4-row-info stratum-regular-tf" text="{s:info}" />
@@ -266,7 +278,7 @@
 							<Label id="k4-rk-2-name" class="k4-name stratum-medium-tf" text="{s:name}" />
 							<Label class="k4-row-info stratum-regular-tf" text="{s:info}" />
 						</Panel>
-						<Panel id="k4-rk-3" class="k4-row">
+						<Panel id="k4-rk-3" class="k4-row k4-row-alt">
 							<Panel id="k4-rk-3-icon" class="k4-row-icon sg-0" />
 							<Label id="k4-rk-3-name" class="k4-name stratum-medium-tf" text="{s:name}" />
 							<Label class="k4-row-info stratum-regular-tf" text="{s:info}" />
@@ -276,7 +288,7 @@
 							<Label id="k4-rk-4-name" class="k4-name stratum-medium-tf" text="{s:name}" />
 							<Label class="k4-row-info stratum-regular-tf" text="{s:info}" />
 						</Panel>
-						<Panel id="k4-rk-5" class="k4-row">
+						<Panel id="k4-rk-5" class="k4-row k4-row-alt">
 							<Panel id="k4-rk-5-icon" class="k4-row-icon sg-0" />
 							<Label id="k4-rk-5-name" class="k4-name stratum-medium-tf" text="{s:name}" />
 							<Label class="k4-row-info stratum-regular-tf" text="{s:info}" />
@@ -286,7 +298,7 @@
 							<Label id="k4-rk-6-name" class="k4-name stratum-medium-tf" text="{s:name}" />
 							<Label class="k4-row-info stratum-regular-tf" text="{s:info}" />
 						</Panel>
-						<Panel id="k4-rk-7" class="k4-row">
+						<Panel id="k4-rk-7" class="k4-row k4-row-alt">
 							<Panel id="k4-rk-7-icon" class="k4-row-icon sg-0" />
 							<Label id="k4-rk-7-name" class="k4-name stratum-medium-tf" text="{s:name}" />
 							<Label class="k4-row-info stratum-regular-tf" text="{s:info}" />
@@ -296,7 +308,7 @@
 							<Label id="k4-rk-8-name" class="k4-name stratum-medium-tf" text="{s:name}" />
 							<Label class="k4-row-info stratum-regular-tf" text="{s:info}" />
 						</Panel>
-						<Panel id="k4-rk-9" class="k4-row">
+						<Panel id="k4-rk-9" class="k4-row k4-row-alt">
 							<Panel id="k4-rk-9-icon" class="k4-row-icon sg-0" />
 							<Label id="k4-rk-9-name" class="k4-name stratum-medium-tf" text="{s:name}" />
 							<Label class="k4-row-info stratum-regular-tf" text="{s:info}" />
