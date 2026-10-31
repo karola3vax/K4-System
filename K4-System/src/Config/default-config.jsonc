@@ -90,6 +90,16 @@
     "reduced-percent": 25 // Each further kill on that player gives this share of the points, and the death costs the same share
   },
 
+  // Point events: more points for playing at set times, such as weekend evenings. Times use missions.timezone.
+  // Each entry: "days" (Monday to Sunday; empty means every day), "from" and "to" (24-hour "HH:mm"; a "to" before
+  // "from" runs past midnight), and "multiplier" (above 1, up to 10; 1.5 means 50% more). Kills, rounds, objectives
+  // and playtime points are multiplied; mission rewards, bounties and duels are not. Admins can start one any time: css_k4_event 2 60
+  "events": {
+    "schedule": [
+      // { "days": ["Saturday", "Sunday"], "from": "18:00", "to": "22:00", "multiplier": 2 }
+    ]
+  },
+
   // Daily missions and one weekly mission. The mission list is in plugins/K4-System/missions.jsonc.
   // K4 checks every map and only gives missions that can be done there: no bomb missions without bomb sites,
   // no round missions in deathmatch, no grenade or weapon missions where players cannot get them.

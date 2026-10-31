@@ -26,6 +26,7 @@ internal sealed class RankService(
 	BackgroundWork background,
 	Chat chat,
 	HudBridge hud,
+	EventService? events,
 	ILogger logger)
 {
 	private RankSettings Settings => config.Ranks;
@@ -70,6 +71,10 @@ internal sealed class RankService(
 
 		if (amount > 0 && AdminManager.PlayerHasPermissions(player.Controller, Permissions.VipMultiplier))
 			amount = PointMath.Scale(amount, Settings.VipMultiplier);
+
+		// A points event multiplies gains only, like the VIP multiplier; losses stay as they are.
+		if (amount > 0 && events?.Multiplier is double multiplier and > 1)
+			amount = PointMath.Scale(amount, multiplier);
 
 		int oldPoints = state.Points;
 		state.Points = PointMath.AddToStored(oldPoints, amount);

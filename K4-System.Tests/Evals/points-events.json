@@ -1,0 +1,54 @@
+[
+  {
+    "Name": "weekend evening 2x in Istanbul (UTC+3): Saturday 19:30 local is on, ends 22:00 local",
+    "TimeZone": "Europe/Istanbul",
+    "Schedule": [{ "days": ["Saturday", "Sunday"], "from": "18:00", "to": "22:00", "multiplier": 2 }],
+    "NowUtc": "2026-10-31T16:30:00Z",
+    "ExpectedMultiplier": 2, "ExpectedEndsUtc": "2026-10-31T19:00:00Z"
+  },
+  {
+    "Name": "same schedule on a Friday is off",
+    "TimeZone": "Europe/Istanbul",
+    "Schedule": [{ "days": ["Saturday", "Sunday"], "from": "18:00", "to": "22:00", "multiplier": 2 }],
+    "NowUtc": "2026-10-30T16:30:00Z",
+    "ExpectedMultiplier": 1, "ExpectedEndsUtc": null
+  },
+  {
+    "Name": "the end time itself is no longer inside the event",
+    "TimeZone": "UTC",
+    "Schedule": [{ "days": [], "from": "18:00", "to": "22:00", "multiplier": 2 }],
+    "NowUtc": "2026-10-31T22:00:00Z",
+    "ExpectedMultiplier": 1, "ExpectedEndsUtc": null
+  },
+  {
+    "Name": "Friday night past midnight: a Friday 22:00-02:00 event is still on at Saturday 01:00",
+    "TimeZone": "UTC",
+    "Schedule": [{ "days": ["Friday"], "from": "22:00", "to": "02:00", "multiplier": 1.5 }],
+    "NowUtc": "2026-10-31T01:00:00Z",
+    "ExpectedMultiplier": 1.5, "ExpectedEndsUtc": "2026-10-31T02:00:00Z"
+  },
+  {
+    "Name": "overlapping events: the higher multiplier wins",
+    "TimeZone": "UTC",
+    "Schedule": [
+      { "days": [], "from": "12:00", "to": "23:00", "multiplier": 1.5 },
+      { "days": ["Saturday"], "from": "18:00", "to": "20:00", "multiplier": 3 }
+    ],
+    "NowUtc": "2026-10-31T19:00:00Z",
+    "ExpectedMultiplier": 3, "ExpectedEndsUtc": "2026-10-31T20:00:00Z"
+  },
+  {
+    "Name": "every day, all day: from equal to to runs 24 hours",
+    "TimeZone": "UTC",
+    "Schedule": [{ "days": [], "from": "00:00", "to": "00:00", "multiplier": 1.25 }],
+    "NowUtc": "2026-10-31T13:37:00Z",
+    "ExpectedMultiplier": 1.25, "ExpectedEndsUtc": "2026-11-01T00:00:00Z"
+  },
+  {
+    "Name": "Europe/Berlin across the autumn clock change: 01:00-04:00 local on 25 Oct 2026 ends at 03:00 UTC",
+    "TimeZone": "Europe/Berlin",
+    "Schedule": [{ "days": ["Sunday"], "from": "01:00", "to": "04:00", "multiplier": 2 }],
+    "NowUtc": "2026-10-25T01:30:00Z",
+    "ExpectedMultiplier": 2, "ExpectedEndsUtc": "2026-10-25T03:00:00Z"
+  }
+]

@@ -236,6 +236,16 @@ internal sealed class PanoramaHud(
 			ShowLater(player, state, enableCapture: false);
 	}
 
+	/// <summary>Redraws every open panel on its current tab, for changes that concern everyone, such as a points event.</summary>
+	public void RefreshOpenPanels()
+	{
+		foreach ((int slot, HudState state) in open.ToArray())
+		{
+			if (players.All.FirstOrDefault(player => player.Slot == slot) is K4Player player)
+				ShowLater(player, state, enableCapture: false);
+		}
+	}
+
 	// Waits a moment, because a HUD update in the same frame as a chat command can kick the player.
 	private void ShowLater(K4Player player, HudState state, bool enableCapture)
 	{
