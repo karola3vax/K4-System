@@ -127,6 +127,8 @@ internal static partial class ConfigValidator
 					yield return $"commands.{list}: \"{name}\" is one name with a comma or space in it. Put each name in its own quotes, such as [\"k4\", \"lvl\"].";
 				else if (owner.TryGetValue(name, out string? first) && first != list)
 					yield return $"commands: \"{name}\" is in both commands.{first} and commands.{list}, so !{name} runs both commands. Keep it in one list.";
+				else if (first == list)
+					yield return $"commands.{list}: \"{name}\" is listed twice; it is used once.";
 				else
 					owner.TryAdd(name, list);
 			}
@@ -137,6 +139,14 @@ internal static partial class ConfigValidator
 	{
 		List<string> warnings = [.. CommandNameWarnings(config.Commands)];
 		RankSettings ranks = config.Ranks;
+
+		// A name twice in one list would register the command twice, so one !rank would answer twice.
+		CommandSettings commands = config.Commands;
+		foreach (List<string> names in new[] { commands.Main, commands.Rank, commands.Top, commands.Ranks, commands.Stats, commands.Playtime, commands.Reset, commands.Admins, commands.Missions, commands.Duel })
+		{
+			HashSet<string> seen = new(StringComparer.OrdinalIgnoreCase);
+			names.RemoveAll(name => !seen.Add(name));
+		}
 		MySqlSettings mySql = config.Storage.MySql;
 
 		if (!IsSqlite(config.Storage))
@@ -237,6 +247,8 @@ internal static partial class ConfigValidator
 
 		if (!float.IsFinite(ranks.PlaytimeReward.EveryMinutes) || ranks.PlaytimeReward.EveryMinutes < 0)
 			ranks.PlaytimeReward.EveryMinutes = 0;
+		// Far beyond any real interval, and safe for TimeSpan; a huge value used to throw on every timer tick.
+		ranks.PlaytimeReward.EveryMinutes = Math.Min(ranks.PlaytimeReward.EveryMinutes, 10080);
 
 		BountySettings bounty = config.Bounty;
 		bounty.KillStreak = Math.Max(1, bounty.KillStreak);

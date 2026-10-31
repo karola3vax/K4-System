@@ -55,6 +55,10 @@ public sealed class Plugin : BasePlugin
 	private SharedPlayerApi.Source? apiSource;
 	private DuelService? duels;
 
+	// An earlier instance's saves that were still running when this one loaded. Handed on again if this
+	// instance unloads first, so two quick reloads in a row cannot skip the wait.
+	private Task? inheritedSaves;
+
 	/// <summary>Reads and checks k4-system.jsonc. Logs the reason and returns false when K4 must not start.</summary>
 	private bool TryLoadConfig()
 	{
@@ -233,6 +237,7 @@ public sealed class Plugin : BasePlugin
 
 		Task? unfinished = AppDomain.CurrentDomain.GetData(UnfinishedSavesKey) as Task;
 		AppDomain.CurrentDomain.SetData(UnfinishedSavesKey, null);
+		inheritedSaves = unfinished;
 
 		Task ready = Task.Run(async () =>
 		{
@@ -369,13 +374,19 @@ public sealed class Plugin : BasePlugin
 				duels?.ReturnStakes();
 
 				Task<bool> saved = playerService.SaveAll();
+				Task? stillSaving = null;
 				if (saves is not null && !saves.Complete(UnloadSaveTimeout))
 				{
-					AppDomain.CurrentDomain.SetData(UnfinishedSavesKey, saves.Worker);
+					stillSaving = saves.Worker;
 					Logger.LogError("K4-System could not finish saving player data within {Seconds} seconds while unloading. Saving continues in the background; a reloaded K4-System waits for it.", UnloadSaveTimeout.TotalSeconds);
 				}
 				else if (saved.IsCompleted && !saved.Result)
 					Logger.LogError("Some player data could not be saved while unloading.");
+
+				if (inheritedSaves is { IsCompleted: false } older)
+					stillSaving = stillSaving is null ? older : Task.WhenAll(stillSaving, older);
+				if (stillSaving is not null)
+					AppDomain.CurrentDomain.SetData(UnfinishedSavesKey, stillSaving);
 
 				background?.WaitAll(TimeSpan.FromSeconds(5));
 

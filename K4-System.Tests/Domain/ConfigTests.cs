@@ -18,6 +18,47 @@ public class ConfigTests
 		Assert.Empty(ConfigValidator.CommandNameWarnings(new CommandSettings()));
 	}
 
+	// Regression: a name twice in one list registered the command twice, so !rank answered twice.
+	[Fact]
+	public void A_name_twice_in_one_list_is_reported_and_used_once()
+	{
+		PluginConfig config = new();
+		config.Commands.Rank = ["rank", "myrank", "RANK"];
+
+		List<string> warnings = ConfigValidator.ValidateAndNormalize(config);
+
+		Assert.Contains(warnings, warning => warning.Contains("\"RANK\" is listed twice"));
+		Assert.Equal(["rank", "myrank"], config.Commands.Rank);
+	}
+
+	// Regression: a huge interval overflowed TimeSpan on every playtime-reward timer tick.
+	[Fact]
+	public void A_huge_playtime_reward_interval_is_capped()
+	{
+		PluginConfig config = new();
+		config.Ranks.PlaytimeReward.EveryMinutes = 1e12f;
+
+		ConfigValidator.ValidateAndNormalize(config);
+
+		Assert.Equal(10080, config.Ranks.PlaytimeReward.EveryMinutes);
+		Assert.Equal(TimeSpan.FromDays(7), TimeSpan.FromSeconds(config.Ranks.PlaytimeReward.EveryMinutes * 60d));
+	}
+
+	[Fact]
+	public void Anti_farm_values_are_kept_in_range()
+	{
+		PluginConfig config = new();
+		config.AntiFarm.RepeatKills = -3;
+		config.AntiFarm.WindowMinutes = 0;
+		config.AntiFarm.ReducedPercent = 400;
+
+		ConfigValidator.ValidateAndNormalize(config);
+
+		Assert.Equal(0, config.AntiFarm.RepeatKills);
+		Assert.Equal(1, config.AntiFarm.WindowMinutes);
+		Assert.Equal(100, config.AntiFarm.ReducedPercent);
+	}
+
 	private static PluginConfig ParseTemplate()
 	{
 		ConfigLoadResult result = ConfigFile.Parse(ConfigFile.Template, "template", created: true);

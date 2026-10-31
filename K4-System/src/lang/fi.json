@@ -5,6 +5,7 @@
   "error.target-loading": "{lightred}Pelaajan {0} tietoja ladataan vielä.",
   "error.target-immunity": "{lightred}Et voi valita kohteeksi pelaajaa {0}.",
   "error.target-not-found": "{lightred}Sopivaa pelaajaa ei löytynyt.",
+  "error.target-many": "{lightred}\"{0}\" vastaa {1} pelaajaa. Käytä #userid, tarkempaa nimeä tai ryhmää kuten @ct.",
   "error.target-bot": "{lightred}{0} on botti.",
   "error.invalid-amount": "{lightred}Anna kokonaisluku, joka on 0 tai suurempi.",
   "error.no-permission": "{lightred}Sinulla ei ole oikeutta käyttää tätä komentoa.",

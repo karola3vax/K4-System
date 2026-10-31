@@ -5,6 +5,7 @@
   "error.target-loading": "{lightred}Ойыншы деректері әлі жүктеліп жатыр: {0}",
   "error.target-immunity": "{lightred}Бұл ойыншыны таңдай алмайсың: {0}",
   "error.target-not-found": "{lightred}Сәйкес ойыншы табылмады.",
+  "error.target-many": "{lightred}\"{0}\" {1} ойыншыға сәйкес келеді. #userid, толығырақ атау немесе @ct сияқты топ қолданыңыз.",
   "error.target-bot": "{lightred}Бұл ойыншы — бот: {0}",
   "error.invalid-amount": "{lightred}0 немесе одан үлкен бүтін сан енгіз.",
   "error.no-permission": "{lightred}Бұл команданы қолдануға рұқсатың жоқ.",

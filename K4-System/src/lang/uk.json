@@ -5,6 +5,7 @@
   "error.target-loading": "{lightred}Дані гравця {0} ще завантажуються.",
   "error.target-immunity": "{lightred}Ти не можеш вибрати ціллю {0}.",
   "error.target-not-found": "{lightred}Відповідного гравця не знайдено.",
+  "error.target-many": "{lightred}\"{0}\" підходить {1} гравцям. Використайте #userid, повніше ім'я або групу, наприклад @ct.",
   "error.target-bot": "{lightred}{0} — бот.",
   "error.invalid-amount": "{lightred}Введи ціле число від 0 і більше.",
   "error.no-permission": "{lightred}У тебе немає доступу до цієї команди.",

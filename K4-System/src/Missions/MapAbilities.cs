@@ -62,7 +62,7 @@ public sealed record MapAbilities(bool Rounds, bool Teams, bool Bomb, bool Hosta
 		{
 			MissionType.GrenadeKills or MissionType.FlashAssists or MissionType.SmokeKills or MissionType.BlindKills => Grenades,
 			MissionType.NoscopeKills => HasAny(WeaponCatalog.Snipers),
-			MissionType.WeaponKills => mission.Weapon is string part && Weapons.Any(weapon => weapon.Contains(part, StringComparison.Ordinal)),
+			MissionType.WeaponKills => mission.Weapon is string part && AllowsWeapon(part),
 			MissionType.ZeusKills => Weapons.Contains(WeaponCatalog.Zeus),
 			MissionType.PistolKills or MissionType.SmgKills or MissionType.ShotgunKills or MissionType.RifleKills or MissionType.SniperKills
 				=> HasAny(WeaponCatalog.GroupOf(mission.Type)!),
@@ -75,6 +75,17 @@ public sealed record MapAbilities(bool Rounds, bool Teams, bool Bomb, bool Hosta
 	}
 
 	private bool HasAny(string[] group) => group.Any(Weapons.Contains);
+
+	// Everyone carries a knife, and grenades follow the grenade rule: Weapons never lists either, so a knife or
+	// grenade WeaponKills mission was swapped away on every map.
+	private bool AllowsWeapon(string part)
+	{
+		if (WeaponCatalog.IsKnife(part))
+			return true;
+		if (part is "inferno" or "planted_c4" || WeaponCatalog.Grenades.Any(grenade => grenade.Contains(part, StringComparison.Ordinal)))
+			return part == "planted_c4" ? Bomb : Grenades;
+		return Weapons.Any(weapon => weapon.Contains(part, StringComparison.Ordinal));
+	}
 
 	/// <summary>Works out the abilities from what the server reports, then applies the owner's map rules in file order.</summary>
 	public static MapAbilities Read(MapFacts facts, IReadOnlyDictionary<string, MapRule>? rules)

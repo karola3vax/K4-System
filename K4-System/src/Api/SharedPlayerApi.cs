@@ -101,10 +101,12 @@ internal sealed class UnavailablePlayerApi(CCSPlayerController controller) : IPl
 
 internal sealed class PlayerApi(CCSPlayerController controller, SharedPlayerApi.Source source) : IPlayerAPI
 {
-	private K4Player? Player => source.Players.Get(controller);
+	// The player list and CS2 entities are game-thread only. Other plugins also read from async continuations, so
+	// off that thread the player comes from the registry's thread-safe copy and no entity is read.
+	private K4Player? Player => source.IsGameThread() ? source.Players.Get(controller) : source.Players.FindFromAnyThread(controller);
 
 	public bool IsLoaded => source.IsActive() && Player?.Rank is not null;
-	public bool IsValid => Player?.IsValid == true;
+	public bool IsValid => source.IsGameThread() ? Player?.IsValid == true : Player is not null;
 	public bool IsPlayer => Player?.IsHuman == true;
 	public CCSPlayerController Controller => Player?.Controller ?? throw new Exception("K4-SharedAPI > Controller > Player is not valid or is not a player.");
 
@@ -139,7 +141,7 @@ internal sealed class PlayerApi(CCSPlayerController controller, SharedPlayerApi.
 	private K4Player Require(string member)
 	{
 		K4Player? player = Player;
-		if (player is null || !player.IsValid || !player.IsHuman || player.Rank is null)
+		if (player is null || (source.IsGameThread() && !player.IsValid) || !player.IsHuman || player.Rank is null)
 			throw new Exception($"K4-SharedAPI > {member} > Player is not valid or is not a player.");
 		return player;
 	}

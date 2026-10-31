@@ -5,6 +5,7 @@
   "error.target-loading": "{lightred}De gegevens van {0} worden nog geladen.",
   "error.target-immunity": "{lightred}Je kunt {0} niet als doelwit kiezen.",
   "error.target-not-found": "{lightred}Geen speler gevonden.",
+  "error.target-many": "{lightred}\"{0}\" past op {1} spelers. Gebruik #userid, een vollere naam of een groep zoals @ct.",
   "error.target-bot": "{lightred}{0} is een bot.",
   "error.invalid-amount": "{lightred}Voer een heel getal van 0 of hoger in.",
   "error.no-permission": "{lightred}Je hebt geen toestemming voor dit commando.",

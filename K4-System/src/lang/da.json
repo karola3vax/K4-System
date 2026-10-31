@@ -5,6 +5,7 @@
   "error.target-loading": "{lightred}Data for {0} indlæses stadig.",
   "error.target-immunity": "{lightred}Du kan ikke vælge {0} som mål.",
   "error.target-not-found": "{lightred}Ingen matchende spiller blev fundet.",
+  "error.target-many": "{lightred}\"{0}\" passer på {1} spillere. Brug #userid, et længere navn eller en gruppe som @ct.",
   "error.target-bot": "{lightred}{0} er en bot.",
   "error.invalid-amount": "{lightred}Skriv et helt tal på 0 eller mere.",
   "error.no-permission": "{lightred}Du har ikke adgang til denne kommando.",

@@ -5,6 +5,7 @@
   "error.target-loading": "{lightred}Данните на {0} още се зареждат.",
   "error.target-immunity": "{lightred}Не можеш да избереш {0} за цел.",
   "error.target-not-found": "{lightred}Не е намерен подходящ играч.",
+  "error.target-many": "{lightred}\"{0}\" съвпада с {1} играчи. Използвай #userid, по-пълно име или група като @ct.",
   "error.target-bot": "{lightred}{0} е бот.",
   "error.invalid-amount": "{lightred}Въведи цяло число, 0 или повече.",
   "error.no-permission": "{lightred}Нямаш права за тази команда.",

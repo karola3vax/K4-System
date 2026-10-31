@@ -175,6 +175,7 @@ internal sealed class GameEvents(
 			foreach (K4Player player in players.All)
 				player.MatchKills = 0;
 			missions?.OnMatchStart();
+			duels?.OnMatchStart();
 			return HookResult.Continue;
 		});
 

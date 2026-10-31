@@ -25,6 +25,15 @@ public class ShowdownsTests
 	public void LeaverLosesAndMoreKillsWins(bool challengerHere, int challengerKills, bool opponentHere, int opponentKills, int expected)
 		=> Assert.Equal(expected, Showdowns.Winner(challengerHere, challengerKills, opponentHere, opponentKills));
 
+	// Regression: on unload the leaver's stake used to vanish instead of going to the player still here.
+	[Theory]
+	[InlineData(true, true, 100, 100, 100)]
+	[InlineData(true, false, 100, 200, 0)]
+	[InlineData(false, true, 100, 0, 200)]
+	[InlineData(false, false, 100, 0, 0)]
+	public void UnloadReturnsStakesAndALeaverLoses(bool challengerHere, bool opponentHere, int stake, int toChallenger, int toOpponent)
+		=> Assert.Equal((toChallenger, toOpponent), Showdowns.UnloadRefund(challengerHere, opponentHere, stake));
+
 	[Theory]
 	[InlineData("1.2.3.4:27005", "1.2.3.4:27006", true)]
 	[InlineData("1.2.3.4:27005", "1.2.3.5:27005", false)]

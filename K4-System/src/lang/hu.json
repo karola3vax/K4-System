@@ -5,6 +5,7 @@
   "error.target-loading": "{lightred}{0} adatai még töltődnek.",
   "error.target-immunity": "{lightred}Ezt nem használhatod rajta: {0}.",
   "error.target-not-found": "{lightred}Nincs ilyen játékos.",
+  "error.target-many": "{lightred}A(z) \"{0}\" {1} játékosra illik. Használj #userid-t, teljesebb nevet vagy csoportot, pl. @ct.",
   "error.target-bot": "{lightred}{0} egy bot.",
   "error.invalid-amount": "{lightred}Adj meg egy egész számot, ami legalább 0.",
   "error.no-permission": "{lightred}Nincs jogod ehhez a parancshoz.",

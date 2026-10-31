@@ -69,6 +69,17 @@ public sealed class CustomLanguageTests : IDisposable
 		Assert.Equal("Welcome back, Ana!", In("en", () => language["hello", "Ana"]));
 	}
 
+	// Regression: a typo in the server's own line threw a FormatException in the command that printed it.
+	[Theory]
+	[InlineData("Welcome back, {name}!")]
+	[InlineData("Welcome back, {1}!")]
+	[InlineData("Welcome back, {0!")]
+	public void ABrokenPlaceholderInTheServersLineFallsBackToTheShippedText(string line)
+	{
+		CustomLanguage language = Language(("en.json", $$"""{ "hello": "{{line}}" }"""));
+		Assert.Equal("Hello Ana", In("en", () => language["hello", "Ana"]));
+	}
+
 	[Fact]
 	public void AShippedTranslationIsNotReplacedByTheServersEnglishLine()
 	{

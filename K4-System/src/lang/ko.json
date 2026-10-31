@@ -5,6 +5,7 @@
   "error.target-loading": "{lightred}{0} 님의 데이터를 불러오는 중이에요.",
   "error.target-immunity": "{lightred}{0} 님은 대상으로 지정할 수 없어요.",
   "error.target-not-found": "{lightred}일치하는 플레이어를 찾을 수 없어요.",
+  "error.target-many": "{lightred}\"{0}\"이(가) {1}명과 일치합니다. #userid, 더 정확한 이름 또는 @ct 같은 그룹을 사용하세요.",
   "error.target-bot": "{lightred}{0} 님은 봇이에요.",
   "error.invalid-amount": "{lightred}0 이상의 정수를 입력해 주세요.",
   "error.no-permission": "{lightred}이 명령어를 사용할 권한이 없어요.",

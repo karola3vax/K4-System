@@ -5,6 +5,7 @@
   "error.target-loading": "{lightred}Τα δεδομένα του παίκτη {0} φορτώνουν ακόμα.",
   "error.target-immunity": "{lightred}Δεν μπορείς να στοχεύσεις τον παίκτη {0}.",
   "error.target-not-found": "{lightred}Δεν βρέθηκε παίκτης που να ταιριάζει.",
+  "error.target-many": "{lightred}Το \"{0}\" ταιριάζει με {1} παίκτες. Χρησιμοποίησε #userid, πιο πλήρες όνομα ή ομάδα όπως @ct.",
   "error.target-bot": "{lightred}Ο παίκτης {0} είναι bot.",
   "error.invalid-amount": "{lightred}Γράψε έναν ακέραιο αριθμό, 0 ή μεγαλύτερο.",
   "error.no-permission": "{lightred}Δεν έχεις δικαίωμα για αυτή την εντολή.",

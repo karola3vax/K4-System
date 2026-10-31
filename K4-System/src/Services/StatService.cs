@@ -135,7 +135,8 @@ internal sealed class StatService(PluginConfig config, PlayerRegistry players, G
 		foreach (K4Player player in players.ValidHumans)
 		{
 			CsTeam team = player.Controller.Team;
-			if (team <= CsTeam.Spectator)
+			// Like round win points: joining a team seconds before the round ends does not count as playing it.
+			if (team <= CsTeam.Spectator || player.Rank is { PlayedRound: false })
 				continue;
 
 			if (winnerTeam > (int)CsTeam.Spectator)

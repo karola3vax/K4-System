@@ -5,6 +5,7 @@
   "error.target-loading": "{lightred}ข้อมูลของ {0} ยังโหลดอยู่",
   "error.target-immunity": "{lightred}คุณเลือก {0} เป็นเป้าหมายไม่ได้",
   "error.target-not-found": "{lightred}ไม่พบผู้เล่นที่ตรงกัน",
+  "error.target-many": "{lightred}\"{0}\" ตรงกับผู้เล่น {1} คน ใช้ #userid ชื่อที่ครบกว่านี้ หรือกลุ่มเช่น @ct",
   "error.target-bot": "{lightred}{0} เป็นบอท",
   "error.invalid-amount": "{lightred}ใส่จำนวนเต็มตั้งแต่ 0 ขึ้นไป",
   "error.no-permission": "{lightred}คุณไม่มีสิทธิ์ใช้คำสั่งนี้",

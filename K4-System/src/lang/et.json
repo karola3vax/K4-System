@@ -5,6 +5,7 @@
   "error.target-loading": "{lightred}Mängija {0} andmeid alles laaditakse.",
   "error.target-immunity": "{lightred}Mängijat {0} ei saa sihtida.",
   "error.target-not-found": "{lightred}Sobivat mängijat ei leitud.",
+  "error.target-many": "{lightred}\"{0}\" sobib {1} mängijaga. Kasuta #userid, täielikumat nime või gruppi nagu @ct.",
   "error.target-bot": "{lightred}{0} on bot.",
   "error.invalid-amount": "{lightred}Sisesta täisarv, 0 või suurem.",
   "error.no-permission": "{lightred}Sul pole õigust seda käsku kasutada.",

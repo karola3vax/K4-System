@@ -5,6 +5,7 @@
   "error.target-loading": "{lightred}Dane gracza {0} wciąż się ładują.",
   "error.target-immunity": "{lightred}Nie możesz użyć tego na graczu {0}.",
   "error.target-not-found": "{lightred}Nie znaleziono pasującego gracza.",
+  "error.target-many": "{lightred}\"{0}\" pasuje do {1} graczy. Użyj #userid, pełniejszej nazwy lub grupy, np. @ct.",
   "error.target-bot": "{lightred}{0} to bot.",
   "error.invalid-amount": "{lightred}Podaj liczbę całkowitą od 0 wzwyż.",
   "error.no-permission": "{lightred}Nie masz uprawnień do tej komendy.",

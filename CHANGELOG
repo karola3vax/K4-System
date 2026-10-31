@@ -2,6 +2,24 @@
 
 - feat: Anti-farming, on by default. A kill between two players on the same connection gives and takes no points, so a second account cannot feed the first. After 10 kills on the same player within 10 minutes, each further kill on them is worth 25% of the points (and costs them 25%), and the point message says so. Normal matches never reach the limit. Settings: `anti-farm`
 - fix: With `ranks.dynamic-death-points` on, a victim with 0 points was worth full kill points instead of the lowest multiplier, which made an empty second account the best one to farm
+- fix: Any death now ends the killer's streak, also one that gives no points (such as a bot kill with `tracking.count-bots` off). Before, the streak bonuses kept growing in long deathmatch rounds
+- fix: With `ranks.round-summary` on, points from a round in which tracking stopped (a player left and the server fell below `tracking.minimum-players`) are summarized instead of silently added
+- fix: Stats no longer count a round win or loss for a player who joined a team seconds before the round ended, the same rule round points already used
+- fix: A free-for-all match in which no player got a kill has no winner, instead of a match win for an arbitrary player
+- fix: Duels open again after `mp_match_end_restart` or `mp_restartgame` on the same map; before, every `!duel` said "not now" until the map changed
+- fix: Accepting a duel checks the 10% stake limit again, so a player whose points dropped after the challenge cannot stake more than allowed
+- fix: When K4 reloads during a duel and one player has already left, the player still here gets both stakes, as at the match end; before, the leaver's stake was lost
+- fix: Custom `WeaponKills` missions for knives and grenades were swapped away on every map. Knife missions are now possible everywhere, grenade missions where grenades are, and `planted_c4` where there is a bomb
+- fix: `!resetdata`, `!setpoints`, `!givepoints` and `!removepoints` refuse a plain name that matches several players (such as "jo") and say how many it matched. `#userid` and groups such as `@ct` still work
+- fix: `!resetmydata all` no longer starts the 24-hour rank-reset cooldown when the ranks module is off
+- fix: A broken placeholder in your own language line (`configs/plugins/K4-System/lang/`), such as `{name}` or `{3}` on a line with fewer values, shows the shipped text instead of breaking the command
+- fix: A command name listed twice in one list ran its command twice; it is now used once, with a warning in the console
+- fix: Other plugins reading the shared API (points, rank, placement) from a background thread no longer read K4's player list or the game there, which could fail or crash
+- fix: Purging inactive players runs in one transaction, so a player who joins during the purge cannot lose only their stats and playtime
+- fix: Two plugin reloads in a row no longer skip waiting for the first instance's unfinished saves
+- perf: The player count behind every shot, hit and kill is read from the game at most every half second instead of on every event, which was the hottest path on full servers
+- perf: The panel caches leaderboard and rank data even while the player keeps clicking, and `!top` saves all players at most every 10 seconds for the whole server, so clicking and `!top` spam can no longer flood the database
+- fix: A `ranks.playtime-reward.every-minutes` value above one week (10080) is capped; a huge value threw an error on every timer tick
 
 -- 2026.10.29 - V6.4.0
 

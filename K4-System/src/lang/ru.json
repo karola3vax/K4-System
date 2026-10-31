@@ -5,6 +5,7 @@
   "error.target-loading": "{lightred}Данные игрока {0} ещё загружаются.",
   "error.target-immunity": "{lightred}Ты не можешь выбрать целью {0}.",
   "error.target-not-found": "{lightred}Подходящий игрок не найден.",
+  "error.target-many": "{lightred}\"{0}\" подходит {1} игрокам. Используйте #userid, более полное имя или группу, например @ct.",
   "error.target-bot": "{lightred}{0} — бот.",
   "error.invalid-amount": "{lightred}Введи целое число от 0 и больше.",
   "error.no-permission": "{lightred}У тебя нет доступа к этой команде.",

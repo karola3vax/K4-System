@@ -124,8 +124,9 @@ internal sealed class DuelService(PluginConfig config, PlayerRegistry players, R
 
 		pending.Remove(challenge);
 		K4Player? challenger = players.Get(challenge.Challenger);
+		// Points may have dropped since the challenge, so the stake must still be within the cap now.
 		if (challenger is not { IsHuman: true, Rank: not null } || opponent.Rank is null
-			|| challenger.Rank.Points < challenge.Stake || opponent.Rank.Points < challenge.Stake)
+			|| challenge.Stake > Showdowns.MaxStake(challenger.Rank.Points, opponent.Rank.Points, Settings.MaxStakePercent))
 		{
 			TellBoth(challenge, "duel.declined", challenge.ChallengerName, challenge.OpponentName);
 			return new Refusal("duel.error.no-points", []);
@@ -214,6 +215,9 @@ internal sealed class DuelService(PluginConfig config, PlayerRegistry players, R
 	/// <summary>The map changed without a match end. Settled quietly before the map-end save.</summary>
 	public void OnMapEnd() => Settle(announce: false);
 
+	/// <summary>A new match on the same map (mp_match_end_restart, mp_restartgame) opens duels again.</summary>
+	public void OnMatchStart() => matchOver = false;
+
 	public void OnMapStart()
 	{
 		running.Clear();
@@ -271,16 +275,22 @@ internal sealed class DuelService(PluginConfig config, PlayerRegistry players, R
 	private K4Player? Present(ulong steamId)
 		=> players.Get(steamId) is { IsHuman: true } player ? player : null;
 
-	/// <summary>K4 unloads: duels cannot finish, so players still here get their stake back. Touches no entities.</summary>
+	/// <summary>
+	/// K4 unloads: duels cannot finish, so both players get their stake back. A player who already left has lost,
+	/// as at the match end, so the one still here gets both stakes. Touches no entities.
+	/// </summary>
 	public void ReturnStakes()
 	{
 		foreach (Duel duel in running)
 		{
-			foreach (ulong steamId in new[] { duel.Terms.Challenger, duel.Terms.Opponent })
-			{
-				if (Present(steamId) is K4Player player)
-					ranks.CreditPoints(player, duel.Terms.Stake, refresh: false);
-			}
+			K4Player? challenger = Present(duel.Terms.Challenger);
+			K4Player? opponent = Present(duel.Terms.Opponent);
+			(int toChallenger, int toOpponent) = Showdowns.UnloadRefund(challenger is not null, opponent is not null, duel.Terms.Stake);
+
+			if (challenger is not null)
+				ranks.CreditPoints(challenger, toChallenger, refresh: false);
+			if (opponent is not null)
+				ranks.CreditPoints(opponent, toOpponent, refresh: false);
 		}
 
 		running.Clear();

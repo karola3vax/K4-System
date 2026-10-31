@@ -5,6 +5,7 @@
   "error.target-loading": "{lightred}Die Daten von {0} werden noch geladen.",
   "error.target-immunity": "{lightred}Du kannst {0} nicht als Ziel wählen.",
   "error.target-not-found": "{lightred}Kein passender Spieler gefunden.",
+  "error.target-many": "{lightred}\"{0}\" passt auf {1} Spieler. Nutze #userid, einen längeren Namen oder eine Gruppe wie @ct.",
   "error.target-bot": "{lightred}{0} ist ein Bot.",
   "error.invalid-amount": "{lightred}Gib eine ganze Zahl ab 0 ein.",
   "error.no-permission": "{lightred}Du hast keine Berechtigung für diesen Befehl.",

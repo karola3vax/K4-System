@@ -5,6 +5,7 @@
   "error.target-loading": "{lightred}Podaci igrača {0} se još učitavaju.",
   "error.target-immunity": "{lightred}Ne možeš da izabereš igrača {0} kao metu.",
   "error.target-not-found": "{lightred}Nije pronađen odgovarajući igrač.",
+  "error.target-many": "{lightred}\"{0}\" odgovara za {1} igrača. Koristi #userid, potpunije ime ili grupu kao @ct.",
   "error.target-bot": "{lightred}{0} je bot.",
   "error.invalid-amount": "{lightred}Unesi ceo broj, 0 ili veći.",
   "error.no-permission": "{lightred}Nemaš dozvolu za ovu komandu.",

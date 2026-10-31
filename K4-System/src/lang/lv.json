@@ -5,6 +5,7 @@
   "error.target-loading": "{lightred}Spēlētāja {0} dati vēl ielādējas.",
   "error.target-immunity": "{lightred}Tu nevari izvēlēties {0} par mērķi.",
   "error.target-not-found": "{lightred}Atbilstošs spēlētājs netika atrasts.",
+  "error.target-many": "{lightred}\"{0}\" atbilst {1} spēlētājiem. Izmanto #userid, pilnāku vārdu vai grupu, piem., @ct.",
   "error.target-bot": "{lightred}{0} ir bots.",
   "error.invalid-amount": "{lightred}Ievadi veselu skaitli, 0 vai lielāku.",
   "error.no-permission": "{lightred}Tev nav atļaujas izmantot šo komandu.",

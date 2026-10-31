@@ -5,6 +5,7 @@
   "error.target-loading": "{lightred}Dáta hráča {0} sa ešte načítavajú.",
   "error.target-immunity": "{lightred}Hráča {0} nemôžeš zvoliť ako cieľ.",
   "error.target-not-found": "{lightred}Žiadny zodpovedajúci hráč sa nenašiel.",
+  "error.target-many": "{lightred}\"{0}\" zodpovedá {1} hráčom. Použi #userid, celé meno alebo skupinu ako @ct.",
   "error.target-bot": "{lightred}{0} je bot.",
   "error.invalid-amount": "{lightred}Zadaj celé číslo 0 alebo vyššie.",
   "error.no-permission": "{lightred}Na tento príkaz nemáš oprávnenie.",

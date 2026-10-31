@@ -410,8 +410,11 @@ internal sealed class PanoramaHud(
 		_ => config.Modules.Stats || config.Modules.Playtime
 	};
 
-	/// <summary>Runs a database read, then draws on the game thread if the panel still shows the same view.</summary>
-	private void Later<T>(K4Player player, HudState state, Func<Task<T>> load, Action<T> draw, string description)
+	/// <summary>
+	/// Runs a database read, caches the result, then draws on the game thread if the panel still shows the same view.
+	/// The cache is written even when the player clicked on meanwhile, so fast clicking reuses it instead of reading again.
+	/// </summary>
+	private void Later<T>(K4Player player, HudState state, Func<Task<T>> load, Action<T> remember, Action<T> draw, string description)
 	{
 		int version = state.Version;
 		ulong steamId = player.SteamId;
@@ -421,6 +424,7 @@ internal sealed class PanoramaHud(
 			T result = await load();
 			gameThread.Post(() =>
 			{
+				remember(result);
 				if (players.Get(steamId) is K4Player current && open.TryGetValue(current.Slot, out HudState? now) && now.Version == version && layout is { IsValid: true })
 					draw(result);
 			});
@@ -650,11 +654,9 @@ internal sealed class PanoramaHud(
 			return;
 		}
 
-		Later(player, state, () => store.GetPlacementAndTotalAsync(steamId), result =>
-		{
-			placementCache[steamId] = new Cached<(int, int)>(result, DateTime.UtcNow);
-			ShowPlacement(result);
-		}, "Loading the rank panel");
+		Later(player, state, () => store.GetPlacementAndTotalAsync(steamId),
+			result => placementCache[steamId] = new Cached<(int, int)>(result, DateTime.UtcNow),
+			ShowPlacement, "Loading the rank panel");
 	}
 
 	private void DrawMissions(K4Player player)
@@ -778,8 +780,7 @@ internal sealed class PanoramaHud(
 		{
 			topCache[needed] = new Cached<List<TopEntry>>(result.entries, DateTime.UtcNow);
 			placementCache[steamId] = new Cached<(int, int)>(result.Item2, DateTime.UtcNow);
-			Draw(result.entries, result.Item2);
-		}, "Loading the top list panel");
+		}, result => Draw(result.entries, result.Item2), "Loading the top list panel");
 	}
 
 	/// <summary>CS2's gold, silver and bronze laurels around the top three positions.</summary>
@@ -836,11 +837,9 @@ internal sealed class PanoramaHud(
 		}
 
 		Draw(null, 0);
-		Later(player, state, store.GetRankCountsAsync, result =>
-		{
-			rankCountCache = new Cached<(Dictionary<string, int>, int)>(result, DateTime.UtcNow);
-			Draw(result.Counts, result.Total);
-		}, "Loading the rank list panel");
+		Later(player, state, store.GetRankCountsAsync,
+			result => rankCountCache = new Cached<(Dictionary<string, int>, int)>(result, DateTime.UtcNow),
+			result => Draw(result.Counts, result.Total), "Loading the rank list panel");
 	}
 
 	private void DrawStats(K4Player player)

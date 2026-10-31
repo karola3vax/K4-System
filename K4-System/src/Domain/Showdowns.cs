@@ -17,6 +17,22 @@ internal static class Showdowns
 		return challengerPresent ? Math.Sign(challengerKills.CompareTo(opponentKills)) : 0;
 	}
 
+	/// <summary>
+	/// What each player of an unfinished duel gets when K4 unloads: their own stake back, or both stakes for the
+	/// player still here when the other has left (a leaver loses, as at the match end).
+	/// </summary>
+	public static (int Challenger, int Opponent) UnloadRefund(bool challengerPresent, bool opponentPresent, int stake)
+	{
+		int pot = PointMath.AddClamped(stake, stake);
+		return (challengerPresent, opponentPresent) switch
+		{
+			(true, true) => (stake, stake),
+			(true, false) => (pot, 0),
+			(false, true) => (0, pot),
+			_ => (0, 0)
+		};
+	}
+
 	/// <summary>Two players connect from the same address. Unknown addresses never match.</summary>
 	public static bool SameAddress(string? left, string? right)
 	{

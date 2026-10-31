@@ -5,6 +5,7 @@
   "error.target-loading": "{lightred}Data {0} masih dimuat.",
   "error.target-immunity": "{lightred}Kamu tidak bisa menargetkan {0}.",
   "error.target-not-found": "{lightred}Tidak ada pemain yang cocok.",
+  "error.target-many": "{lightred}\"{0}\" cocok dengan {1} pemain. Gunakan #userid, nama yang lebih lengkap, atau grup seperti @ct.",
   "error.target-bot": "{lightred}{0} adalah bot.",
   "error.invalid-amount": "{lightred}Masukkan bilangan bulat 0 atau lebih.",
   "error.no-permission": "{lightred}Kamu tidak punya izin untuk memakai perintah ini.",
