@@ -213,6 +213,19 @@ public partial class PanoramaLayoutTests
 		Assert.Contains(Layout.Descendants("include"), include => (string?)include.Attribute("src") == "s2r://panorama/styles/custom_game/k4_ui.vcss_c");
 	}
 
+	// Regression: CSS uppercase ran in the client's locale, so a Turkish CS2 showed English tabs as "MİSSİONS".
+	[Fact]
+	public void Stylesheet_never_uppercases_text()
+		=> Assert.DoesNotContain("text-transform", Stylesheet, StringComparison.Ordinal);
+
+	[Theory]
+	[InlineData("en", "Missions", "MISSIONS")]
+	[InlineData("en", "Achievements", "ACHIEVEMENTS")]
+	[InlineData("tr", "Görevler", "GÖREVLER")]
+	[InlineData("tr", "İstatistik", "İSTATİSTİK")]
+	public void Labels_are_capitalized_in_the_readers_language(string language, string text, string expected)
+		=> Assert.Equal(expected, PanoramaHud.Upper(System.Globalization.CultureInfo.GetCultureInfo(language), text));
+
 	[Fact]
 	public void Stylesheet_braces_are_balanced()
 	{

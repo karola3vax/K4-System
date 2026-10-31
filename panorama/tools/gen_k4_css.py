@@ -38,6 +38,8 @@ EQUIPMENT_ICONS = [
     "p250", "p90", "revolver", "sawedoff", "scar20", "sg556", "ssg08", "tec9", "ump45", "usp_silencer", "xm1014",
 ]
 
+# No text-transform: uppercase anywhere. The client uppercases with its own locale (a Turkish client writes
+# "MİSSİONS"), so K4 sends labels already capitalized in each reader's language.
 css = r"""@define k4-text: #FFFFFF;
 @define k4-base: #CCCCCC;
 @define k4-muted: #8F98A1;
@@ -179,7 +181,6 @@ css = r"""@define k4-text: #FFFFFF;
 {
 	color: k4-text;
 	font-size: 15px;
-	text-transform: uppercase;
 	vertical-align: center;
 }
 
@@ -366,7 +367,6 @@ css = r"""@define k4-text: #FFFFFF;
 {
 	color: k4-muted;
 	font-size: 13px;
-	text-transform: uppercase;
 	letter-spacing: 1px;
 }
 
@@ -455,7 +455,6 @@ css = r"""@define k4-text: #FFFFFF;
 	padding: 2px 7px;
 	margin-right: 10px;
 	border-radius: 3px;
-	text-transform: uppercase;
 	vertical-align: center;
 	color: k4-muted;
 	background-color: k4-cell-light;
@@ -487,7 +486,7 @@ css = r"""@define k4-text: #FFFFFF;
 	color: k4-base;
 	font-size: 14px;
 	vertical-align: center;
-	min-width: 96px;
+	min-width: 150px; /* "1,227/10,000 · +2,500" fits, so every bar is the same length */
 	text-align: right;
 }
 
@@ -540,7 +539,6 @@ css = r"""@define k4-text: #FFFFFF;
 {
 	color: k4-base;
 	font-size: 13px;
-	text-transform: uppercase;
 	vertical-align: center;
 }
 
@@ -768,7 +766,6 @@ css = r"""@define k4-text: #FFFFFF;
 {
 	color: k4-muted;
 	font-size: 12px;
-	text-transform: uppercase;
 	letter-spacing: 1px;
 }
 
@@ -849,7 +846,6 @@ css = r"""@define k4-text: #FFFFFF;
 {
 	color: k4-green;
 	font-size: 15px;
-	text-transform: uppercase;
 	letter-spacing: 1px;
 }
 

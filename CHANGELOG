@@ -1,3 +1,9 @@
+-- 2026.10.31 - V6.5.1
+
+- fix: Panel tabs, captions, buttons and pop-up titles no longer show a dotted capital İ ("MİSSİONS", "ACHİEVEMENTS") for players whose CS2 runs in Turkish. CS2 capitalized these with the player's game language; K4 now sends them already capitalized in the player's K4 language, so English reads "MISSIONS" and Turkish keeps its own capitals
+- fix: All progress bars on the Missions and Achievements tabs are the same length; a long progress text such as "1,227/10,000 · +2,500" made its bar shorter
+- setup: Needs the updated Workshop addon `3811667212`. A 6.5.0 server with the new addon shows these labels in normal case instead of capitals until it is updated; nothing else changes. No config, language or database changes
+
 -- 2026.10.31 - Workshop addon update (after V6.5.0)
 
 - fix: The addon's rank emblems are now exact copies of the current CS2 ones. 11 of them (skillgroup 1, 11, 12, 13, 17, 18 and wingman 11, 12, 13, 17, 18) were from an older version of Valve's artwork, and all 38 carried invisible leftover shapes. Checked against the installed game: every one of the 123 images the panel uses exists in CS2 or ships in the addon
