@@ -36,6 +36,8 @@ K4-System gives your Counter-Strike 2 server a rank ladder that players climb wi
 
 - **A rank that grows with them.** Points for kills, headshots, objectives and round wins, shown as a CS2 rank icon on the scoreboard.
 - **Missions every day.** Three daily missions and one weekly mission that fit the current map, with a streak bonus for playing several days in a row.
+- **Achievements to chase.** 21 long-term goals, from 100 kills to a 30-day mission streak, each with a one-time reward. Progress counts from a player's first game.
+- **Points events.** Double points on weekend evenings, or whenever an admin starts one.
 - **Bounties and duels.** A long kill streak makes a player WANTED, with bonus points for whoever ends it. Players can bet points on who gets more kills this map with `!duel`. Both are rare, so they stay special.
 - **A clickable panel** in CS2's own style for their rank, missions, the top players, all ranks and their stats (optional, through a free Workshop addon).
 - **Their own stats and playtime**, and the server's top list.
@@ -46,7 +48,8 @@ K4-System gives your Counter-Strike 2 server a rank ladder that players climb wi
 - **Works right away.** Drop it in, start the server, and it runs on SQLite. Switch to MySQL when you run several servers or a web panel.
 - **Everything is adjustable** in one commented config file: point values (with ready presets for casual, competitive and deathmatch), the rank ladder, missions, messages and command names.
 - **Rewards for ranks**, such as a VIP flag or a chat tag, given once when a player reaches a rank.
-- **Fair counting.** Warmup, bots, team kills, AFK players and a minimum player count are handled for you.
+- **Fair counting.** Warmup, bots, team kills, AFK players and a minimum player count are handled for you, and anti-farming stops points being fed from a second account or a friend.
+- **Admin tools.** A point history of every manual change (`css_k4_history`), and `css_k4_reload` to apply config changes without a restart.
 - **Fits your server.** Rank-only or permission-only ladders, free-for-all servers, LVL Ranks-style `!lvl` and public `!rank` lines, and a LevelRanks table for older web panels.
 
 ## Screenshots
@@ -85,6 +88,7 @@ Players type `!k4` to see everything they can do. For the clickable panel, add t
 | [Configuration](docs/configuration.md) | Every setting, SQLite or MySQL, point presets, rank modes, permission ranks, rank rewards, scoreboard ranks, languages and tags |
 | [Commands and permissions](docs/commands.md) | Player commands, admin commands, permissions |
 | [Missions](docs/missions.md) | How missions work, every mission type, map rules, the weekly mission |
+| [Achievements](docs/achievements.md) | Long-term goals with one-time rewards, the achievement list, your own achievements |
 | [Panel guide](panorama/README.md) | Setting up the clickable in-game panel and the Workshop addon |
 | [Common problems](docs/troubleshooting.md) | What to check when something does not work |
 | [For developers](docs/developers.md) | How it works, the shared API, building from source |

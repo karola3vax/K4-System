@@ -30,7 +30,8 @@
     "stats": true, // Kills, deaths, hits, rounds, and more (!stats)
     "playtime": true, // Time played per team and alive/dead (!time)
     "admin-list": true, // !admins shows online admins from tags.admins
-    "missions": true // Daily missions (!missions). Needs "ranks", because missions reward points
+    "missions": true, // Daily missions (!missions). Needs "ranks", because missions reward points
+    "achievements": true // Permanent goals with a one-time reward (!achievements). The list is in plugins/K4-System/achievements.jsonc. Needs "ranks"
   },
 
   // When points and stats count.
@@ -199,6 +200,7 @@
     "reset": ["resetmydata"],
     "admins": ["admins", "listadmins"],
     "missions": ["missions", "mission", "daily"],
-    "duel": ["duel"]
+    "duel": ["duel"],
+    "achievements": ["achievements", "achievement", "ach"]
   }
 }

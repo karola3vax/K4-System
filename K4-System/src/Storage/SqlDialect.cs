@@ -18,6 +18,7 @@ internal sealed record TableNames(string Prefix, string LevelRanks)
 	public string Missions => $"{Prefix}k4missions";
 	public string MissionState => $"{Prefix}k4missionstate";
 	public string PointLog => $"{Prefix}k4pointlog";
+	public string Achievements => $"{Prefix}k4achievements";
 }
 
 /// <summary>
@@ -166,6 +167,13 @@ internal sealed class MySqlDialect(string connectionString, string databaseName)
 			`source` VARCHAR(32) COLLATE 'utf8mb4_unicode_ci' NOT NULL,
 			`actor` VARCHAR(255) COLLATE 'utf8mb4_unicode_ci' NOT NULL,
 			INDEX `idx_steam_changed` (`steam_id`, `changed_at`)
+		) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
+
+		yield return $@"CREATE TABLE IF NOT EXISTS `{tables.Achievements}` (
+			`steam_id` VARCHAR(32) COLLATE 'utf8mb4_unicode_ci' NOT NULL,
+			`achievement_id` VARCHAR(64) COLLATE 'utf8mb4_unicode_ci' NOT NULL,
+			`unlocked_at` DATETIME NOT NULL,
+			PRIMARY KEY (`steam_id`, `achievement_id`)
 		) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
 	}
 
@@ -332,6 +340,13 @@ internal sealed class SqliteDialect(string filePath) : SqlDialect
 		);";
 
 		yield return $"CREATE INDEX IF NOT EXISTS `idx_{tables.PointLog}_steam` ON `{tables.PointLog}` (`steam_id`, `changed_at`);";
+
+		yield return $@"CREATE TABLE IF NOT EXISTS `{tables.Achievements}` (
+			`steam_id` TEXT NOT NULL,
+			`achievement_id` TEXT NOT NULL,
+			`unlocked_at` TEXT NOT NULL,
+			PRIMARY KEY (`steam_id`, `achievement_id`)
+		);";
 	}
 
 	public override string CreateLevelRanksTable(string table) => $@"CREATE TABLE IF NOT EXISTS `{table}` (

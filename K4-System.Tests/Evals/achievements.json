@@ -1,0 +1,32 @@
+[
+  {
+    "Name": "a new player's first evening: 100 kills unlocks the first achievement only",
+    "Stats": { "Kills": 100, "Headshots": 40, "Assists": 20 },
+    "PlaytimeHours": 3, "MissionStreak": 1, "Unlocked": [],
+    "ExpectedNew": ["kills-100"]
+  },
+  {
+    "Name": "a veteran crossing 1000 kills and 10 hours in one round gets both, nothing already unlocked again",
+    "Stats": { "Kills": 1000, "Headshots": 450, "Mvp": 60 },
+    "PlaytimeHours": 10, "MissionStreak": 0, "Unlocked": ["kills-100", "headshots-100", "mvps-50"],
+    "ExpectedNew": ["kills-1000", "playtime-10"]
+  },
+  {
+    "Name": "one below every goal unlocks nothing",
+    "Stats": { "Kills": 99, "Headshots": 99, "Assists": 499, "Mvp": 49, "RoundWin": 499, "GameWin": 49, "FirstBlood": 99, "BombPlanted": 99, "BombDefused": 49, "NoscopeKill": 24, "PenetratedKill": 49, "ThrusmokeKill": 24, "FlashedKill": 24, "RevengeKill": 99 },
+    "PlaytimeHours": 9, "MissionStreak": 6, "Unlocked": [],
+    "ExpectedNew": []
+  },
+  {
+    "Name": "a week of daily missions unlocks the streak achievement",
+    "Stats": {},
+    "PlaytimeHours": 0, "MissionStreak": 7, "Unlocked": [],
+    "ExpectedNew": ["mission-streak-7"]
+  },
+  {
+    "Name": "with the stats module off, stat achievements never unlock, playtime ones still do",
+    "Stats": null,
+    "PlaytimeHours": 120, "MissionStreak": null, "Unlocked": [],
+    "ExpectedNew": ["playtime-10", "playtime-100"]
+  }
+]

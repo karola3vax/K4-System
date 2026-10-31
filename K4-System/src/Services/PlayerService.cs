@@ -26,6 +26,7 @@ internal sealed class PlayerService(
 	CountryLookup countries,
 	Chat chat,
 	EventService? events,
+	Achievements.AchievementService? achievements,
 	ILogger logger)
 {
 	// CS2 reports this disconnect reason for players moving to the next map.
@@ -188,6 +189,7 @@ internal sealed class PlayerService(
 		}
 
 		missions?.Load(player);
+		achievements?.Restore(player, record.Achievements, config.Commands.Achievements.FirstOrDefault() ?? "achievements");
 		events?.Greet(player);
 
 		if (config.Messages.Connect)
@@ -233,6 +235,9 @@ internal sealed class PlayerService(
 
 		if (General.Modules.Playtime)
 			playtime.Settle(player);
+
+		// A goal reached in the last moments still unlocks with its reward, saved with the player below.
+		achievements?.Check(player, leaving: true);
 
 		// On a map change everyone is saved together at map end, and reloaded on the next map.
 		if (reason == MapChangeDisconnectReason)
@@ -288,7 +293,8 @@ internal sealed class PlayerService(
 			player.Stats?.ToArray(),
 			player.Playtime?.ToArray(),
 			personalRankResetUtc,
-			player.Missions?.Snapshot());
+			player.Missions?.Snapshot(),
+			player.Achievements?.TakeUnsaved());
 	}
 
 	/// <summary>Saves one player, then refreshes their leaderboard placement while they are still online.</summary>
