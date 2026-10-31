@@ -8,7 +8,8 @@ The clickable K4 panel (`!k4`, `!rank`, `!missions`, `!top`, `!ranks`, `!stats`,
 | `k4system/panorama/styles/custom_game/k4_ui.css` | Colors, sizes, and the hidden or shown states |
 | `k4system/panorama/images/custom_game/k4/ranks/` | Sharp copies of CS2's rank emblems (see below) |
 | `tools/gen_k4_ui.py`, `tools/gen_k4_css.py` | Generate the layout and stylesheet. Edit these, then run them |
-| `tools/gen_k4_ranks.py` | Writes the rank emblem copies from the game's own files |
+| `tools/gen_k4_ranks.py` | Writes the rank emblem copies straight from the installed game |
+| `tools/check_game_images.py` | Checks every game image the addon uses against the installed CS2, and that the emblem copies match the current game. Run it before publishing |
 
 The plugin finds the layout at `panorama/layout/custom_game/k4_ui.xml`. Keep that path.
 
@@ -16,7 +17,14 @@ CS2 checks this layout before showing it: K4 uses only `Panel`, `Label`, and `Bu
 
 The panel reuses CS2's own stylesheet, icons (`panorama/images/icons/...`), and UI sounds. If a Valve update renames one of those files, that icon goes blank; the rest of the panel keeps working.
 
-The rank emblems are the one exception. CS2 draws an SVG at the size written in the file, and the game's rank emblems are only 32×13 pixels, so they looked blurry at the panel's size. The panel cannot use the `Image` element that CS2's own menus use to draw them larger. The addon therefore carries copies of Valve's emblems with only that size raised ten times (320×130). They must stay under `panorama/images/custom_game/`: it is the only image folder the Workshop Manager packs, and images anywhere else are silently left out of the upload. To refresh them after a CS2 update, unpack `panorama/images/icons/skillgroups/skillgroup0..18.vsvg_c` and `wingman0..18.vsvg_c` with Source2Viewer-CLI and run `tools/gen_k4_ranks.py <folder>`.
+The rank emblems are the one exception. CS2 draws an SVG at the size written in the file, and the game's rank emblems are only 32×13 pixels, so they looked blurry at the panel's size. The panel cannot use the `Image` element that CS2's own menus use to draw them larger. The addon therefore carries copies of Valve's emblems with only that size raised ten times (320×130). They must stay under `panorama/images/custom_game/`: it is the only image folder the Workshop Manager packs, and images anywhere else are silently left out of the upload. Both tools read the game's own `pak01_dir.vpk` and need only Python:
+
+```bash
+python panorama/tools/check_game_images.py "<CS2>/game/csgo/pak01_dir.vpk"
+python panorama/tools/gen_k4_ranks.py "<CS2>/game/csgo/pak01_dir.vpk"
+```
+
+`check_game_images.py` exits with an error and names the file when a game image the panel uses is gone or an emblem no longer matches the game; `gen_k4_ranks.py` then rewrites all 38 emblems from the current game files. (It also still accepts a folder of SVGs unpacked with Source2Viewer-CLI.)
 
 ### Server and addon versions
 
