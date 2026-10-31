@@ -3,6 +3,7 @@ namespace K4System.Hud;
 using System.Globalization;
 using CounterStrikeSharp.API;
 using CounterStrikeSharp.API.Core;
+using CounterStrikeSharp.API.Core.Translations;
 using CounterStrikeSharp.API.Modules.Extensions;
 using CounterStrikeSharp.API.Modules.Timers;
 using K4System.Config;
@@ -384,7 +385,7 @@ internal sealed class PanoramaHud(
 		for (int i = 0; i < TabIds.Length; i++)
 		{
 			string tabId = $"k4-tab-{TabIds[i]}";
-			SetVar(player, tabId, "label", Text(player, $"hud.tab.{TabIds[i]}"));
+			SetVar(player, tabId, "label", Upper(player, Text(player, $"hud.tab.{TabIds[i]}")));
 			SetClass(player, tabId, "k4-active", (int)state.Tab == i);
 			SetClass(player, tabId, "k4-gone", !IsTabAvailable((HudTab)i));
 			SetClass(player, Views[i], "k4-show", (int)state.Tab == i);
@@ -588,6 +589,12 @@ internal sealed class PanoramaHud(
 
 	private string Text(K4Player player, string key, params object[] args) => chat.For(player.Controller, key, args);
 
+	// Capital letters follow the reader's K4 language, not the game's: CS2's CSS uppercase used the client's own
+	// locale, so a Turkish client turned English "Missions" into "MİSSİONS".
+	private static string Upper(K4Player player, string text) => Upper(player.Controller.GetLanguage(), text);
+
+	internal static string Upper(CultureInfo language, string text) => text.ToUpper(language);
+
 	private static string Number(long value) => value.ToString("N0", CultureInfo.InvariantCulture);
 
 	private void Tell(K4Player player, DuelService.Refusal? refusal)
@@ -615,8 +622,8 @@ internal sealed class PanoramaHud(
 		SetClass(player, "k4-sd-duel", "k4-gone", duel is null);
 
 		SetVar(player, view, "challenge", incoming is { } c ? Text(player, "hud.sd-challenge", StripColors(c.Challenger), Number(c.Stake)) : "");
-		SetVar(player, view, "accept", Text(player, "hud.sd-accept"));
-		SetVar(player, view, "decline", Text(player, "hud.sd-decline"));
+		SetVar(player, view, "accept", Upper(player, Text(player, "hud.sd-accept")));
+		SetVar(player, view, "decline", Upper(player, Text(player, "hud.sd-decline")));
 		SetClass(player, "k4-sd-challenge", "k4-gone", incoming is null);
 
 		// With nothing going on, a hint says the features exist.
@@ -648,7 +655,7 @@ internal sealed class PanoramaHud(
 		SetClass(player, "k4-rank-badge", "k4-gone", !textBadge);
 		SetVar(player, view, "tag", string.IsNullOrWhiteSpace(current.Tag) ? current.Name : current.Tag.Trim('[', ']'));
 		SetVar(player, view, "rank", current.Name);
-		SetVar(player, view, "caption", Text(player, "hud.tab.rank"));
+		SetVar(player, view, "caption", Upper(player, Text(player, "hud.tab.rank")));
 		SetColor(player, "k4-rank-name", current.ColorName);
 		SetColor(player, "k4-rank-badge", current.ColorName);
 
@@ -725,7 +732,7 @@ internal sealed class PanoramaHud(
 			SetClass(player, card, "k4-gone", false);
 			SetClass(player, card, "k4-done", slot.Completed);
 			SetClass(player, card, "k4-blocked", !slot.Completed && !missions.IsDoable(mission));
-			SetVar(player, card, "diff", missions.DifficultyLabel(player.Controller, mission));
+			SetVar(player, card, "diff", Upper(player, missions.DifficultyLabel(player.Controller, mission)));
 			SwapClass(player, card, "difficulty", $"k4-{difficulty}");
 			SwapClass(player, $"{card}-icon", "mission-icon", MissionIcon(mission));
 
@@ -736,7 +743,7 @@ internal sealed class PanoramaHud(
 			SetBar(player, $"{card}-bar", slot.Progress, mission.Target);
 
 			// The weekly mission cannot be rerolled; it is only swapped when the map cannot offer it.
-			SetVar(player, $"k4-reroll-{i}", "reroll", Text(player, "hud.reroll"));
+			SetVar(player, $"k4-reroll-{i}", "reroll", Upper(player, Text(player, "hud.reroll")));
 			SetClass(player, $"k4-reroll-{i}", "k4-gone", weekly || !canReroll || !slot.Untouched);
 		}
 
@@ -974,7 +981,7 @@ internal sealed class PanoramaHud(
 			SetClass(player, tile, "k4-gone", i >= tiles.Count);
 			if (i < tiles.Count)
 			{
-				SetVar(player, tile, "label", tiles[i].Label);
+				SetVar(player, tile, "label", Upper(player, tiles[i].Label));
 				SetVar(player, tile, "value", tiles[i].Value);
 				SwapClass(player, $"{tile}-icon", "stat-icon", tiles[i].Icon);
 			}
@@ -996,7 +1003,7 @@ internal sealed class PanoramaHud(
 		int version = toastVersions[player.Slot] = NextVersion();
 
 		CCSCustomHudLayout hud = layout!;
-		hud.SetDialogVariableStringForPlayer(controller, Toast, "title", chat.For(controller, titleKey));
+		hud.SetDialogVariableStringForPlayer(controller, Toast, "title", Upper(controller.GetLanguage(), chat.For(controller, titleKey)));
 		hud.SetDialogVariableStringForPlayer(controller, Toast, "text", StripColors(text));
 		SwapClass(player, Toast, "toast", kind switch
 		{

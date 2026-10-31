@@ -139,7 +139,6 @@
 {
 	color: k4-text;
 	font-size: 15px;
-	text-transform: uppercase;
 	vertical-align: center;
 }
 
@@ -326,7 +325,6 @@
 {
 	color: k4-muted;
 	font-size: 13px;
-	text-transform: uppercase;
 	letter-spacing: 1px;
 }
 
@@ -415,7 +413,6 @@
 	padding: 2px 7px;
 	margin-right: 10px;
 	border-radius: 3px;
-	text-transform: uppercase;
 	vertical-align: center;
 	color: k4-muted;
 	background-color: k4-cell-light;
@@ -447,7 +444,7 @@
 	color: k4-base;
 	font-size: 14px;
 	vertical-align: center;
-	min-width: 96px;
+	min-width: 150px; /* "1,227/10,000 · +2,500" fits, so every bar is the same length */
 	text-align: right;
 }
 
@@ -500,7 +497,6 @@
 {
 	color: k4-base;
 	font-size: 13px;
-	text-transform: uppercase;
 	vertical-align: center;
 }
 
@@ -728,7 +724,6 @@
 {
 	color: k4-muted;
 	font-size: 12px;
-	text-transform: uppercase;
 	letter-spacing: 1px;
 }
 
@@ -809,7 +804,6 @@
 {
 	color: k4-green;
 	font-size: 15px;
-	text-transform: uppercase;
 	letter-spacing: 1px;
 }
 
