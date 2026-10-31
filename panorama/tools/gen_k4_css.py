@@ -428,6 +428,7 @@ css = r"""@define k4-text: #FFFFFF;
 .k4-card.k4-medium .k4-card-stripe { background-color: k4-gold; }
 .k4-card.k4-hard .k4-card-stripe { background-color: k4-red; }
 .k4-card.k4-weekly .k4-card-stripe { background-color: #B054E8; }
+.k4-card.k4-ach .k4-card-stripe { background-color: k4-gold; }
 
 .k4-mission-icon
 {
@@ -863,6 +864,21 @@ css = r"""@define k4-text: #FFFFFF;
 .k4-toast.k4-toast-red .k4-toast-title { color: #FF6B5E; }
 .k4-toast.k4-toast-gold .k4-toast-line { background-color: gradient( linear, 0% 0%, 100% 0%, from( #00000000 ), to( k4-gold ) ); }
 .k4-toast.k4-toast-red .k4-toast-line { background-color: gradient( linear, 0% 0%, 100% 0%, from( #00000000 ), to( k4-red ) ); }
+
+/* Achievements (6.5): the name in gold, like CS2's mission titles */
+.k4-ach-name { color: k4-gold; font-size: 14px; margin-right: 8px; vertical-align: center; }
+
+/* Points event banner under the header (6.5) */
+.k4-event
+{
+	width: 100%;
+	margin: 0px 0px 6px 0px;
+	padding: 5px 18px;
+	color: k4-gold;
+	font-size: 14px;
+	background-color: #e4ae391f;
+	border-left: 3px solid k4-gold;
+}
 
 /* Bounty and duels on the Rank tab */
 .k4-showdown { margin-top: 8px; }

@@ -1,6 +1,6 @@
 # K4 Panorama addon
 
-The clickable K4 panel (`!k4`, `!rank`, `!missions`, `!top`, `!ranks`, `!stats`, `!time`) and its toast pop-ups are a CS2 Panorama layout. A server plugin cannot add Panorama files, so they ship to players as a Steam Workshop addon. The server mounts that addon with MultiAddonManager, players download it when they join, and K4 fills in the text and handles the clicks.
+The clickable K4 panel (`!k4`, `!rank`, `!missions`, `!top`, `!ranks`, `!stats`, `!time`, `!achievements`) and its toast pop-ups are a CS2 Panorama layout. A server plugin cannot add Panorama files, so they ship to players as a Steam Workshop addon. The server mounts that addon with MultiAddonManager, players download it when they join, and K4 fills in the text and handles the clicks.
 
 | File | What it is |
 | --- | --- |
@@ -17,6 +17,10 @@ CS2 checks this layout before showing it: K4 uses only `Panel`, `Label`, and `Bu
 The panel reuses CS2's own stylesheet, icons (`panorama/images/icons/...`), and UI sounds. If a Valve update renames one of those files, that icon goes blank; the rest of the panel keeps working.
 
 The rank emblems are the one exception. CS2 draws an SVG at the size written in the file, and the game's rank emblems are only 32×13 pixels, so they looked blurry at the panel's size. The panel cannot use the `Image` element that CS2's own menus use to draw them larger. The addon therefore carries copies of Valve's emblems with only that size raised ten times (320×130). They must stay under `panorama/images/custom_game/`: it is the only image folder the Workshop Manager packs, and images anywhere else are silently left out of the upload. To refresh them after a CS2 update, unpack `panorama/images/icons/skillgroups/skillgroup0..18.vsvg_c` and `wingman0..18.vsvg_c` with Source2Viewer-CLI and run `tools/gen_k4_ranks.py <folder>`.
+
+### Server and addon versions
+
+Players and servers update at different times, so every part a newer server fills starts hidden in the layout. A server older than the addon simply never shows those parts; a server newer than a player's addon writes to parts the player does not have, which does nothing. In 6.5 that is the Achievements tab and the points-event line under the header; in 6.4 the bounty and duel lines on the Rank tab. The layout tests check that each of them starts hidden.
 
 ## The official addon
 
@@ -63,7 +67,7 @@ To update the panel later, repeat steps 3 to 5 and choose the existing item in t
 
 4. **Restart the server**, join, and type `!k4`.
 
-With the panel on, the K4 commands open their tab instead of printing to chat. Promotions, demotions, and finished missions show as a small pop-up at the right side of the screen, below the kill feed, instead of a chat line. Point messages stay in chat. Click **✕** (top right) to close the panel. While it is open the mouse controls the panel, not your aim, so K4 also closes it when freeze time ends and after 45 seconds without a click.
+With the panel on, the K4 commands open their tab instead of printing to chat. Promotions, demotions, finished missions, unlocked achievements, and points events show as a small pop-up at the right side of the screen, below the kill feed, instead of a chat line. Point messages stay in chat. Click **✕** (top right) to close the panel. While it is open the mouse controls the panel, not your aim, so K4 also closes it when freeze time ends and after 45 seconds without a click.
 
 ## If something does not work
 

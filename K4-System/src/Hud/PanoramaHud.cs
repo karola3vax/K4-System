@@ -6,6 +6,7 @@ using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Modules.Extensions;
 using CounterStrikeSharp.API.Modules.Timers;
 using K4System.Config;
+using K4System.Domain;
 using K4System.Missions;
 using K4System.Players;
 using K4System.Ranks;
@@ -19,7 +20,8 @@ public enum HudTab
 	Missions,
 	Top,
 	Ranks,
-	Stats
+	Stats,
+	Achievements
 }
 
 public enum ToastKind
@@ -42,6 +44,8 @@ internal sealed class PanoramaHud(
 	MissionService? missions,
 	BountyService? bounty,
 	DuelService? duels,
+	Achievements.AchievementService? achievements,
+	EventService? events,
 	PlaytimeService playtime,
 	SqlPlayerStore store,
 	GameThread gameThread,
@@ -74,8 +78,11 @@ internal sealed class PanoramaHud(
 	// Database-backed views are cached briefly, so spamming commands or page buttons cannot flood the database.
 	private static readonly TimeSpan CacheFor = TimeSpan.FromSeconds(15);
 
-	private static readonly string[] TabIds = ["rank", "missions", "top", "ranks", "stats"];
-	private static readonly string[] Views = ["k4-view-rank", "k4-view-missions", "k4-view-top", "k4-view-ranks", "k4-view-stats"];
+	private static readonly string[] TabIds = ["rank", "missions", "top", "ranks", "stats", "achievements"];
+	private static readonly string[] Views = ["k4-view-rank", "k4-view-missions", "k4-view-top", "k4-view-ranks", "k4-view-stats", "k4-view-achievements"];
+
+	/// <summary>Achievement cards on one page of the Achievements tab.</summary>
+	internal const int AchievementCards = 4;
 	private static readonly HashSet<string> ColorNames =
 	[
 		"default", "white", "darkred", "green", "lightyellow", "lightblue", "olive", "lime", "red", "lightpurple",
@@ -106,6 +113,7 @@ internal sealed class PanoramaHud(
 		public int TopPage { get; set; }
 		public int TopPageCount { get; set; } = 1;
 		public int RanksPage { get; set; }
+		public int AchievementsPage { get; set; }
 		public int Version { get; set; }
 	}
 
@@ -336,6 +344,12 @@ internal sealed class PanoramaHud(
 			case "k4-rk-next" when ranks is not null && (state.RanksPage + 1) * RankRows < ranks.Ladder.Ranks.Count:
 				state.RanksPage++;
 				break;
+			case "k4-ach-prev" when state.AchievementsPage > 0:
+				state.AchievementsPage--;
+				break;
+			case "k4-ach-next" when (state.AchievementsPage + 1) * AchievementCards < AchievementOrder(player).Count:
+				state.AchievementsPage++;
+				break;
 			default:
 				if (buttonId.StartsWith("k4-tab-", StringComparison.Ordinal) && Array.IndexOf(TabIds, buttonId["k4-tab-".Length..]) is int tab and >= 0)
 				{
@@ -365,6 +379,7 @@ internal sealed class PanoramaHud(
 		CCSPlayerController controller = player.Controller;
 
 		SetVar(player, "k4-subtitle", "subtitle", player.Name);
+		DrawEventBanner(player);
 
 		for (int i = 0; i < TabIds.Length; i++)
 		{
@@ -388,6 +403,9 @@ internal sealed class PanoramaHud(
 				break;
 			case HudTab.Ranks:
 				DrawRanks(player, state);
+				break;
+			case HudTab.Achievements:
+				DrawAchievements(player, state);
 				break;
 			default:
 				DrawStats(player);
@@ -417,6 +435,7 @@ internal sealed class PanoramaHud(
 	{
 		HudTab.Rank or HudTab.Top or HudTab.Ranks => ranks is not null,
 		HudTab.Missions => missions is not null,
+		HudTab.Achievements => achievements is not null,
 		_ => config.Modules.Stats || config.Modules.Playtime
 	};
 
@@ -561,8 +580,10 @@ internal sealed class PanoramaHud(
 			yield return $"eq-{weapon}";
 		foreach (string icon in StatIcons)
 			yield return icon;
-		foreach (string icon in new[] { "ic-bullet", "ic-check", "ic-hot_trend", "ic-cold_trend", "ic-trade_up", "ic-mission_star" })
+		foreach (string icon in new[] { "ic-bullet", "ic-check", "ic-hot_trend", "ic-cold_trend", "ic-trade_up", "ic-mission_star", "ic-trophy" })
 			yield return icon;
+		foreach (Achievements.AchievementType type in Enum.GetValues<Achievements.AchievementType>())
+			yield return AchievementIcon(type);
 	}
 
 	private string Text(K4Player player, string key, params object[] args) => chat.For(player.Controller, key, args);
@@ -721,6 +742,76 @@ internal sealed class PanoramaHud(
 
 		SetVar(player, view, "footer", missions.Footer(player));
 	}
+
+	/// <summary>The gold line under the header while a points event is on.</summary>
+	private void DrawEventBanner(K4Player player)
+	{
+		if (events?.Current is ActiveEvent active)
+		{
+			SetVar(player, "k4-event", "event", Text(player, "hud.event-banner", PointEvents.Format(active.Multiplier), PointEvents.MinutesLeft(active, DateTime.UtcNow)));
+			SetClass(player, "k4-event", "k4-gone", false);
+		}
+		else
+			SetClass(player, "k4-event", "k4-gone", true);
+	}
+
+	/// <summary>Unfinished achievements closest to done first, then the unlocked ones in file order.</summary>
+	private List<(Achievements.AchievementDefinition Achievement, int Progress, bool Done)> AchievementOrder(K4Player player)
+	{
+		if (achievements is null || player.Achievements is not Achievements.PlayerAchievements mine)
+			return [];
+
+		Achievements.AchievementCounters counters = Achievements.AchievementService.CountersOf(player);
+		List<(Achievements.AchievementDefinition, int, bool)> order = [.. Achievements.AchievementRules
+			.Closest(achievements.All, mine.Unlocked, counters, int.MaxValue)
+			.Select(item => (item.Achievement, item.Progress, false))];
+		order.AddRange(achievements.All.Where(achievement => mine.Unlocked.Contains(achievement.Id)).Select(achievement => (achievement, achievement.Goal, true)));
+		return order;
+	}
+
+	private void DrawAchievements(K4Player player, HudState state)
+	{
+		const string view = "k4-view-achievements";
+		List<(Achievements.AchievementDefinition Achievement, int Progress, bool Done)> order = AchievementOrder(player);
+		int pages = Math.Max(1, (order.Count + AchievementCards - 1) / AchievementCards);
+		state.AchievementsPage = Math.Clamp(state.AchievementsPage, 0, pages - 1);
+		var rows = order.Skip(state.AchievementsPage * AchievementCards).Take(AchievementCards).ToList();
+
+		for (int i = 0; i < AchievementCards; i++)
+		{
+			string card = $"k4-ach-{i}";
+			if (i >= rows.Count)
+			{
+				SetClass(player, card, "k4-gone", true);
+				continue;
+			}
+
+			(Achievements.AchievementDefinition achievement, int progress, bool done) = rows[i];
+			SetClass(player, card, "k4-gone", false);
+			SetClass(player, card, "k4-done", done);
+			SetVar(player, card, "name", achievements!.NameFor(achievement, player.Controller));
+			SetVar(player, card, "desc", achievements.DescriptionFor(achievement, player.Controller));
+			SetVar(player, card, "progress", done
+				? $"{Text(player, "hud.done")} · +{Number(achievement.Points)}"
+				: $"{Number(progress)}/{Number(achievement.Goal)} · +{Number(achievement.Points)}");
+			SetBar(player, $"{card}-bar", progress, achievement.Goal);
+			SwapClass(player, $"{card}-icon", "mission-icon", AchievementIcon(achievement.Type));
+		}
+
+		int unlocked = player.Achievements is Achievements.PlayerAchievements mine ? achievements?.All.Count(achievement => mine.Unlocked.Contains(achievement.Id)) ?? 0 : 0;
+		SetVar(player, view, "summary", Text(player, "hud.ach-summary", unlocked, achievements?.All.Count ?? 0));
+		SetVar(player, "k4-ach-page", "page", Text(player, "hud.page", state.AchievementsPage + 1, pages));
+		SetClass(player, "k4-ach-prev", "k4-disabled", state.AchievementsPage == 0);
+		SetClass(player, "k4-ach-next", "k4-disabled", state.AchievementsPage + 1 >= pages);
+	}
+
+	/// <summary>The mission icon of the same kind of goal; the streak gets the hot-trend icon of the mission footer.</summary>
+	internal static string AchievementIcon(Achievements.AchievementType type) => type switch
+	{
+		Achievements.AchievementType.PlaytimeHours => "ic-clock",
+		Achievements.AchievementType.MissionStreak => "ic-hot_trend",
+		_ => Enum.TryParse(type.ToString(), out MissionType mission) ? MissionIcon(new MissionDefinition { Type = mission }) : "ic-mission_star"
+	};
 
 	private void DrawTop(K4Player player, HudState state)
 	{

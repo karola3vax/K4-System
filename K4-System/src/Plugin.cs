@@ -173,7 +173,7 @@ public sealed class Plugin : BasePlugin
 
 		if (Config.Panorama.Enabled)
 		{
-			hud = new PanoramaHud(this, Config, players, ranks, missions, bounty, duels, playtime, store, gameThread, background, chat, Logger);
+			hud = new PanoramaHud(this, Config, players, ranks, missions, bounty, duels, achievements, events, playtime, store, gameThread, background, chat, Logger);
 			hudBridge.Hud = hud;
 			RegisterHudListeners(hud, players);
 			hud.Warmup();

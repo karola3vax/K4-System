@@ -41,9 +41,12 @@ public partial class PanoramaLayoutTests
 			"k4-view-rank", "k4-view-missions", "k4-view-top", "k4-view-ranks", "k4-view-stats",
 			"k4-rank-badge", "k4-rank-icon", "k4-rank-name", "k4-rank-bar", "k4-rank-reward", "k4-toast-icon",
 			"k4-top-me", "k4-top-me-icon", "k4-top-me-pos", "k4-top-prev", "k4-top-next", "k4-rk-prev", "k4-rk-next",
-			"k4-showdown", "k4-sd-wanted", "k4-sd-duel", "k4-sd-challenge", "k4-sd-hint", "k4-duel-accept", "k4-duel-decline"
+			"k4-showdown", "k4-sd-wanted", "k4-sd-duel", "k4-sd-challenge", "k4-sd-hint", "k4-duel-accept", "k4-duel-decline",
+			"k4-event", "k4-view-achievements", "k4-ach-prev", "k4-ach-next", "k4-ach-page"
 		];
-		expected.AddRange(new[] { "rank", "missions", "top", "ranks", "stats" }.Select(tab => $"k4-tab-{tab}"));
+		expected.AddRange(new[] { "rank", "missions", "top", "ranks", "stats", "achievements" }.Select(tab => $"k4-tab-{tab}"));
+		for (int i = 0; i < PanoramaHud.AchievementCards; i++)
+			expected.AddRange([$"k4-ach-{i}", $"k4-ach-{i}-icon", $"k4-ach-{i}-bar"]);
 
 		for (int i = 0; i < PanoramaHud.MissionCards; i++)
 			expected.AddRange([$"k4-m{i}", $"k4-m{i}-diff", $"k4-m{i}-icon", $"k4-m{i}-bar", $"k4-reroll-{i}"]);
@@ -60,9 +63,9 @@ public partial class PanoramaLayoutTests
 	[Fact]
 	public void Every_clickable_id_is_a_button()
 	{
-		List<string> clickable = ["k4-close", "k4-top-prev", "k4-top-next", "k4-rk-prev", "k4-rk-next", "k4-duel-accept", "k4-duel-decline"];
+		List<string> clickable = ["k4-close", "k4-top-prev", "k4-top-next", "k4-rk-prev", "k4-rk-next", "k4-duel-accept", "k4-duel-decline", "k4-ach-prev", "k4-ach-next"];
 		clickable.AddRange(Enumerable.Range(0, 3).Select(i => $"k4-reroll-{i}"));
-		clickable.AddRange(new[] { "rank", "missions", "top", "ranks", "stats" }.Select(tab => $"k4-tab-{tab}"));
+		clickable.AddRange(new[] { "rank", "missions", "top", "ranks", "stats", "achievements" }.Select(tab => $"k4-tab-{tab}"));
 		Dictionary<string, string> elements = Layout.Descendants()
 			.Where(element => element.Attribute("id") is not null)
 			.ToDictionary(element => (string)element.Attribute("id")!, element => element.Name.LocalName);
@@ -83,6 +86,31 @@ public partial class PanoramaLayoutTests
 		string? classes = Layout.Descendants().Where(element => (string?)element.Attribute("id") == panel)
 			.Select(element => (string?)element.Attribute("class")).Single();
 		Assert.Contains(PanoramaHud.DefaultClass(group)!, (classes ?? "").Split(' '));
+	}
+
+	// Players update the addon before or after their server: a 6.4 server never touches what 6.5 added,
+	// so the new tab, view content and banner must start hidden, or a 6.4 server would show them empty.
+	[Theory]
+	[InlineData("k4-tab-achievements")]
+	[InlineData("k4-event")]
+	[InlineData("k4-showdown")]
+	public void Parts_newer_servers_fill_start_hidden(string panel)
+	{
+		string? classes = Layout.Descendants().Where(element => (string?)element.Attribute("id") == panel)
+			.Select(element => (string?)element.Attribute("class")).Single();
+		Assert.Contains("k4-gone", (classes ?? "").Split(' '));
+	}
+
+	[Fact]
+	public void The_server_tab_list_matches_the_layout_tabs_in_order()
+	{
+		List<string> layoutTabs = Layout.Descendants()
+			.Select(element => (string?)element.Attribute("id"))
+			.OfType<string>()
+			.Where(id => id.StartsWith("k4-tab-", StringComparison.Ordinal))
+			.Select(id => id["k4-tab-".Length..])
+			.ToList();
+		Assert.Equal(Enum.GetNames<HudTab>().Select(name => name.ToLowerInvariant()), layoutTabs);
 	}
 
 	[Theory]
