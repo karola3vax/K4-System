@@ -264,6 +264,10 @@ internal sealed class RankService(
 		K4Player? victim = players.Get(@event.Userid);
 		K4Player? attacker = players.Get(@event.Attacker);
 
+		// Anti-farm: a kill on someone from the same connection, or the same victim over and over, is worth less to both.
+		double share = decision.AttackerPoint == AttackerPointAction.Kill ? KillShare(attacker, victim) : 1;
+		ChatText? farmNote = share < 1 && share > 0 ? new ChatText("reason.repeat-kill", [(int)Math.Round(share * 100)]) : null;
+
 		if (decision.VictimPoint != VictimPointAction.None && victim is { IsHuman: true, Rank: not null })
 		{
 			victim.KillStreak = 0;
@@ -276,7 +280,7 @@ internal sealed class RankService(
 				string attackerName = @event.Attacker?.PlayerName ?? attacker?.Name ?? string.Empty;
 				ChatText? extra = Settings.NamesInKillMessages ? new ChatText("reason.death-by", [attackerName, attacker?.Rank?.Points ?? 0]) : null;
 				int deathPoints = attacker?.IsValid == true ? DynamicPoints(attacker, victim, Points.Death) : Points.Death;
-				ApplyPoints(victim, deathPoints, "reason.death", extra);
+				ApplyPoints(victim, PointMath.Scale(deathPoints, share), "reason.death", extra);
 			}
 		}
 
@@ -284,8 +288,8 @@ internal sealed class RankService(
 		{
 			if (decision.AttackerPoint == AttackerPointAction.TeamKill)
 				ApplyPoints(attacker, Points.TeamKill, "reason.team-kill", refreshRank: false);
-			else
-				ApplyKillPoints(@event, attacker, victim);
+			else if (share > 0)
+				ApplyKillPoints(@event, attacker, victim, share, farmNote);
 
 			// All bonuses of one kill end in a single rank change.
 			RefreshRank(attacker, announce: true, allowRewards: true);
@@ -297,44 +301,81 @@ internal sealed class RankService(
 			bool enemy = decision.AssisterVictimIsEnemy;
 			bool flash = @event.Assistedflash;
 
+			// An assist on a farmed kill is worth the same share as the kill.
+			int Fair(int amount) => amount > 0 ? PointMath.Scale(amount, share) : amount;
+
 			if (enemy && !flash)
-				ApplyPoints(assister, Points.Assist, "reason.assist");
+				ApplyPoints(assister, Fair(Points.Assist), "reason.assist");
 			else if (!enemy && !flash)
 				ApplyPoints(assister, Points.TeamAssist, "reason.team-assist");
 			else if (enemy)
-				ApplyPoints(assister, Points.AssistFlash, "reason.flash-assist");
+				ApplyPoints(assister, Fair(Points.AssistFlash), "reason.flash-assist");
 			else
 				ApplyPoints(assister, Points.TeamAssistFlash, "reason.team-flash-assist");
 		}
 	}
 
-	private void ApplyKillPoints(EventPlayerDeath @event, K4Player attacker, K4Player? victim)
+	/// <summary>The anti-farm share of a kill's points; recording the kill for the repeat-kill rule.</summary>
+	private double KillShare(K4Player? attacker, K4Player? victim)
 	{
+		AntiFarmSettings farm = config.AntiFarm;
+		if (attacker is not { IsValid: true, IsHuman: true } || victim is not { IsValid: true, IsHuman: true } || ReferenceEquals(attacker, victim))
+			return 1;
+
+		bool sameAddress = farm.SameIp && Showdowns.SameAddress(attacker.Controller.IpAddress, victim.Controller.IpAddress);
+		int earlier = 0;
+		if (farm.RepeatKills > 0)
+		{
+			if (!killHistories.TryGetValue(attacker.SteamId, out KillHistory? history))
+				killHistories[attacker.SteamId] = history = new KillHistory();
+			earlier = history.Record(victim.SteamId, DateTime.UtcNow, TimeSpan.FromMinutes(farm.WindowMinutes));
+		}
+		return FarmGuard.KillShare(sameAddress, earlier, farm.RepeatKills, farm.ReducedPercent);
+	}
+
+	// By SteamID, not on the player, so reconnecting does not start the repeat-kill count again.
+	private readonly Dictionary<ulong, KillHistory> killHistories = [];
+
+	private void PruneKillHistories(DateTime nowUtc)
+	{
+		TimeSpan window = TimeSpan.FromMinutes(config.AntiFarm.WindowMinutes);
+		foreach ((ulong killer, KillHistory history) in killHistories.ToArray())
+		{
+			history.Prune(nowUtc, window);
+			if (history.VictimCount == 0)
+				killHistories.Remove(killer);
+		}
+	}
+
+	private void ApplyKillPoints(EventPlayerDeath @event, K4Player attacker, K4Player? victim, double share, ChatText? farmNote)
+	{
+		int Fair(int amount) => share >= 1 ? amount : PointMath.Scale(amount, share);
+
 		string victimName = @event.Userid?.PlayerName ?? victim?.Name ?? string.Empty;
-		ChatText? extra = Settings.NamesInKillMessages ? new ChatText("reason.kill-of", [victimName, victim?.Rank?.Points ?? 0]) : null;
+		ChatText? extra = farmNote ?? (Settings.NamesInKillMessages ? new ChatText("reason.kill-of", [victimName, victim?.Rank?.Points ?? 0]) : null);
 		int killPoints = victim is not null ? DynamicPoints(attacker, victim, Points.Kill) : Points.Kill;
-		ApplyPoints(attacker, killPoints, "reason.kill", extra, refreshRank: false);
+		ApplyPoints(attacker, Fair(killPoints), "reason.kill", extra, refreshRank: false);
 
 		if (@event.Headshot)
-			ApplyPoints(attacker, Points.Headshot, "reason.headshot", refreshRank: false);
+			ApplyPoints(attacker, Fair(Points.Headshot), "reason.headshot", refreshRank: false);
 
 		if (@event.Penetrated > 0 && Points.Penetrated > 0)
-			ApplyPoints(attacker, PointMath.Scale(Points.Penetrated, @event.Penetrated), "reason.penetrated", refreshRank: false);
+			ApplyPoints(attacker, Fair(PointMath.Scale(Points.Penetrated, @event.Penetrated)), "reason.penetrated", refreshRank: false);
 
 		if (@event.Noscope)
-			ApplyPoints(attacker, Points.NoScope, "reason.noscope", refreshRank: false);
+			ApplyPoints(attacker, Fair(Points.NoScope), "reason.noscope", refreshRank: false);
 
 		if (@event.Thrusmoke)
-			ApplyPoints(attacker, Points.Thrusmoke, "reason.through-smoke", refreshRank: false);
+			ApplyPoints(attacker, Fair(Points.Thrusmoke), "reason.through-smoke", refreshRank: false);
 
 		if (@event.Attackerblind)
-			ApplyPoints(attacker, Points.BlindKill, "reason.blind-kill", refreshRank: false);
+			ApplyPoints(attacker, Fair(Points.BlindKill), "reason.blind-kill", refreshRank: false);
 
 		if (@event.Distance >= Points.LongDistance)
-			ApplyPoints(attacker, Points.LongDistanceKill, "reason.long-distance", refreshRank: false);
+			ApplyPoints(attacker, Fair(Points.LongDistanceKill), "reason.long-distance", refreshRank: false);
 
 		if (KillBonuses.ForWeapon(@event.Weapon, Points) is PointBonus weaponBonus)
-			ApplyPoints(attacker, weaponBonus.Points, weaponBonus.Phrase, refreshRank: false);
+			ApplyPoints(attacker, Fair(weaponBonus.Points), weaponBonus.Phrase, refreshRank: false);
 
 		DateTime now = DateTime.UtcNow;
 		(int streak, PointBonus? streakBonus) = KillBonuses.NextStreak(attacker.KillStreak, attacker.LastKillUtc, now, Settings.KillstreakWindowSeconds, Points);
@@ -342,7 +383,7 @@ internal sealed class RankService(
 		attacker.LastKillUtc = now;
 
 		if (streakBonus is PointBonus bonus)
-			ApplyPoints(attacker, bonus.Points, bonus.Phrase, refreshRank: false);
+			ApplyPoints(attacker, Fair(bonus.Points), bonus.Phrase, refreshRank: false);
 	}
 
 	public void OnTeamChange(K4Player player, bool disconnect, int team, int oldTeam)
@@ -394,6 +435,7 @@ internal sealed class RankService(
 	public void OnRoundStart()
 	{
 		roundSummarized = false;
+		PruneKillHistories(DateTime.UtcNow);
 
 		foreach (K4Player player in players.ValidHumans.ToArray())
 		{

@@ -101,6 +101,7 @@
   "reason.team-kill": "Tiimikaaslase tapmine",
   "reason.kill": "Tapmine",
   "reason.kill-of": "{silver}— {lime}{0} {silver}({1})",
+  "reason.repeat-kill": "{silver}(jälle sama mängija: {0}%)",
   "reason.headshot": "Pealask",
   "reason.penetrated": "Läbi seina",
   "reason.noscope": "Ilma sihikuta",

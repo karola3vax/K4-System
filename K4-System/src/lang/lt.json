@@ -101,6 +101,7 @@
   "reason.team-kill": "Komandos draugo nužudymas",
   "reason.kill": "Nužudymas",
   "reason.kill-of": "{silver}— {lime}{0} {silver}({1})",
+  "reason.repeat-kill": "{silver}(vėl tas pats žaidėjas: {0} %)",
   "reason.headshot": "Headshotas",
   "reason.penetrated": "Kiaurai sieną",
   "reason.noscope": "Be taikiklio",

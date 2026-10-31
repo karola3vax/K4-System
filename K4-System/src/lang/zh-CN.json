@@ -101,6 +101,7 @@
   "reason.team-kill": "误杀队友",
   "reason.kill": "击杀",
   "reason.kill-of": "{silver}目标 {lime}{0} {silver}({1})",
+  "reason.repeat-kill": "{silver}(重复击杀同一玩家：{0}%)",
   "reason.headshot": "爆头",
   "reason.penetrated": "穿墙",
   "reason.noscope": "盲狙",

@@ -39,4 +39,15 @@ public class PointMathTests
 		Assert.Equal(0, PointMath.Scale(100, -1));
 		Assert.Equal(125, PointMath.Scale(100, 1.25));
 	}
+
+	// Regression: a victim with 0 points used to be worth the full amount, which made an empty alt the best farm target.
+	[Theory]
+	[InlineData(10, 10000, 0, 5)]
+	[InlineData(10, 10000, 1, 5)]
+	[InlineData(10, 0, 0, 10)]
+	[InlineData(10, 1000, 1000, 10)]
+	[InlineData(10, 1000, 2000, 20)]
+	[InlineData(10, 0, 5000, 30)]
+	public void DynamicPointsTreatAnEmptyAccountAsTheWeakestOpponent(int amount, int killer, int victim, int expected)
+		=> Assert.Equal(expected, PointMath.Dynamic(amount, killer, victim, 0.5, 3.0));
 }

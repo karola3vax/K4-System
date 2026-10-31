@@ -101,6 +101,7 @@
   "reason.team-kill": "Komanda yoldaşını öldürmə",
   "reason.kill": "Öldürmə",
   "reason.kill-of": "{silver}qurban: {lime}{0} {silver}({1})",
+  "reason.repeat-kill": "{silver}(yenə eyni oyunçu: {0}%)",
   "reason.headshot": "Headshot",
   "reason.penetrated": "Divar arxasından",
   "reason.noscope": "Dürbünsüz",

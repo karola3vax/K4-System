@@ -101,6 +101,7 @@
   "reason.team-kill": "Teamkill",
   "reason.kill": "Kill",
   "reason.kill-of": "{silver}na {lime}{0} {silver}({1})",
+  "reason.repeat-kill": "{silver}(znova ten istý hráč: {0} %)",
   "reason.headshot": "Headshot",
   "reason.penetrated": "Prestrel",
   "reason.noscope": "No-scope",

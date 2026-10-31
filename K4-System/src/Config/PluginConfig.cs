@@ -27,6 +27,9 @@ public sealed class PluginConfig
 	[JsonPropertyName("points")]
 	public PointsSettings Points { get; set; } = new();
 
+	[JsonPropertyName("anti-farm")]
+	public AntiFarmSettings AntiFarm { get; set; } = new();
+
 	[JsonPropertyName("missions")]
 	public MissionSettings Missions { get; set; } = new();
 
@@ -229,6 +232,25 @@ public sealed class PointsSettings
 	/// <summary>Point values that replace the preset's, by name.</summary>
 	[JsonPropertyName("overrides")]
 	public Dictionary<string, int> Overrides { get; set; } = [];
+}
+
+/// <summary>Keeps kill points fair when the same two players keep meeting, or play from one connection.</summary>
+public sealed class AntiFarmSettings
+{
+	/// <summary>Kills between players on the same connection give and take no points.</summary>
+	[JsonPropertyName("same-ip")]
+	public bool SameIp { get; set; } = true;
+
+	/// <summary>Kills on the same player within the window that count fully. 0 turns the rule off.</summary>
+	[JsonPropertyName("repeat-kills")]
+	public int RepeatKills { get; set; } = 10;
+
+	[JsonPropertyName("window-minutes")]
+	public int WindowMinutes { get; set; } = 10;
+
+	/// <summary>The share of the points each further kill on that player is worth, and the death costs.</summary>
+	[JsonPropertyName("reduced-percent")]
+	public int ReducedPercent { get; set; } = 25;
 }
 
 public sealed class MissionSettings

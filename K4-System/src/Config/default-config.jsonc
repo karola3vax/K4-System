@@ -82,6 +82,14 @@
     }
   },
 
+  // Fair kill points. Normal play is not affected; these only stop points being farmed.
+  "anti-farm": {
+    "same-ip": true, // Kills between players on the same connection give and take no points, so a second account cannot feed the first
+    "repeat-kills": 10, // Kills on the same player within the window that count fully. 0 turns this rule off
+    "window-minutes": 10,
+    "reduced-percent": 25 // Each further kill on that player gives this share of the points, and the death costs the same share
+  },
+
   // Daily missions and one weekly mission. The mission list is in plugins/K4-System/missions.jsonc.
   // K4 checks every map and only gives missions that can be done there: no bomb missions without bomb sites,
   // no round missions in deathmatch, no grenade or weapon missions where players cannot get them.

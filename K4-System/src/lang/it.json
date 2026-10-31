@@ -101,6 +101,7 @@
   "reason.team-kill": "Team kill",
   "reason.kill": "Kill",
   "reason.kill-of": "{silver}su {lime}{0} {silver}({1})",
+  "reason.repeat-kill": "{silver}(di nuovo lo stesso giocatore: {0}%)",
   "reason.headshot": "Headshot",
   "reason.penetrated": "Wallbang",
   "reason.noscope": "No-scope",

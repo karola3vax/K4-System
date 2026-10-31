@@ -1,0 +1,37 @@
+[
+  {
+    "Name": "competitive match: one kill on the same enemy per round never hits the limit",
+    "SameAddress": false, "FullKills": 10, "WindowMinutes": 10, "ReducedPercent": 25,
+    "KillMinutes": [0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30],
+    "KillPoints": 10,
+    "ExpectedPoints": [10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10]
+  },
+  {
+    "Name": "two friends trading kills on an aim map: the 11th kill in ten minutes is cut to a quarter (2.5 rounds to 2)",
+    "SameAddress": false, "FullKills": 10, "WindowMinutes": 10, "ReducedPercent": 25,
+    "KillMinutes": [0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6],
+    "KillPoints": 10,
+    "ExpectedPoints": [10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 2, 2, 2]
+  },
+  {
+    "Name": "a farmer who takes a break gets full points again once the window has passed",
+    "SameAddress": false, "FullKills": 3, "WindowMinutes": 10, "ReducedPercent": 0,
+    "KillMinutes": [0, 1, 2, 3, 4, 20],
+    "KillPoints": 10,
+    "ExpectedPoints": [10, 10, 10, 0, 0, 10]
+  },
+  {
+    "Name": "an alt account on the same connection gives nothing",
+    "SameAddress": true, "FullKills": 10, "WindowMinutes": 10, "ReducedPercent": 25,
+    "KillMinutes": [0, 5, 30],
+    "KillPoints": 10,
+    "ExpectedPoints": [0, 0, 0]
+  },
+  {
+    "Name": "repeat-kill rule turned off",
+    "SameAddress": false, "FullKills": 0, "WindowMinutes": 10, "ReducedPercent": 25,
+    "KillMinutes": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    "KillPoints": 10,
+    "ExpectedPoints": [10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10]
+  }
+]

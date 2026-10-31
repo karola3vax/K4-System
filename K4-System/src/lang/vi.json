@@ -101,6 +101,7 @@
   "reason.team-kill": "Giết đồng đội",
   "reason.kill": "Kill",
   "reason.kill-of": "{silver}hạ {lime}{0} {silver}({1})",
+  "reason.repeat-kill": "{silver}(lại cùng người chơi: {0}%)",
   "reason.headshot": "Headshot",
   "reason.penetrated": "Wallbang",
   "reason.noscope": "No-scope",
