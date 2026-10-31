@@ -441,6 +441,9 @@ internal sealed class SqlPlayerStore
 		string oldestMissionDay = DateTime.UtcNow.AddDays(-14).ToString(MissionRules.DayFormat, System.Globalization.CultureInfo.InvariantCulture);
 		await connection.ExecuteAsync($"DELETE FROM `{tables.Missions}` WHERE `day` < @Day;", new { Day = oldestMissionDay });
 
+		// The point audit log keeps 90 days, like a support ticket's memory; it is never needed for gameplay.
+		await connection.ExecuteAsync($"DELETE FROM `{tables.PointLog}` WHERE {dialect.OlderThanDays("changed_at")};", new { Days = PointLogDays });
+
 		if (days <= 0)
 			return;
 
@@ -453,7 +456,7 @@ internal sealed class SqlPlayerStore
 			foreach (string table in new[] { tables.Times, tables.Stats, tables.Ranks })
 				await connection.ExecuteAsync($"DELETE FROM `{table}` WHERE {dialect.OlderThanDays("lastseen")};", parameters, transaction);
 
-			foreach (string table in new[] { tables.Rewards, tables.Resets, tables.Missions, tables.MissionState })
+			foreach (string table in new[] { tables.Rewards, tables.Resets, tables.Missions, tables.MissionState, tables.PointLog })
 			{
 				await connection.ExecuteAsync($@"DELETE FROM `{table}`
 					WHERE NOT EXISTS (SELECT 1 FROM `{tables.Ranks}` r WHERE r.`steam_id` = `{table}`.`steam_id`);", transaction: transaction);
@@ -474,6 +477,44 @@ internal sealed class SqlPlayerStore
 			logger.LogError("K4 data was purged, but the optional LevelRanks purge failed: {ErrorMessage}", ex.Message);
 		}
 	}
+
+	// ---------------------------------------------------------------- point audit log
+
+	internal const int PointLogDays = 90;
+
+	public async Task LogPointChangesAsync(IReadOnlyCollection<PointChange> changes)
+	{
+		if (changes.Count == 0)
+			return;
+
+		await using DbConnection connection = await OpenAsync();
+		await using DbTransaction transaction = await connection.BeginTransactionAsync();
+		foreach (PointChange change in changes)
+		{
+			await connection.ExecuteAsync($@"INSERT INTO `{tables.PointLog}` (`steam_id`, `changed_at`, `delta`, `points_after`, `source`, `actor`)
+				VALUES (@SteamId, CURRENT_TIMESTAMP, @Delta, @PointsAfter, @Source, @Actor);",
+				new { SteamId = Id(change.SteamId), change.Delta, change.PointsAfter, Source = Truncate(change.Source, 32), Actor = Truncate(change.Actor, 255) }, transaction);
+		}
+		await transaction.CommitAsync();
+	}
+
+	/// <summary>The player's newest logged point changes first.</summary>
+	public async Task<List<PointHistoryEntry>> GetPointHistoryAsync(ulong steamId, int count)
+	{
+		await using DbConnection connection = await OpenAsync();
+		IEnumerable<(object ChangedAt, long Delta, long PointsAfter, string Source, string Actor)> rows = await connection.QueryAsync<(object, long, long, string, string)>(
+			$"SELECT `changed_at`, `delta`, `points_after`, `source`, `actor` FROM `{tables.PointLog}` WHERE `steam_id` = @SteamId ORDER BY `changed_at` DESC, `id` DESC LIMIT @Count;",
+			new { SteamId = Id(steamId), Count = count });
+
+		return rows.Select(row => new PointHistoryEntry(
+			dialect.ReadUtcDateTime(row.ChangedAt) ?? DateTime.MinValue,
+			(int)Math.Clamp(row.Delta, int.MinValue, int.MaxValue),
+			(int)Math.Clamp(row.PointsAfter, int.MinValue, int.MaxValue),
+			row.Source,
+			row.Actor)).ToList();
+	}
+
+	private static string Truncate(string text, int length) => text.Length <= length ? text : text[..length];
 
 	// ---------------------------------------------------------------- leaderboard
 

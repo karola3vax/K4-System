@@ -154,9 +154,14 @@ public sealed class Plugin : BasePlugin
 		playerService = new PlayerService(this, Config, players, store, saves, storageReady, ranks, rewards, missions, playtime, game, gameThread, background, countries, chat, Logger);
 
 		RankService? rankService = ranks;
+		PointAudit? audit = ranks is not null ? new PointAudit(store, background) : null;
 		int gameThreadId = Environment.CurrentManagedThreadId;
-		apiSource = new SharedPlayerApi.Source(players, () => active, () => Environment.CurrentManagedThreadId == gameThreadId,
-			(player, points) => rankService?.SetPoints(player, points));
+		apiSource = new SharedPlayerApi.Source(players, () => active, () => Environment.CurrentManagedThreadId == gameThreadId, (player, points) =>
+		{
+			int before = player.Rank?.Points ?? 0;
+			rankService?.SetPoints(player, points);
+			audit?.Record(player, before, PointAudit.Api, PointAudit.ApiActor);
+		});
 		SharedPlayerApi.Register(apiSource, Logger);
 
 		if (Config.Panorama.Enabled)
@@ -168,7 +173,7 @@ public sealed class Plugin : BasePlugin
 		}
 
 		new GameEvents(this, Config, players, playerService, ranks, stats, Config.Modules.Playtime ? playtime : null, scoreboard, missions, bounty, duels, store, game, gameThread, background, chat, Logger).Register();
-		new K4Commands(this, Config, players, playerService, ranks, rewards, missions, duels, playtime, store, gameThread, background, chat, new CommandGuard(chat), hud).Register();
+		new K4Commands(this, Config, players, playerService, ranks, rewards, missions, duels, playtime, store, gameThread, background, chat, new CommandGuard(chat), hud, audit).Register();
 
 		scoreboard?.Start(hotReload);
 

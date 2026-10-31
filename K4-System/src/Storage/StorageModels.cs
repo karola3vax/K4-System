@@ -34,3 +34,10 @@ internal sealed record PlayerRecord(int Points, int[] Stats, int[] Playtime, Dat
 internal sealed record TopEntry(int Points, string Name, string Rank);
 
 internal sealed record StoredReward(string RewardId, string RankName);
+
+/// <summary>A manual point change for the audit log: an admin command, a reset, or another plugin.</summary>
+/// <param name="Source">set, give, remove, reset, self-reset, or api.</param>
+/// <param name="Actor">Who did it, such as "Admin (76561198000000001)", "console", or a plugin.</param>
+internal sealed record PointChange(ulong SteamId, int Delta, int PointsAfter, string Source, string Actor);
+
+internal sealed record PointHistoryEntry(DateTime ChangedUtc, int Delta, int PointsAfter, string Source, string Actor);

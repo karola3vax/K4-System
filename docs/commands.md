@@ -31,12 +31,22 @@ css_givepoints <target> <amount>
 css_removepoints <target> <amount>
 css_setpoints <target> <amount>
 css_resetdata <target> [all|time|stat|rank]
+css_k4_history <target|steamid64> [count]   shows who changed a player's points (default 10, up to 25)
 css_k4_hud        (server console only) shows whether the panel works for each player
 ```
 
 Without a section, `css_resetdata` resets everything. Admin resets keep the reward history, so rewards are not paid twice.
 
-CounterStrikeSharp targets include player names, `#userid`, `@all`, `@t`, `@ct`, and `@alive`.
+CounterStrikeSharp targets include player names, `#userid`, `@all`, `@t`, `@ct`, and `@alive`. A plain name that matches several players is refused for these commands, so `css_resetdata jo` cannot hit every "jo" on the server; use `#userid`, a fuller name, or a group.
+
+### Point history
+
+Every manual point change is logged: `css_setpoints`, `css_givepoints`, `css_removepoints`, `css_resetdata`, a player's own `!resetmydata`, and points set by another plugin through the shared API. Each entry has the time (UTC), the change, the points afterwards, and who did it (the admin's name and SteamID64, `console`, or `shared API`). `css_k4_history` shows the newest entries; a SteamID64 also works for players who are offline. Points from playing (kills, rounds, missions) are not logged. Entries are kept for 90 days, and removed with the player when inactive players are purged.
+
+```text
+css_k4_history "#12"
+css_k4_history 76561198000000001 25
+```
 
 ```text
 css_givepoints @all 50

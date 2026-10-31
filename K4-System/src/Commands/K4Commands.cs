@@ -33,7 +33,8 @@ internal sealed class K4Commands(
 	BackgroundWork background,
 	Chat chat,
 	CommandGuard guard,
-	PanoramaHud? hud)
+	PanoramaHud? hud,
+	PointAudit? audit)
 {
 	private enum PointCommand
 	{
@@ -79,6 +80,7 @@ internal sealed class K4Commands(
 			plugin.AddCommand("css_setpoints", "Set the targeted player's points", (player, info) => OnPoints(player, info, PointCommand.Set));
 			plugin.AddCommand("css_givepoints", "Give points to the targeted player", (player, info) => OnPoints(player, info, PointCommand.Give));
 			plugin.AddCommand("css_removepoints", "Remove points from the targeted player", (player, info) => OnPoints(player, info, PointCommand.Remove));
+			plugin.AddCommand("css_k4_history", "Shows who changed a player's points", OnHistory);
 			plugin.AddCommand("css_toggletag", "Toggles the tag assigned by permissions", OnToggleTag);
 			plugin.AddCommand("css_togglepointmsg", "Toggles the chat messages of point changes", OnTogglePointMessages);
 		}
@@ -252,7 +254,8 @@ internal sealed class K4Commands(
 	// ---------------------------------------------------------------- resets
 
 	/// <summary>Resets the chosen sections. Returns false when the player had none of them loaded.</summary>
-	private bool ResetSections(K4Player player, string target, DateTime nowUtc, bool cancelRewards)
+	/// <param name="actor">Who reset, for the point audit log.</param>
+	private bool ResetSections(K4Player player, string target, DateTime nowUtc, bool cancelRewards, string actor)
 	{
 		bool resetAny = false;
 
@@ -267,7 +270,9 @@ internal sealed class K4Commands(
 			if (cancelRewards)
 				rewards?.CancelPending(player);
 
+			int before = player.Rank.Points;
 			ranks.SetPoints(player, config.Ranks.StartPoints, 0);
+			audit?.Record(player, before, cancelRewards ? PointAudit.SelfReset : PointAudit.Reset, actor);
 			resetAny = true;
 		}
 
@@ -318,7 +323,7 @@ internal sealed class K4Commands(
 			rankResetAt = now;
 		}
 
-		if (!ResetSections(k4player, target, now, cancelRewards: true))
+		if (!ResetSections(k4player, target, now, cancelRewards: true, PointAudit.ActorOf(player)))
 			return;
 
 		k4player.LastPersonalResetCommandUtc = now;
@@ -342,11 +347,12 @@ internal sealed class K4Commands(
 		}
 
 		string callerName = CommandGuard.CallerName(player);
+		string actor = PointAudit.ActorOf(player);
 
 		foreach (K4Player k4player in ResolveTargets(player, info))
 		{
 			// An admin reset keeps reward claims, so rewards already earned are not paid out again.
-			if (!ResetSections(k4player, target, DateTime.UtcNow, cancelRewards: false))
+			if (!ResetSections(k4player, target, DateTime.UtcNow, cancelRewards: false, actor))
 				continue;
 
 			if (callerName != "SERVER")
@@ -408,6 +414,7 @@ internal sealed class K4Commands(
 		}
 
 		string callerName = CommandGuard.CallerName(player);
+		string actor = PointAudit.ActorOf(player);
 
 		foreach (K4Player target in ResolveTargets(player, info))
 		{
@@ -416,6 +423,7 @@ internal sealed class K4Commands(
 				continue;
 
 			string targetName = target.Controller.PlayerName;
+			int before = state.Points;
 
 			switch (command)
 			{
@@ -436,7 +444,75 @@ internal sealed class K4Commands(
 					break;
 			}
 
+			audit?.Record(target, before, command switch { PointCommand.Set => PointAudit.Set, PointCommand.Give => PointAudit.Give, _ => PointAudit.Remove }, actor);
 			playerService.Save(target);
+		}
+	}
+
+	/// <summary>css_k4_history &lt;target or SteamID64&gt; [count]: the newest logged manual point changes.</summary>
+	private void OnHistory(CCSPlayerController? player, CommandInfo info)
+	{
+		const string usage = "<target|steamid64> [count]";
+		if (audit is null || !guard.Check(player, info, CommandUsage.CLIENT_AND_SERVER, 1, usage, Permissions.Admin))
+			return;
+
+		int count = int.TryParse(info.ArgByIndex(2), out int parsed) ? Math.Clamp(parsed, 1, 25) : 10;
+		string pattern = info.ArgByIndex(1);
+		ulong steamId;
+		string name;
+
+		// A SteamID64 also works for players who are offline.
+		if (pattern.Length == 17 && ulong.TryParse(pattern, out ulong offline))
+		{
+			steamId = offline;
+			name = players.Get(offline)?.Name ?? pattern;
+		}
+		else if (ResolveTargets(player, info) is [K4Player target])
+		{
+			steamId = target.SteamId;
+			name = target.Name;
+		}
+		else
+		{
+			info.ReplyToCommand(chat.Prefixed("duel.error.one-player"));
+			return;
+		}
+
+		ulong? caller = player?.SteamID;
+		background.Run(async () =>
+		{
+			List<PointHistoryEntry> entries = await store.GetPointHistoryAsync(steamId, count);
+			gameThread.Post(() => PrintHistory(caller, name, entries));
+		}, "Loading a point history");
+	}
+
+	private void PrintHistory(ulong? caller, string name, List<PointHistoryEntry> entries)
+	{
+		CCSPlayerController? reader = caller is ulong id ? players.Get(id)?.Controller : null;
+		if (caller is not null && reader is not { IsValid: true })
+			return;
+
+		void Reply(string line)
+		{
+			if (reader is null)
+				Server.PrintToConsole(line);
+			else
+				reader.PrintToChat(line);
+		}
+
+		if (entries.Count == 0)
+		{
+			Reply(chat.PrefixedFor(reader, "history.empty", name, SqlPlayerStore.PointLogDays));
+			return;
+		}
+
+		Reply(chat.PrefixedFor(reader, "history.title", name));
+		foreach (PointHistoryEntry entry in entries)
+		{
+			string delta = entry.Delta >= 0 ? $"{ChatColors.Green}+{entry.Delta}" : $"{ChatColors.Red}{entry.Delta}";
+			Reply(" " + chat.For(reader, "history.line",
+				entry.ChangedUtc.ToString("yyyy-MM-dd HH:mm", System.Globalization.CultureInfo.InvariantCulture),
+				chat.For(reader, "history.source." + entry.Source), delta, entry.PointsAfter, entry.Actor));
 		}
 	}
 
