@@ -19,7 +19,7 @@
 
 1. Download the [current K4-System package](https://github.com/karola3vax/K4-System/releases).
 2. Extract the ZIP into `game/csgo/addons/counterstrikesharp/` and keep its folder structure intact.
-3. Start the server once. K4 creates `k4-system.jsonc`, `ranks.jsonc`, and `missions.jsonc`, and runs on SQLite right away.
+3. Start the server once. K4 creates `k4-system.jsonc`, `ranks.jsonc`, `missions.jsonc`, and `achievements.jsonc`, and runs on SQLite right away.
 4. To use MySQL instead, set `storage.type` to `mysql` and fill in `storage.mysql`.
 5. Pick a point preset and review modules, tags, scoreboard display, commands, and the rank ladder.
 6. Restart K4-System and confirm that it loads without errors.
@@ -29,6 +29,7 @@
 | Main configuration | `addons/counterstrikesharp/configs/plugins/K4-System/k4-system.jsonc` |
 | Rank ladder | `addons/counterstrikesharp/plugins/K4-System/ranks.jsonc` |
 | Mission list | `addons/counterstrikesharp/plugins/K4-System/missions.jsonc` |
+| Achievement list | `addons/counterstrikesharp/plugins/K4-System/achievements.jsonc` |
 | Language files (replaced by updates) | `addons/counterstrikesharp/plugins/K4-System/lang/` |
 | Your own wording (kept by updates) | `addons/counterstrikesharp/configs/plugins/K4-System/lang/` |
 | Optional GeoIP database | `addons/counterstrikesharp/plugins/K4-System/GeoLite2-Country.mmdb` |
@@ -66,7 +67,7 @@ addons/counterstrikesharp/
 ## Updating
 
 1. Download the [newest release](https://github.com/karola3vax/K4-System/releases).
-2. Extract it into `game/csgo/addons/counterstrikesharp/` over the old files. Do not delete `plugins/K4-System/` first: your `ranks.jsonc`, `missions.jsonc`, `k4system.db`, and GeoIP file are there. The package also updates `shared/K4-SharedApi/` and the `lang` folder; your own wording in `configs/plugins/K4-System/lang/` stays as it is.
+2. Extract it into `game/csgo/addons/counterstrikesharp/` over the old files. Do not delete `plugins/K4-System/` first: your `ranks.jsonc`, `missions.jsonc`, `achievements.jsonc`, `k4system.db`, and GeoIP file are there. The package also updates `shared/K4-SharedApi/` and the `lang` folder; your own wording in `configs/plugins/K4-System/lang/` stays as it is.
 3. Remove K4-System-MMRanks and FakeRanks RevealAll if they were installed. FakeRanks is a Metamod plugin, so this needs a full server restart.
 4. Restart the server.
 
