@@ -32,6 +32,7 @@ css_removepoints <target> <amount>
 css_setpoints <target> <amount>
 css_resetdata <target> [all|time|stat|rank]
 css_k4_history <target|steamid64> [count]   shows who changed a player's points (default 10, up to 25)
+css_k4_event <multiplier> <minutes> | stop   starts or ends a points event, such as css_k4_event 2 60
 css_k4_reload     checks k4-system.jsonc, ranks.jsonc and missions.jsonc, then reloads K4-System without a restart
 css_k4_hud        (server console only) shows whether the panel works for each player
 ```

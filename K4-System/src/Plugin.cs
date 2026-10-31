@@ -132,26 +132,29 @@ public sealed class Plugin : BasePlugin
 		Task storageReady = StartStorage(store);
 
 		HudBridge hudBridge = new();
+		TimeZoneInfo zone = ResolveMissionTimeZone();
 		RewardService? rewards = null;
+		EventService? events = null;
 		if (Config.Modules.Ranks)
 		{
+			events = new EventService(new EventState(Config.Events.Windows, zone), players, chat, hudBridge);
 			RankLadder ladder = LoadRankLadder();
 			ClanTagService clanTags = new(Config, countries, gameThread);
 			rewards = new RewardService(ladder, players, store, gameThread, background, Logger);
-			ranks = new RankService(Config, ladder, players, game, rewards, clanTags, store, gameThread, background, chat, hudBridge, Logger);
+			ranks = new RankService(Config, ladder, players, game, rewards, clanTags, store, gameThread, background, chat, hudBridge, events, Logger);
 			scoreboard = new ScoreboardService(this, Config, players, gameThread, Logger);
 		}
 
 		playtime = new PlaytimeService(chat);
 		StatService? stats = Config.Modules.Stats ? new StatService(Config, players, game) : null;
 		MissionService? missions = ranks is not null && Config.Modules.Missions && LoadMissionPool() is MissionPool pool
-			? new MissionService(Config, pool, ResolveMissionTimeZone(), players, ranks, game, store, gameThread, background, chat, hudBridge, (seconds, action) => AddTimer(seconds, action))
+			? new MissionService(Config, pool, zone, players, ranks, game, store, gameThread, background, chat, hudBridge, (seconds, action) => AddTimer(seconds, action))
 			: null;
 
 		BountyService? bounty = ranks is not null && Config.Bounty.Enabled ? new BountyService(Config, players, ranks, chat, hudBridge) : null;
 		duels = ranks is not null && Config.Duels.Enabled ? new DuelService(Config, players, ranks, game, chat, hudBridge, (seconds, action) => AddTimer(seconds, action)) : null;
 
-		playerService = new PlayerService(this, Config, players, store, saves, storageReady, ranks, rewards, missions, playtime, game, gameThread, background, countries, chat, Logger);
+		playerService = new PlayerService(this, Config, players, store, saves, storageReady, ranks, rewards, missions, playtime, game, gameThread, background, countries, chat, events, Logger);
 
 		RankService? rankService = ranks;
 		PointAudit? audit = ranks is not null ? new PointAudit(store, background) : null;
@@ -173,7 +176,10 @@ public sealed class Plugin : BasePlugin
 		}
 
 		new GameEvents(this, Config, players, playerService, ranks, stats, Config.Modules.Playtime ? playtime : null, scoreboard, missions, bounty, duels, store, game, gameThread, background, chat, Logger).Register();
-		new K4Commands(this, Config, players, playerService, ranks, rewards, missions, duels, playtime, store, gameThread, background, chat, new CommandGuard(chat), hud, audit).Register();
+		new K4Commands(this, Config, players, playerService, ranks, rewards, missions, duels, playtime, store, gameThread, background, chat, new CommandGuard(chat), hud, audit, events).Register();
+
+		if (events is not null)
+			AddTimer(15.0f, events.Tick, CounterStrikeSharp.API.Modules.Timers.TimerFlags.REPEAT);
 
 		scoreboard?.Start(hotReload);
 

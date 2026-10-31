@@ -25,6 +25,7 @@ internal sealed class PlayerService(
 	BackgroundWork background,
 	CountryLookup countries,
 	Chat chat,
+	EventService? events,
 	ILogger logger)
 {
 	// CS2 reports this disconnect reason for players moving to the next map.
@@ -187,6 +188,7 @@ internal sealed class PlayerService(
 		}
 
 		missions?.Load(player);
+		events?.Greet(player);
 
 		if (config.Messages.Connect)
 			Announce(player, "announce.connect");

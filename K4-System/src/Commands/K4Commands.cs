@@ -34,7 +34,8 @@ internal sealed class K4Commands(
 	Chat chat,
 	CommandGuard guard,
 	PanoramaHud? hud,
-	PointAudit? audit)
+	PointAudit? audit,
+	EventService? events)
 {
 	private enum PointCommand
 	{
@@ -82,6 +83,7 @@ internal sealed class K4Commands(
 			plugin.AddCommand("css_givepoints", "Give points to the targeted player", (player, info) => OnPoints(player, info, PointCommand.Give));
 			plugin.AddCommand("css_removepoints", "Remove points from the targeted player", (player, info) => OnPoints(player, info, PointCommand.Remove));
 			plugin.AddCommand("css_k4_history", "Shows who changed a player's points", OnHistory);
+			plugin.AddCommand("css_k4_event", "Starts or stops a points event: <multiplier> <minutes> | stop", OnEvent);
 			plugin.AddCommand("css_toggletag", "Toggles the tag assigned by permissions", OnToggleTag);
 			plugin.AddCommand("css_togglepointmsg", "Toggles the chat messages of point changes", OnTogglePointMessages);
 		}
@@ -273,6 +275,42 @@ internal sealed class K4Commands(
 		// Never unload from inside this plugin's own command: the reload runs from the server's command queue next frame.
 		string name = plugin.ModuleName;
 		Server.NextFrame(() => Server.ExecuteCommand($"css_plugins reload {name}"));
+	}
+
+	// ---------------------------------------------------------------- points events
+
+	/// <summary>css_k4_event shows the event that is on; css_k4_event 2 60 starts one; css_k4_event stop ends it.</summary>
+	private void OnEvent(CCSPlayerController? player, CommandInfo info)
+	{
+		if (events is null || !guard.Check(player, info, CommandUsage.CLIENT_AND_SERVER, 0, "", Permissions.Admin))
+			return;
+
+		string first = info.ArgByIndex(1);
+		if (info.ArgCount < 2)
+		{
+			if (events.Current is ActiveEvent active)
+				info.ReplyToCommand(chat.Prefixed("event.running", PointEvents.Format(active.Multiplier), PointEvents.MinutesLeft(active, DateTime.UtcNow)));
+			else
+				info.ReplyToCommand(chat.Prefixed("event.none"));
+			return;
+		}
+
+		if (first.Equals("stop", StringComparison.OrdinalIgnoreCase))
+		{
+			if (!events.Stop())
+				info.ReplyToCommand(chat.Prefixed("event.none"));
+			return;
+		}
+
+		if (!double.TryParse(first.TrimEnd('x', 'X'), System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out double multiplier)
+			|| !PointEvents.IsValidMultiplier(multiplier)
+			|| !int.TryParse(info.ArgByIndex(2), out int minutes) || minutes is < 1 or > PointEvents.MaxMinutes)
+		{
+			info.ReplyToCommand(chat.Prefixed("event.invalid", CommandGuard.CommandName(info)));
+			return;
+		}
+
+		events.Start(multiplier, minutes);
 	}
 
 	// ---------------------------------------------------------------- resets

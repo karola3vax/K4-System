@@ -30,6 +30,9 @@ public sealed class PluginConfig
 	[JsonPropertyName("anti-farm")]
 	public AntiFarmSettings AntiFarm { get; set; } = new();
 
+	[JsonPropertyName("events")]
+	public EventSettings Events { get; set; } = new();
+
 	[JsonPropertyName("missions")]
 	public MissionSettings Missions { get; set; } = new();
 
@@ -251,6 +254,35 @@ public sealed class AntiFarmSettings
 	/// <summary>The share of the points each further kill on that player is worth, and the death costs.</summary>
 	[JsonPropertyName("reduced-percent")]
 	public int ReducedPercent { get; set; } = 25;
+}
+
+/// <summary>More points for playing at set times. Admins can also start one with css_k4_event.</summary>
+public sealed class EventSettings
+{
+	[JsonPropertyName("schedule")]
+	public List<EventSchedule?> Schedule { get; set; } = [];
+
+	/// <summary>The valid schedule entries. Set during validation.</summary>
+	[JsonIgnore]
+	internal List<Domain.EventWindow> Windows { get; set; } = [];
+}
+
+public sealed class EventSchedule
+{
+	/// <summary>Monday to Sunday. Empty means every day.</summary>
+	[JsonPropertyName("days")]
+	public List<string>? Days { get; set; } = [];
+
+	/// <summary>24-hour local time in missions.timezone, such as "18:00".</summary>
+	[JsonPropertyName("from")]
+	public string? From { get; set; } = "18:00";
+
+	/// <summary>Before "from" means the event runs past midnight.</summary>
+	[JsonPropertyName("to")]
+	public string? To { get; set; } = "22:00";
+
+	[JsonPropertyName("multiplier")]
+	public double Multiplier { get; set; } = 2;
 }
 
 public sealed class MissionSettings

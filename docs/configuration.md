@@ -14,6 +14,7 @@ All settings live in one commented file, `configs/plugins/K4-System/k4-system.js
 | `ranks` | Rank mode, start points, VIP multiplier, round summary, kill streaks, reset cooldown, dynamic death points, team balance, playtime reward |
 | `points` | A point preset plus your own overrides |
 | `anti-farm` | No points between players on the same connection, and less for killing the same player over and over |
+| `events` | Scheduled points events, such as 2× points on weekend evenings |
 | `missions` | Time zone, rewards per difficulty, streak bonus, rerolls per day, bots, and map rules |
 | `bounty` | The wanted kill streak, the bounty reward, and the survivor bonus |
 | `duels` | Duel stakes, how long a challenge waits, and the same-connection block |
@@ -93,6 +94,23 @@ Team kills, suicides, assists, objectives and missions are not affected.
   "reduced-percent": 25
 }
 ```
+
+## Points events
+
+A points event multiplies the points players earn from kills, rounds, objectives and playtime for a while. It is announced to everyone when it starts and ends, and players who join during one are told. With the panel, everyone also gets a pop-up. Mission rewards, bounties and duels are not multiplied, and point losses stay as they are. The VIP multiplier applies on top.
+
+Schedule events in `events.schedule`. Each entry has `days` (Monday to Sunday; leave it empty for every day), `from` and `to` as 24-hour `"HH:mm"` times in `missions.timezone`, and a `multiplier` above 1 and up to 10. A `to` before `from` runs past midnight, so a Friday `"22:00"` to `"02:00"` event ends on Saturday at 2:00. When events overlap, the highest multiplier counts. The schedule is empty by default, so nothing changes until you add one.
+
+```jsonc
+"events": {
+  "schedule": [
+    { "days": ["Saturday", "Sunday"], "from": "18:00", "to": "22:00", "multiplier": 2 },
+    { "days": ["Friday"], "from": "22:00", "to": "02:00", "multiplier": 1.5 }
+  ]
+}
+```
+
+Admins can start one at any time with `css_k4_event <multiplier> <minutes>`, such as `css_k4_event 2 60`, and end it with `css_k4_event stop`. Stopping a scheduled event silences it until it would have ended. `css_k4_event` alone shows the event that is on. Events an admin started end when K4 reloads; scheduled ones carry on.
 
 ## Bounties and duels
 

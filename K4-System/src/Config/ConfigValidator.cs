@@ -37,7 +37,7 @@ internal static partial class ConfigValidator
 	{
 		if (config.Storage?.MySql is null || config.Storage.LevelRanks is null || config.Modules is null || config.Tracking is null ||
 			config.Ranks?.DynamicDeathPoints is null || config.Ranks.TeamBalance is null || config.Ranks.PlaytimeReward is null ||
-			config.Points?.Overrides is null || config.AntiFarm is null || config.Missions?.Rewards is null || config.Bounty is null || config.Duels is null || config.Panorama is null || config.Scoreboard?.CustomIcons is null ||
+			config.Points?.Overrides is null || config.AntiFarm is null || config.Events?.Schedule is null || config.Missions?.Rewards is null || config.Bounty is null || config.Duels is null || config.Panorama is null || config.Scoreboard?.CustomIcons is null ||
 			config.Tags?.TopPlacement is null || config.Tags.Admins is null || config.Messages is null || config.Commands is null)
 			throw new InvalidDataException("A section of k4-system.jsonc is missing or null. Delete the file to get a fresh one.");
 
@@ -254,6 +254,8 @@ internal static partial class ConfigValidator
 		bounty.KillStreak = Math.Max(1, bounty.KillStreak);
 		bounty.Reward = Math.Max(0, bounty.Reward);
 		bounty.SurvivorReward = Math.Max(0, bounty.SurvivorReward);
+
+		config.Events.Windows = PointEvents.Parse(config.Events.Schedule, warnings);
 
 		AntiFarmSettings farm = config.AntiFarm;
 		farm.RepeatKills = Math.Max(0, farm.RepeatKills);
