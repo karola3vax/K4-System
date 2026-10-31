@@ -58,6 +58,8 @@
   "history.source.reset": "réinitialisé par un admin",
   "history.source.self-reset": "réinitialisation personnelle",
   "history.source.api": "plugin",
+  "reload.ok": "{green}Les fichiers de K4 sont corrects. {silver}Rechargement de K4-System ; les joueurs gardent leurs données et les duels en cours rendent leurs mises.",
+  "reload.failed": "{lightred}K4-System n’a pas été rechargé et continue avec les anciens réglages. Corrige d’abord ceci :",
 
   "top.title": "{silver}Top {lime}{0} {silver}joueurs",
   "top.line": " {gold}#{0} {1}{2} {white}{3} {silver}· {lime}{4}",

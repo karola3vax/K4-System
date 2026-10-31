@@ -58,6 +58,8 @@
   "history.source.reset": "επαναφορά από διαχειριστή",
   "history.source.self-reset": "δική του επαναφορά",
   "history.source.api": "plugin",
+  "reload.ok": "{green}Τα αρχεία του K4 είναι εντάξει. {silver}Το K4-System επαναφορτώνεται τώρα· οι παίκτες κρατούν τα δεδομένα τους και τα πονταρίσματα των τρεχουσών μονομαχιών επιστρέφονται.",
+  "reload.failed": "{lightred}Το K4-System δεν επαναφορτώθηκε και συνεχίζει με τις παλιές ρυθμίσεις. Διόρθωσε πρώτα αυτό:",
 
   "top.title": "{silver}Top {lime}{0} {silver}παίκτες",
   "top.line": " {gold}#{0} {1}{2} {white}{3} {silver}· {lime}{4}",

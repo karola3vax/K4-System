@@ -32,12 +32,23 @@ css_removepoints <target> <amount>
 css_setpoints <target> <amount>
 css_resetdata <target> [all|time|stat|rank]
 css_k4_history <target|steamid64> [count]   shows who changed a player's points (default 10, up to 25)
+css_k4_reload     checks k4-system.jsonc, ranks.jsonc and missions.jsonc, then reloads K4-System without a restart
 css_k4_hud        (server console only) shows whether the panel works for each player
 ```
 
 Without a section, `css_resetdata` resets everything. Admin resets keep the reward history, so rewards are not paid twice.
 
 CounterStrikeSharp targets include player names, `#userid`, `@all`, `@t`, `@ct`, and `@alive`. A plain name that matches several players is refused for these commands, so `css_resetdata jo` cannot hit every "jo" on the server; use `#userid`, a fuller name, or a group.
+
+```text
+css_givepoints @all 50
+css_setpoints "#12" 5000
+css_resetdata "PlayerName" rank
+```
+
+### Reloading after an edit
+
+`css_k4_reload` reads `k4-system.jsonc`, `ranks.jsonc` and `missions.jsonc` exactly as a start would. When any of them has a problem, nothing is reloaded: K4 keeps running with the old settings and the reply names the file and the problem. When all are fine, K4-System reloads at once. Players keep their data (everything is saved first), the panel closes, and running duels give both stakes back, because a reload ends them. Your own wording in `configs/plugins/K4-System/lang/` is read again too.
 
 ### Point history
 
@@ -46,12 +57,6 @@ Every manual point change is logged: `css_setpoints`, `css_givepoints`, `css_rem
 ```text
 css_k4_history "#12"
 css_k4_history 76561198000000001 25
-```
-
-```text
-css_givepoints @all 50
-css_setpoints "#12" 5000
-css_resetdata "PlayerName" rank
 ```
 
 | Permission | Purpose |

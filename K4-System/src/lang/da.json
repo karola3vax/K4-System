@@ -58,6 +58,8 @@
   "history.source.reset": "nulstillet af admin",
   "history.source.self-reset": "egen nulstilling",
   "history.source.api": "plugin",
+  "reload.ok": "{green}K4-filerne er i orden. {silver}K4-System genindlæses nu; spillerne beholder deres data, og indsatser i igangværende dueller gives tilbage.",
+  "reload.failed": "{lightred}K4-System blev ikke genindlæst og kører videre med de gamle indstillinger. Ret dette først:",
 
   "top.title": "{silver}Top {lime}{0} {silver}spillere",
   "top.line": " {gold}#{0} {1}{2} {white}{3} {silver}· {lime}{4}",

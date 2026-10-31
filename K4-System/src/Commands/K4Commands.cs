@@ -67,6 +67,7 @@ internal sealed class K4Commands(
 			plugin.AddCommand($"css_{alias}", "Resets the player's own data", OnResetMyData);
 
 		plugin.AddCommand("css_resetdata", "Resets the targeted player's data", OnResetData);
+		plugin.AddCommand("css_k4_reload", "Checks the K4 files, then reloads K4-System without a restart", OnReload);
 
 		if (ranks is not null)
 		{
@@ -249,6 +250,29 @@ internal sealed class K4Commands(
 
 		if (refusal is DuelService.Refusal reason)
 			info.ReplyToCommand(chat.Prefixed(reason.Key, reason.Args));
+	}
+
+	// ---------------------------------------------------------------- reload
+
+	/// <summary>Reloads K4-System only when its files are valid, so a typo never leaves the server without K4.</summary>
+	private void OnReload(CCSPlayerController? player, CommandInfo info)
+	{
+		if (!guard.Check(player, info, CommandUsage.CLIENT_AND_SERVER, 0, "", Permissions.Admin))
+			return;
+
+		List<string> problems = ReloadCheck.Run(ConfigFile.DirectoryFor(plugin.ModuleDirectory), plugin.ModuleDirectory);
+		if (problems.Count > 0)
+		{
+			info.ReplyToCommand(chat.Prefixed("reload.failed"));
+			foreach (string problem in problems)
+				info.ReplyToCommand($" {ChatColors.LightRed}{problem}");
+			return;
+		}
+
+		info.ReplyToCommand(chat.Prefixed("reload.ok"));
+		// Never unload from inside this plugin's own command: the reload runs from the server's command queue next frame.
+		string name = plugin.ModuleName;
+		Server.NextFrame(() => Server.ExecuteCommand($"css_plugins reload {name}"));
 	}
 
 	// ---------------------------------------------------------------- resets

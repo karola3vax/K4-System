@@ -58,6 +58,8 @@
   "history.source.reset": "admin sıfırladı",
   "history.source.self-reset": "kendi sıfırlaması",
   "history.source.api": "eklenti",
+  "reload.ok": "{green}K4 dosyaları sorunsuz. {silver}K4-System şimdi yeniden yükleniyor; oyuncuların verileri korunur, süren düellolardaki bahisler geri verilir.",
+  "reload.failed": "{lightred}K4-System yeniden yüklenmedi, eski ayarlarla çalışmaya devam ediyor. Önce şunu düzeltin:",
 
   "top.title": "{silver}En iyi {lime}{0} {silver}oyuncu",
   "top.line": " {gold}#{0} {1}{2} {white}{3} {silver}· {lime}{4}",

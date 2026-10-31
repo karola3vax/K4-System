@@ -58,6 +58,8 @@
   "history.source.reset": "管理者がリセット",
   "history.source.self-reset": "本人がリセット",
   "history.source.api": "プラグイン",
+  "reload.ok": "{green}K4 のファイルに問題はありません。{silver}K4-System を再読み込みします。プレイヤーのデータは保持され、進行中のデュエルの賭けは返却されます。",
+  "reload.failed": "{lightred}K4-System は再読み込みされず、以前の設定のまま動作しています。先にこれを修正してください:",
 
   "top.title": "{silver}トップ {lime}{0} {silver}プレイヤー",
   "top.line": " {gold}#{0} {1}{2} {white}{3} {silver}· {lime}{4}",

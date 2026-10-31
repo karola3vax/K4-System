@@ -66,8 +66,25 @@ internal static class ConfigFile
 		return Parse(content, path, created);
 	}
 
+	/// <summary>
+	/// The file still holds only default values. Compared by value, not text, so a template written by an older 6.x
+	/// (other comments, fewer sections) still counts as never edited after an update.
+	/// </summary>
 	internal static bool IsTemplate(string content)
-		=> content.Replace("\r\n", "\n", StringComparison.Ordinal).Trim() == Template.Replace("\r\n", "\n", StringComparison.Ordinal).Trim();
+	{
+		if (content.Replace("\r\n", "\n", StringComparison.Ordinal).Trim() == Template.Replace("\r\n", "\n", StringComparison.Ordinal).Trim())
+			return true;
+
+		try
+		{
+			PluginConfig? parsed = JsonSerializer.Deserialize<PluginConfig>(content, Options);
+			return parsed is not null && JsonSerializer.Serialize(parsed) == JsonSerializer.Serialize(new PluginConfig());
+		}
+		catch (JsonException)
+		{
+			return false;
+		}
+	}
 
 	internal static ConfigLoadResult Parse(string content, string path, bool created)
 	{

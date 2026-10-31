@@ -58,6 +58,8 @@
   "history.source.reset": "әкімші қалпына келтірді",
   "history.source.self-reset": "өзі қалпына келтірді",
   "history.source.api": "плагин",
+  "reload.ok": "{green}K4 файлдары дұрыс. {silver}K4-System қазір қайта жүктелуде; ойыншылардың деректері сақталады, жүріп жатқан жекпе-жек бәстері қайтарылады.",
+  "reload.failed": "{lightred}K4-System қайта жүктелмеді және ескі баптаулармен жұмыс істеп тұр. Алдымен мынаны түзетіңіз:",
 
   "top.title": "{silver}Үздік {lime}{0} {silver}ойыншы",
   "top.line": " {gold}#{0} {1}{2} {white}{3} {silver}· {lime}{4}",

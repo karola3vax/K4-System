@@ -58,6 +58,8 @@
   "history.source.reset": "admin đặt lại",
   "history.source.self-reset": "tự đặt lại",
   "history.source.api": "plugin",
+  "reload.ok": "{green}Các tệp K4 đều ổn. {silver}Đang tải lại K4-System; người chơi giữ nguyên dữ liệu, tiền cược của các trận đấu tay đôi đang diễn ra được hoàn lại.",
+  "reload.failed": "{lightred}K4-System chưa được tải lại và vẫn chạy với cài đặt cũ. Hãy sửa lỗi này trước:",
 
   "top.title": "{silver}Top {lime}{0} {silver}người chơi",
   "top.line": " {gold}#{0} {1}{2} {white}{3} {silver}· {lime}{4}",

@@ -58,6 +58,8 @@
   "history.source.reset": "admin sıfırladı",
   "history.source.self-reset": "özü sıfırladı",
   "history.source.api": "plugin",
+  "reload.ok": "{green}K4 faylları qaydasındadır. {silver}K4-System indi yenidən yüklənir; oyunçular məlumatlarını saxlayır, davam edən duellərin mərcləri qaytarılır.",
+  "reload.failed": "{lightred}K4-System yenidən yüklənmədi və köhnə ayarlarla işləməyə davam edir. Əvvəlcə bunu düzəldin:",
 
   "top.title": "{silver}Ən yaxşı {lime}{0} {silver}oyunçu",
   "top.line": " {gold}#{0} {1}{2} {white}{3} {silver}· {lime}{4}",

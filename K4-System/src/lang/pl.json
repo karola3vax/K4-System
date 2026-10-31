@@ -58,6 +58,8 @@
   "history.source.reset": "reset przez admina",
   "history.source.self-reset": "własny reset",
   "history.source.api": "plugin",
+  "reload.ok": "{green}Pliki K4 są w porządku. {silver}Przeładowuję K4-System; gracze zachowują dane, a trwające pojedynki zwracają stawki.",
+  "reload.failed": "{lightred}K4-System nie został przeładowany i działa ze starymi ustawieniami. Najpierw popraw:",
 
   "top.title": "{silver}Top {lime}{0} {silver}graczy",
   "top.line": " {gold}#{0} {1}{2} {white}{3} {silver}· {lime}{4}",
