@@ -40,6 +40,8 @@ All settings live in one commented file, `configs/plugins/K4-System/k4-system.js
 | `sqlite` | You run one server and want no database setup. Everything is stored in one file beside the plugin |
 | `mysql` | You run several servers on one database, use a web panel, or need the LevelRanks table for an external tool |
 
+Several servers on one database share players, but a player should be on one of them at a time. Each server saves the player's totals when they leave and reads them when they join; a player who jumps to another server while the first one cannot reach the database yet may start there with the totals from before, and one side's progress is overwritten.
+
 Both use the same tables, so commands, top lists, rewards, and resets behave the same. K4 does not copy data between the two. If you replace the whole plugin folder when updating, keep `k4system.db`.
 
 By default K4 deletes players who have not joined for 30 days (`storage.purge-after-days`). Set it to `0` to keep everyone.

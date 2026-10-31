@@ -7,7 +7,7 @@
 - feat: Anti-farming, on by default. A kill between two players on the same connection gives and takes no points, so a second account cannot feed the first. After 10 kills on the same player within 10 minutes, each further kill on them is worth 25% of the points (and costs them 25%), and the point message says so. Normal matches never reach the limit. Settings: `anti-farm`
 - fix: With `ranks.dynamic-death-points` on, a victim with 0 points was worth full kill points instead of the lowest multiplier, which made an empty second account the best one to farm
 - feat: Point history for admins. Every manual point change is logged with the time, the change, the new total and who did it: admin point commands, admin and personal resets, and other plugins through the shared API. `css_k4_history <target|steamid64> [count]` shows the newest entries, also for offline players. Kept for 90 days. New table `k4pointlog`, created automatically
-- feat: `css_k4_reload` applies changes to `k4-system.jsonc`, `ranks.jsonc` and `missions.jsonc` without a restart. It reads all three first, and when one has a problem it names it and reloads nothing, so a typo can no longer leave the server without K4
+- feat: `css_k4_reload` applies changes to `k4-system.jsonc`, `ranks.jsonc`, `missions.jsonc` and `achievements.jsonc` without a restart. It reads them all first, and when one has a problem it names it and reloads nothing, so a typo can no longer leave the server without K4
 - fix: The 5.x upgrade guard (K4 waits until the new `k4-system.jsonc` is filled in when an old `K4-System.json` exists) now compares values, not text, so an untouched file written by an older 6.x still counts as untouched after this update
 - fix: Any death now ends the killer's streak, also one that gives no points (such as a bot kill with `tracking.count-bots` off). Before, the streak bonuses kept growing in long deathmatch rounds
 - fix: With `ranks.round-summary` on, points from a round in which tracking stopped (a player left and the server fell below `tracking.minimum-players`) are summarized instead of silently added
@@ -27,6 +27,7 @@
 - perf: The player count behind every shot, hit and kill is read from the game at most every half second instead of on every event, which was the hottest path on full servers
 - perf: The panel caches leaderboard and rank data even while the player keeps clicking, and `!top` saves all players at most every 10 seconds for the whole server, so clicking and `!top` spam can no longer flood the database
 - fix: A `ranks.playtime-reward.every-minutes` value above one week (10080) is capped; a huge value threw an error on every timer tick
+- setup: Existing config files get every new setting with its default and need no changes. New sections to change them: `anti-farm`, `events`, `modules.achievements`, `commands.achievements`. New texts in all 36 languages. New tables `k4pointlog` and `k4achievements` are created on the next start; existing tables are not changed
 
 -- 2026.10.29 - V6.4.0
 
