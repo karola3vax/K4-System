@@ -22,14 +22,11 @@ internal static class PointMath
 
 	/// <summary>
 	/// Scales a kill or death by the victim-to-killer point ratio, within the configured bounds.
-	/// Returns the amount unchanged when either side has no points.
+	/// No points counts as 1, so an empty account is the weakest opponent, not a full-value one.
 	/// </summary>
 	public static int Dynamic(int amount, int fromPoints, int toPoints, double minMultiplier, double maxMultiplier)
 	{
-		if (toPoints <= 0 || fromPoints <= 0)
-			return amount;
-
-		double ratio = Math.Clamp((double)toPoints / fromPoints, minMultiplier, maxMultiplier);
+		double ratio = Math.Clamp((double)Math.Max(1, toPoints) / Math.Max(1, fromPoints), minMultiplier, maxMultiplier);
 		return Scale(amount, ratio);
 	}
 }

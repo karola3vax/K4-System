@@ -101,6 +101,7 @@
   "reason.team-kill": "Командаласты өлтіру",
   "reason.kill": "Өлтіру",
   "reason.kill-of": "{silver}құрбан: {lime}{0} {silver}({1})",
+  "reason.repeat-kill": "{silver}(тағы сол ойыншы: {0}%)",
   "reason.headshot": "Хедшот",
   "reason.penetrated": "Қабырға арқылы",
   "reason.noscope": "Прицелсіз",

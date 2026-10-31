@@ -101,6 +101,7 @@
   "reason.team-kill": "Komandas biedra nogalināšana",
   "reason.kill": "Frags",
   "reason.kill-of": "{silver}— {lime}{0} {silver}({1})",
+  "reason.repeat-kill": "{silver}(atkal tas pats spēlētājs: {0}%)",
   "reason.headshot": "Hedšots",
   "reason.penetrated": "Caur sienu",
   "reason.noscope": "Bez tēmēkļa",

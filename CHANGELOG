@@ -1,3 +1,8 @@
+-- 2026.10.31 - V6.5.0
+
+- feat: Anti-farming, on by default. A kill between two players on the same connection gives and takes no points, so a second account cannot feed the first. After 10 kills on the same player within 10 minutes, each further kill on them is worth 25% of the points (and costs them 25%), and the point message says so. Normal matches never reach the limit. Settings: `anti-farm`
+- fix: With `ranks.dynamic-death-points` on, a victim with 0 points was worth full kill points instead of the lowest multiplier, which made an empty second account the best one to farm
+
 -- 2026.10.29 - V6.4.0
 
 - feat: Bounties. A player who gets 7 kills on real players in one life becomes WANTED: everyone sees it in chat (and as a pop-up with the panel), and the enemy who ends the streak gets +150 points. The wanted player loses nothing extra. A wanted player who is never caught gets +50 when the match ends. Only one player is wanted at a time, and each player at most once per map, so it stays rare. Settings: `bounty`

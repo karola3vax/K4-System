@@ -101,6 +101,7 @@
   "reason.team-kill": "Тимкилл",
   "reason.kill": "Убийство",
   "reason.kill-of": "{silver}игрока {lime}{0} {silver}({1})",
+  "reason.repeat-kill": "{silver}(снова тот же игрок: {0}%)",
   "reason.headshot": "Хедшот",
   "reason.penetrated": "Прострел",
   "reason.noscope": "Ноускоп",

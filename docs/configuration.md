@@ -13,6 +13,7 @@ All settings live in one commented file, `configs/plugins/K4-System/k4-system.js
 | `tracking` | Minimum players, warmup, bots, and free-for-all. Applies to points and stats alike |
 | `ranks` | Rank mode, start points, VIP multiplier, round summary, kill streaks, reset cooldown, dynamic death points, team balance, playtime reward |
 | `points` | A point preset plus your own overrides |
+| `anti-farm` | No points between players on the same connection, and less for killing the same player over and over |
 | `missions` | Time zone, rewards per difficulty, streak bonus, rerolls per day, bots, and map rules |
 | `bounty` | The wanted kill streak, the bounty reward, and the survivor bonus |
 | `duels` | Duel stakes, how long a challenge waits, and the same-connection block |
@@ -74,6 +75,24 @@ Choose a preset, then change single values in `overrides`:
 `casual` is the default and uses the same values as K4-System 5.x. `competitive` rewards winning rounds and clean play over flashy kills. `deathmatch` counts only kills, in small steps, for servers without rounds or objectives.
 
 Bots are never stored as persistent ranked players. Bot settings only decide whether eligible human interactions with bots count.
+
+## Anti-farming
+
+On by default, and normal play never notices it. It only stops points being farmed with a second account or a friend.
+
+- **Same connection.** With `same-ip`, a kill between two players on the same connection gives the killer nothing and costs the victim nothing, so a second account cannot feed the first. Kill bonuses and the kill streak do not count either.
+- **The same victim again and again.** The first `repeat-kills` kills on one player within `window-minutes` count fully. Each further kill on that player gives `reduced-percent` of the points, bonuses included, and the death costs the victim the same share. The point message says so, such as "(same player again: 25%)". Once the window has passed without kills on that player, kills count fully again. `"repeat-kills": 0` turns this rule off.
+
+Team kills, suicides, assists, objectives and missions are not affected.
+
+```jsonc
+"anti-farm": {
+  "same-ip": true,
+  "repeat-kills": 10,
+  "window-minutes": 10,
+  "reduced-percent": 25
+}
+```
 
 ## Bounties and duels
 
