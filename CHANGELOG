@@ -1,3 +1,9 @@
+-- 2026.10.31 - Workshop addon update (after V6.5.0)
+
+- fix: The addon's rank emblems are now exact copies of the current CS2 ones. 11 of them (skillgroup 1, 11, 12, 13, 17, 18 and wingman 11, 12, 13, 17, 18) were from an older version of Valve's artwork, and all 38 carried invisible leftover shapes. Checked against the installed game: every one of the 123 images the panel uses exists in CS2 or ships in the addon
+- chore: `panorama/tools/check_game_images.py` checks the addon against an installed CS2, and `gen_k4_ranks.py` now reads the emblems straight from the game's `pak01_dir.vpk` (no Source2Viewer needed)
+- setup: Republish Workshop addon `3811667212`. The server plugin did not change; servers stay on 6.5.0
+
 -- 2026.10.31 - V6.5.0
 
 - feat: Achievements. 21 long-term goals, from 100 kills and 10 hours played to a 30-day mission streak, each unlocking once with one-time points (and an optional server command). Progress comes from the stats, playtime and streak K4 already stores. Goals a player had already reached unlock without the reward, so the update does not hand out points for old history. `!achievements` shows progress; everyone sees unlocks in chat. Edit `plugins/K4-System/achievements.jsonc`, names in all 36 languages. Settings: `modules.achievements`, `commands.achievements`. New table `k4achievements`, created automatically
