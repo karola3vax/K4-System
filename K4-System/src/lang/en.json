@@ -58,6 +58,8 @@
   "history.source.reset": "reset by admin",
   "history.source.self-reset": "own reset",
   "history.source.api": "plugin",
+  "reload.ok": "{green}The K4 files are fine. {silver}Reloading K4-System now; players keep their data, and running duels give their stakes back.",
+  "reload.failed": "{lightred}K4-System was not reloaded and keeps running with the old settings. Fix this first:",
 
   "top.title": "{silver}Top {lime}{0} {silver}players",
   "top.line": " {gold}#{0} {1}{2} {white}{3} {silver}· {lime}{4}",

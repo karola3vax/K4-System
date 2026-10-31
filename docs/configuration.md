@@ -4,7 +4,7 @@
 
 ## The config file
 
-All settings live in one commented file, `configs/plugins/K4-System/k4-system.jsonc`. Every setting has a comment that explains it. Delete the file to get a fresh default copy. Unknown or misspelled settings stop K4 with a message that names them, so typos never fail silently.
+All settings live in one commented file, `configs/plugins/K4-System/k4-system.jsonc`. Every setting has a comment that explains it. After an edit, `css_k4_reload` checks the files and applies them without a restart (see [Commands](commands.md#reloading-after-an-edit)). Delete the file to get a fresh default copy. Unknown or misspelled settings stop K4 with a message that names them, so typos never fail silently.
 
 | Section | What it controls |
 | --- | --- |

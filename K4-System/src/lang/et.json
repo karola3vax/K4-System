@@ -58,6 +58,8 @@
   "history.source.reset": "admin lähtestas",
   "history.source.self-reset": "enda lähtestus",
   "history.source.api": "plugin",
+  "reload.ok": "{green}K4 failid on korras. {silver}K4-System laaditakse uuesti; mängijate andmed jäävad alles ja käimasolevate duellide panused tagastatakse.",
+  "reload.failed": "{lightred}K4-Systemit ei laaditud uuesti ja see töötab vanade seadetega. Paranda kõigepealt see:",
 
   "top.title": "{silver}Top {lime}{0} {silver}mängijat",
   "top.line": " {gold}#{0} {1}{2} {white}{3} {silver}· {lime}{4}",

@@ -1,5 +1,5 @@
 // K4-System configuration.
-// Restart the server (or reload K4-System) after changing this file.
+// After changing this file, run css_k4_reload (it checks the file first) or restart the server.
 // Delete this file to get a fresh copy with the default values.
 {
   "version": 1, // File format version. Do not change it.

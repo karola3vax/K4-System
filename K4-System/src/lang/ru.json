@@ -58,6 +58,8 @@
   "history.source.reset": "сброс админом",
   "history.source.self-reset": "свой сброс",
   "history.source.api": "плагин",
+  "reload.ok": "{green}Файлы K4 в порядке. {silver}K4-System перезагружается; данные игроков сохраняются, ставки текущих дуэлей возвращаются.",
+  "reload.failed": "{lightred}K4-System не перезагружен и работает со старыми настройками. Сначала исправьте:",
 
   "top.title": "{silver}Топ {lime}{0} {silver}игроков",
   "top.line": " {gold}#{0} {1}{2} {white}{3} {silver}· {lime}{4}",

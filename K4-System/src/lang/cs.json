@@ -58,6 +58,8 @@
   "history.source.reset": "reset adminem",
   "history.source.self-reset": "vlastní reset",
   "history.source.api": "plugin",
+  "reload.ok": "{green}Soubory K4 jsou v pořádku. {silver}K4-System se nyní načítá znovu; hráči si ponechají data a sázky z běžících duelů se vrátí.",
+  "reload.failed": "{lightred}K4-System nebyl znovu načten a běží se starým nastavením. Nejdřív oprav tohle:",
 
   "top.title": "{silver}Top {lime}{0} {silver}hráčů",
   "top.line": " {gold}#{0} {1}{2} {white}{3} {silver}· {lime}{4}",

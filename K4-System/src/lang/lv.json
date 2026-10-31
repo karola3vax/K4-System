@@ -58,6 +58,8 @@
   "history.source.reset": "atiestatīja administrators",
   "history.source.self-reset": "paša atiestatīšana",
   "history.source.api": "spraudnis",
+  "reload.ok": "{green}K4 faili ir kārtībā. {silver}K4-System tagad tiek pārlādēts; spēlētāju dati saglabājas, notiekošo dueļu likmes tiek atgrieztas.",
+  "reload.failed": "{lightred}K4-System netika pārlādēts un turpina darboties ar vecajiem iestatījumiem. Vispirms izlabo šo:",
 
   "top.title": "{silver}Top {lime}{0} {silver}spēlētāji",
   "top.line": " {gold}#{0} {1}{2} {white}{3} {silver}· {lime}{4}",

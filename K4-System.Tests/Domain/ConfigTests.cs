@@ -198,6 +198,23 @@ public class ConfigTests
 		}
 	}
 
+	// Regression: the guard compared text, so a template written by an older 6.x (without the anti-farm section,
+	// with other comments) no longer counted as untouched after an update, and K4 started on an empty database.
+	[Fact]
+	public void An_untouched_template_from_an_older_6x_still_counts_as_unedited()
+	{
+		string older = ConfigFile.Template
+			.Replace("// After changing this file", "// Restart the server (or reload K4-System) after changing this file. Old wording", StringComparison.Ordinal);
+		int start = older.IndexOf("  // Fair kill points.", StringComparison.Ordinal);
+		int end = older.IndexOf("  // Daily missions", StringComparison.Ordinal);
+		older = older.Remove(start, end - start);
+
+		Assert.NotEqual(ConfigFile.Template, older);
+		Assert.True(ConfigFile.IsTemplate(older));
+		Assert.False(ConfigFile.IsTemplate(older.Replace("\"start-points\": 0", "\"start-points\": 10", StringComparison.Ordinal)));
+		Assert.False(ConfigFile.IsTemplate("{ not json"));
+	}
+
 	[Fact]
 	public void Null_sections_and_blank_aliases_are_rejected()
 	{

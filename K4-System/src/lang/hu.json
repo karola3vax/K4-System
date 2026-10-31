@@ -58,6 +58,8 @@
   "history.source.reset": "admin nullázta",
   "history.source.self-reset": "saját nullázás",
   "history.source.api": "plugin",
+  "reload.ok": "{green}A K4 fájljai rendben vannak. {silver}A K4-System most újratöltődik; a játékosok adatai megmaradnak, a futó párbajok tétjei visszajárnak.",
+  "reload.failed": "{lightred}A K4-System nem töltődött újra, a régi beállításokkal fut tovább. Előbb ezt javítsd:",
 
   "top.title": "{silver}Top {lime}{0} {silver}játékos",
   "top.line": " {gold}#{0} {1}{2} {white}{3} {silver}· {lime}{4}",

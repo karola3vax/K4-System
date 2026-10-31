@@ -58,6 +58,8 @@
   "history.source.reset": "إعادة ضبط بواسطة مشرف",
   "history.source.self-reset": "إعادة ضبط ذاتية",
   "history.source.api": "إضافة",
+  "reload.ok": "{green}ملفات K4 سليمة. {silver}تتم إعادة تحميل K4-System الآن؛ يحتفظ اللاعبون ببياناتهم، وتُعاد رهانات المبارزات الجارية.",
+  "reload.failed": "{lightred}لم تتم إعادة تحميل K4-System ويستمر بالإعدادات القديمة. أصلح هذا أولًا:",
 
   "top.title": "{silver}أفضل اللاعبين · العدد: {lime}{0}",
   "top.line": " {gold}#{0} {1}{2} {white}{3} {silver}· {lime}{4}",

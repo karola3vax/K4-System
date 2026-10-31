@@ -58,6 +58,8 @@
   "history.source.reset": "管理员重置",
   "history.source.self-reset": "自行重置",
   "history.source.api": "插件",
+  "reload.ok": "{green}K4 文件没有问题。{silver}正在重新加载 K4-System；玩家数据保留，进行中的决斗退还赌注。",
+  "reload.failed": "{lightred}K4-System 未重新加载，仍使用旧设置运行。请先修复：",
 
   "top.title": "{silver}前 {lime}{0} {silver}名玩家",
   "top.line": " {gold}#{0} {1}{2} {white}{3} {silver}· {lime}{4}",
