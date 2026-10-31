@@ -23,6 +23,7 @@
 					<Label id="k4-subtitle" class="k4-subtitle stratum-medium-tf" text="{s:subtitle}" />
 					<Button id="k4-close" class="CloseButton k4-close" />
 				</Panel>
+				<Label id="k4-event" class="k4-event k4-gone stratum-medium-tf" text="{s:event}" />
 				<Panel class="k4-tabs">
 					<Button id="k4-tab-rank" class="k4-tab">
 						<Panel class="k4-tab-icon ic-xp_rank" />
@@ -42,6 +43,10 @@
 					</Button>
 					<Button id="k4-tab-stats" class="k4-tab">
 						<Panel class="k4-tab-icon ic-stats" />
+						<Label class="stratum-medium-tf" text="{s:label}" />
+					</Button>
+					<Button id="k4-tab-achievements" class="k4-tab k4-gone">
+						<Panel class="k4-tab-icon ic-winner_ribbon" />
 						<Label class="stratum-medium-tf" text="{s:label}" />
 					</Button>
 				</Panel>
@@ -385,6 +390,73 @@
 								<Label class="k4-tile-value stratum-bold-tf" text="{s:value}" />
 							</Panel>
 						</Panel>
+					</Panel>
+				</Panel>
+				<Panel id="k4-view-achievements" class="k4-view">
+					<Panel id="k4-ach-0" class="k4-card k4-ach">
+						<Panel class="k4-card-stripe" />
+						<Panel id="k4-ach-0-icon" class="k4-mission-icon" />
+						<Panel class="k4-card-body">
+							<Panel class="k4-split">
+								<Label class="k4-ach-name stratum-bold-tf" text="{s:name}" />
+								<Label class="k4-mission-desc stratum-medium-tf" text="{s:desc}" />
+							</Panel>
+							<Panel class="k4-split k4-split-last">
+								<Panel class="k4-bar k4-bar-short"><Panel id="k4-ach-0-bar" class="k4-bar-fill w0" /></Panel>
+								<Label class="k4-progress stratum-medium-tf" text="{s:progress}" />
+							</Panel>
+						</Panel>
+					</Panel>
+					<Panel id="k4-ach-1" class="k4-card k4-ach">
+						<Panel class="k4-card-stripe" />
+						<Panel id="k4-ach-1-icon" class="k4-mission-icon" />
+						<Panel class="k4-card-body">
+							<Panel class="k4-split">
+								<Label class="k4-ach-name stratum-bold-tf" text="{s:name}" />
+								<Label class="k4-mission-desc stratum-medium-tf" text="{s:desc}" />
+							</Panel>
+							<Panel class="k4-split k4-split-last">
+								<Panel class="k4-bar k4-bar-short"><Panel id="k4-ach-1-bar" class="k4-bar-fill w0" /></Panel>
+								<Label class="k4-progress stratum-medium-tf" text="{s:progress}" />
+							</Panel>
+						</Panel>
+					</Panel>
+					<Panel id="k4-ach-2" class="k4-card k4-ach">
+						<Panel class="k4-card-stripe" />
+						<Panel id="k4-ach-2-icon" class="k4-mission-icon" />
+						<Panel class="k4-card-body">
+							<Panel class="k4-split">
+								<Label class="k4-ach-name stratum-bold-tf" text="{s:name}" />
+								<Label class="k4-mission-desc stratum-medium-tf" text="{s:desc}" />
+							</Panel>
+							<Panel class="k4-split k4-split-last">
+								<Panel class="k4-bar k4-bar-short"><Panel id="k4-ach-2-bar" class="k4-bar-fill w0" /></Panel>
+								<Label class="k4-progress stratum-medium-tf" text="{s:progress}" />
+							</Panel>
+						</Panel>
+					</Panel>
+					<Panel id="k4-ach-3" class="k4-card k4-ach">
+						<Panel class="k4-card-stripe" />
+						<Panel id="k4-ach-3-icon" class="k4-mission-icon" />
+						<Panel class="k4-card-body">
+							<Panel class="k4-split">
+								<Label class="k4-ach-name stratum-bold-tf" text="{s:name}" />
+								<Label class="k4-mission-desc stratum-medium-tf" text="{s:desc}" />
+							</Panel>
+							<Panel class="k4-split k4-split-last">
+								<Panel class="k4-bar k4-bar-short"><Panel id="k4-ach-3-bar" class="k4-bar-fill w0" /></Panel>
+								<Label class="k4-progress stratum-medium-tf" text="{s:progress}" />
+							</Panel>
+						</Panel>
+					</Panel>
+					<Panel class="k4-footer">
+						<Panel class="k4-meta-icon ic-winner_ribbon" />
+						<Label class="k4-muted k4-fill stratum-regular-tf" text="{s:summary}" />
+					</Panel>
+					<Panel class="k4-pager">
+						<Button id="k4-ach-prev" class="k4-arrow k4-arrow-left" />
+						<Label id="k4-ach-page" class="k4-muted k4-page stratum-medium-tf" text="{s:page}" />
+						<Button id="k4-ach-next" class="k4-arrow k4-arrow-right" />
 					</Panel>
 				</Panel>
 				<Label class="k4-copyright stratum-regular-tf" hittest="false" text="© 2026 karola3vax" />

@@ -11,9 +11,13 @@ TOP_ROWS = 10
 RANK_ROWS = 10
 STAT_TILES = 9
 MISSIONS = 4  # three daily missions and the weekly one
+ACHIEVEMENT_CARDS = 4  # one page of achievements
 
 # Tab id -> CS2 icon (panorama/images/icons/ui/<name>.vsvg)
-TABS = [("rank", "xp_rank"), ("missions", "quest"), ("top", "leader"), ("ranks", "trophy"), ("stats", "stats")]
+TABS = [("rank", "xp_rank"), ("missions", "quest"), ("top", "leader"), ("ranks", "trophy"), ("stats", "stats"), ("achievements", "winner_ribbon")]
+
+# Tabs added after 6.4 start hidden, so a server older than the addon shows exactly the tabs it can fill.
+NEW_TABS = {"achievements"}
 
 
 def icon(name, css):
@@ -72,10 +76,13 @@ w(5, '<Label id="k4-subtitle" class="k4-subtitle stratum-medium-tf" text="{s:sub
 w(5, '<Button id="k4-close" class="CloseButton k4-close" />')
 w(4, '</Panel>')
 
+# Points event banner (K4 6.5). Hidden until a 6.5+ server shows it during an event.
+w(4, '<Label id="k4-event" class="k4-event k4-gone stratum-medium-tf" text="{s:event}" />')
+
 # Tabs (CS2 main-menu navbar)
 w(4, '<Panel class="k4-tabs">')
 for tab, name in TABS:
-    w(5, f'<Button id="k4-tab-{tab}" class="k4-tab">')
+    w(5, f'<Button id="k4-tab-{tab}" class="k4-tab{" k4-gone" if tab in NEW_TABS else ""}">')
     w(6, icon(name, "k4-tab-icon"))
     w(6, '<Label class="stratum-medium-tf" text="{s:label}" />')
     w(5, '</Button>')
@@ -207,6 +214,30 @@ for i in range(STAT_TILES):
     w(7, '</Panel>')
     w(6, '</Panel>')
 w(5, '</Panel>')
+w(4, '</Panel>')
+
+# Achievements view (K4 6.5): one page of cards in the mission style, unfinished ones closest to done first.
+w(4, '<Panel id="k4-view-achievements" class="k4-view">')
+for i in range(ACHIEVEMENT_CARDS):
+    w(5, f'<Panel id="k4-ach-{i}" class="k4-card k4-ach">')
+    w(6, '<Panel class="k4-card-stripe" />')
+    w(6, f'<Panel id="k4-ach-{i}-icon" class="k4-mission-icon" />')
+    w(6, '<Panel class="k4-card-body">')
+    w(7, '<Panel class="k4-split">')
+    w(8, '<Label class="k4-ach-name stratum-bold-tf" text="{s:name}" />')
+    w(8, '<Label class="k4-mission-desc stratum-medium-tf" text="{s:desc}" />')
+    w(7, '</Panel>')
+    w(7, '<Panel class="k4-split k4-split-last">')
+    w(8, bar(f"k4-ach-{i}-bar", " k4-bar-short"))
+    w(8, '<Label class="k4-progress stratum-medium-tf" text="{s:progress}" />')
+    w(7, '</Panel>')
+    w(6, '</Panel>')
+    w(5, '</Panel>')
+w(5, '<Panel class="k4-footer">')
+w(6, icon("winner_ribbon", "k4-meta-icon"))
+w(6, '<Label class="k4-muted k4-fill stratum-regular-tf" text="{s:summary}" />')
+w(5, '</Panel>')
+pager("k4-ach", "k4-ach-page")
 w(4, '</Panel>')
 
 w(4, '<Label class="k4-copyright stratum-regular-tf" hittest="false" text="© 2026 karola3vax" />')

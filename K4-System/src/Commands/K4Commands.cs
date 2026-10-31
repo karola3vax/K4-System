@@ -872,6 +872,9 @@ internal sealed class K4Commands(
 		if (achievements is null || !guard.Check(player, info, CommandUsage.CLIENT_ONLY) || LoadedPlayer(player!, info) is not K4Player k4player)
 			return;
 
+		if (hud is not null && hud.Open(k4player, HudTab.Achievements))
+			return;
+
 		if (k4player.Achievements is not Achievements.PlayerAchievements mine)
 		{
 			info.ReplyToCommand(chat.Prefixed("error.loading"));
