@@ -54,9 +54,11 @@ internal static class ReloadCheck
 		if (config.Modules.Ranks)
 			Check(Path.Join(moduleDirectory, RankFile.FileName), content => RankFile.Parse(content), problems);
 
-		// A broken missions file turns missions off on start.
+		// A broken missions or achievements file turns that feature off on start.
 		if (config.Modules.Missions && config.Modules.Ranks)
 			Check(Path.Join(moduleDirectory, MissionFile.FileName), content => MissionFile.Parse(content), problems);
+		if (config.Modules.Achievements && config.Modules.Ranks)
+			Check(Path.Join(moduleDirectory, Achievements.AchievementFile.FileName), content => Achievements.AchievementFile.Parse(content), problems);
 
 		return problems;
 	}

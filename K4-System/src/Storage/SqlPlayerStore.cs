@@ -226,6 +226,13 @@ internal sealed class SqlPlayerStore
 				record = ReadRecord(reader);
 		}
 
+		if (record is not null)
+		{
+			IEnumerable<string> achievements = await connection.QueryAsync<string>(
+				$"SELECT `achievement_id` FROM `{tables.Achievements}` WHERE `steam_id` = @SteamId;", parameters, transaction);
+			record = record with { Achievements = achievements.ToArray() };
+		}
+
 		await transaction.CommitAsync();
 		return record;
 	}
@@ -247,7 +254,7 @@ internal sealed class SqlPlayerStore
 		ordinal++;
 
 		int placement = ReadInt(reader, ordinal) + 1;
-		return new PlayerRecord(points, stats, playtime, lastReset, placement);
+		return new PlayerRecord(points, stats, playtime, lastReset, placement, []);
 	}
 
 	private static int ReadInt(DbDataReader reader, int ordinal)
@@ -283,6 +290,13 @@ internal sealed class SqlPlayerStore
 
 				if (snapshot.Missions is MissionSnapshot missions)
 					await SaveMissionsAsync(connection, transaction, steamId, missions);
+
+				// Saved with the points they gave, so an unlock and its reward are never stored apart.
+				foreach (string achievement in snapshot.NewAchievements ?? [])
+				{
+					await connection.ExecuteAsync($@"{dialect.InsertIgnore} `{tables.Achievements}` (`steam_id`, `achievement_id`, `unlocked_at`)
+						VALUES (@SteamId, @Achievement, CURRENT_TIMESTAMP);", new { SteamId = steamId, Achievement = achievement }, transaction);
+				}
 
 				if (snapshot.PersonalRankResetUtc is DateTime resetAt)
 				{
@@ -456,7 +470,7 @@ internal sealed class SqlPlayerStore
 			foreach (string table in new[] { tables.Times, tables.Stats, tables.Ranks })
 				await connection.ExecuteAsync($"DELETE FROM `{table}` WHERE {dialect.OlderThanDays("lastseen")};", parameters, transaction);
 
-			foreach (string table in new[] { tables.Rewards, tables.Resets, tables.Missions, tables.MissionState, tables.PointLog })
+			foreach (string table in new[] { tables.Rewards, tables.Resets, tables.Missions, tables.MissionState, tables.PointLog, tables.Achievements })
 			{
 				await connection.ExecuteAsync($@"DELETE FROM `{table}`
 					WHERE NOT EXISTS (SELECT 1 FROM `{tables.Ranks}` r WHERE r.`steam_id` = `{table}`.`steam_id`);", transaction: transaction);

@@ -9,7 +9,7 @@ All settings live in one commented file, `configs/plugins/K4-System/k4-system.js
 | Section | What it controls |
 | --- | --- |
 | `storage` | SQLite or MySQL, table prefix, purge of inactive players, optional LevelRanks table |
-| `modules` | Turn ranks, stats, playtime, missions, and the admin list on or off |
+| `modules` | Turn ranks, stats, playtime, missions, [achievements](achievements.md), and the admin list on or off |
 | `tracking` | Minimum players, warmup, bots, and free-for-all. Applies to points and stats alike |
 | `ranks` | Rank mode, start points, VIP multiplier, round summary, kill streaks, reset cooldown, dynamic death points, team balance, playtime reward |
 | `points` | A point preset plus your own overrides |

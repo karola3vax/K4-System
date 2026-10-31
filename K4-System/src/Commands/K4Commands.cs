@@ -35,7 +35,8 @@ internal sealed class K4Commands(
 	CommandGuard guard,
 	PanoramaHud? hud,
 	PointAudit? audit,
-	EventService? events)
+	EventService? events,
+	Achievements.AchievementService? achievements)
 {
 	private enum PointCommand
 	{
@@ -117,6 +118,12 @@ internal sealed class K4Commands(
 			foreach (string alias in Aliases.Duel)
 				plugin.AddCommand($"css_{alias}", "Bet points on who gets more kills this map", OnDuel);
 		}
+
+		if (achievements is not null)
+		{
+			foreach (string alias in Aliases.Achievements)
+				plugin.AddCommand($"css_{alias}", "Show your achievements", OnAchievements);
+		}
 	}
 
 	/// <summary>The command's player once loaded. Replies with a loading message otherwise.</summary>
@@ -173,6 +180,8 @@ internal sealed class K4Commands(
 			categories[chat["help.playtime"]] = [.. Aliases.Playtime];
 		if (missions is not null)
 			categories[chat["help.missions"]] = [.. Aliases.Missions];
+		if (achievements is not null)
+			categories[chat["help.achievements"]] = [.. Aliases.Achievements];
 
 		List<string> other = [.. Aliases.Reset];
 		if (General.Modules.AdminList)
@@ -851,6 +860,36 @@ internal sealed class K4Commands(
 			missions.Reroll(k4player, info.ArgByIndex(2));
 		else if (hud is null || !hud.Open(k4player, HudTab.Missions))
 			missions.Show(k4player, command);
+	}
+
+	// ---------------------------------------------------------------- achievements
+
+	private const int AchievementLines = 5;
+
+	/// <summary>How many are unlocked, then the unfinished ones closest to done.</summary>
+	private void OnAchievements(CCSPlayerController? player, CommandInfo info)
+	{
+		if (achievements is null || !guard.Check(player, info, CommandUsage.CLIENT_ONLY) || LoadedPlayer(player!, info) is not K4Player k4player)
+			return;
+
+		if (k4player.Achievements is not Achievements.PlayerAchievements mine)
+		{
+			info.ReplyToCommand(chat.Prefixed("error.loading"));
+			return;
+		}
+
+		CCSPlayerController controller = k4player.Controller;
+		int unlocked = achievements.All.Count(achievement => mine.Unlocked.Contains(achievement.Id));
+		chat.Tell(controller, "achievement.title", unlocked, achievements.All.Count);
+
+		foreach ((Achievements.AchievementDefinition achievement, int progress) in Achievements.AchievementRules.Closest(achievements.All, mine.Unlocked, Achievements.AchievementService.CountersOf(k4player), AchievementLines))
+		{
+			chat.TellLine(controller, "achievement.line", achievements.NameFor(achievement, controller), achievements.DescriptionFor(achievement, controller),
+				progress, achievement.Goal, achievement.Points);
+		}
+
+		if (unlocked == achievements.All.Count)
+			chat.TellLine(controller, "achievement.all-done");
 	}
 
 	// ---------------------------------------------------------------- utilities

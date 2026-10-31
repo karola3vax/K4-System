@@ -79,6 +79,9 @@ public sealed class K4Player
 
 	public PlayerMissions? Missions { get; set; }
 
+	/// <summary>Null while achievements are off or not loaded yet.</summary>
+	public Achievements.PlayerAchievements? Achievements { get; set; }
+
 	public int KillStreak { get; set; }
 
 	public DateTime LastKillUtc { get; set; } = DateTime.MinValue;

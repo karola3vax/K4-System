@@ -53,6 +53,7 @@
     <EmbeddedResource Include="Ranks\default-ranks.jsonc" LogicalName="K4System.Ranks.default-ranks.jsonc" />
     <EmbeddedResource Include="Config\default-config.jsonc" LogicalName="K4System.Config.default-config.jsonc" />
     <EmbeddedResource Include="Missions\default-missions.jsonc" LogicalName="K4System.Missions.default-missions.jsonc" />
+    <EmbeddedResource Include="Achievements\default-achievements.jsonc" LogicalName="K4System.Achievements.default-achievements.jsonc" />
   </ItemGroup>
   <!-- CS2 dedicated servers run on Linux or Windows x64, so other SQLite native builds are left out. -->
   <Target Name="RemoveUnusedNativeRuntimes" AfterTargets="Build">

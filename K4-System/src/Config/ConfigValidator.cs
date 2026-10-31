@@ -42,7 +42,7 @@ internal static partial class ConfigValidator
 			throw new InvalidDataException("A section of k4-system.jsonc is missing or null. Delete the file to get a fresh one.");
 
 		CommandSettings commands = config.Commands;
-		List<string>?[] aliasLists = [commands.Main, commands.Rank, commands.Top, commands.Ranks, commands.Stats, commands.Playtime, commands.Reset, commands.Admins, commands.Missions, commands.Duel];
+		List<string>?[] aliasLists = [commands.Main, commands.Rank, commands.Top, commands.Ranks, commands.Stats, commands.Playtime, commands.Reset, commands.Admins, commands.Missions, commands.Duel, commands.Achievements];
 		if (aliasLists.Any(list => list is null || list.Any(string.IsNullOrWhiteSpace)))
 			throw new InvalidDataException("commands: every alias list must exist and contain no blank names.");
 
@@ -115,7 +115,7 @@ internal static partial class ConfigValidator
 		[
 			("main", commands.Main), ("rank", commands.Rank), ("top", commands.Top), ("ranks", commands.Ranks), ("stats", commands.Stats),
 			("playtime", commands.Playtime), ("reset", commands.Reset), ("admins", commands.Admins), ("missions", commands.Missions),
-			("duel", commands.Duel)
+			("duel", commands.Duel), ("achievements", commands.Achievements)
 		];
 
 		Dictionary<string, string> owner = new(StringComparer.OrdinalIgnoreCase);
@@ -142,7 +142,7 @@ internal static partial class ConfigValidator
 
 		// A name twice in one list would register the command twice, so one !rank would answer twice.
 		CommandSettings commands = config.Commands;
-		foreach (List<string> names in new[] { commands.Main, commands.Rank, commands.Top, commands.Ranks, commands.Stats, commands.Playtime, commands.Reset, commands.Admins, commands.Missions, commands.Duel })
+		foreach (List<string> names in new[] { commands.Main, commands.Rank, commands.Top, commands.Ranks, commands.Stats, commands.Playtime, commands.Reset, commands.Admins, commands.Missions, commands.Duel, commands.Achievements })
 		{
 			HashSet<string> seen = new(StringComparer.OrdinalIgnoreCase);
 			names.RemoveAll(name => !seen.Add(name));
@@ -243,6 +243,12 @@ internal static partial class ConfigValidator
 		{
 			warnings.Add("modules.missions needs modules.ranks, because missions reward points. Missions are off.");
 			config.Modules.Missions = false;
+		}
+
+		if (config.Modules.Achievements && !config.Modules.Ranks)
+		{
+			warnings.Add("modules.achievements needs modules.ranks, because achievements reward points. Achievements are off.");
+			config.Modules.Achievements = false;
 		}
 
 		if (!float.IsFinite(ranks.PlaytimeReward.EveryMinutes) || ranks.PlaytimeReward.EveryMinutes < 0)

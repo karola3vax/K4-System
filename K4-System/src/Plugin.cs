@@ -3,6 +3,7 @@ namespace K4System;
 using CounterStrikeSharp.API;
 using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Core.Attributes;
+using K4System.Achievements;
 using K4System.Api;
 using K4System.Commands;
 using K4System.Config;
@@ -153,8 +154,11 @@ public sealed class Plugin : BasePlugin
 
 		BountyService? bounty = ranks is not null && Config.Bounty.Enabled ? new BountyService(Config, players, ranks, chat, hudBridge) : null;
 		duels = ranks is not null && Config.Duels.Enabled ? new DuelService(Config, players, ranks, game, chat, hudBridge, (seconds, action) => AddTimer(seconds, action)) : null;
+		AchievementService? achievements = ranks is not null && Config.Modules.Achievements && LoadAchievements() is { } list
+			? new AchievementService(list, players, ranks, chat, hudBridge, Logger)
+			: null;
 
-		playerService = new PlayerService(this, Config, players, store, saves, storageReady, ranks, rewards, missions, playtime, game, gameThread, background, countries, chat, events, Logger);
+		playerService = new PlayerService(this, Config, players, store, saves, storageReady, ranks, rewards, missions, playtime, game, gameThread, background, countries, chat, events, achievements, Logger);
 
 		RankService? rankService = ranks;
 		PointAudit? audit = ranks is not null ? new PointAudit(store, background) : null;
@@ -175,8 +179,8 @@ public sealed class Plugin : BasePlugin
 			hud.Warmup();
 		}
 
-		new GameEvents(this, Config, players, playerService, ranks, stats, Config.Modules.Playtime ? playtime : null, scoreboard, missions, bounty, duels, store, game, gameThread, background, chat, Logger).Register();
-		new K4Commands(this, Config, players, playerService, ranks, rewards, missions, duels, playtime, store, gameThread, background, chat, new CommandGuard(chat), hud, audit, events).Register();
+		new GameEvents(this, Config, players, playerService, ranks, stats, Config.Modules.Playtime ? playtime : null, scoreboard, missions, bounty, duels, achievements, store, game, gameThread, background, chat, Logger).Register();
+		new K4Commands(this, Config, players, playerService, ranks, rewards, missions, duels, playtime, store, gameThread, background, chat, new CommandGuard(chat), hud, audit, events, achievements).Register();
 
 		if (events is not null)
 			AddTimer(15.0f, events.Tick, CounterStrikeSharp.API.Modules.Timers.TimerFlags.REPEAT);
@@ -312,6 +316,30 @@ public sealed class Plugin : BasePlugin
 		catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or InvalidDataException or System.Text.Json.JsonException)
 		{
 			Logger.LogError("Daily missions are off because {File} could not be loaded: {Error}", MissionFile.FileName, ex.Message);
+			return null;
+		}
+	}
+
+	/// <summary>Reads achievements.jsonc, writing the default list on first start. Null turns achievements off for this session.</summary>
+	private IReadOnlyList<AchievementDefinition>? LoadAchievements()
+	{
+		string path = Path.Join(ModuleDirectory, AchievementFile.FileName);
+
+		try
+		{
+			if (!File.Exists(path))
+			{
+				File.WriteAllText(path, AchievementFile.DefaultContent);
+				Logger.LogInformation("Default achievements file created.");
+			}
+
+			IReadOnlyList<AchievementDefinition> list = AchievementFile.Parse(File.ReadAllText(path));
+			Logger.LogInformation("Achievements loaded: {Count}.", list.Count);
+			return list;
+		}
+		catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or InvalidDataException or System.Text.Json.JsonException)
+		{
+			Logger.LogError("Achievements are off because {File} could not be loaded: {Error}", AchievementFile.FileName, ex.Message);
 			return null;
 		}
 	}

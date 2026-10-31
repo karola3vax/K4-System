@@ -27,6 +27,7 @@ internal sealed class GameEvents(
 	MissionService? missions,
 	BountyService? bounty,
 	DuelService? duels,
+	Achievements.AchievementService? achievements,
 	SqlPlayerStore store,
 	GameState game,
 	GameThread gameThread,
@@ -150,6 +151,7 @@ internal sealed class GameEvents(
 			ranks?.OnRoundEnd(@event.Winner);
 			if (missions?.IsTrackingAllowed() == true)
 				missions.OnRoundEnd(@event.Winner);
+			achievements?.CheckAll();
 			playerService.SaveAll();
 			return HookResult.Continue;
 		});
@@ -186,6 +188,7 @@ internal sealed class GameEvents(
 			missions?.OnMatchEnd();
 			bounty?.OnMatchEnd();
 			duels?.OnMatchEnd();
+			achievements?.CheckAll();
 			playerService.SaveAll();
 			return HookResult.Continue;
 		});
