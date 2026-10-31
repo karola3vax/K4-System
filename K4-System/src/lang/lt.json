@@ -5,6 +5,7 @@
   "error.target-loading": "{lightred}Žaidėjo {0} duomenys dar kraunami.",
   "error.target-immunity": "{lightred}Šis veiksmas žaidėjui {0} negalimas.",
   "error.target-not-found": "{lightred}Tinkamas žaidėjas nerastas.",
+  "error.target-many": "{lightred}\"{0}\" atitinka {1} žaidėjus. Naudok #userid, pilnesnį vardą arba grupę, pvz., @ct.",
   "error.target-bot": "{lightred}{0} yra botas.",
   "error.invalid-amount": "{lightred}Įvesk sveikąjį skaičių, 0 arba didesnį.",
   "error.no-permission": "{lightred}Neturi teisės naudoti šios komandos.",

@@ -47,9 +47,21 @@ internal sealed class GameState(ILogger logger)
 		Rules = proxy.GameRules;
 	}
 
-	/// <summary>Connected human players with a real 17-digit SteamID64 and a pawn.</summary>
+	// Every shot, hit, and death asks for this count, so it is read from the game at most every half second.
+	private const long CountCacheMilliseconds = 500;
+	private static long countedAtTick = long.MinValue / 2; // never; half so that now minus it cannot overflow
+	private static int cachedCount;
+
+	/// <summary>Connected human players with a real 17-digit SteamID64 and a pawn. At most half a second old.</summary>
 	public static bool TryCountEligibleHumans(out int count)
 	{
+		long now = Environment.TickCount64;
+		if (now - countedAtTick < CountCacheMilliseconds)
+		{
+			count = cachedCount;
+			return true;
+		}
+
 		count = 0;
 
 		try
@@ -61,6 +73,8 @@ internal sealed class GameState(ILogger logger)
 				!player.IsHLTV &&
 				player.SteamID.ToString().Length == 17 &&
 				player.Connected == PlayerConnectedState.Connected);
+			countedAtTick = now;
+			cachedCount = count;
 			return true;
 		}
 		catch (Exception ex) when (IsEntitySystemUnavailable(ex))

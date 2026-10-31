@@ -16,7 +16,8 @@ internal static class MatchResults
 
 		if (freeForAll)
 		{
-			K4Player? winner = played.OrderByDescending(player => player.MatchKills).ThenBy(player => player.SteamId).FirstOrDefault();
+			// Nobody wins a match without a kill, so an empty or bot-only match is no result.
+			K4Player? winner = played.Where(player => player.MatchKills > 0).OrderByDescending(player => player.MatchKills).ThenBy(player => player.SteamId).FirstOrDefault();
 			if (winner is not null)
 				winners.Add(winner);
 			return (played, winners, winner is not null);

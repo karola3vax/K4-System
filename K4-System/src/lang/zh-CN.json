@@ -5,6 +5,7 @@
   "error.target-loading": "{lightred}{0} 的数据仍在加载。",
   "error.target-immunity": "{lightred}你无法对 {0} 执行此操作。",
   "error.target-not-found": "{lightred}未找到匹配的玩家。",
+  "error.target-many": "{lightred}\"{0}\" 匹配到 {1} 名玩家。请使用 #userid、更完整的名字或 @ct 等分组。",
   "error.target-bot": "{lightred}{0} 是机器人。",
   "error.invalid-amount": "{lightred}请输入大于或等于 0 的整数。",
   "error.no-permission": "{lightred}你没有权限使用此指令。",

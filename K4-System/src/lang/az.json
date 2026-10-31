@@ -5,6 +5,7 @@
   "error.target-loading": "{lightred}Oyunçu məlumatları hələ yüklənir: {0}",
   "error.target-immunity": "{lightred}Bu oyunçunu hədəf ala bilməzsən: {0}",
   "error.target-not-found": "{lightred}Uyğun oyunçu tapılmadı.",
+  "error.target-many": "{lightred}\"{0}\" {1} oyunçuya uyğun gəlir. #userid, daha tam ad və ya @ct kimi qrup istifadə edin.",
   "error.target-bot": "{lightred}Bu oyunçu botdur: {0}",
   "error.invalid-amount": "{lightred}0 və ya daha böyük tam ədəd yaz.",
   "error.no-permission": "{lightred}Bu əmri işlətməyə icazən yoxdur.",

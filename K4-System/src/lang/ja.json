@@ -5,6 +5,7 @@
   "error.target-loading": "{lightred}{0} のデータを読み込み中です。",
   "error.target-immunity": "{lightred}{0} は対象にできません。",
   "error.target-not-found": "{lightred}該当するプレイヤーが見つかりません。",
+  "error.target-many": "{lightred}\"{0}\" は {1} 人に一致します。#userid、より正確な名前、または @ct などのグループを使ってください。",
   "error.target-bot": "{lightred}{0} はBOTです。",
   "error.invalid-amount": "{lightred}0以上の整数を入力してください。",
   "error.no-permission": "{lightred}このコマンドを使う権限がありません。",

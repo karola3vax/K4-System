@@ -123,7 +123,19 @@ internal sealed class CustomLanguage : IStringLocalizer
 		get
 		{
 			string? text = Custom(name);
-			return text is null ? shipped[name, arguments] : new LocalizedString(name, string.Format(text, arguments));
+			if (text is null)
+				return shipped[name, arguments];
+
+			try
+			{
+				return new LocalizedString(name, string.Format(text, arguments));
+			}
+			catch (FormatException)
+			{
+				// A server line with a broken placeholder, such as {name} or {3} on a line with two values,
+				// would throw in the middle of a command or event. The shipped text is shown instead.
+				return shipped[name, arguments];
+			}
 		}
 	}
 

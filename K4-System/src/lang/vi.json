@@ -5,6 +5,7 @@
   "error.target-loading": "{lightred}Dữ liệu của {0} vẫn đang tải.",
   "error.target-immunity": "{lightred}Bạn không thể nhắm vào {0}.",
   "error.target-not-found": "{lightred}Không tìm thấy người chơi phù hợp.",
+  "error.target-many": "{lightred}\"{0}\" khớp với {1} người chơi. Dùng #userid, tên đầy đủ hơn hoặc nhóm như @ct.",
   "error.target-bot": "{lightred}{0} là bot.",
   "error.invalid-amount": "{lightred}Nhập số nguyên từ 0 trở lên.",
   "error.no-permission": "{lightred}Bạn không có quyền dùng lệnh này.",

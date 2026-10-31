@@ -268,11 +268,15 @@ internal sealed class RankService(
 		double share = decision.AttackerPoint == AttackerPointAction.Kill ? KillShare(attacker, victim) : 1;
 		ChatText? farmNote = share < 1 && share > 0 ? new ChatText("reason.repeat-kill", [(int)Math.Round(share * 100)]) : null;
 
-		if (decision.VictimPoint != VictimPointAction.None && victim is { IsHuman: true, Rank: not null })
+		// Every death ends the streak, also one that gives no points (such as a bot kill with count-bots off).
+		if (victim is { IsHuman: true })
 		{
 			victim.KillStreak = 0;
 			victim.LastKillUtc = DateTime.UtcNow;
+		}
 
+		if (decision.VictimPoint != VictimPointAction.None && victim is { IsHuman: true, Rank: not null })
+		{
 			if (decision.VictimPoint == VictimPointAction.Suicide)
 				ApplyPoints(victim, Points.Suicide, "reason.suicide");
 			else
@@ -462,11 +466,9 @@ internal sealed class RankService(
 
 			if (!pointsAllowed)
 			{
+				// Points earned before tracking stopped (a player left mid-round) still get their summary.
 				if (state is not null)
-				{
-					state.RoundPoints = 0;
-					state.RoundReasons.Clear();
-				}
+					FinishRoundSummary(player, state);
 				continue;
 			}
 
@@ -495,29 +497,35 @@ internal sealed class RankService(
 					ApplyPoints(player, Points.RoundLose, "reason.round-loss");
 			}
 
-			if (!state.MuteMessages && Settings.RoundSummary)
-			{
-				if (state.RoundPoints > 0)
-					chat.Tell(player.Controller, "points.gain", state.Points, state.RoundPoints, chat.For(player.Controller, "reason.round-summary"));
-				else if (state.RoundPoints < 0)
-					chat.Tell(player.Controller, "points.loss", state.Points, Math.Abs((long)state.RoundPoints), chat.For(player.Controller, "reason.round-summary"));
-
-				// What the total is made of, such as "5× Kill: +100", when it came from more than one reason.
-				if (state.RoundPoints != 0 && state.RoundReasons.Count > 1)
-				{
-					foreach ((string reason, (int count, int points)) in state.RoundReasons)
-					{
-						if (points != 0)
-							player.Controller.PrintToChat(SummaryLine(player.Controller, reason, count, points));
-					}
-				}
-			}
-
-			state.RoundPoints = 0;
-			state.RoundReasons.Clear();
+			FinishRoundSummary(player, state);
 		}
 
 		roundSummarized = Settings.RoundSummary;
+	}
+
+	/// <summary>Prints the round summary when it is on, then starts the next round's total at zero.</summary>
+	private void FinishRoundSummary(K4Player player, RankState state)
+	{
+		if (!state.MuteMessages && Settings.RoundSummary)
+		{
+			if (state.RoundPoints > 0)
+				chat.Tell(player.Controller, "points.gain", state.Points, state.RoundPoints, chat.For(player.Controller, "reason.round-summary"));
+			else if (state.RoundPoints < 0)
+				chat.Tell(player.Controller, "points.loss", state.Points, Math.Abs((long)state.RoundPoints), chat.For(player.Controller, "reason.round-summary"));
+
+			// What the total is made of, such as "5× Kill: +100", when it came from more than one reason.
+			if (state.RoundPoints != 0 && state.RoundReasons.Count > 1)
+			{
+				foreach ((string reason, (int count, int points)) in state.RoundReasons)
+				{
+					if (points != 0)
+						player.Controller.PrintToChat(SummaryLine(player.Controller, reason, count, points));
+				}
+			}
+		}
+
+		state.RoundPoints = 0;
+		state.RoundReasons.Clear();
 	}
 
 	/// <summary>" 5× Kill: +100" in the player's language; the count and sign need no translation.</summary>

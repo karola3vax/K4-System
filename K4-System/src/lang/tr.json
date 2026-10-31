@@ -5,6 +5,7 @@
   "error.target-loading": "{lightred}Oyuncu verileri hâlâ yükleniyor: {0}",
   "error.target-immunity": "{lightred}Bu oyuncu hedef alınamaz: {0}",
   "error.target-not-found": "{lightred}Eşleşen oyuncu bulunamadı.",
+  "error.target-many": "{lightred}\"{0}\" {1} oyuncuyla eşleşiyor. #userid, daha tam bir ad veya @ct gibi bir grup kullanın.",
   "error.target-bot": "{lightred}Bu oyuncu bir bot: {0}",
   "error.invalid-amount": "{lightred}0 veya daha büyük bir tam sayı gir.",
   "error.no-permission": "{lightred}Bu komutu kullanma yetkin yok.",

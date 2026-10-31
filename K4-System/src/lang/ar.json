@@ -5,6 +5,7 @@
   "error.target-loading": "{lightred}بيانات هذا اللاعب قيد التحميل: {0}",
   "error.target-immunity": "{lightred}لا يمكنك استهداف هذا اللاعب: {0}",
   "error.target-not-found": "{lightred}لم يتم العثور على لاعب مطابق.",
+  "error.target-many": "{lightred}\"{0}\" يطابق {1} لاعبين. استخدم ‎#userid أو اسمًا أكمل أو مجموعة مثل ‎@ct.",
   "error.target-bot": "{lightred}هذا اللاعب بوت: {0}",
   "error.invalid-amount": "{lightred}أدخل عددًا صحيحًا يساوي 0 أو أكثر.",
   "error.no-permission": "{lightred}ليست لديك صلاحية لاستخدام هذا الأمر.",

@@ -74,6 +74,29 @@ public class MapMissionTests
 		Assert.True(map.Allows(Mission(MissionType.ClutchWins)));
 	}
 
+	// Regression: the weapon list never holds knives or grenades, so these custom missions were swapped away on every map.
+	[Fact]
+	public void Knife_and_grenade_weapon_missions_follow_the_knife_and_grenade_rules()
+	{
+		MapAbilities competitive = MapAbilities.Read(Competitive() with { SeenWeapons = new HashSet<string>() }, DefaultRules);
+		MapAbilities aim = MapAbilities.Read(AimMap(), DefaultRules);
+
+		foreach (string weapon in new[] { "knife", "bayonet" })
+		{
+			Assert.True(competitive.Allows(Mission(MissionType.WeaponKills, weapon)), weapon);
+			Assert.True(aim.Allows(Mission(MissionType.WeaponKills, weapon)), weapon);
+		}
+
+		foreach (string weapon in new[] { "hegrenade", "molotov", "inferno", "incgrenade" })
+		{
+			Assert.True(competitive.Allows(Mission(MissionType.WeaponKills, weapon)), weapon);
+			Assert.False(aim.Allows(Mission(MissionType.WeaponKills, weapon)), weapon);
+		}
+
+		Assert.True(competitive.Allows(Mission(MissionType.WeaponKills, "planted_c4")));
+		Assert.False(aim.Allows(Mission(MissionType.WeaponKills, "planted_c4")));
+	}
+
 	[Fact]
 	public void The_aim_rule_wins_even_when_the_server_sells_grenades()
 	{

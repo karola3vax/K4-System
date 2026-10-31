@@ -305,7 +305,8 @@ internal sealed class K4Commands(
 
 		DateTime? rankResetAt = null;
 
-		if (ResetPolicy.ClearsRewardClaims(target))
+		// Without the rank module nothing about ranks is reset, so there is no rank-reset cooldown to start.
+		if (ResetPolicy.ClearsRewardClaims(target) && ranks is not null)
 		{
 			TimeSpan rankCooldown = ResetPolicy.RankResetCooldownRemaining(now, k4player.LastPersonalRankResetUtc, config.Ranks.ResetCooldownHours);
 			if (rankCooldown > TimeSpan.Zero)
@@ -364,6 +365,15 @@ internal sealed class K4Commands(
 		if (!targets.Any())
 		{
 			info.ReplyToCommand(chat.Prefixed("error.target-not-found"));
+			return result;
+		}
+
+		// A plain name matches every player whose name contains it, so "jo" could reset or change several players.
+		// Groups such as @all or @ct, and #userid, say clearly who is meant.
+		string pattern = info.ArgByIndex(1);
+		if (targets.Count() > 1 && !pattern.StartsWith('@') && !pattern.StartsWith('#'))
+		{
+			info.ReplyToCommand(chat.Prefixed("error.target-many", pattern, targets.Count()));
 			return result;
 		}
 
@@ -595,8 +605,14 @@ internal sealed class K4Commands(
 		int count = int.TryParse(info.ArgByIndex(1), out int parsed) ? Math.Clamp(parsed, 1, 25) : 5;
 		ulong steamId = k4player.SteamId;
 
-		// Save everyone first so the list includes the latest points.
-		Task<bool> saved = playerService.SaveAll();
+		// Save everyone first so the list includes the latest points, at most every few seconds for the whole server.
+		DateTime now = DateTime.UtcNow;
+		Task<bool> saved = Task.FromResult(true);
+		if (now - lastTopSaveUtc >= TopSaveInterval)
+		{
+			lastTopSaveUtc = now;
+			saved = playerService.SaveAll();
+		}
 
 		background.Run(async () =>
 		{
@@ -605,6 +621,9 @@ internal sealed class K4Commands(
 			gameThread.Post(() => PrintTop(steamId, count, top));
 		}, "Preparing the top list");
 	}
+
+	private static readonly TimeSpan TopSaveInterval = TimeSpan.FromSeconds(10);
+	private DateTime lastTopSaveUtc = DateTime.MinValue;
 
 	private void PrintTop(ulong steamId, int count, List<TopEntry> top)
 	{

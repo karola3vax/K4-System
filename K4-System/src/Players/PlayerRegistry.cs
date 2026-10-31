@@ -11,6 +11,29 @@ public sealed class PlayerRegistry
 	private readonly Dictionary<int, K4Player> loaded = [];
 	private readonly Dictionary<int, K4Player> loading = [];
 
+	// A copy of the loaded players for other plugins' threads, replaced (never changed) on the game thread.
+	private volatile K4Player[] snapshot = [];
+
+	private void Publish() => snapshot = [.. loaded.Values];
+
+	/// <summary>
+	/// The loaded player for this controller, from any thread. Compares entity handles only and reads nothing
+	/// from the game, so it is safe off the game thread; the answer may be one frame old.
+	/// </summary>
+	public K4Player? FindFromAnyThread(CCSPlayerController? controller)
+	{
+		if (controller is null)
+			return null;
+
+		foreach (K4Player player in snapshot)
+		{
+			if (player.Controller.Handle == controller.Handle)
+				return player;
+		}
+
+		return null;
+	}
+
 	public IEnumerable<K4Player> All => loaded.Values;
 
 	/// <summary>Loaded humans whose controller and pawn are valid.</summary>
@@ -78,13 +101,17 @@ public sealed class PlayerRegistry
 		}
 
 		loaded[player.Slot] = player;
+		Publish();
 		return displaced;
 	}
 
 	public void Remove(K4Player player)
 	{
 		if (loaded.TryGetValue(player.Slot, out K4Player? current) && ReferenceEquals(current, player))
+		{
 			loaded.Remove(player.Slot);
+			Publish();
+		}
 	}
 
 	/// <summary>Entries whose controller is gone, for example players who left during a map change.</summary>
@@ -120,5 +147,6 @@ public sealed class PlayerRegistry
 	{
 		loaded.Clear();
 		loading.Clear();
+		Publish();
 	}
 }

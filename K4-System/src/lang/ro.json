@@ -5,6 +5,7 @@
   "error.target-loading": "{lightred}Datele lui {0} încă se încarcă.",
   "error.target-immunity": "{lightred}Nu poți folosi asta pe {0}.",
   "error.target-not-found": "{lightred}Niciun jucător găsit.",
+  "error.target-many": "{lightred}\"{0}\" se potrivește cu {1} jucători. Folosește #userid, un nume mai complet sau un grup ca @ct.",
   "error.target-bot": "{lightred}{0} este un bot.",
   "error.invalid-amount": "{lightred}Introdu un număr întreg, 0 sau mai mare.",
   "error.no-permission": "{lightred}Nu ai permisiunea să folosești această comandă.",

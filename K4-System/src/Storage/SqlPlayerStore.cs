@@ -446,13 +446,20 @@ internal sealed class SqlPlayerStore
 
 		var parameters = new { Days = days };
 
-		foreach (string table in new[] { tables.Times, tables.Stats, tables.Ranks })
-			await connection.ExecuteAsync($"DELETE FROM `{table}` WHERE {dialect.OlderThanDays("lastseen")};", parameters);
-
-		foreach (string table in new[] { tables.Rewards, tables.Resets, tables.Missions, tables.MissionState })
+		// One transaction: a player who joins while the purge runs is either purged everywhere or kept everywhere.
+		// Separately, the times and stats rows could go while the join refreshed the ranks row, wiping only half.
+		await using (DbTransaction transaction = await connection.BeginTransactionAsync())
 		{
-			await connection.ExecuteAsync($@"DELETE FROM `{table}`
-				WHERE NOT EXISTS (SELECT 1 FROM `{tables.Ranks}` r WHERE r.`steam_id` = `{table}`.`steam_id`);");
+			foreach (string table in new[] { tables.Times, tables.Stats, tables.Ranks })
+				await connection.ExecuteAsync($"DELETE FROM `{table}` WHERE {dialect.OlderThanDays("lastseen")};", parameters, transaction);
+
+			foreach (string table in new[] { tables.Rewards, tables.Resets, tables.Missions, tables.MissionState })
+			{
+				await connection.ExecuteAsync($@"DELETE FROM `{table}`
+					WHERE NOT EXISTS (SELECT 1 FROM `{tables.Ranks}` r WHERE r.`steam_id` = `{table}`.`steam_id`);", transaction: transaction);
+			}
+
+			await transaction.CommitAsync();
 		}
 
 		if (!levelRanks)
