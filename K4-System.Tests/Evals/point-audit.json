@@ -1,0 +1,30 @@
+[
+  {
+    "Name": "an admin gives, removes and resets; the player sees the newest first",
+    "Changes": [
+      { "Delta": 500, "PointsAfter": 1500, "Source": "give", "Actor": "Admin (76561198000000009)" },
+      { "Delta": -200, "PointsAfter": 1300, "Source": "remove", "Actor": "Admin (76561198000000009)" },
+      { "Delta": -1300, "PointsAfter": 0, "Source": "reset", "Actor": "console" }
+    ],
+    "Count": 10,
+    "ExpectedSources": ["reset", "remove", "give"]
+  },
+  {
+    "Name": "the count limits the list to the newest changes",
+    "Changes": [
+      { "Delta": 10, "PointsAfter": 10, "Source": "api", "Actor": "shared API" },
+      { "Delta": 10, "PointsAfter": 20, "Source": "api", "Actor": "shared API" },
+      { "Delta": 30, "PointsAfter": 50, "Source": "set", "Actor": "console" }
+    ],
+    "Count": 2,
+    "ExpectedSources": ["set", "api"]
+  },
+  {
+    "Name": "a very long actor name is cut to fit instead of failing the insert",
+    "Changes": [
+      { "Delta": 1, "PointsAfter": 1, "Source": "give", "Actor": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" }
+    ],
+    "Count": 10,
+    "ExpectedSources": ["give"]
+  }
+]

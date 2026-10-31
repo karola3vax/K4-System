@@ -17,6 +17,7 @@ internal sealed record TableNames(string Prefix, string LevelRanks)
 	public string Schema => $"{Prefix}k4schema";
 	public string Missions => $"{Prefix}k4missions";
 	public string MissionState => $"{Prefix}k4missionstate";
+	public string PointLog => $"{Prefix}k4pointlog";
 }
 
 /// <summary>
@@ -154,6 +155,17 @@ internal sealed class MySqlDialect(string connectionString, string databaseName)
 			`last_completed_day` CHAR(10) COLLATE 'utf8mb4_unicode_ci' NULL,
 			`reroll_day` CHAR(10) COLLATE 'utf8mb4_unicode_ci' NULL,
 			`rerolls_used` INT NOT NULL DEFAULT 0
+		) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
+
+		yield return $@"CREATE TABLE IF NOT EXISTS `{tables.PointLog}` (
+			`id` BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+			`steam_id` VARCHAR(32) COLLATE 'utf8mb4_unicode_ci' NOT NULL,
+			`changed_at` DATETIME NOT NULL,
+			`delta` INT NOT NULL,
+			`points_after` INT NOT NULL,
+			`source` VARCHAR(32) COLLATE 'utf8mb4_unicode_ci' NOT NULL,
+			`actor` VARCHAR(255) COLLATE 'utf8mb4_unicode_ci' NOT NULL,
+			INDEX `idx_steam_changed` (`steam_id`, `changed_at`)
 		) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
 	}
 
@@ -308,6 +320,18 @@ internal sealed class SqliteDialect(string filePath) : SqlDialect
 			`reroll_day` TEXT NULL,
 			`rerolls_used` INTEGER NOT NULL DEFAULT 0
 		);";
+
+		yield return $@"CREATE TABLE IF NOT EXISTS `{tables.PointLog}` (
+			`id` INTEGER PRIMARY KEY AUTOINCREMENT,
+			`steam_id` TEXT NOT NULL,
+			`changed_at` TEXT NOT NULL,
+			`delta` INTEGER NOT NULL,
+			`points_after` INTEGER NOT NULL,
+			`source` TEXT NOT NULL,
+			`actor` TEXT NOT NULL
+		);";
+
+		yield return $"CREATE INDEX IF NOT EXISTS `idx_{tables.PointLog}_steam` ON `{tables.PointLog}` (`steam_id`, `changed_at`);";
 	}
 
 	public override string CreateLevelRanksTable(string table) => $@"CREATE TABLE IF NOT EXISTS `{table}` (
