@@ -95,6 +95,32 @@ internal sealed class RankService(
 
 		if (refreshRank)
 			RefreshRank(player, announce: true, allowRewards: true);
+
+		if (applied < 0)
+			WarnRankAtRisk(player, state, oldPoints);
+	}
+
+	/// <summary>A red toast, once per rank per connection, when a loss leaves the player close to dropping a rank.</summary>
+	private void WarnRankAtRisk(K4Player player, RankState state, int pointsBefore)
+	{
+		if (hud.Hud is not PanoramaHud panel)
+			return;
+
+		RankDefinition rank = ResolveRank(player, state.Points);
+		IReadOnlyList<RankDefinition> progression = Progression(player);
+		int below = -1;
+		for (int i = 1; i < progression.Count && below < 0; i++)
+		{
+			if (progression[i].Key == rank.Key)
+				below = i - 1;
+		}
+
+		if (below < 0 || !ToastRules.HoldRank(pointsBefore, state.Points, rank.Point, progression[below].Point) || !player.ToastsShown.Add("hold:" + rank.Key))
+			return;
+
+		CCSPlayerController controller = player.Controller;
+		panel.Toast(player, new Toast(chat.For(controller, "toast.hold-rank"), chat.For(controller, "toast.hold-rank-text", state.Points - rank.Point, rank.Name),
+			"", panel.RankIcon(rank) ?? "ic-cold_trend", ToastColor.Red));
 	}
 
 	private void AnnouncePointChange(K4Player player, RankState state, int applied, string reason, ChatText? extra)
@@ -194,9 +220,13 @@ internal sealed class RankService(
 			if (announce)
 			{
 				bool demoted = oldRank.Point > newRank.Point;
-				if (hud.Hud is PanoramaHud panel)
-					panel.ShowToast(player, demoted ? "hud.toast.demoted" : "hud.toast.promoted", newRank.Name,
-						demoted ? ToastKind.Warning : ToastKind.Gold, demoted ? null : panel.RankIcon(newRank) ?? "ic-trade_up");
+				if (hud.Hud is PanoramaHud panel && !player.ToastsOff)
+				{
+					if (demoted)
+						panel.Toast(player, new Toast(chat.For(player.Controller, "hud.toast.demoted"), newRank.Name, "", panel.RankIcon(newRank) ?? "ic-cold_trend", ToastColor.Red));
+					else
+						panel.Promote(player, newRank);
+				}
 				else
 					chat.Tell(player.Controller, demoted ? "rank.demoted" : "rank.promoted", newRank.Color, newRank.Name);
 			}
@@ -473,7 +503,7 @@ internal sealed class RankService(
 			{
 				// Points earned before tracking stopped (a player left mid-round) still get their summary.
 				if (state is not null)
-					FinishRoundSummary(player, state);
+					FinishRoundSummary(player, state, RoundResultOf(player, winnerTeam));
 				continue;
 			}
 
@@ -502,16 +532,38 @@ internal sealed class RankService(
 					ApplyPoints(player, Points.RoundLose, "reason.round-loss");
 			}
 
-			FinishRoundSummary(player, state);
+			FinishRoundSummary(player, state, RoundResultOf(player, winnerTeam));
 		}
 
 		roundSummarized = Settings.RoundSummary;
 	}
 
-	/// <summary>Prints the round summary when it is on, then starts the next round's total at zero.</summary>
-	private void FinishRoundSummary(K4Player player, RankState state)
+	/// <summary>"toast.round-won", "toast.round-lost", or "toast.round" for a draw or a spectator.</summary>
+	private static string RoundResultOf(K4Player player, int winnerTeam)
 	{
-		if (!state.MuteMessages && Settings.RoundSummary)
+		int team = player.Controller.TeamNum;
+		if (winnerTeam <= (int)CsTeam.Spectator || team <= (int)CsTeam.Spectator)
+			return "toast.round";
+		return winnerTeam == team ? "toast.round-won" : "toast.round-lost";
+	}
+
+	/// <summary>
+	/// Shows the round summary when it is on, then starts the next round's total at zero. Players with the panel get
+	/// one toast instead of the chat lines, unless they turned toasts off.
+	/// </summary>
+	private void FinishRoundSummary(K4Player player, RankState state, string resultKey)
+	{
+		if (!state.MuteMessages && Settings.RoundSummary && state.RoundPoints != 0 && hud.Hud is PanoramaHud panel && !player.ToastsOff)
+		{
+			CCSPlayerController controller = player.Controller;
+			string reasons = ToastRules.RoundSummary(state.RoundReasons
+				.Where(entry => entry.Value.Points != 0)
+				.Select(entry => (chat.For(controller, entry.Key), entry.Value.Count)));
+			string team = controller.Team == CsTeam.Terrorist ? "tp-t" : controller.Team == CsTeam.CounterTerrorist ? "tp-ct" : "ic-watch";
+			panel.Toast(player, new Toast(chat.For(controller, resultKey), reasons, ToastRules.Signed(state.RoundPoints), team,
+				state.RoundPoints > 0 ? ToastColor.Green : ToastColor.Red));
+		}
+		else if (!state.MuteMessages && Settings.RoundSummary)
 		{
 			if (state.RoundPoints > 0)
 				chat.Tell(player.Controller, "points.gain", state.Points, state.RoundPoints, chat.For(player.Controller, "reason.round-summary"));
@@ -642,7 +694,12 @@ internal sealed class RankService(
 		if (player?.Rank is null || !player.IsValid || !player.IsHuman)
 			return;
 
+		int before = player.Rank.TopPlacement;
 		player.Rank.TopPlacement = placement;
 		clanTags.Apply(player);
+
+		if (ToastRules.LeaderboardGain(before, placement) is int gained && hud.Hud is PanoramaHud panel)
+			panel.Toast(player, new Toast(chat.For(player.Controller, "toast.leaderboard"), chat.For(player.Controller, "toast.leaderboard-text", placement),
+				$"▲ {gained}", "ic-trade_up", ToastColor.Blue, ToastLength.Short));
 	}
 }

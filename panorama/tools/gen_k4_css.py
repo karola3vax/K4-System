@@ -1,10 +1,14 @@
-"""Writes the K4 Panorama stylesheet.
+"""Writes the K4 Panorama stylesheet (7.1): a full-screen panel in the style of CS2's main menu, and the toast stack.
 
-Colors, sizes and sounds follow CS2's own panels (scoreboard.css, mainmenu.css navbar, hudmissionpanel.css,
-csgostyles.css). Every image is one CS2 already ships, referenced the way Valve's stylesheets do
-(s2r://panorama/images/....vsvg). The one exception is the rank emblems: the addon carries sharp copies
-of CS2's own (panorama/images/custom_game/k4/ranks, written by gen_k4_ranks.py), because the game's are 32x13.
-Generated parts: icon classes, rank icons, progress bar widths and rank colors.
+The classes the server swaps (docs/panel-contract.md) are generated at the bottom: game icons, rank emblems,
+team patches, map backgrounds, medal tiers, bar widths, rank colors, toast colors and lengths.
+Every image is one CS2 already ships, referenced the way Valve's stylesheets do (s2r://panorama/images/...).
+The one exception is the rank emblems: the addon carries sharp copies of CS2's own
+(panorama/images/custom_game/k4/ranks, written by gen_k4_ranks.py), because the game's are 32x13.
+Sounds are CS2's own UI sound events, the ones Valve's Panorama files use.
+
+Panorama scales the whole HUD by screen height (1080 is 1:1), so heights are fixed px and widths flow:
+the sidebar is 300px and everything right of it shares the rest, which keeps 16:9 and 16:10 alike.
 """
 import os
 
@@ -19,18 +23,19 @@ COLORS = {
     "orange": "#FF9D47",
 }
 
-# panorama/images/icons/ui/<name>.vsvg, used as ic-<name> by the server (stats, missions, toasts)
+# panorama/images/icons/ui/<name>.vsvg, used as ic-<name> (stats, missions, toasts, the panel's own icons)
 UI_ICONS = [
     "kill", "kill_headshot", "map_death", "stats", "stat_headshots", "stat_assists", "stat_mvps", "trophy",
     "crosshair_circle", "clock", "bullet", "hostage_rescued", "play", "winner_ribbon", "check", "hot_trend",
     "cold_trend", "trade_up", "mission_star", "bomb_c4", "xp_rank", "quest", "leader", "gift", "refresh_skinny",
     "crosshair", "first_person", "multipleenemieshere", "icon_star_multi", "shield", "health",
+    "home", "profile", "watch", "icon_star", "cancel", "expand", "locked", "timer", "star",
 ]
 
-# panorama/images/hud/deathnotice/<name>.vsvg (the kill feed's kill markers), used as dn-<name> for style-kill missions
-DEATHNOTICE_ICONS = ["penetrate", "smoke_kill", "inairkill", "blind_kill", "revenge", "domination"]
+# panorama/images/hud/deathnotice/<name>.vsvg (the kill feed's kill markers), used as dn-<name>
+DEATHNOTICE_ICONS = ["penetrate", "smoke_kill", "inairkill", "blind_kill", "revenge", "domination", "noscope"]
 
-# panorama/images/icons/equipment/<name>.vsvg (killfeed icons), used as eq-<name> for weapon missions
+# panorama/images/icons/equipment/<name>.vsvg (killfeed icons), used as eq-<name> for weapons
 EQUIPMENT_ICONS = [
     "knife", "hegrenade", "flashbang_assist", "planted_c4", "defuser", "taser", "molotov", "incgrenade",
     "ak47", "aug", "awp", "bizon", "cz75a", "deagle", "elite", "famas", "fiveseven", "g3sg1", "galilar", "glock",
@@ -38,20 +43,74 @@ EQUIPMENT_ICONS = [
     "p250", "p90", "revolver", "sawedoff", "scar20", "sg556", "ssg08", "tec9", "ump45", "usp_silencer", "xm1014",
 ]
 
+# Every map with a base 1080p screenshot in CS2 (panorama/images/map_icons/screenshots/1080p/<map>_png.vtex).
+# Made from pak01_dir.vpk (2026-11-01) with vpk.py: entries matching that path, minus the numbered variants
+# (<map>_1, cs_italy_0, ...) and the non-maps "random" and "lobby_mapveto". Kept here so the generator runs
+# without the game; check_game_images.py fails if a CS2 update removes one.
+MAPS = [
+    "ar_baggage", "ar_pool_day", "ar_shoots", "ar_shoots_night", "cs_italy", "cs_office", "cs_shelter",
+    "de_ancient", "de_ancient_night", "de_anubis", "de_boulder", "de_cache", "de_debris", "de_dust2",
+    "de_eldorado", "de_fachwerk", "de_inferno", "de_mirage", "de_nuke", "de_overpass", "de_poseidon",
+    "de_train", "de_vertigo", "rush_001",
+]
+
+# Toast color -> left strip and kind text color, and the CS2 sound the toast plays when it appears.
+TOAST_COLORS = {
+    "green": ("#5CC97B", "UI.Mission.Complete"),
+    "gold": ("#E4AE39", "UIPanorama.EOM.CardReveal"),
+    "red": ("#EB5B4B", "UI.DeathMatchBonusAlertEnd"),
+    "blue": ("#6BB6F5", "UIPanorama.popup_newweapon"),
+    "purple": ("#B99BFF", "UI.DeathMatchBonusAlertStart"),
+}
+
+# Toast length -> how long the timer bar takes to run out
+TOAST_LENGTHS = {"short": "2.5s", "normal": "3.5s", "long": "5s"}
+
+# Medal ring: light, middle and dark stop of the diagonal gradient, and the glow
+TIERS = {
+    "gold": ("#FFE9A8", "#E4AE39", "#7A5414", "#E4AE3973"),
+    "silver": ("#FFFFFF", "#BFC7D0", "#5B646E", "#BFC7D04D"),
+    "bronze": ("#FFD3B0", "#C98A5B", "#5E3618", "#C98A5B4D"),
+}
+
+# Panels that only draw a picture
+PICTURES = [
+    "k4-nav-icon", "k4-me-icon", "k4-h-rank-icon", "k4-cap-icon", "k4-h-m-icon", "k4-medal-icon", "k4-h-p-icon",
+    "k4-h-q-icon", "k4-btn-icon", "k4-pf-icon", "k4-pf-st-icon", "k4-pf-fav-icon", "k4-pf-ss-icon",
+    "k4-m-head-icon", "k4-m-icon", "k4-mw-icon", "k4-streak-icon", "k4-sd-icon", "k4-chip-icon", "k4-a-pin",
+    "k4-lb-p-icon", "k4-lb-icon", "k4-rk-icon", "k4-rk-gift", "k4-rk-you-icon", "k4-st-icon", "k4-sw-icon",
+    "k4-pt-head-icon", "k4-pt-icon", "k4-event-icon", "k4-close-icon", "k4-promo-icon", "k4-toast-icon",
+    "k4-bg", "k4-bg-map",
+]
+
+# Grid cells spaced by a left margin, and rows spaced by a top margin; k4-first cancels it (see gen_k4_ui.py).
+GAPS_LEFT = {
+    "k4-h-card": 22, "k4-h-m": 14, "k4-h-a": 14, "k4-h-p": 14, "k4-h-q": 22, "k4-pf-sc": 26, "k4-pf-st": 18,
+    "k4-pf-ss": 18, "k4-m": 22, "k4-a": 16, "k4-rk": 14, "k4-st": 18, "k4-lb-p": 30,
+}
+GAPS_TOP = {"k4-grid-row": 16, "k4-st-row": 18, "k4-sw": 30}
+
 # No text-transform: uppercase anywhere. The client uppercases with its own locale (a Turkish client writes
 # "MİSSİONS"), so K4 sends labels already capitalized in each reader's language.
 css = r"""@define k4-text: #FFFFFF;
-@define k4-base: #CCCCCC;
-@define k4-muted: #8F98A1;
-@define k4-accent: #82D8FF;
+@define k4-soft: #C9D1DA;
+@define k4-muted: #AEB7C2;
+@define k4-dim: #8F98A1;
+@define k4-accent: #6BB6F5;
 @define k4-gold: #E4AE39;
-@define k4-green: #4CFF6A;
-@define k4-red: #DB4437;
-@define k4-cell: #ffffff08;
-@define k4-cell-dark: #ffffff05;
-@define k4-cell-light: #ffffff10;
-@define k4-line: #ffffff12;
+@define k4-gold-light: #FFD27A;
+@define k4-green: #5CC97B;
+@define k4-green-light: #7BE29A;
+@define k4-red: #EB5B4B;
+@define k4-purple: #B99BFF;
+@define k4-tile: #0A0E149E;
+@define k4-tile-line: #FFFFFF17;
 @define k4-dur: 0.15s;
+
+Label
+{
+	color: k4-text;
+}
 
 .k4-root
 {
@@ -60,77 +119,414 @@ css = r"""@define k4-text: #FFFFFF;
 	z-index: 2000000000;
 }
 
-/* ---------------------------------------------------------------- panel: the CS2 scoreboard frame */
+.k4-gone
+{
+	visibility: collapse;
+}
+
+/* Spacers that push what follows to the end of a row (k4-grow) or a column (k4-vgrow) */
+.k4-grow
+{
+	width: fill-parent-flow( 1.0 );
+}
+
+.k4-vgrow
+{
+	height: fill-parent-flow( 1.0 );
+}
+
+/* ---------------------------------------------------------------- frame */
 
 .k4-panel
 {
-	width: 640px;
-	horizontal-align: center;
-	vertical-align: middle;
+	width: 100%;
+	height: 100%;
 	opacity: 1;
-	transform: scale3d(1, 1, 1);
-	transition-property: opacity, transform;
-	transition-duration: k4-dur;
+	transition-property: opacity;
+	transition-duration: 0.2s;
 	transition-timing-function: ease-out;
 }
 
 .k4-panel.k4-closed
 {
 	opacity: 0;
-	transform: scale3d(0.97, 0.97, 1);
 	visibility: collapse;
+}
+
+/* k4-bg always draws the fallback; k4-bg-map draws the current map over it, or nothing for an unknown map. */
+.k4-bg, .k4-bg-map
+{
+	width: 100%;
+	height: 100%;
 }
 
 .k4-bg
 {
+	background-color: #080B10;
+}
+
+/* The map dims from left to right, like CS2's main menu */
+.k4-shade
+{
 	width: 100%;
 	height: 100%;
-	background-color: rgba(0, 0, 0, 0.88);
-	background-image: url("s2r://panorama/images/backgrounds/bluedots_large_png.vtex");
-	background-size: 360px 360px;
-	background-img-opacity: 0.015;
-	border-radius: 5px;
-	box-shadow: #00000080 0px 0px 16px 0px;
+	background-color: gradient( linear, 0% 0%, 100% 0%, from( #070A0EF5 ), color-stop( 0.45, #070A0EE0 ), to( #070A0EB0 ) );
 }
 
-.k4-content
+.k4-frame
 {
 	width: 100%;
-	flow-children: down;
-	padding: 0px 0px 18px 0px;
-}
-
-.k4-header
-{
-	width: 100%;
-	height: 48px;
+	height: 100%;
 	flow-children: right;
-	padding: 0px 10px 0px 18px;
 }
 
-/* Static icons are Panels with a game image as background (CS2's custom HUD allows no Image elements). */
-.k4-tab-icon, .k4-meta-icon, .k4-btn-icon
+.k4-main
 {
-	background-size: contain;
-	background-repeat: no-repeat;
-	background-position: center;
+	width: fill-parent-flow( 1.0 );
+	height: 100%;
 }
 
-.k4-subtitle
+.k4-view
 {
-	white-space: nowrap;
+	width: 100%;
+	height: 100%;
+	flow-children: down;
+	visibility: collapse;
+	opacity: 0;
+	transition-property: opacity;
+	transition-duration: 0.2s;
+}
+
+.k4-view.k4-show
+{
+	visibility: visible;
+	opacity: 1;
+}
+
+.k4-view-pad
+{
+	padding: 40px 60px 40px 60px;
+}
+
+.k4-header-space
+{
+	width: 100%;
+	height: 52px;
+	margin-bottom: 26px;
+}
+
+.k4-tile
+{
+	background-color: k4-tile;
+	border: 1px solid k4-tile-line;
+	border-radius: 6px;
+	transition-property: background-color, border;
+	transition-duration: k4-dur;
+}
+
+.k4-cap
+{
+	font-size: 14px;
+	letter-spacing: 3px;
+	color: k4-muted;
+}
+
+/* One line, shrunk to fit: a long value (big playtime, a long translation) wrapped and was cut off. */
+.k4-tile-value
+{
 	color: k4-text;
-	font-size: 17px;
-	letter-spacing: 0.3px;
+	white-space: nowrap;
+	text-overflow: shrink;
+}
+
+.k4-place
+{
+	font-size: 30px;
+	color: k4-gold;
+	margin-left: 26px;
+}
+
+.k4-reward
+{
+	font-size: 28px;
+	color: k4-gold-light;
 	vertical-align: center;
-	width: fill-parent-flow(1.0);
+}
+
+/* ---------------------------------------------------------------- sidebar */
+
+.k4-sidebar
+{
+	width: 300px;
+	height: 100%;
+	flow-children: down;
+	background-color: #06090DB8;
+	border-right: 1px solid #FFFFFF12;
+}
+
+.k4-brand
+{
+	flow-children: right;
+	margin: 40px 28px 28px 28px;
+}
+
+.k4-brand-name
+{
+	font-size: 40px;
+	letter-spacing: 1px;
+}
+
+.k4-brand-sub
+{
+	font-size: 16px;
+	letter-spacing: 4px;
+	color: k4-accent;
+	vertical-align: bottom;
+	margin: 0px 0px 9px 10px;
+}
+
+.k4-me
+{
+	width: 260px;
+	horizontal-align: center;
+	flow-children: right;
+	margin-bottom: 24px;
+	padding: 14px;
+	border-radius: 4px;
+	background-color: #FFFFFF0D;
+	border: 1px solid #FFFFFF14;
+	transition-property: background-color, border;
+	transition-duration: k4-dur;
+}
+
+.k4-me:hover
+{
+	background-color: #FFFFFF17;
+	border: 1px solid #6BB6F599;
+	sound: "UIPanorama.sidemenu_rollover";
+}
+
+.k4-me:active
+{
+	sound: "UIPanorama.sidemenu_select";
+}
+
+.k4-me-icon
+{
+	width: 72px;
+	height: 29px;
+	vertical-align: center;
+}
+
+.k4-me-text
+{
+	width: fill-parent-flow( 1.0 );
+	flow-children: down;
+	margin-left: 14px;
+	vertical-align: center;
+}
+
+.k4-me-name
+{
+	width: 100%;
+	font-size: 20px;
+	white-space: nowrap;
 	text-overflow: ellipsis;
 }
 
-/* The CloseButton class comes from csgostyles; this only places it. */
+.k4-me-meta
+{
+	width: 100%;
+	font-size: 15px;
+	color: k4-muted;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+}
+
+.k4-nav
+{
+	width: 100%;
+	height: 52px;
+	flow-children: right;
+	padding-left: 21px;
+	border-left: 3px solid #6BB6F500;
+	transition-property: background-color;
+	transition-duration: k4-dur;
+}
+
+.k4-nav-icon
+{
+	width: 22px;
+	height: 22px;
+	vertical-align: center;
+	opacity: 0.7;
+	transition-property: opacity;
+	transition-duration: k4-dur;
+}
+
+.k4-nav-label
+{
+	margin-left: 16px;
+	vertical-align: center;
+	font-size: 19px;
+	letter-spacing: 1.5px;
+	color: k4-muted;
+	transition-property: color;
+	transition-duration: k4-dur;
+}
+
+.k4-nav:hover
+{
+	background-color: #FFFFFF0D;
+	sound: "UIPanorama.sidemenu_rollover";
+}
+
+.k4-nav:hover .k4-nav-label
+{
+	color: k4-text;
+}
+
+.k4-nav:active
+{
+	sound: "UIPanorama.sidemenu_select";
+}
+
+.k4-nav.k4-active
+{
+	background-color: gradient( linear, 0% 0%, 100% 0%, from( #6BB6F52E ), to( #6BB6F500 ) );
+	border-left: 3px solid k4-accent;
+}
+
+.k4-nav.k4-active .k4-nav-label
+{
+	color: k4-text;
+}
+
+.k4-nav.k4-active .k4-nav-icon
+{
+	opacity: 1;
+}
+
+.k4-season
+{
+	width: 260px;
+	horizontal-align: center;
+	flow-children: down;
+	margin-bottom: 16px;
+	padding: 16px 18px;
+	border-radius: 4px;
+	background-color: #E4AE3914;
+	border: 1px solid #E4AE3947;
+}
+
+.k4-season-title
+{
+	width: 100%;
+	font-size: 14px;
+	letter-spacing: 2px;
+	color: k4-gold;
+	white-space: nowrap;
+	text-overflow: shrink;
+}
+
+.k4-season-left
+{
+	width: 100%;
+	font-size: 26px;
+	margin-top: 2px;
+	white-space: nowrap;
+	text-overflow: shrink;
+}
+
+.k4-bar-season
+{
+	height: 4px;
+	margin-top: 10px;
+}
+
+.k4-bar-season .k4-bar-fill
+{
+	background-color: k4-gold;
+}
+
+.k4-copyright-box
+{
+	width: 100%;
+	padding: 18px 28px 28px 28px;
+	border-top: 1px solid #FFFFFF12;
+}
+
+.k4-copyright
+{
+	horizontal-align: center;
+	text-align: center;
+	font-size: 18px;
+	letter-spacing: 1px;
+	color: #FFFFFF;
+}
+
+/* ---------------------------------------------------------------- top right: points event and close */
+
+.k4-topbar
+{
+	height: 52px;
+	flow-children: right;
+	horizontal-align: right;
+	vertical-align: top;
+	margin: 40px 60px 0px 0px;
+}
+
+.k4-event
+{
+	height: 52px;
+	flow-children: right;
+	padding: 0px 20px;
+	margin-right: 20px;
+	border-radius: 4px;
+	background-color: #E4AE392E;
+	border: 1px solid k4-gold;
+}
+
+.k4-event-icon
+{
+	width: 24px;
+	height: 24px;
+	vertical-align: center;
+	wash-color: k4-gold-light;
+}
+
+.k4-event-text
+{
+	margin-left: 12px;
+	vertical-align: center;
+	font-size: 22px;
+	letter-spacing: 2px;
+	color: k4-gold-light;
+}
+
 .k4-close
 {
+	width: 52px;
+	height: 52px;
+	border-radius: 4px;
+	border: 1px solid #FFFFFF33;
+	background-color: #0000004D;
+	transition-property: background-color, border;
+	transition-duration: k4-dur;
+}
+
+.k4-close-icon
+{
+	width: 22px;
+	height: 22px;
+	horizontal-align: center;
 	vertical-align: center;
+}
+
+.k4-close:hover
+{
+	background-color: #FFFFFF1F;
+	border: 1px solid #FFFFFF66;
 	sound: "UIPanorama.generic_button_rollover";
 }
 
@@ -139,569 +535,104 @@ css = r"""@define k4-text: #FFFFFF;
 	sound: "UIPanorama.generic_button_press";
 }
 
-/* ---------------------------------------------------------------- tabs: the CS2 main-menu navbar */
+/* ---------------------------------------------------------------- shared controls */
 
-.k4-tabs
-{
-	width: 100%;
-	height: 44px;
-	flow-children: right;
-	padding: 0px 12px;
-	background-color: rgba(0, 0, 0, 0.25);
-	border-bottom: 1px solid k4-line;
-}
-
-.k4-tab
-{
-	height: 32px;
-	margin: 0px 3px;
-	padding: 0px 8px;
-	flow-children: right;
-	vertical-align: center;
-	border-radius: 3px;
-	transition-property: background-color;
-	transition-duration: k4-dur;
-}
-
-.k4-tab-icon
-{
-	width: 16px;
-	height: 16px;
-	margin-right: 6px;
-	vertical-align: center;
-	wash-color: k4-muted;
-}
-
-.k4-tab:hover .k4-tab-icon
-{
-	wash-color: k4-base;
-}
-
-.k4-tab Label
-{
-	color: k4-text;
-	font-size: 15px;
-	vertical-align: center;
-}
-
-.k4-tab:hover
-{
-	background-color: rgba(255, 255, 255, 0.04);
-	sound: "UIPanorama.loadout_sector_scroll";
-}
-
-.k4-tab.k4-active
-{
-	background-color: #82d7ff1a;
-	border-bottom: 2px solid k4-accent;
-}
-
-.k4-tab.k4-active Label
-{
-	color: k4-accent;
-	sound: "UIPanorama.submenu_select";
-}
-
-.k4-tab.k4-active .k4-tab-icon
-{
-	wash-color: k4-accent;
-}
-
-/* ---------------------------------------------------------------- shared */
-
-.k4-view
-{
-	width: 100%;
-	flow-children: down;
-	padding: 16px 18px 0px 18px;
-	visibility: collapse;
-}
-
-.k4-view.k4-show
-{
-	visibility: visible;
-}
-
-.k4-gone
-{
-	visibility: collapse;
-}
-
-.k4-split
-{
-	width: 100%;
-	flow-children: right;
-	margin-bottom: 8px;
-}
-
-.k4-split-last
-{
-	margin-bottom: 0px;
-}
-
-.k4-muted
-{
-	color: k4-muted;
-	font-size: 15px;
-	vertical-align: center;
-}
-
-.k4-fill
-{
-	width: fill-parent-flow(1.0);
-}
-
-.k4-right
-{
-	horizontal-align: right;
-	text-align: right;
-}
-
-.k4-accent
-{
-	color: k4-accent;
-	font-size: 15px;
-	vertical-align: center;
-}
-
-.k4-meta
-{
-	flow-children: right;
-	margin-top: 4px;
-}
-
-.k4-meta-icon
-{
-	width: 16px;
-	height: 16px;
-	margin-right: 7px;
-	vertical-align: center;
-	wash-color: k4-muted;
-}
-
-.k4-section
-{
-	width: 100%;
-	flow-children: down;
-	padding: 12px 14px;
-	border-radius: 4px;
-	border: 1px solid k4-line;
-	background-color: k4-cell;
-}
-
-/* CS2's own progress bar colors (csgostyles .ProgressBarLeft) */
 .k4-bar
 {
 	width: 100%;
 	height: 6px;
-	border-radius: 4px;
-	background-color: #ffffff14;
-}
-
-.k4-bar-large
-{
-	height: 10px;
-	margin: 2px 0px 0px 0px;
-}
-
-.k4-bar-short
-{
-	width: fill-parent-flow(1.0);
-	vertical-align: center;
-	margin-right: 12px;
+	border-radius: 3px;
+	background-color: #FFFFFF24;
 }
 
 .k4-bar-fill
 {
 	height: 100%;
-	border-radius: 4px;
-	background-color: gradient( linear, 0% 0%, 100% 0%, from( #134f87 ), to( #1ab8e0 ) );
-}
-
-/* ---------------------------------------------------------------- rank */
-
-.k4-hero
-{
-	width: 100%;
-	flow-children: right;
-	margin-bottom: 14px;
-}
-
-.k4-hero-emblem
-{
-	width: 168px;
-	height: 72px;
-	border-radius: 4px;
-	border: 1px solid k4-line;
-	background-color: gradient( linear, 0% 0%, 0% 100%, from( #ffffff0d ), to( #ffffff04 ) );
-}
-
-.k4-rank-icon
-{
-	width: 144px;
-	height: 58px;
-	horizontal-align: center;
-	vertical-align: center;
-	background-size: contain;
-	background-repeat: no-repeat;
-	background-position: center;
-}
-
-.k4-badge
-{
-	horizontal-align: center;
-	vertical-align: center;
-	font-size: 22px;
-	text-align: center;
-	color: k4-text;
-}
-
-.k4-hero-text
-{
-	flow-children: down;
-	margin-left: 16px;
-	vertical-align: center;
-}
-
-.k4-eyebrow
-{
-	color: k4-muted;
-	font-size: 13px;
-	letter-spacing: 1px;
-}
-
-.k4-rank-name
-{
-	font-size: 28px;
-	color: k4-text;
-}
-
-.k4-next
-{
-	color: k4-base;
-	font-size: 15px;
-	vertical-align: center;
-}
-
-.k4-reward
-{
-	margin-top: 10px;
-}
-
-.k4-reward .k4-meta-icon
-{
-	wash-color: k4-accent;
-}
-
-/* The author line at the bottom right of the panel */
-.k4-copyright
-{
-	horizontal-align: right;
-	margin: 6px 18px 0px 0px;
-	font-size: 12px;
-	color: k4-muted;
-}
-
-/* ---------------------------------------------------------------- missions: CS2 mission tiles */
-
-.k4-card
-{
-	width: 100%;
-	flow-children: right;
-	margin-bottom: 8px;
-	border-radius: 4px;
-	border: 1px solid k4-line;
-	background-color: k4-cell;
-	transition-property: wash-color;
-	transition-duration: 0.5s;
-}
-
-.k4-card-stripe
-{
-	width: 3px;
-	height: 100%;
-	background-color: k4-muted;
-	border-radius: 4px 0px 0px 4px;
-}
-
-.k4-card.k4-easy .k4-card-stripe { background-color: k4-green; }
-.k4-card.k4-medium .k4-card-stripe { background-color: k4-gold; }
-.k4-card.k4-hard .k4-card-stripe { background-color: k4-red; }
-.k4-card.k4-weekly .k4-card-stripe { background-color: #B054E8; }
-.k4-card.k4-ach .k4-card-stripe { background-color: k4-gold; }
-
-.k4-mission-icon
-{
-	width: 56px;
-	height: 32px;
-	margin: 0px 6px 0px 12px;
-	vertical-align: center;
-	background-size: contain;
-	background-repeat: no-repeat;
-	background-position: center;
-	wash-color: k4-base;
-}
-
-.k4-card-body
-{
-	width: fill-parent-flow(1.0);
-	flow-children: down;
-	padding: 10px 12px 10px 8px;
-}
-
-.k4-diff
-{
-	font-size: 12px;
-	padding: 2px 7px;
-	margin-right: 10px;
 	border-radius: 3px;
-	vertical-align: center;
-	color: k4-muted;
-	background-color: k4-cell-light;
+	background-color: k4-accent;
+	transition-property: width;
+	transition-duration: 0.4s;
+	transition-timing-function: ease-out;
 }
 
-.k4-card.k4-easy .k4-diff { color: k4-green; background-color: #4cff6a1f; }
-.k4-card.k4-medium .k4-diff { color: k4-gold; background-color: #e4ae391f; }
-.k4-card.k4-hard .k4-diff { color: #FF6B5E; background-color: #db443726; }
-.k4-card.k4-weekly .k4-diff { color: #C99BFF; background-color: #b054e826; }
-
-/* A started mission the current map cannot offer: it waits for another map */
-.k4-card.k4-blocked
+.k4-btn
 {
-	opacity: 0.55;
-}
-
-.k4-mission-desc
-{
-	white-space: nowrap;
-	color: k4-text;
-	font-size: 16px;
-	vertical-align: center;
-	width: fill-parent-flow(1.0);
-	text-overflow: ellipsis;
-}
-
-.k4-progress
-{
-	color: k4-base;
-	font-size: 14px;
-	vertical-align: center;
-	min-width: 150px; /* "1,227/10,000 · +2,500" fits, so every bar is the same length */
-	text-align: right;
-}
-
-/* A finished mission: CS2's mission-complete green and check mark, and its sound */
-.k4-card.k4-done
-{
-	background-color: #4cff6a12;
-	border: 1px solid #4cff6a40;
-}
-
-.k4-card.k4-done .k4-mission-icon
-{
-	background-image: url("s2r://panorama/images/icons/ui/check.vsvg");
-	wash-color: k4-green;
-}
-
-.k4-card.k4-done .k4-bar-fill
-{
-	background-color: k4-green;
-}
-
-.k4-card.k4-done .k4-progress
-{
-	color: k4-green;
-}
-
-.k4-small-btn
-{
-	height: 26px;
-	padding: 0px 10px;
-	margin-left: 10px;
+	height: 48px;
 	flow-children: right;
-	vertical-align: center;
-	border-radius: 3px;
-	background-color: #ffffff0f;
-	transition-property: background-color;
+	padding: 0px 20px;
+	margin-right: 12px;
+	border-radius: 4px;
+	border: 1px solid #FFFFFF4D;
+	background-color: #00000066;
+	transition-property: background-color, border;
 	transition-duration: k4-dur;
 }
 
-.k4-btn-icon
+.k4-btn:hover
 {
-	width: 14px;
-	height: 14px;
-	margin-right: 6px;
-	vertical-align: center;
-	wash-color: k4-base;
-}
-
-.k4-small-btn Label
-{
-	color: k4-base;
-	font-size: 13px;
-	vertical-align: center;
-}
-
-.k4-small-btn:hover
-{
-	background-color: #ffffff24;
+	background-color: #6BB6F540;
+	border: 1px solid k4-accent;
 	sound: "UIPanorama.generic_button_rollover";
 }
 
-/* The main choice of a pair, such as Accept next to Decline */
-.k4-btn-primary
-{
-	background-color: #82d8ff26;
-}
-
-.k4-btn-primary Label
-{
-	color: k4-accent;
-}
-
-.k4-btn-primary:hover
-{
-	background-color: #82d8ff40;
-}
-
-.k4-small-btn:active
+.k4-btn:active
 {
 	sound: "UIPanorama.generic_button_press";
 }
 
-.k4-footer
+.k4-btn-icon
 {
-	flow-children: right;
-	margin-top: 6px;
-}
-
-.k4-footer .k4-meta-icon
-{
-	wash-color: none;
-}
-
-/* ---------------------------------------------------------------- top and ranks: CS2 scoreboard rows */
-
-.k4-table
-{
-	width: 100%;
-	flow-children: down;
-}
-
-.k4-row
-{
-	width: 100%;
-	height: 34px;
-	flow-children: right;
-	margin-bottom: 2px;
-	border-radius: 4px;
-	border: 1px solid k4-line;
-	background-color: k4-cell;
-}
-
-.k4-row-alt
-{
-	background-color: k4-cell-dark;
-}
-
-.k4-row Label
-{
+	width: 20px;
+	height: 20px;
+	margin-right: 10px;
 	vertical-align: center;
 }
 
-.k4-row-me
+.k4-icon-back
 {
-	margin-top: 6px;
-	background-color: rgba(0, 166, 255, 0.10);
-	border-left: 3px solid k4-accent;
+	transform: rotateZ( 90deg );
 }
 
-.k4-row.k4-current
+.k4-btn-label
 {
-	background-color: rgba(0, 166, 255, 0.10);
-}
-
-.k4-pos-cell
-{
-	width: 52px;
-	height: 100%;
-	border-radius: 4px 0px 0px 4px;
-	background-color: k4-cell-dark;
-	background-size: 44px 22px;
-	background-repeat: no-repeat;
-	background-position: center;
-}
-
-.k4-pos
-{
-	color: k4-base;
-	font-size: 15px;
-	horizontal-align: center;
-	text-align: center;
-}
-
-/* Top three: CS2's laurels around the position */
-.k4-pos-cell.k4-place-1 { background-image: url("s2r://panorama/images/icons/ui/laurel_gold.vsvg"); }
-.k4-pos-cell.k4-place-2 { background-image: url("s2r://panorama/images/icons/ui/laurel_silver.vsvg"); }
-.k4-pos-cell.k4-place-3 { background-image: url("s2r://panorama/images/icons/ui/laurel_bronze.vsvg"); }
-.k4-pos-cell.k4-place-1 .k4-pos { color: #F4D27A; }
-.k4-pos-cell.k4-place-2 .k4-pos { color: #D6DCE4; }
-.k4-pos-cell.k4-place-3 .k4-pos { color: #D9A27A; }
-
-.k4-row-icon
-{
-	width: 60px;
-	height: 24px;
-	margin: 0px 10px;
 	vertical-align: center;
-	background-size: contain;
-	background-repeat: no-repeat;
-	background-position: center;
+	font-size: 17px;
+	letter-spacing: 2px;
 }
 
-.k4-name
+.k4-toggle-dot
 {
-	white-space: nowrap;
-	color: k4-text;
-	font-size: 16px;
-	width: fill-parent-flow(1.0);
-	text-overflow: ellipsis;
+	width: 12px;
+	height: 12px;
+	margin-right: 10px;
+	vertical-align: center;
+	border-radius: 6px;
+	background-color: #FFFFFF40;
 }
 
-.k4-row-info
+.k4-toggle.k4-on
 {
-	color: k4-muted;
-	font-size: 14px;
-	margin: 0px 12px;
-	text-align: right;
+	border: 1px solid #5CC97B99;
 }
 
-.k4-pager
+.k4-toggle.k4-on .k4-toggle-dot
 {
-	width: 100%;
-	flow-children: right;
-	margin-top: 12px;
+	background-color: k4-green;
 }
 
-.k4-page
-{
-	width: fill-parent-flow(1.0);
-	text-align: center;
-}
-
-/* Valve's pagination arrow (csgostyles .PaginationArrow) */
 .k4-arrow
 {
-	width: 28px;
-	height: 28px;
-	border-radius: 3px;
-	background-color: #ffffff0f;
+	width: 44px;
+	height: 44px;
+	vertical-align: center;
+	border-radius: 4px;
+	border: 1px solid #FFFFFF40;
+	background-color: #00000059;
 	background-image: url("s2r://panorama/images/icons/ui/expand.vsvg");
 	background-repeat: no-repeat;
-	background-size: 18px 18px;
+	background-size: 20px 20px;
 	background-position: 50% 50%;
-	wash-color: k4-base;
-	transition-property: background-color, opacity;
+	transition-property: background-color, border, opacity;
 	transition-duration: k4-dur;
 }
 
@@ -710,8 +641,8 @@ css = r"""@define k4-text: #FFFFFF;
 
 .k4-arrow:hover
 {
-	background-color: #ffffff24;
-	wash-color: k4-text;
+	background-color: #6BB6F540;
+	border: 1px solid k4-accent;
 	sound: "UIPanorama.generic_button_rollover";
 }
 
@@ -725,275 +656,1736 @@ css = r"""@define k4-text: #FFFFFF;
 	opacity: 0.25;
 }
 
-/* ---------------------------------------------------------------- stats */
-
-.k4-tiles
+.k4-pager
 {
-	width: 100%;
-	flow-children: right-wrap;
-}
-
-.k4-tile
-{
-	width: 190px;
-	height: 64px;
+	height: 52px;
 	flow-children: right;
-	margin: 0px 8px 8px 0px;
-	border-radius: 4px;
-	border: 1px solid k4-line;
-	background-color: k4-cell;
 }
 
-.k4-tile-icon
+.k4-pager-bottom
 {
-	width: 30px;
-	height: 30px;
-	margin: 0px 10px 0px 14px;
+	horizontal-align: center;
+	margin-top: 16px;
+}
+
+.k4-page
+{
+	min-width: 80px;
+	margin: 0px 16px;
 	vertical-align: center;
-	background-size: contain;
-	background-repeat: no-repeat;
-	background-position: center;
-	wash-color: k4-accent;
-}
-
-.k4-tile-text
-{
-	flow-children: down;
-	vertical-align: center;
-	width: fill-parent-flow(1.0);
-	margin-right: 8px;
-}
-
-.k4-tile-label
-{
+	text-align: center;
+	font-size: 18px;
 	color: k4-muted;
-	font-size: 12px;
-	letter-spacing: 1px;
 }
 
-/* One line, shrunk to fit: a long value (big playtime, a long translation) wrapped and was cut off. */
-.k4-tile-value
+/* ---------------------------------------------------------------- medal: tier ring, dark disc, white icon */
+
+.k4-ring
 {
-	color: k4-text;
-	font-size: 26px;
+	border-radius: 50%;
+	horizontal-align: center;
+}
+
+.k4-disc
+{
 	width: 100%;
+	height: 100%;
+	border-radius: 50%;
+	background-color: gradient( radial, 50% 35%, 0% 0%, 70% 70%, from( #1E2833 ), to( #0B1016 ) );
+}
+
+.k4-medal-icon
+{
+	width: 46%;
+	height: 46%;
+	horizontal-align: center;
+	vertical-align: center;
+}
+
+.t-locked
+{
+	background-color: #262C34;
+}
+
+.t-locked .k4-medal-icon
+{
+	opacity: 0.35;
+}
+
+.k4-ring-home { width: 104px; height: 104px; padding: 6px; }
+.k4-ring-showcase { width: 130px; height: 130px; padding: 7px; }
+.k4-ring-card { width: 118px; height: 118px; padding: 7px; }
+.k4-ring-toast { width: 72px; height: 72px; padding: 5px; vertical-align: center; }
+
+/* ---------------------------------------------------------------- home */
+
+.k4-h-hero
+{
+	width: 100%;
+	height: 330px;
+	flow-children: right;
+	margin-bottom: 26px;
+}
+
+.k4-h-rank-icon
+{
+	width: 560px;
+	height: 228px;
+	vertical-align: center;
+}
+
+.k4-h-hero-text
+{
+	width: fill-parent-flow( 1.0 );
+	flow-children: down;
+	margin-left: 44px;
+	vertical-align: center;
+}
+
+.k4-h-rank-name
+{
+	width: 100%;
+	font-size: 92px;
+	color: k4-text;
 	white-space: nowrap;
 	text-overflow: shrink;
 }
 
-/* ---------------------------------------------------------------- toast: the CS2 HUD mission panel */
-
-.k4-toast
+.k4-h-points-row
 {
-	/* Right side, vertically centred: the kill feed owns the top right corner, the weapon list the
-	   bottom right. */
-	width: 420px;
-	height: fit-children;
-	horizontal-align: right;
+	flow-children: right;
+	margin-top: 8px;
+}
+
+.k4-h-points
+{
+	font-size: 30px;
+}
+
+.k4-bar-hero
+{
+	width: 620px;
+	max-width: 100%;
+	height: 10px;
+	margin-top: 18px;
+	border-radius: 5px;
+}
+
+.k4-bar-hero .k4-bar-fill
+{
+	border-radius: 5px;
+	background-color: gradient( linear, 0% 0%, 100% 0%, from( #C8922B ), to( k4-gold-light ) );
+}
+
+.k4-h-next
+{
+	margin-top: 12px;
+	font-size: 20px;
+	color: k4-muted;
+}
+
+.k4-h-cards
+{
+	width: 100%;
+	height: fill-parent-flow( 1.0 );
+	flow-children: right;
+}
+
+.k4-h-card
+{
+	width: fill-parent-flow( 1.0 );
+	height: 100%;
+	flow-children: down;
+	padding: 24px;
+}
+
+.k4-h-card:hover, .k4-h-q:hover
+{
+	background-color: #141E2AB3;
+	border: 1px solid #6BB6F599;
+	sound: "UIPanorama.mainmenu_rollover";
+}
+
+.k4-h-card:active, .k4-h-q:active
+{
+	sound: "UIPanorama.generic_button_press";
+}
+
+.k4-cap-icon
+{
+	width: 24px;
+	height: 24px;
+	margin-bottom: 14px;
+	opacity: 0.6;
+}
+
+.k4-h-slots
+{
+	width: 100%;
+	height: fill-parent-flow( 1.0 );
+	flow-children: right;
+}
+
+.k4-h-m
+{
+	width: fill-parent-flow( 1.0 );
+	height: 100%;
+	border-radius: 6px;
+	background-color: #FFFFFF0D;
+	border: 1px solid #FFFFFF1F;
+}
+
+.k4-h-m-icon
+{
+	width: 60px;
+	height: 60px;
+	horizontal-align: center;
 	vertical-align: center;
-	margin: 0px;
-	opacity: 1;
-	transform: translateX(0px);
-	transition-property: opacity, transform;
-	transition-duration: 0.2s;
-	transition-timing-function: ease-in-out;
+	margin-bottom: 44px;
 }
 
-.k4-toast.k4-gone
+.k4-h-m-value
 {
-	visibility: visible;
-	opacity: 0;
-	transform: translateX(200px);
+	horizontal-align: center;
+	vertical-align: center;
+	margin-top: 60px;
+	text-align: center;
+	font-size: 24px;
+	white-space: nowrap;
+	text-overflow: shrink;
+	max-width: 100%;
 }
 
-.k4-toast-bg
+.k4-h-m.k4-done
+{
+	background-color: #5CC97B29;
+	border: 1px solid #5CC97B99;
+}
+
+.k4-h-m.k4-done .k4-h-m-value
+{
+	color: k4-green-light;
+}
+
+.k4-h-a
+{
+	width: fill-parent-flow( 1.0 );
+	height: fit-children;
+	flow-children: down;
+	vertical-align: center;
+}
+
+.k4-h-a-name
+{
+	width: 100%;
+	margin-top: 10px;
+	text-align: center;
+	font-size: 18px;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+}
+
+.k4-bar-small
+{
+	width: 120px;
+	max-width: 100%;
+	horizontal-align: center;
+	margin-top: 10px;
+}
+
+.k4-h-p
+{
+	width: fill-parent-flow( 1.0 );
+	height: fit-children;
+	flow-children: down;
+	vertical-align: bottom;
+}
+
+.k4-h-p-icon
+{
+	width: 130px;
+	height: 53px;
+	horizontal-align: center;
+}
+
+.k4-h-p-name
+{
+	width: 100%;
+	margin: 8px 0px;
+	text-align: center;
+	font-size: 19px;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+}
+
+.k4-step
+{
+	width: 100%;
+	border-radius: 4px 4px 0px 0px;
+}
+
+.k4-step-pos
+{
+	horizontal-align: center;
+	vertical-align: center;
+	font-size: 40px;
+}
+
+.k4-place-1 .k4-step { background-color: gradient( linear, 0% 0%, 0% 100%, from( #E4AE39 ), to( #8A6316 ) ); }
+.k4-place-2 .k4-step { background-color: gradient( linear, 0% 0%, 0% 100%, from( #8E99A6 ), to( #4F5863 ) ); }
+.k4-place-3 .k4-step { background-color: gradient( linear, 0% 0%, 0% 100%, from( #C98A5B ), to( #6E4426 ) ); }
+.k4-h-p.k4-place-1 .k4-step { height: 130px; }
+.k4-h-p.k4-place-2 .k4-step { height: 90px; }
+.k4-h-p.k4-place-3 .k4-step { height: 64px; }
+
+.k4-h-quick
+{
+	width: 100%;
+	height: 96px;
+	flow-children: right;
+	margin-top: 22px;
+}
+
+.k4-h-q
+{
+	width: fill-parent-flow( 1.0 );
+	height: 100%;
+}
+
+.k4-h-q-inner
+{
+	max-width: 100%;
+	flow-children: right;
+	horizontal-align: center;
+	vertical-align: center;
+	padding: 0px 12px;
+}
+
+.k4-h-q-icon
+{
+	width: 44px;
+	height: 44px;
+	vertical-align: center;
+}
+
+.k4-h-q-wide .k4-h-q-icon
+{
+	width: 120px;
+}
+
+.k4-h-q-value
+{
+	margin-left: 18px;
+	vertical-align: center;
+	font-size: 38px;
+}
+
+/* ---------------------------------------------------------------- profile */
+
+.k4-pf-head
+{
+	width: 100%;
+	height: 52px;
+	flow-children: right;
+}
+
+.k4-pf-banner
+{
+	width: 100%;
+	height: 360px;
+	flow-children: right;
+}
+
+.k4-pf-emblem
+{
+	width: 360px;
+	height: 146px;
+	vertical-align: center;
+}
+
+.k4-pf-icon
 {
 	width: 100%;
 	height: 100%;
-	background-color: gradient( linear, 100% 0%, 0% 0%, from( #000000ED ), color-stop( 0.8, #00000020 ), to( #00000000 ) );
 }
 
-.k4-toast-line
+.k4-pf-badge
 {
-	width: 100%;
-	height: 2px;
-	background-color: gradient( linear, 0% 0%, 100% 0%, from( #00000000 ), to( k4-green ) );
-}
-
-.k4-toast-line-top { vertical-align: top; }
-.k4-toast-line-bottom { vertical-align: bottom; }
-
-.k4-toast-content
-{
-	width: 100%;
-	flow-children: right;
-	padding: 14px 24px 14px 60px;
-}
-
-.k4-toast-icon
-{
-	width: 64px;
-	height: 40px;
+	horizontal-align: center;
 	vertical-align: center;
-	background-size: contain;
-	background-repeat: no-repeat;
-	background-position: center;
+	font-size: 64px;
 }
 
-.k4-toast-body
+.k4-pf-text
+{
+	width: fill-parent-flow( 1.0 );
+	flow-children: down;
+	margin-left: 40px;
+	vertical-align: center;
+}
+
+.k4-pf-name
+{
+	width: 100%;
+	font-size: 96px;
+	white-space: nowrap;
+	text-overflow: shrink;
+}
+
+.k4-pf-line
+{
+	flow-children: right;
+	margin-top: 6px;
+}
+
+.k4-pf-rank
+{
+	font-size: 30px;
+	color: k4-text;
+}
+
+.k4-pf-points
+{
+	margin-left: 26px;
+	font-size: 30px;
+}
+
+.k4-pf-showcase
 {
 	flow-children: down;
-	margin-left: 14px;
-	width: fill-parent-flow(1.0);
+	margin-left: 26px;
 	vertical-align: center;
 }
 
-.k4-toast-title
+.k4-pf-sc-row
 {
-	color: k4-green;
-	font-size: 15px;
-	letter-spacing: 1px;
+	flow-children: right;
+	horizontal-align: right;
 }
 
-.k4-toast-text
+.k4-pf-sc
 {
-	color: k4-text;
-	font-size: 18px;
-	margin-top: 2px;
+	width: 150px;
+	flow-children: down;
 }
 
-.k4-toast.k4-toast-gold .k4-toast-title { color: k4-gold; }
-.k4-toast.k4-toast-red .k4-toast-title { color: #FF6B5E; }
-.k4-toast.k4-toast-gold .k4-toast-line { background-color: gradient( linear, 0% 0%, 100% 0%, from( #00000000 ), to( k4-gold ) ); }
-.k4-toast.k4-toast-red .k4-toast-line { background-color: gradient( linear, 0% 0%, 100% 0%, from( #00000000 ), to( k4-red ) ); }
-
-/* Achievements (6.5): the name in gold, like CS2's mission titles */
-.k4-ach-name { color: k4-gold; font-size: 14px; margin-right: 8px; vertical-align: center; }
-
-/* Points event banner under the header (6.5) */
-.k4-event
+.k4-pf-sc-name
 {
 	width: 100%;
-	margin: 0px 0px 6px 0px;
-	padding: 5px 18px;
-	color: k4-gold;
-	font-size: 14px;
-	background-color: #e4ae391f;
-	border-left: 3px solid k4-gold;
+	margin-top: 10px;
+	text-align: center;
+	font-size: 20px;
+	white-space: nowrap;
+	text-overflow: ellipsis;
 }
 
-/* Bounty and duels on the Rank tab */
-.k4-showdown { margin-top: 8px; }
-.k4-wanted { color: #EB4B4B; font-size: 15px; vertical-align: center; border-left: 3px solid #EB4B4B; padding-left: 8px; }
-
-/* The player's name in the header opens their profile (7.0) */
-.k4-subtitle-btn
+.k4-pf-sc-hint
 {
-	width: fill-parent-flow(1.0);
+	width: 500px;
+	horizontal-align: right;
+	text-align: right;
+	font-size: 18px;
+	color: k4-dim;
+	white-space: nowrap;
+	text-overflow: shrink;
+}
+
+.k4-pf-stats
+{
+	width: 100%;
+	height: 150px;
+	flow-children: right;
+	margin-top: 22px;
+}
+
+.k4-pf-st
+{
+	width: fill-parent-flow( 1.0 );
+	height: 100%;
+	flow-children: down;
+	padding: 18px 10px;
+}
+
+.k4-pf-st-icon
+{
+	width: 40px;
+	height: 40px;
+	horizontal-align: center;
+	opacity: 0.9;
+}
+
+.k4-pf-st-value
+{
+	max-width: 100%;
+	horizontal-align: center;
+	margin-top: 8px;
+	font-size: 38px;
+}
+
+.k4-pf-st-label
+{
+	max-width: 100%;
+	horizontal-align: center;
+	margin-top: 8px;
+	font-size: 13px;
+	white-space: nowrap;
+	text-overflow: shrink;
+}
+
+.k4-pf-bottom
+{
+	width: 100%;
+	height: fill-parent-flow( 1.0 );
+	flow-children: right;
+	margin-top: 22px;
+}
+
+.k4-pf-fav
+{
+	width: fill-parent-flow( 1.0 );
+	height: 100%;
+	margin-right: 22px;
+}
+
+.k4-pf-fav-icon
+{
+	width: 90%;
+	height: 120px;
+	horizontal-align: center;
+	vertical-align: center;
+	margin-bottom: 60px;
+}
+
+.k4-pf-fav-line
+{
+	max-width: 100%;
+	flow-children: right;
+	horizontal-align: center;
+	vertical-align: center;
+	margin-top: 120px;
+}
+
+.k4-pf-fav-name
+{
+	font-size: 36px;
+}
+
+.k4-pf-fav-kills
+{
+	margin-left: 10px;
+	vertical-align: center;
+	font-size: 26px;
+	color: k4-muted;
+}
+
+.k4-pf-seasons
+{
+	width: fill-parent-flow( 2.0 );
+	height: 100%;
+	flow-children: right;
+}
+
+.k4-pf-ss
+{
+	width: fill-parent-flow( 1.0 );
+	height: 100%;
+}
+
+.k4-pf-ss-season
+{
+	horizontal-align: center;
+	vertical-align: center;
+	margin-bottom: 150px;
+}
+
+.k4-pf-ss-icon
+{
+	width: 220px;
+	max-width: 90%;
+	height: 89px;
+	horizontal-align: center;
 	vertical-align: center;
 }
 
-.k4-subtitle-btn .k4-subtitle { width: 100%; transition-property: color; transition-duration: k4-dur; }
-.k4-subtitle-btn:hover .k4-subtitle { color: k4-accent; }
+.k4-pf-ss-pos
+{
+	horizontal-align: center;
+	vertical-align: center;
+	margin-top: 150px;
+	font-size: 44px;
+}
 
-/* Top rows open the player's profile (7.0) */
-.k4-row-click { transition-property: background-color; transition-duration: k4-dur; }
-.k4-row-click:hover { background-color: k4-cell-light; }
+.k4-pf-ss-none
+{
+	vertical-align: center;
+	font-size: 22px;
+	color: k4-dim;
+}
 
-/* Season switch above the Top list (7.0) */
-.k4-season-bar
+/* ---------------------------------------------------------------- missions */
+
+.k4-m-head
+{
+	width: 100%;
+	height: 52px;
+	flow-children: right;
+}
+
+.k4-m-head-icon
+{
+	width: 30px;
+	height: 30px;
+	vertical-align: center;
+}
+
+.k4-m-reset
+{
+	margin-left: 18px;
+	vertical-align: center;
+	font-size: 30px;
+}
+
+.k4-m-cards
+{
+	width: 100%;
+	height: 520px;
+	flow-children: right;
+	margin-top: 24px;
+}
+
+.k4-m
+{
+	width: fill-parent-flow( 1.0 );
+	height: 100%;
+	flow-children: down;
+	padding: 24px 28px 28px 28px;
+	border-radius: 6px;
+	border: 2px solid #FFFFFF26;
+	background-color: #0A0E1499;
+}
+
+.k4-m.k4-easy { background-color: gradient( linear, 0% 0%, 0% 100%, from( #5CC97B38 ), color-stop( 0.6, #0A0E14B3 ), to( #0A0E14B3 ) ); }
+.k4-m.k4-medium { background-color: gradient( linear, 0% 0%, 0% 100%, from( #E4AE3938 ), color-stop( 0.6, #0A0E14B3 ), to( #0A0E14B3 ) ); }
+.k4-m.k4-hard { background-color: gradient( linear, 0% 0%, 0% 100%, from( #EB5B4B38 ), color-stop( 0.6, #0A0E14B3 ), to( #0A0E14B3 ) ); }
+.k4-m.k4-done { border: 2px solid #5CC97BCC; }
+
+.k4-m-top
 {
 	width: 100%;
 	flow-children: right;
-	margin-bottom: 8px;
 }
 
-.k4-season-name
+.k4-m-diff
 {
-	width: fill-parent-flow(1.0);
+	padding: 6px 14px;
+	border-radius: 3px;
 	vertical-align: center;
-	text-align: center;
+	font-size: 17px;
+	letter-spacing: 2px;
+	color: #0B1016;
+	background-color: k4-muted;
+}
+
+.k4-easy .k4-m-diff { background-color: k4-green; }
+.k4-medium .k4-m-diff { background-color: k4-gold; }
+.k4-hard .k4-m-diff { background-color: k4-red; }
+
+.k4-m-icon
+{
+	width: 100%;
+	height: 120px;
+	margin-bottom: 16px;
+}
+
+.k4-m-desc
+{
+	width: 100%;
+	font-size: 30px;
+}
+
+.k4-bar-mission
+{
+	height: 10px;
+	margin-top: 16px;
+	border-radius: 5px;
+}
+
+.k4-bar-mission .k4-bar-fill { border-radius: 5px; }
+.k4-easy .k4-bar-fill { background-color: k4-green; }
+.k4-medium .k4-bar-fill { background-color: k4-gold; }
+.k4-hard .k4-bar-fill { background-color: k4-red; }
+.k4-m.k4-done .k4-bar-fill { background-color: k4-green-light; }
+
+.k4-m-bottom
+{
+	width: 100%;
+	height: 48px;
+	flow-children: right;
+	margin-top: 16px;
+}
+
+.k4-m-progress
+{
+	vertical-align: center;
+	font-size: 28px;
+}
+
+.k4-done .k4-m-progress, .k4-done .k4-mw-progress
+{
+	color: k4-green-light;
+}
+
+.k4-m-bottom .k4-btn
+{
+	margin-right: 0px;
+}
+
+.k4-mw
+{
+	width: 100%;
+	flow-children: right;
+	margin-top: 24px;
+	padding: 24px 36px;
+	border-radius: 6px;
+	border: 2px solid #B99BFFB3;
+	background-color: gradient( linear, 0% 0%, 100% 0%, from( #825ADC4D ), color-stop( 0.7, #0A0E14B3 ), to( #0A0E14B3 ) );
+}
+
+.k4-mw.k4-done
+{
+	border: 2px solid #5CC97BCC;
+}
+
+.k4-mw-icon
+{
+	width: 96px;
+	height: 96px;
+	vertical-align: center;
+}
+
+.k4-mw-text
+{
+	width: fill-parent-flow( 1.0 );
+	flow-children: down;
+	margin-left: 36px;
+	vertical-align: center;
+}
+
+.k4-mw-left
+{
+	font-size: 17px;
+	letter-spacing: 3px;
+	color: #CDB6FF;
+}
+
+.k4-mw-desc
+{
+	width: 100%;
+	margin-top: 8px;
+	font-size: 34px;
+	white-space: nowrap;
+	text-overflow: shrink;
+}
+
+.k4-mw .k4-bar-fill { background-color: k4-purple; }
+.k4-mw.k4-done .k4-bar-fill { background-color: k4-green-light; }
+
+.k4-mw-side
+{
+	flow-children: down;
+	margin-left: 36px;
+	vertical-align: center;
+}
+
+.k4-mw-progress
+{
+	horizontal-align: right;
+	font-size: 44px;
+}
+
+.k4-mw-reward
+{
+	horizontal-align: right;
+	font-size: 30px;
+}
+
+.k4-streak
+{
+	width: 100%;
+	height: fill-parent-flow( 1.0 );
+	flow-children: right;
+	margin-top: 24px;
+}
+
+.k4-streak-icon
+{
+	width: 44px;
+	height: 44px;
+	vertical-align: center;
+}
+
+.k4-streak-count
+{
+	width: 120px;
+	margin-left: 18px;
+	vertical-align: center;
+	font-size: 40px;
+	color: k4-gold;
+}
+
+.k4-sd
+{
+	width: fill-parent-flow( 1.0 );
+	height: 64px;
+	margin-left: 18px;
+	vertical-align: center;
+	border-radius: 6px;
+	background-color: #FFFFFF0D;
+	border: 2px solid #FFFFFF4D;
+}
+
+.k4-sd-icon
+{
+	width: 30px;
+	height: 30px;
+	horizontal-align: center;
+	vertical-align: center;
+	background-image: url("s2r://panorama/images/icons/ui/hot_trend.vsvg");
+	opacity: 0.5;
+}
+
+.k4-sd.k4-today
+{
+	border: 2px solid k4-accent;
+}
+
+.k4-sd.k4-today .k4-sd-icon
+{
+	opacity: 1;
+}
+
+.k4-sd.k4-on
+{
+	background-color: #E4AE3938;
+	border: 2px solid k4-gold;
+}
+
+.k4-sd.k4-on .k4-sd-icon
+{
+	background-image: url("s2r://panorama/images/icons/ui/check.vsvg");
+	wash-color: k4-gold-light;
+	opacity: 1;
+}
+
+.k4-streak-bonus
+{
+	width: 110px;
+	margin-left: 18px;
+	text-align: right;
+	font-size: 30px;
+}
+
+/* ---------------------------------------------------------------- achievements */
+
+.k4-a-head
+{
+	width: 100%;
+	height: 52px;
+	flow-children: right;
+}
+
+.k4-chip
+{
+	height: 44px;
+	flow-children: right;
+	padding: 0px 20px;
+	margin-right: 14px;
+	vertical-align: center;
+	border-radius: 22px;
+	border: 1px solid #FFFFFF33;
+	background-color: #00000040;
+	transition-property: background-color, border;
+	transition-duration: k4-dur;
+}
+
+.k4-chip-icon
+{
+	width: 18px;
+	height: 18px;
+	margin-right: 8px;
+	vertical-align: center;
+	wash-color: k4-gold;
+}
+
+.k4-chip-label
+{
+	vertical-align: center;
+	font-size: 17px;
+	letter-spacing: 2px;
+	color: k4-soft;
+}
+
+.k4-chip:hover
+{
+	border: 1px solid k4-accent;
+	sound: "UIPanorama.generic_button_rollover";
+}
+
+.k4-chip:active
+{
+	sound: "UIPanorama.submenu_select";
+}
+
+.k4-chip:hover .k4-chip-label, .k4-chip.k4-active .k4-chip-label
+{
 	color: k4-text;
-	font-size: 15px;
 }
 
-/* Achievements chosen for the profile carry a gold star (7.0) */
-.k4-ach-pin
+.k4-chip.k4-active
 {
-	width: 16px;
-	height: 16px;
-	margin: 0px 6px 0px -4px;
+	background-color: #6BB6F538;
+	border: 1px solid k4-accent;
+}
+
+.k4-a-count
+{
+	margin-left: 24px;
 	vertical-align: center;
-	background-size: contain;
-	background-repeat: no-repeat;
+	font-size: 34px;
+}
+
+.k4-grid
+{
+	width: 100%;
+	height: fill-parent-flow( 1.0 );
+	flow-children: down;
+	margin-top: 22px;
+}
+
+.k4-grid-row
+{
+	width: 100%;
+	height: fill-parent-flow( 1.0 );
+	flow-children: right;
+}
+
+.k4-a
+{
+	width: fill-parent-flow( 1.0 );
+	height: 100%;
+	flow-children: down;
+	padding: 18px 10px 16px 10px;
+	border-radius: 6px;
+	background-color: #0A0E148C;
+	border: 1px solid #FFFFFF14;
+	transition-property: background-color, border;
+	transition-duration: k4-dur;
+}
+
+.k4-a:hover
+{
+	border: 1px solid k4-accent;
+	sound: "UIPanorama.inventory_item_rollover";
+}
+
+.k4-a:active
+{
+	sound: "UIPanorama.inventory_item_select";
+}
+
+.k4-a.k4-pinned
+{
+	background-color: #E4AE3924;
+	border: 1px solid k4-gold;
+}
+
+.k4-a-medal
+{
+	width: 150px;
+	height: 118px;
+	horizontal-align: center;
+}
+
+.k4-a-pin
+{
+	width: 34px;
+	height: 34px;
+	horizontal-align: right;
+	vertical-align: top;
 	wash-color: k4-gold;
 	visibility: collapse;
 }
 
-.k4-ach.k4-pinned .k4-ach-pin { visibility: visible; }
-.k4-ach.k4-done { transition-property: background-color; transition-duration: k4-dur; }
-.k4-ach.k4-done:hover { background-color: k4-cell-light; }
+.k4-a.k4-pinned .k4-a-pin
+{
+	visibility: visible;
+}
 
-/* Profile (7.0) */
-#k4-view-profile .k4-hero-text { width: fill-parent-flow(1.0); }
-.k4-pf-back { vertical-align: top; }
-
-.k4-pf-chips
+.k4-a-name
 {
 	width: 100%;
-	height: 32px;
-	flow-children: right;
-	margin-bottom: 8px;
+	margin-top: 10px;
+	text-align: center;
+	font-size: 21px;
+	white-space: nowrap;
+	text-overflow: ellipsis;
 }
 
-.k4-pf-chip
+.k4-a-goal
 {
-	height: 30px;
+	width: 100%;
+	margin-top: 4px;
+	text-align: center;
+	font-size: 18px;
+	color: k4-soft;
+	white-space: nowrap;
+	text-overflow: shrink;
+}
+
+.k4-bar-card
+{
+	width: 150px;
+	max-width: 100%;
+	horizontal-align: center;
+	margin-top: 10px;
+}
+
+/* A full bar is a finished achievement: gold, like its ring */
+.k4-bar-card .k4-bar-fill.w20 { background-color: k4-gold; }
+
+/* ---------------------------------------------------------------- leaderboard */
+
+.k4-lb-stage
+{
+	width: 100%;
+	height: 480px;
+	flow-children: down;
+	padding: 40px 60px 0px 60px;
+	background-color: gradient( linear, 0% 0%, 0% 100%, from( #070A0E00 ), to( #080B10F2 ) );
+}
+
+.k4-lb-head
+{
+	width: 100%;
+	height: 52px;
 	flow-children: right;
-	padding: 0px 12px 0px 8px;
-	margin-right: 8px;
+}
+
+.k4-lb-head .k4-arrow
+{
+	width: 52px;
+	height: 52px;
+}
+
+.k4-lb-head .k4-pager
+{
+	margin-left: 40px;
+}
+
+.k4-lb-season
+{
+	width: 340px;
+	flow-children: down;
+	vertical-align: center;
+}
+
+.k4-lb-season-name
+{
+	width: 100%;
+	text-align: center;
+	font-size: 30px;
+	white-space: nowrap;
+	text-overflow: shrink;
+}
+
+.k4-lb-status
+{
+	width: 100%;
+	text-align: center;
+	font-size: 16px;
+	letter-spacing: 3px;
+	color: k4-muted;
+}
+
+.k4-lb-podium
+{
+	width: fit-children;
+	height: fill-parent-flow( 1.0 );
+	flow-children: right;
+	horizontal-align: center;
+}
+
+.k4-lb-p
+{
+	width: 330px;
+	flow-children: down;
+	vertical-align: bottom;
+}
+
+.k4-lb-p-icon
+{
+	width: 200px;
+	height: 81px;
+	horizontal-align: center;
+}
+
+.k4-lb-p.k4-place-1 .k4-lb-p-icon
+{
+	width: 260px;
+	height: 105px;
+}
+
+.k4-lb-p-name
+{
+	width: 100%;
+	margin-top: 8px;
+	text-align: center;
+	font-size: 30px;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+	transition-property: color;
+	transition-duration: k4-dur;
+}
+
+.k4-lb-p-points
+{
+	horizontal-align: center;
+	font-size: 22px;
+	color: k4-soft;
+}
+
+.k4-lb-p .k4-step
+{
+	margin-top: 8px;
+	border-radius: 6px 6px 0px 0px;
+}
+
+.k4-lb-p .k4-step-pos
+{
+	vertical-align: top;
+	margin-top: 6px;
+	font-size: 56px;
+	color: #0000008C;
+}
+
+.k4-lb-p.k4-place-1 .k4-step { height: 150px; background-color: gradient( linear, 0% 0%, 0% 100%, from( #FFD27A ), to( #B07F1E ) ); }
+.k4-lb-p.k4-place-2 .k4-step { height: 105px; background-color: gradient( linear, 0% 0%, 0% 100%, from( #DDE3EA ), to( #7D8894 ) ); }
+.k4-lb-p.k4-place-3 .k4-step { height: 76px; background-color: gradient( linear, 0% 0%, 0% 100%, from( #E3A57A ), to( #8A5330 ) ); }
+
+.k4-lb-p:hover
+{
+	sound: "UIPanorama.generic_button_rollover";
+}
+
+.k4-lb-p:hover .k4-lb-p-name
+{
+	color: k4-accent;
+}
+
+.k4-lb-list
+{
+	width: 100%;
+	height: fill-parent-flow( 1.0 );
+	flow-children: down;
+	padding: 16px 60px 36px 60px;
+}
+
+.k4-lb-row
+{
+	width: 100%;
+	height: 56px;
+	flow-children: right;
+	margin-bottom: 4px;
+	padding: 0px 26px;
 	border-radius: 4px;
-	border: 1px solid #e4ae3955;
-	background-color: #e4ae3914;
+	transition-property: background-color;
+	transition-duration: k4-dur;
 }
 
-.k4-pf-chip-icon
+.k4-lb-alt
 {
-	width: 18px;
-	height: 18px;
-	vertical-align: center;
-	background-size: contain;
-	background-repeat: no-repeat;
-	background-position: center;
-	wash-color: k4-gold;
+	background-color: #FFFFFF08;
 }
 
-.k4-pf-chip-name
+Button.k4-lb-row:hover
 {
-	margin-left: 6px;
-	vertical-align: center;
-	color: k4-text;
-	font-size: 14px;
+	background-color: #6BB6F524;
+	sound: "UIPanorama.generic_button_rollover";
 }
 
-/* Long translations of the hint stay on one line and shrink to fit */
-#k4-pf-sc-hint { width: 100%; vertical-align: center; white-space: nowrap; text-overflow: shrink; }
+.k4-lb-pos
+{
+	width: 64px;
+	vertical-align: center;
+	font-size: 26px;
+	color: k4-muted;
+}
 
-.k4-pf-seasons
+.k4-lb-icon
+{
+	width: 110px;
+	height: 44px;
+	margin-left: 22px;
+	vertical-align: center;
+}
+
+.k4-lb-name
+{
+	width: fill-parent-flow( 1.0 );
+	margin-left: 22px;
+	vertical-align: center;
+	font-size: 24px;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+}
+
+.k4-lb-points
+{
+	margin-left: 22px;
+	vertical-align: center;
+	font-size: 24px;
+}
+
+.k4-lb-me
+{
+	height: 60px;
+	margin: 0px;
+	border: 2px solid k4-accent;
+	background-color: #6BB6F529;
+}
+
+.k4-lb-me .k4-lb-pos
+{
+	color: k4-accent;
+}
+
+/* ---------------------------------------------------------------- ranks */
+
+.k4-rk-head
+{
+	width: 100%;
+	height: 52px;
+	flow-children: right;
+}
+
+.k4-rk
+{
+	width: fill-parent-flow( 1.0 );
+	height: 100%;
+	border-radius: 6px;
+	background-color: #0A0E148C;
+	border: 2px solid #FFFFFF14;
+}
+
+.k4-rk.k4-current
+{
+	background-color: #6BB6F52E;
+	border: 2px solid k4-accent;
+}
+
+.k4-rk-body
 {
 	width: 100%;
 	flow-children: down;
-	margin-top: 4px;
+	vertical-align: center;
 }
 
-.k4-pf-seasons .k4-eyebrow { margin-bottom: 4px; }
+.k4-rk-icon
+{
+	width: 200px;
+	max-width: 86%;
+	height: 81px;
+	horizontal-align: center;
+}
 
-/* CS2's own sounds when a toast appears */
-.k4-toast.k4-toast-green:not(.k4-gone) { sound: "UI.Mission.Complete"; }
-.k4-toast.k4-toast-gold:not(.k4-gone) { sound: "UIPanorama.EOM.CardReveal"; }
+.k4-rk-name
+{
+	width: 92%;
+	horizontal-align: center;
+	margin-top: 6px;
+	text-align: center;
+	font-size: 19px;
+	color: k4-text;
+}
+
+.k4-rk-points
+{
+	horizontal-align: center;
+	margin-top: 4px;
+	font-size: 18px;
+	color: k4-muted;
+}
+
+.k4-rk-gift
+{
+	width: 24px;
+	height: 24px;
+	horizontal-align: right;
+	vertical-align: top;
+	margin: 10px 10px 0px 0px;
+	wash-color: k4-gold-light;
+}
+
+.k4-rk-you
+{
+	padding: 3px 10px;
+	margin: 10px 0px 0px 10px;
+	border-radius: 3px;
+	background-color: k4-accent;
+}
+
+.k4-rk-you-icon
+{
+	width: 16px;
+	height: 16px;
+	wash-color: #0B1016;
+}
+
+/* ---------------------------------------------------------------- stats */
+
+.k4-st-tiles
+{
+	width: 100%;
+	flow-children: down;
+}
+
+.k4-st-row
+{
+	width: 100%;
+	height: 104px;
+	flow-children: right;
+}
+
+.k4-st
+{
+	width: fill-parent-flow( 1.0 );
+	height: 100%;
+	flow-children: right;
+	padding: 0px 26px;
+}
+
+.k4-st-icon
+{
+	width: 60px;
+	height: 60px;
+	vertical-align: center;
+}
+
+.k4-st-text
+{
+	width: fill-parent-flow( 1.0 );
+	flow-children: down;
+	margin-left: 22px;
+	vertical-align: center;
+}
+
+.k4-st-value
+{
+	width: 100%;
+	font-size: 50px;
+}
+
+.k4-st-bottom
+{
+	width: 100%;
+	height: fill-parent-flow( 1.0 );
+	flow-children: right;
+	margin-top: 22px;
+}
+
+.k4-st-weapons
+{
+	width: fill-parent-flow( 3.0 );
+	height: 100%;
+	padding: 30px 36px;
+}
+
+.k4-sw-list
+{
+	width: 100%;
+	flow-children: down;
+	vertical-align: center;
+}
+
+.k4-sw
+{
+	width: 100%;
+	height: 70px;
+	flow-children: right;
+}
+
+.k4-sw-icon
+{
+	width: 220px;
+	height: 70px;
+}
+
+.k4-bar-weapon
+{
+	width: fill-parent-flow( 1.0 );
+	height: 14px;
+	margin: 0px 26px;
+	vertical-align: center;
+	border-radius: 7px;
+	background-color: #FFFFFF1A;
+}
+
+.k4-bar-weapon .k4-bar-fill
+{
+	border-radius: 7px;
+	background-color: gradient( linear, 0% 0%, 100% 0%, from( #3A8FD9 ), to( #8CCBFF ) );
+}
+
+.k4-sw-kills
+{
+	width: 90px;
+	vertical-align: center;
+	text-align: right;
+	font-size: 34px;
+}
+
+.k4-pt
+{
+	width: fill-parent-flow( 2.0 );
+	height: 100%;
+	margin-left: 22px;
+	padding: 28px 34px;
+}
+
+.k4-pt-list
+{
+	width: 100%;
+	flow-children: down;
+	vertical-align: center;
+}
+
+.k4-pt-head
+{
+	width: 100%;
+	flow-children: right;
+}
+
+.k4-pt-head-icon
+{
+	width: 44px;
+	height: 44px;
+	vertical-align: center;
+}
+
+.k4-pt-total
+{
+	width: fill-parent-flow( 1.0 );
+	margin-left: 16px;
+	vertical-align: center;
+	font-size: 50px;
+}
+
+.k4-pt-team
+{
+	width: 100%;
+	flow-children: right;
+	margin-top: 22px;
+}
+
+.k4-pt-icon
+{
+	width: 76px;
+	height: 76px;
+	vertical-align: center;
+}
+
+.k4-pt-spec .k4-pt-icon
+{
+	width: 44px;
+	height: 44px;
+	margin: 0px 16px;
+}
+
+.k4-pt-text
+{
+	width: fill-parent-flow( 1.0 );
+	flow-children: down;
+	margin-left: 20px;
+	vertical-align: center;
+}
+
+.k4-pt-line
+{
+	width: 100%;
+	flow-children: right;
+}
+
+.k4-pt-name
+{
+	vertical-align: bottom;
+	font-size: 20px;
+	letter-spacing: 2px;
+	white-space: nowrap;
+	text-overflow: shrink;
+}
+
+.k4-pt-time
+{
+	vertical-align: bottom;
+	font-size: 30px;
+	white-space: nowrap;
+}
+
+.k4-bar-team
+{
+	height: 10px;
+	margin-top: 8px;
+	border-radius: 5px;
+	background-color: #FFFFFF1A;
+}
+
+.k4-bar-team .k4-bar-fill { border-radius: 5px; }
+.k4-pt-t .k4-pt-name { color: k4-gold; }
+.k4-pt-t .k4-bar-fill { background-color: k4-gold; }
+.k4-pt-ct .k4-pt-name { color: k4-accent; }
+.k4-pt-ct .k4-bar-fill { background-color: k4-accent; }
+.k4-pt-spec .k4-pt-name { color: k4-dim; }
+.k4-pt-spec .k4-bar-fill { background-color: k4-dim; }
+
+/* ---------------------------------------------------------------- toasts: under the kill feed, newest on top */
+
+@keyframes 'k4-toast-in'
+{
+	0%
+	{
+		opacity: 0;
+		transform: translateX( 120px );
+	}
+
+	100%
+	{
+		opacity: 1;
+		transform: translateX( 0px );
+	}
+}
+
+@keyframes 'k4-promo-in'
+{
+	0%
+	{
+		opacity: 0;
+		transform: scale3d( 0.85, 0.85, 1 );
+	}
+
+	100%
+	{
+		opacity: 1;
+		transform: scale3d( 1, 1, 1 );
+	}
+}
+
+.k4-toasts
+{
+	width: 480px;
+	flow-children: down;
+	horizontal-align: right;
+	vertical-align: top;
+	margin: 240px 24px 0px 0px;
+}
+
+.k4-toast
+{
+	width: 480px;
+	height: 100px;
+	margin-bottom: 10px;
+	border-radius: 6px;
+	border: 1px solid #FFFFFF1A;
+	background-color: gradient( linear, 0% 0%, 100% 0%, from( #080C11F0 ), to( #080C11CC ) );
+}
+
+.k4-toast:not(.k4-gone)
+{
+	animation-name: k4-toast-in;
+	animation-duration: 0.25s;
+	animation-timing-function: ease-out;
+	animation-iteration-count: 1;
+}
+
+.k4-toast-0 { border: 1px solid #FFFFFF40; }
+.k4-toast-1 { opacity: 0.85; }
+.k4-toast-2 { opacity: 0.6; }
+
+.k4-toast-strip
+{
+	width: 5px;
+	height: 100%;
+	background-color: k4-green;
+}
+
+.k4-toast-row
+{
+	width: 100%;
+	height: 100%;
+	flow-children: right;
+	padding: 0px 20px 0px 24px;
+}
+
+.k4-toast-pic
+{
+	width: 100px;
+	height: 72px;
+	vertical-align: center;
+}
+
+.k4-toast-icon
+{
+	width: 92px;
+	height: 44px;
+	horizontal-align: center;
+	vertical-align: center;
+}
+
+.k4-toast-body
+{
+	width: fill-parent-flow( 1.0 );
+	flow-children: down;
+	margin-left: 16px;
+	vertical-align: center;
+}
+
+.k4-toast-kind
+{
+	width: 100%;
+	font-size: 14px;
+	letter-spacing: 3px;
+	white-space: nowrap;
+	text-overflow: shrink;
+}
+
+.k4-toast-text
+{
+	width: 100%;
+	margin-top: 4px;
+	font-size: 21px;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+}
+
+.k4-bar-toast
+{
+	height: 5px;
+	margin-top: 6px;
+}
+
+.k4-toast-value
+{
+	margin-left: 12px;
+	vertical-align: center;
+	font-size: 26px;
+	color: k4-gold-light;
+	white-space: nowrap;
+}
+
+/* Full width while the toast waits, empty at the end of its length; without k4-run it snaps back at once. */
+.k4-toast-timer
+{
+	width: 100%;
+	height: 3px;
+	vertical-align: bottom;
+	background-color: #FFFFFF59;
+	transition-property: width;
+	transition-duration: 0s;
+	transition-timing-function: linear;
+}
+
+.k4-toast-timer.k4-run
+{
+	width: 0%;
+}
+
+.k4-t-more
+{
+	horizontal-align: right;
+	padding: 4px 12px;
+	border-radius: 3px;
+	background-color: #00000099;
+	font-size: 15px;
+	letter-spacing: 2px;
+	color: k4-muted;
+}
+
+.k4-promo
+{
+	flow-children: down;
+	horizontal-align: center;
+	vertical-align: top;
+	margin-top: 120px;
+	padding: 22px 70px 26px 70px;
+	border-radius: 8px;
+	border: 1px solid #E4AE3999;
+	background-color: gradient( radial, 50% 50%, 0% 0%, 70% 70%, from( #E4AE3947 ), to( #080C11D9 ) );
+}
+
+.k4-promo:not(.k4-gone)
+{
+	animation-name: k4-promo-in;
+	animation-duration: 0.35s;
+	animation-timing-function: ease-out;
+	animation-iteration-count: 1;
+	sound: "UI.ArmsRace.BecomeMatchLeader";
+}
+
+.k4-promo-title
+{
+	horizontal-align: center;
+	font-size: 18px;
+	letter-spacing: 6px;
+	color: k4-gold-light;
+}
+
+.k4-promo-icon
+{
+	width: 300px;
+	height: 122px;
+	horizontal-align: center;
+	margin-top: 6px;
+}
+
+.k4-promo-rank
+{
+	horizontal-align: center;
+	margin-top: 6px;
+	font-size: 40px;
+}
 
 /* ---------------------------------------------------------------- generated */
 """
+
+css += "\n/* Pictures: a game image as background (CS2's custom HUD allows no Image elements) */\n"
+css += ",\n".join(f".{name}" for name in PICTURES)
+css += "\n{\n\tbackground-size: contain;\n\tbackground-repeat: no-repeat;\n\tbackground-position: 50% 50%;\n}\n"
+# The backgrounds fill the screen instead; this repeats after the shared rule so it wins.
+css += ".k4-bg, .k4-bg-map { background-size: cover; }\n"
+
+css += "\n/* Grid gaps */\n"
+for name, gap in GAPS_LEFT.items():
+    css += f".{name} {{ margin-left: {gap}px; }}\n"
+for name, gap in GAPS_TOP.items():
+    css += f".{name} {{ margin-top: {gap}px; }}\n"
+css += ",\n".join(f".{name}.k4-first" for name in GAPS_LEFT) + "\n{\n\tmargin-left: 0px;\n}\n"
+css += ",\n".join(f".{name}.k4-first" for name in GAPS_TOP) + "\n{\n\tmargin-top: 0px;\n}\n"
+
+css += "\n/* Medal tiers */\n"
+for tier, (light, middle, dark, glow) in TIERS.items():
+    css += (f".t-{tier} {{ background-color: gradient( linear, 0% 0%, 100% 100%, from( {light} ), "
+            f"color-stop( 0.45, {middle} ), to( {dark} ) ); }}\n")
+    css += f".t-{tier}.k4-ring-showcase, .t-{tier}.k4-ring-card {{ box-shadow: {glow} 0px 0px 26px 0px; }}\n"
+
+css += "\n/* Toast colors and their sounds */\n"
+for name, (color, sound) in TOAST_COLORS.items():
+    css += f".k4-tc-{name} .k4-toast-strip {{ background-color: {color}; }}\n"
+    css += f".k4-tc-{name} .k4-toast-kind {{ color: {color}; }}\n"
+    css += f".k4-tc-{name} .k4-bar-toast .k4-bar-fill {{ background-color: {color}; }}\n"
+    css += f'.k4-toast.k4-tc-{name}:not(.k4-gone) {{ sound: "{sound}"; }}\n'
+
+css += "\n/* Toast lengths: the timer bar's run-out time */\n"
+for name, duration in TOAST_LENGTHS.items():
+    css += f".k4-len-{name} .k4-toast-timer.k4-run {{ transition-duration: {duration}; }}\n"
 
 css += "\n/* Game icons */\n"
 for name in UI_ICONS:
@@ -1003,10 +2395,19 @@ for name in EQUIPMENT_ICONS:
 for name in DEATHNOTICE_ICONS:
     css += f'.dn-{name} {{ background-image: url("s2r://panorama/images/hud/deathnotice/{name}.vsvg"); }}\n'
 
+css += "\n/* Team patches (CS2's win panel) */\n"
+css += '.tp-t { background-image: url("s2r://panorama/images/hud/winpanel/t_patch_png.vtex"); }\n'
+css += '.tp-ct { background-image: url("s2r://panorama/images/hud/winpanel/ct_patch_png.vtex"); }\n'
+
 css += "\n/* CS2 rank icons, numbered like the scoreboard; sharp copies shipped in the addon (gen_k4_ranks.py) */\n"
 for number in range(19):
     css += f'.sg-{number} {{ background-image: url("s2r://panorama/images/custom_game/k4/ranks/skillgroup{number}.vsvg"); }}\n'
     css += f'.wg-{number} {{ background-image: url("s2r://panorama/images/custom_game/k4/ranks/wingman{number}.vsvg"); }}\n'
+
+css += "\n/* Map backgrounds */\n"
+css += '.map-default { background-image: url("s2r://panorama/images/backgrounds/season_stats_background_png.vtex"); }\n'
+for name in MAPS:
+    css += f'.map-{name} {{ background-image: url("s2r://panorama/images/map_icons/screenshots/1080p/{name}_png.vtex"); }}\n'
 
 css += "\n/* Progress bar widths */\n"
 for step in range(21):
@@ -1016,5 +2417,5 @@ css += "\n/* Rank colors */\n"
 for name, color in COLORS.items():
     css += f".col-{name} {{ color: {color}; }}\n"
 
-open(OUT, 'w', encoding='utf-8', newline='\n').write(css)
-print("ok")
+open(OUT, "w", encoding="utf-8", newline="\n").write(css)
+print(f"ok: {len(MAPS)} maps")

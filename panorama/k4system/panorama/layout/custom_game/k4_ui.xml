@@ -4,573 +4,1237 @@
 		<include src="s2r://panorama/styles/custom_game/k4_ui.vcss_c" />
 	</styles>
 	<Panel class="k4-root" hittest="false">
-		<Panel id="k4-toast" class="k4-toast k4-toast-green k4-gone" hittest="false">
-			<Panel class="k4-toast-bg" hittest="false" />
-			<Panel class="k4-toast-line k4-toast-line-top" hittest="false" />
-			<Panel class="k4-toast-line k4-toast-line-bottom" hittest="false" />
-			<Panel class="k4-toast-content" hittest="false">
-				<Panel id="k4-toast-icon" class="k4-toast-icon ic-check" hittest="false" />
-				<Panel class="k4-toast-body" hittest="false">
-					<Label class="k4-toast-title stratum-bold-tf" text="{s:title}" hittest="false" />
-					<Label class="k4-toast-text stratum-regular-tf" text="{s:text}" hittest="false" />
+		<Panel id="k4-panel" class="k4-panel k4-closed">
+			<Panel id="k4-bg" class="k4-bg map-default">
+				<Panel id="k4-bg-map" class="k4-bg-map" />
+			</Panel>
+			<Panel class="k4-shade" />
+			<Panel class="k4-frame">
+				<Panel class="k4-sidebar">
+					<Panel class="k4-brand">
+						<Label class="k4-brand-name stratum-bold-tf" text="K4" />
+						<Label class="k4-brand-sub stratum-bold-tf" text="SYSTEM" />
+					</Panel>
+					<Button id="k4-me" class="k4-me">
+						<Panel id="k4-me-icon" class="k4-me-icon sg-0" />
+						<Panel class="k4-me-text">
+							<Label class="k4-me-name stratum-bold-tf" text="{s:name}" />
+							<Label class="k4-me-meta stratum-medium-tf" text="{s:meta}" />
+						</Panel>
+					</Button>
+					<Button id="k4-nav-home" class="k4-nav">
+						<Panel class="k4-nav-icon ic-home" />
+						<Label class="k4-nav-label stratum-medium-tf" text="{s:label}" />
+					</Button>
+					<Button id="k4-nav-profile" class="k4-nav">
+						<Panel class="k4-nav-icon ic-profile" />
+						<Label class="k4-nav-label stratum-medium-tf" text="{s:label}" />
+					</Button>
+					<Button id="k4-nav-missions" class="k4-nav">
+						<Panel class="k4-nav-icon ic-quest" />
+						<Label class="k4-nav-label stratum-medium-tf" text="{s:label}" />
+					</Button>
+					<Button id="k4-nav-achievements" class="k4-nav">
+						<Panel class="k4-nav-icon ic-winner_ribbon" />
+						<Label class="k4-nav-label stratum-medium-tf" text="{s:label}" />
+					</Button>
+					<Button id="k4-nav-leaderboard" class="k4-nav">
+						<Panel class="k4-nav-icon ic-leader" />
+						<Label class="k4-nav-label stratum-medium-tf" text="{s:label}" />
+					</Button>
+					<Button id="k4-nav-ranks" class="k4-nav">
+						<Panel class="k4-nav-icon ic-trophy" />
+						<Label class="k4-nav-label stratum-medium-tf" text="{s:label}" />
+					</Button>
+					<Button id="k4-nav-stats" class="k4-nav">
+						<Panel class="k4-nav-icon ic-stats" />
+						<Label class="k4-nav-label stratum-medium-tf" text="{s:label}" />
+					</Button>
+					<Panel class="k4-vgrow" />
+					<Panel id="k4-season" class="k4-season k4-gone">
+						<Label class="k4-season-title stratum-bold-tf" text="{s:title}" />
+						<Label class="k4-season-left stratum-bold-tf" text="{s:left}" />
+						<Panel class="k4-bar k4-bar-season">
+							<Panel id="k4-season-bar" class="k4-bar-fill w0" />
+						</Panel>
+					</Panel>
+					<Panel class="k4-copyright-box">
+						<Label class="k4-copyright stratum-bold-tf" text="© 2026 karola3vax" />
+					</Panel>
+				</Panel>
+				<Panel class="k4-main">
+					<Panel id="k4-view-home" class="k4-view k4-view-pad">
+						<Panel class="k4-header-space" />
+						<Panel class="k4-h-hero">
+							<Panel id="k4-h-rank-icon" class="k4-h-rank-icon sg-0" />
+							<Panel class="k4-h-hero-text">
+								<Label id="k4-h-rank-name" class="k4-h-rank-name stratum-bold-tf" text="{s:rank}" />
+								<Panel class="k4-h-points-row">
+									<Label class="k4-h-points stratum-bold-tf" text="{s:points}" />
+									<Label class="k4-place stratum-bold-tf" text="{s:place}" />
+								</Panel>
+								<Panel class="k4-bar k4-bar-hero">
+									<Panel id="k4-h-bar" class="k4-bar-fill w0" />
+								</Panel>
+								<Label class="k4-h-next stratum-medium-tf" text="{s:next}" />
+							</Panel>
+						</Panel>
+						<Panel class="k4-h-cards">
+							<Button id="k4-h-missions" class="k4-tile k4-h-card k4-first">
+								<Panel class="k4-cap-icon ic-quest" />
+								<Panel class="k4-h-slots">
+									<Panel id="k4-h-m0" class="k4-h-m k4-first k4-gone">
+										<Panel id="k4-h-m0-icon" class="k4-h-m-icon" />
+										<Label class="k4-h-m-value stratum-bold-tf" text="{s:value}" />
+									</Panel>
+									<Panel id="k4-h-m1" class="k4-h-m k4-gone">
+										<Panel id="k4-h-m1-icon" class="k4-h-m-icon" />
+										<Label class="k4-h-m-value stratum-bold-tf" text="{s:value}" />
+									</Panel>
+									<Panel id="k4-h-m2" class="k4-h-m k4-gone">
+										<Panel id="k4-h-m2-icon" class="k4-h-m-icon" />
+										<Label class="k4-h-m-value stratum-bold-tf" text="{s:value}" />
+									</Panel>
+									<Panel id="k4-h-m3" class="k4-h-m k4-gone">
+										<Panel id="k4-h-m3-icon" class="k4-h-m-icon" />
+										<Label class="k4-h-m-value stratum-bold-tf" text="{s:value}" />
+									</Panel>
+								</Panel>
+							</Button>
+							<Button id="k4-h-ach" class="k4-tile k4-h-card">
+								<Panel class="k4-cap-icon ic-winner_ribbon" />
+								<Panel class="k4-h-slots">
+									<Panel id="k4-h-a0" class="k4-h-a k4-first k4-gone">
+										<Panel id="k4-h-a0-ring" class="k4-ring k4-ring-home t-locked">
+											<Panel class="k4-disc">
+												<Panel id="k4-h-a0-icon" class="k4-medal-icon" />
+											</Panel>
+										</Panel>
+										<Label class="k4-h-a-name stratum-bold-tf" text="{s:name}" />
+										<Panel class="k4-bar k4-bar-small">
+											<Panel id="k4-h-a0-bar" class="k4-bar-fill w0" />
+										</Panel>
+									</Panel>
+									<Panel id="k4-h-a1" class="k4-h-a k4-gone">
+										<Panel id="k4-h-a1-ring" class="k4-ring k4-ring-home t-locked">
+											<Panel class="k4-disc">
+												<Panel id="k4-h-a1-icon" class="k4-medal-icon" />
+											</Panel>
+										</Panel>
+										<Label class="k4-h-a-name stratum-bold-tf" text="{s:name}" />
+										<Panel class="k4-bar k4-bar-small">
+											<Panel id="k4-h-a1-bar" class="k4-bar-fill w0" />
+										</Panel>
+									</Panel>
+									<Panel id="k4-h-a2" class="k4-h-a k4-gone">
+										<Panel id="k4-h-a2-ring" class="k4-ring k4-ring-home t-locked">
+											<Panel class="k4-disc">
+												<Panel id="k4-h-a2-icon" class="k4-medal-icon" />
+											</Panel>
+										</Panel>
+										<Label class="k4-h-a-name stratum-bold-tf" text="{s:name}" />
+										<Panel class="k4-bar k4-bar-small">
+											<Panel id="k4-h-a2-bar" class="k4-bar-fill w0" />
+										</Panel>
+									</Panel>
+								</Panel>
+							</Button>
+							<Button id="k4-h-top" class="k4-tile k4-h-card">
+								<Panel class="k4-cap-icon ic-leader" />
+								<Panel class="k4-h-slots">
+									<Panel id="k4-h-p0" class="k4-h-p k4-place-2 k4-first k4-gone">
+										<Panel id="k4-h-p0-icon" class="k4-h-p-icon sg-0" />
+										<Label class="k4-h-p-name stratum-bold-tf" text="{s:name}" />
+										<Panel class="k4-step">
+											<Label class="k4-step-pos stratum-bold-tf" text="{s:pos}" />
+										</Panel>
+									</Panel>
+									<Panel id="k4-h-p1" class="k4-h-p k4-place-1 k4-gone">
+										<Panel id="k4-h-p1-icon" class="k4-h-p-icon sg-0" />
+										<Label class="k4-h-p-name stratum-bold-tf" text="{s:name}" />
+										<Panel class="k4-step">
+											<Label class="k4-step-pos stratum-bold-tf" text="{s:pos}" />
+										</Panel>
+									</Panel>
+									<Panel id="k4-h-p2" class="k4-h-p k4-place-3 k4-gone">
+										<Panel id="k4-h-p2-icon" class="k4-h-p-icon sg-0" />
+										<Label class="k4-h-p-name stratum-bold-tf" text="{s:name}" />
+										<Panel class="k4-step">
+											<Label class="k4-step-pos stratum-bold-tf" text="{s:pos}" />
+										</Panel>
+									</Panel>
+								</Panel>
+							</Button>
+						</Panel>
+						<Panel class="k4-h-quick">
+							<Button id="k4-h-q0" class="k4-tile k4-h-q k4-first k4-gone">
+								<Panel class="k4-h-q-inner">
+									<Panel id="k4-h-q0-icon" class="k4-h-q-icon" />
+									<Label class="k4-tile-value k4-h-q-value stratum-bold-tf" text="{s:value}" />
+								</Panel>
+							</Button>
+							<Button id="k4-h-q1" class="k4-tile k4-h-q k4-gone">
+								<Panel class="k4-h-q-inner">
+									<Panel id="k4-h-q1-icon" class="k4-h-q-icon" />
+									<Label class="k4-tile-value k4-h-q-value stratum-bold-tf" text="{s:value}" />
+								</Panel>
+							</Button>
+							<Button id="k4-h-q2" class="k4-tile k4-h-q k4-gone">
+								<Panel class="k4-h-q-inner">
+									<Panel id="k4-h-q2-icon" class="k4-h-q-icon" />
+									<Label class="k4-tile-value k4-h-q-value stratum-bold-tf" text="{s:value}" />
+								</Panel>
+							</Button>
+							<Button id="k4-h-q3" class="k4-tile k4-h-q k4-gone">
+								<Panel class="k4-h-q-inner">
+									<Panel id="k4-h-q3-icon" class="k4-h-q-icon" />
+									<Label class="k4-tile-value k4-h-q-value stratum-bold-tf" text="{s:value}" />
+								</Panel>
+							</Button>
+							<Button id="k4-h-q4" class="k4-tile k4-h-q k4-h-q-wide k4-gone">
+								<Panel class="k4-h-q-inner">
+									<Panel id="k4-h-q4-icon" class="k4-h-q-icon" />
+									<Label class="k4-tile-value k4-h-q-value stratum-bold-tf" text="{s:value}" />
+								</Panel>
+							</Button>
+						</Panel>
+					</Panel>
+					<Panel id="k4-view-profile" class="k4-view k4-view-pad">
+						<Panel class="k4-pf-head">
+							<Button id="k4-pf-back" class="k4-btn k4-gone">
+								<Panel class="k4-btn-icon k4-icon-back ic-expand" />
+								<Label class="k4-btn-label stratum-bold-tf" text="{s:back}" />
+							</Button>
+							<Button id="k4-pf-toasts" class="k4-btn k4-toggle k4-gone">
+								<Panel class="k4-toggle-dot" />
+								<Label class="k4-btn-label stratum-bold-tf" text="{s:label}" />
+							</Button>
+							<Button id="k4-pf-chat" class="k4-btn k4-toggle k4-gone">
+								<Panel class="k4-toggle-dot" />
+								<Label class="k4-btn-label stratum-bold-tf" text="{s:label}" />
+							</Button>
+						</Panel>
+						<Panel class="k4-pf-banner">
+							<Panel class="k4-pf-emblem">
+								<Panel id="k4-pf-icon" class="k4-pf-icon sg-0" />
+								<Label id="k4-pf-badge" class="k4-pf-badge k4-gone stratum-bold-tf" text="{s:tag}" />
+							</Panel>
+							<Panel class="k4-pf-text">
+								<Label class="k4-pf-name stratum-bold-tf" text="{s:name}" />
+								<Panel class="k4-pf-line">
+									<Label id="k4-pf-rank" class="k4-pf-rank stratum-bold-tf" text="{s:rank}" />
+									<Label class="k4-pf-points stratum-bold-tf" text="{s:points}" />
+									<Label class="k4-place stratum-bold-tf" text="{s:place}" />
+								</Panel>
+							</Panel>
+							<Panel class="k4-pf-showcase">
+								<Panel class="k4-pf-sc-row">
+									<Panel id="k4-pf-sc0" class="k4-pf-sc k4-first k4-gone">
+										<Panel id="k4-pf-sc0-ring" class="k4-ring k4-ring-showcase t-locked">
+											<Panel class="k4-disc">
+												<Panel id="k4-pf-sc0-icon" class="k4-medal-icon" />
+											</Panel>
+										</Panel>
+										<Label class="k4-pf-sc-name stratum-bold-tf" text="{s:name}" />
+									</Panel>
+									<Panel id="k4-pf-sc1" class="k4-pf-sc k4-gone">
+										<Panel id="k4-pf-sc1-ring" class="k4-ring k4-ring-showcase t-locked">
+											<Panel class="k4-disc">
+												<Panel id="k4-pf-sc1-icon" class="k4-medal-icon" />
+											</Panel>
+										</Panel>
+										<Label class="k4-pf-sc-name stratum-bold-tf" text="{s:name}" />
+									</Panel>
+									<Panel id="k4-pf-sc2" class="k4-pf-sc k4-gone">
+										<Panel id="k4-pf-sc2-ring" class="k4-ring k4-ring-showcase t-locked">
+											<Panel class="k4-disc">
+												<Panel id="k4-pf-sc2-icon" class="k4-medal-icon" />
+											</Panel>
+										</Panel>
+										<Label class="k4-pf-sc-name stratum-bold-tf" text="{s:name}" />
+									</Panel>
+								</Panel>
+								<Label id="k4-pf-sc-hint" class="k4-pf-sc-hint k4-gone stratum-medium-tf" text="{s:hint}" />
+							</Panel>
+						</Panel>
+						<Panel class="k4-pf-stats">
+							<Panel id="k4-pf-st0" class="k4-tile k4-pf-st k4-first">
+								<Panel id="k4-pf-st0-icon" class="k4-pf-st-icon" />
+								<Label class="k4-tile-value k4-pf-st-value stratum-bold-tf" text="{s:value}" />
+								<Label class="k4-cap k4-pf-st-label stratum-bold-tf" text="{s:label}" />
+							</Panel>
+							<Panel id="k4-pf-st1" class="k4-tile k4-pf-st">
+								<Panel id="k4-pf-st1-icon" class="k4-pf-st-icon" />
+								<Label class="k4-tile-value k4-pf-st-value stratum-bold-tf" text="{s:value}" />
+								<Label class="k4-cap k4-pf-st-label stratum-bold-tf" text="{s:label}" />
+							</Panel>
+							<Panel id="k4-pf-st2" class="k4-tile k4-pf-st">
+								<Panel id="k4-pf-st2-icon" class="k4-pf-st-icon" />
+								<Label class="k4-tile-value k4-pf-st-value stratum-bold-tf" text="{s:value}" />
+								<Label class="k4-cap k4-pf-st-label stratum-bold-tf" text="{s:label}" />
+							</Panel>
+							<Panel id="k4-pf-st3" class="k4-tile k4-pf-st">
+								<Panel id="k4-pf-st3-icon" class="k4-pf-st-icon" />
+								<Label class="k4-tile-value k4-pf-st-value stratum-bold-tf" text="{s:value}" />
+								<Label class="k4-cap k4-pf-st-label stratum-bold-tf" text="{s:label}" />
+							</Panel>
+							<Panel id="k4-pf-st4" class="k4-tile k4-pf-st">
+								<Panel id="k4-pf-st4-icon" class="k4-pf-st-icon" />
+								<Label class="k4-tile-value k4-pf-st-value stratum-bold-tf" text="{s:value}" />
+								<Label class="k4-cap k4-pf-st-label stratum-bold-tf" text="{s:label}" />
+							</Panel>
+							<Panel id="k4-pf-st5" class="k4-tile k4-pf-st">
+								<Panel id="k4-pf-st5-icon" class="k4-pf-st-icon" />
+								<Label class="k4-tile-value k4-pf-st-value stratum-bold-tf" text="{s:value}" />
+								<Label class="k4-cap k4-pf-st-label stratum-bold-tf" text="{s:label}" />
+							</Panel>
+						</Panel>
+						<Panel class="k4-pf-bottom">
+							<Panel id="k4-pf-fav" class="k4-tile k4-pf-fav k4-gone">
+								<Panel id="k4-pf-fav-icon" class="k4-pf-fav-icon" />
+								<Panel class="k4-pf-fav-line">
+									<Label class="k4-pf-fav-name stratum-bold-tf" text="{s:fav}" />
+									<Label class="k4-pf-fav-kills stratum-medium-tf" text="{s:favkills}" />
+								</Panel>
+							</Panel>
+							<Panel class="k4-pf-seasons">
+								<Panel id="k4-pf-ss0" class="k4-tile k4-pf-ss k4-first k4-gone">
+									<Label class="k4-cap k4-pf-ss-season stratum-bold-tf" text="{s:season}" />
+									<Panel id="k4-pf-ss0-icon" class="k4-pf-ss-icon sg-0" />
+									<Label class="k4-pf-ss-pos stratum-bold-tf" text="{s:pos}" />
+								</Panel>
+								<Panel id="k4-pf-ss1" class="k4-tile k4-pf-ss k4-gone">
+									<Label class="k4-cap k4-pf-ss-season stratum-bold-tf" text="{s:season}" />
+									<Panel id="k4-pf-ss1-icon" class="k4-pf-ss-icon sg-0" />
+									<Label class="k4-pf-ss-pos stratum-bold-tf" text="{s:pos}" />
+								</Panel>
+								<Panel id="k4-pf-ss2" class="k4-tile k4-pf-ss k4-gone">
+									<Label class="k4-cap k4-pf-ss-season stratum-bold-tf" text="{s:season}" />
+									<Panel id="k4-pf-ss2-icon" class="k4-pf-ss-icon sg-0" />
+									<Label class="k4-pf-ss-pos stratum-bold-tf" text="{s:pos}" />
+								</Panel>
+								<Label id="k4-pf-ss-none" class="k4-pf-ss-none k4-gone stratum-medium-tf" text="{s:none}" />
+							</Panel>
+						</Panel>
+					</Panel>
+					<Panel id="k4-view-missions" class="k4-view k4-view-pad">
+						<Panel class="k4-m-head">
+							<Panel class="k4-m-head-icon ic-clock" />
+							<Label class="k4-m-reset stratum-bold-tf" text="{s:reset}" />
+						</Panel>
+						<Panel class="k4-m-cards">
+							<Panel id="k4-m0" class="k4-m k4-first k4-gone">
+								<Panel class="k4-m-top">
+									<Label class="k4-m-diff stratum-bold-tf" text="{s:diff}" />
+									<Panel class="k4-grow" />
+									<Label class="k4-reward stratum-bold-tf" text="{s:reward}" />
+								</Panel>
+								<Panel class="k4-vgrow" />
+								<Panel id="k4-m0-icon" class="k4-m-icon" />
+								<Label class="k4-m-desc stratum-medium-tf" text="{s:desc}" />
+								<Panel class="k4-bar k4-bar-mission">
+									<Panel id="k4-m0-bar" class="k4-bar-fill w0" />
+								</Panel>
+								<Panel class="k4-m-bottom">
+									<Label class="k4-m-progress stratum-bold-tf" text="{s:progress}" />
+									<Panel class="k4-grow" />
+									<Button id="k4-reroll-0" class="k4-btn k4-gone">
+										<Panel class="k4-btn-icon ic-refresh_skinny" />
+										<Label class="k4-btn-label stratum-bold-tf" text="{s:label}" />
+									</Button>
+								</Panel>
+							</Panel>
+							<Panel id="k4-m1" class="k4-m k4-gone">
+								<Panel class="k4-m-top">
+									<Label class="k4-m-diff stratum-bold-tf" text="{s:diff}" />
+									<Panel class="k4-grow" />
+									<Label class="k4-reward stratum-bold-tf" text="{s:reward}" />
+								</Panel>
+								<Panel class="k4-vgrow" />
+								<Panel id="k4-m1-icon" class="k4-m-icon" />
+								<Label class="k4-m-desc stratum-medium-tf" text="{s:desc}" />
+								<Panel class="k4-bar k4-bar-mission">
+									<Panel id="k4-m1-bar" class="k4-bar-fill w0" />
+								</Panel>
+								<Panel class="k4-m-bottom">
+									<Label class="k4-m-progress stratum-bold-tf" text="{s:progress}" />
+									<Panel class="k4-grow" />
+									<Button id="k4-reroll-1" class="k4-btn k4-gone">
+										<Panel class="k4-btn-icon ic-refresh_skinny" />
+										<Label class="k4-btn-label stratum-bold-tf" text="{s:label}" />
+									</Button>
+								</Panel>
+							</Panel>
+							<Panel id="k4-m2" class="k4-m k4-gone">
+								<Panel class="k4-m-top">
+									<Label class="k4-m-diff stratum-bold-tf" text="{s:diff}" />
+									<Panel class="k4-grow" />
+									<Label class="k4-reward stratum-bold-tf" text="{s:reward}" />
+								</Panel>
+								<Panel class="k4-vgrow" />
+								<Panel id="k4-m2-icon" class="k4-m-icon" />
+								<Label class="k4-m-desc stratum-medium-tf" text="{s:desc}" />
+								<Panel class="k4-bar k4-bar-mission">
+									<Panel id="k4-m2-bar" class="k4-bar-fill w0" />
+								</Panel>
+								<Panel class="k4-m-bottom">
+									<Label class="k4-m-progress stratum-bold-tf" text="{s:progress}" />
+									<Panel class="k4-grow" />
+									<Button id="k4-reroll-2" class="k4-btn k4-gone">
+										<Panel class="k4-btn-icon ic-refresh_skinny" />
+										<Label class="k4-btn-label stratum-bold-tf" text="{s:label}" />
+									</Button>
+								</Panel>
+							</Panel>
+						</Panel>
+						<Panel id="k4-mw" class="k4-mw k4-gone">
+							<Panel id="k4-mw-icon" class="k4-mw-icon" />
+							<Panel class="k4-mw-text">
+								<Label class="k4-mw-left stratum-bold-tf" text="{s:left}" />
+								<Label class="k4-mw-desc stratum-medium-tf" text="{s:desc}" />
+								<Panel class="k4-bar k4-bar-mission">
+									<Panel id="k4-mw-bar" class="k4-bar-fill w0" />
+								</Panel>
+							</Panel>
+							<Panel class="k4-mw-side">
+								<Label class="k4-mw-progress stratum-bold-tf" text="{s:progress}" />
+								<Label class="k4-reward k4-mw-reward stratum-bold-tf" text="{s:reward}" />
+							</Panel>
+						</Panel>
+						<Panel class="k4-streak">
+							<Panel class="k4-streak-icon ic-hot_trend" />
+							<Label class="k4-streak-count stratum-bold-tf" text="{s:streak}" />
+							<Panel id="k4-sd0" class="k4-sd">
+								<Panel class="k4-sd-icon" />
+							</Panel>
+							<Panel id="k4-sd1" class="k4-sd">
+								<Panel class="k4-sd-icon" />
+							</Panel>
+							<Panel id="k4-sd2" class="k4-sd">
+								<Panel class="k4-sd-icon" />
+							</Panel>
+							<Panel id="k4-sd3" class="k4-sd">
+								<Panel class="k4-sd-icon" />
+							</Panel>
+							<Panel id="k4-sd4" class="k4-sd">
+								<Panel class="k4-sd-icon" />
+							</Panel>
+							<Panel id="k4-sd5" class="k4-sd">
+								<Panel class="k4-sd-icon" />
+							</Panel>
+							<Panel id="k4-sd6" class="k4-sd">
+								<Panel class="k4-sd-icon" />
+							</Panel>
+							<Label class="k4-reward k4-streak-bonus stratum-bold-tf" text="{s:bonus}" />
+						</Panel>
+					</Panel>
+					<Panel id="k4-view-achievements" class="k4-view k4-view-pad">
+						<Panel class="k4-a-head">
+							<Button id="k4-af-all" class="k4-chip">
+								<Label class="k4-chip-label stratum-bold-tf" text="{s:label}" />
+							</Button>
+							<Button id="k4-af-progress" class="k4-chip">
+								<Label class="k4-chip-label stratum-bold-tf" text="{s:label}" />
+							</Button>
+							<Button id="k4-af-unlocked" class="k4-chip">
+								<Label class="k4-chip-label stratum-bold-tf" text="{s:label}" />
+							</Button>
+							<Button id="k4-af-shown" class="k4-chip">
+								<Panel class="k4-chip-icon ic-icon_star" />
+								<Label class="k4-chip-label stratum-bold-tf" text="{s:label}" />
+							</Button>
+							<Label class="k4-a-count stratum-bold-tf" text="{s:count}" />
+						</Panel>
+						<Panel class="k4-grid">
+							<Panel class="k4-grid-row k4-first">
+								<Button id="k4-a0" class="k4-a k4-first k4-gone">
+									<Panel class="k4-a-medal">
+										<Panel id="k4-a0-ring" class="k4-ring k4-ring-card t-locked">
+											<Panel class="k4-disc">
+												<Panel id="k4-a0-icon" class="k4-medal-icon" />
+											</Panel>
+										</Panel>
+										<Panel class="k4-a-pin ic-icon_star" />
+									</Panel>
+									<Label class="k4-a-name stratum-bold-tf" text="{s:name}" />
+									<Label class="k4-a-goal stratum-medium-tf" text="{s:goal}" />
+									<Panel class="k4-bar k4-bar-card">
+										<Panel id="k4-a0-bar" class="k4-bar-fill w0" />
+									</Panel>
+								</Button>
+								<Button id="k4-a1" class="k4-a k4-gone">
+									<Panel class="k4-a-medal">
+										<Panel id="k4-a1-ring" class="k4-ring k4-ring-card t-locked">
+											<Panel class="k4-disc">
+												<Panel id="k4-a1-icon" class="k4-medal-icon" />
+											</Panel>
+										</Panel>
+										<Panel class="k4-a-pin ic-icon_star" />
+									</Panel>
+									<Label class="k4-a-name stratum-bold-tf" text="{s:name}" />
+									<Label class="k4-a-goal stratum-medium-tf" text="{s:goal}" />
+									<Panel class="k4-bar k4-bar-card">
+										<Panel id="k4-a1-bar" class="k4-bar-fill w0" />
+									</Panel>
+								</Button>
+								<Button id="k4-a2" class="k4-a k4-gone">
+									<Panel class="k4-a-medal">
+										<Panel id="k4-a2-ring" class="k4-ring k4-ring-card t-locked">
+											<Panel class="k4-disc">
+												<Panel id="k4-a2-icon" class="k4-medal-icon" />
+											</Panel>
+										</Panel>
+										<Panel class="k4-a-pin ic-icon_star" />
+									</Panel>
+									<Label class="k4-a-name stratum-bold-tf" text="{s:name}" />
+									<Label class="k4-a-goal stratum-medium-tf" text="{s:goal}" />
+									<Panel class="k4-bar k4-bar-card">
+										<Panel id="k4-a2-bar" class="k4-bar-fill w0" />
+									</Panel>
+								</Button>
+								<Button id="k4-a3" class="k4-a k4-gone">
+									<Panel class="k4-a-medal">
+										<Panel id="k4-a3-ring" class="k4-ring k4-ring-card t-locked">
+											<Panel class="k4-disc">
+												<Panel id="k4-a3-icon" class="k4-medal-icon" />
+											</Panel>
+										</Panel>
+										<Panel class="k4-a-pin ic-icon_star" />
+									</Panel>
+									<Label class="k4-a-name stratum-bold-tf" text="{s:name}" />
+									<Label class="k4-a-goal stratum-medium-tf" text="{s:goal}" />
+									<Panel class="k4-bar k4-bar-card">
+										<Panel id="k4-a3-bar" class="k4-bar-fill w0" />
+									</Panel>
+								</Button>
+								<Button id="k4-a4" class="k4-a k4-gone">
+									<Panel class="k4-a-medal">
+										<Panel id="k4-a4-ring" class="k4-ring k4-ring-card t-locked">
+											<Panel class="k4-disc">
+												<Panel id="k4-a4-icon" class="k4-medal-icon" />
+											</Panel>
+										</Panel>
+										<Panel class="k4-a-pin ic-icon_star" />
+									</Panel>
+									<Label class="k4-a-name stratum-bold-tf" text="{s:name}" />
+									<Label class="k4-a-goal stratum-medium-tf" text="{s:goal}" />
+									<Panel class="k4-bar k4-bar-card">
+										<Panel id="k4-a4-bar" class="k4-bar-fill w0" />
+									</Panel>
+								</Button>
+							</Panel>
+							<Panel class="k4-grid-row">
+								<Button id="k4-a5" class="k4-a k4-first k4-gone">
+									<Panel class="k4-a-medal">
+										<Panel id="k4-a5-ring" class="k4-ring k4-ring-card t-locked">
+											<Panel class="k4-disc">
+												<Panel id="k4-a5-icon" class="k4-medal-icon" />
+											</Panel>
+										</Panel>
+										<Panel class="k4-a-pin ic-icon_star" />
+									</Panel>
+									<Label class="k4-a-name stratum-bold-tf" text="{s:name}" />
+									<Label class="k4-a-goal stratum-medium-tf" text="{s:goal}" />
+									<Panel class="k4-bar k4-bar-card">
+										<Panel id="k4-a5-bar" class="k4-bar-fill w0" />
+									</Panel>
+								</Button>
+								<Button id="k4-a6" class="k4-a k4-gone">
+									<Panel class="k4-a-medal">
+										<Panel id="k4-a6-ring" class="k4-ring k4-ring-card t-locked">
+											<Panel class="k4-disc">
+												<Panel id="k4-a6-icon" class="k4-medal-icon" />
+											</Panel>
+										</Panel>
+										<Panel class="k4-a-pin ic-icon_star" />
+									</Panel>
+									<Label class="k4-a-name stratum-bold-tf" text="{s:name}" />
+									<Label class="k4-a-goal stratum-medium-tf" text="{s:goal}" />
+									<Panel class="k4-bar k4-bar-card">
+										<Panel id="k4-a6-bar" class="k4-bar-fill w0" />
+									</Panel>
+								</Button>
+								<Button id="k4-a7" class="k4-a k4-gone">
+									<Panel class="k4-a-medal">
+										<Panel id="k4-a7-ring" class="k4-ring k4-ring-card t-locked">
+											<Panel class="k4-disc">
+												<Panel id="k4-a7-icon" class="k4-medal-icon" />
+											</Panel>
+										</Panel>
+										<Panel class="k4-a-pin ic-icon_star" />
+									</Panel>
+									<Label class="k4-a-name stratum-bold-tf" text="{s:name}" />
+									<Label class="k4-a-goal stratum-medium-tf" text="{s:goal}" />
+									<Panel class="k4-bar k4-bar-card">
+										<Panel id="k4-a7-bar" class="k4-bar-fill w0" />
+									</Panel>
+								</Button>
+								<Button id="k4-a8" class="k4-a k4-gone">
+									<Panel class="k4-a-medal">
+										<Panel id="k4-a8-ring" class="k4-ring k4-ring-card t-locked">
+											<Panel class="k4-disc">
+												<Panel id="k4-a8-icon" class="k4-medal-icon" />
+											</Panel>
+										</Panel>
+										<Panel class="k4-a-pin ic-icon_star" />
+									</Panel>
+									<Label class="k4-a-name stratum-bold-tf" text="{s:name}" />
+									<Label class="k4-a-goal stratum-medium-tf" text="{s:goal}" />
+									<Panel class="k4-bar k4-bar-card">
+										<Panel id="k4-a8-bar" class="k4-bar-fill w0" />
+									</Panel>
+								</Button>
+								<Button id="k4-a9" class="k4-a k4-gone">
+									<Panel class="k4-a-medal">
+										<Panel id="k4-a9-ring" class="k4-ring k4-ring-card t-locked">
+											<Panel class="k4-disc">
+												<Panel id="k4-a9-icon" class="k4-medal-icon" />
+											</Panel>
+										</Panel>
+										<Panel class="k4-a-pin ic-icon_star" />
+									</Panel>
+									<Label class="k4-a-name stratum-bold-tf" text="{s:name}" />
+									<Label class="k4-a-goal stratum-medium-tf" text="{s:goal}" />
+									<Panel class="k4-bar k4-bar-card">
+										<Panel id="k4-a9-bar" class="k4-bar-fill w0" />
+									</Panel>
+								</Button>
+							</Panel>
+							<Panel class="k4-grid-row">
+								<Button id="k4-a10" class="k4-a k4-first k4-gone">
+									<Panel class="k4-a-medal">
+										<Panel id="k4-a10-ring" class="k4-ring k4-ring-card t-locked">
+											<Panel class="k4-disc">
+												<Panel id="k4-a10-icon" class="k4-medal-icon" />
+											</Panel>
+										</Panel>
+										<Panel class="k4-a-pin ic-icon_star" />
+									</Panel>
+									<Label class="k4-a-name stratum-bold-tf" text="{s:name}" />
+									<Label class="k4-a-goal stratum-medium-tf" text="{s:goal}" />
+									<Panel class="k4-bar k4-bar-card">
+										<Panel id="k4-a10-bar" class="k4-bar-fill w0" />
+									</Panel>
+								</Button>
+								<Button id="k4-a11" class="k4-a k4-gone">
+									<Panel class="k4-a-medal">
+										<Panel id="k4-a11-ring" class="k4-ring k4-ring-card t-locked">
+											<Panel class="k4-disc">
+												<Panel id="k4-a11-icon" class="k4-medal-icon" />
+											</Panel>
+										</Panel>
+										<Panel class="k4-a-pin ic-icon_star" />
+									</Panel>
+									<Label class="k4-a-name stratum-bold-tf" text="{s:name}" />
+									<Label class="k4-a-goal stratum-medium-tf" text="{s:goal}" />
+									<Panel class="k4-bar k4-bar-card">
+										<Panel id="k4-a11-bar" class="k4-bar-fill w0" />
+									</Panel>
+								</Button>
+								<Button id="k4-a12" class="k4-a k4-gone">
+									<Panel class="k4-a-medal">
+										<Panel id="k4-a12-ring" class="k4-ring k4-ring-card t-locked">
+											<Panel class="k4-disc">
+												<Panel id="k4-a12-icon" class="k4-medal-icon" />
+											</Panel>
+										</Panel>
+										<Panel class="k4-a-pin ic-icon_star" />
+									</Panel>
+									<Label class="k4-a-name stratum-bold-tf" text="{s:name}" />
+									<Label class="k4-a-goal stratum-medium-tf" text="{s:goal}" />
+									<Panel class="k4-bar k4-bar-card">
+										<Panel id="k4-a12-bar" class="k4-bar-fill w0" />
+									</Panel>
+								</Button>
+								<Button id="k4-a13" class="k4-a k4-gone">
+									<Panel class="k4-a-medal">
+										<Panel id="k4-a13-ring" class="k4-ring k4-ring-card t-locked">
+											<Panel class="k4-disc">
+												<Panel id="k4-a13-icon" class="k4-medal-icon" />
+											</Panel>
+										</Panel>
+										<Panel class="k4-a-pin ic-icon_star" />
+									</Panel>
+									<Label class="k4-a-name stratum-bold-tf" text="{s:name}" />
+									<Label class="k4-a-goal stratum-medium-tf" text="{s:goal}" />
+									<Panel class="k4-bar k4-bar-card">
+										<Panel id="k4-a13-bar" class="k4-bar-fill w0" />
+									</Panel>
+								</Button>
+								<Button id="k4-a14" class="k4-a k4-gone">
+									<Panel class="k4-a-medal">
+										<Panel id="k4-a14-ring" class="k4-ring k4-ring-card t-locked">
+											<Panel class="k4-disc">
+												<Panel id="k4-a14-icon" class="k4-medal-icon" />
+											</Panel>
+										</Panel>
+										<Panel class="k4-a-pin ic-icon_star" />
+									</Panel>
+									<Label class="k4-a-name stratum-bold-tf" text="{s:name}" />
+									<Label class="k4-a-goal stratum-medium-tf" text="{s:goal}" />
+									<Panel class="k4-bar k4-bar-card">
+										<Panel id="k4-a14-bar" class="k4-bar-fill w0" />
+									</Panel>
+								</Button>
+							</Panel>
+						</Panel>
+						<Panel class="k4-pager k4-pager-bottom">
+							<Button id="k4-ach-prev" class="k4-arrow k4-arrow-left" />
+							<Label class="k4-page stratum-medium-tf" text="{s:page}" />
+							<Button id="k4-ach-next" class="k4-arrow k4-arrow-right" />
+						</Panel>
+					</Panel>
+					<Panel id="k4-view-leaderboard" class="k4-view">
+						<Panel class="k4-lb-stage">
+							<Panel class="k4-lb-head">
+								<Button id="k4-lb-newer" class="k4-arrow k4-arrow-left" />
+								<Panel class="k4-lb-season">
+									<Label class="k4-lb-season-name stratum-bold-tf" text="{s:season}" />
+									<Label class="k4-lb-status stratum-bold-tf" text="{s:status}" />
+								</Panel>
+								<Button id="k4-lb-older" class="k4-arrow k4-arrow-right" />
+								<Panel class="k4-pager">
+									<Button id="k4-lb-prev" class="k4-arrow k4-arrow-left" />
+									<Label class="k4-page stratum-medium-tf" text="{s:page}" />
+									<Button id="k4-lb-next" class="k4-arrow k4-arrow-right" />
+								</Panel>
+							</Panel>
+							<Panel class="k4-lb-podium">
+								<Button id="k4-lb-p0" class="k4-lb-p k4-place-2 k4-first k4-gone">
+									<Panel id="k4-lb-p0-icon" class="k4-lb-p-icon sg-0" />
+									<Label class="k4-lb-p-name stratum-bold-tf" text="{s:name}" />
+									<Label class="k4-lb-p-points stratum-medium-tf" text="{s:points}" />
+									<Panel class="k4-step">
+										<Label class="k4-step-pos stratum-bold-tf" text="{s:pos}" />
+									</Panel>
+								</Button>
+								<Button id="k4-lb-p1" class="k4-lb-p k4-place-1 k4-gone">
+									<Panel id="k4-lb-p1-icon" class="k4-lb-p-icon sg-0" />
+									<Label class="k4-lb-p-name stratum-bold-tf" text="{s:name}" />
+									<Label class="k4-lb-p-points stratum-medium-tf" text="{s:points}" />
+									<Panel class="k4-step">
+										<Label class="k4-step-pos stratum-bold-tf" text="{s:pos}" />
+									</Panel>
+								</Button>
+								<Button id="k4-lb-p2" class="k4-lb-p k4-place-3 k4-gone">
+									<Panel id="k4-lb-p2-icon" class="k4-lb-p-icon sg-0" />
+									<Label class="k4-lb-p-name stratum-bold-tf" text="{s:name}" />
+									<Label class="k4-lb-p-points stratum-medium-tf" text="{s:points}" />
+									<Panel class="k4-step">
+										<Label class="k4-step-pos stratum-bold-tf" text="{s:pos}" />
+									</Panel>
+								</Button>
+							</Panel>
+						</Panel>
+						<Panel class="k4-lb-list">
+							<Button id="k4-lb-0" class="k4-lb-row k4-gone">
+								<Label class="k4-lb-pos stratum-bold-tf" text="{s:pos}" />
+								<Panel id="k4-lb-0-icon" class="k4-lb-icon sg-0" />
+								<Label class="k4-lb-name stratum-medium-tf" text="{s:name}" />
+								<Label class="k4-lb-points stratum-bold-tf" text="{s:points}" />
+							</Button>
+							<Button id="k4-lb-1" class="k4-lb-row k4-lb-alt k4-gone">
+								<Label class="k4-lb-pos stratum-bold-tf" text="{s:pos}" />
+								<Panel id="k4-lb-1-icon" class="k4-lb-icon sg-0" />
+								<Label class="k4-lb-name stratum-medium-tf" text="{s:name}" />
+								<Label class="k4-lb-points stratum-bold-tf" text="{s:points}" />
+							</Button>
+							<Button id="k4-lb-2" class="k4-lb-row k4-gone">
+								<Label class="k4-lb-pos stratum-bold-tf" text="{s:pos}" />
+								<Panel id="k4-lb-2-icon" class="k4-lb-icon sg-0" />
+								<Label class="k4-lb-name stratum-medium-tf" text="{s:name}" />
+								<Label class="k4-lb-points stratum-bold-tf" text="{s:points}" />
+							</Button>
+							<Button id="k4-lb-3" class="k4-lb-row k4-lb-alt k4-gone">
+								<Label class="k4-lb-pos stratum-bold-tf" text="{s:pos}" />
+								<Panel id="k4-lb-3-icon" class="k4-lb-icon sg-0" />
+								<Label class="k4-lb-name stratum-medium-tf" text="{s:name}" />
+								<Label class="k4-lb-points stratum-bold-tf" text="{s:points}" />
+							</Button>
+							<Button id="k4-lb-4" class="k4-lb-row k4-gone">
+								<Label class="k4-lb-pos stratum-bold-tf" text="{s:pos}" />
+								<Panel id="k4-lb-4-icon" class="k4-lb-icon sg-0" />
+								<Label class="k4-lb-name stratum-medium-tf" text="{s:name}" />
+								<Label class="k4-lb-points stratum-bold-tf" text="{s:points}" />
+							</Button>
+							<Button id="k4-lb-5" class="k4-lb-row k4-lb-alt k4-gone">
+								<Label class="k4-lb-pos stratum-bold-tf" text="{s:pos}" />
+								<Panel id="k4-lb-5-icon" class="k4-lb-icon sg-0" />
+								<Label class="k4-lb-name stratum-medium-tf" text="{s:name}" />
+								<Label class="k4-lb-points stratum-bold-tf" text="{s:points}" />
+							</Button>
+							<Button id="k4-lb-6" class="k4-lb-row k4-gone">
+								<Label class="k4-lb-pos stratum-bold-tf" text="{s:pos}" />
+								<Panel id="k4-lb-6-icon" class="k4-lb-icon sg-0" />
+								<Label class="k4-lb-name stratum-medium-tf" text="{s:name}" />
+								<Label class="k4-lb-points stratum-bold-tf" text="{s:points}" />
+							</Button>
+							<Panel class="k4-vgrow" />
+							<Panel id="k4-lb-me" class="k4-lb-row k4-lb-me k4-gone">
+								<Label class="k4-lb-pos stratum-bold-tf" text="{s:pos}" />
+								<Panel id="k4-lb-me-icon" class="k4-lb-icon sg-0" />
+								<Label class="k4-lb-name stratum-bold-tf" text="{s:name}" />
+								<Label class="k4-lb-points stratum-bold-tf" text="{s:points}" />
+							</Panel>
+						</Panel>
+					</Panel>
+					<Panel id="k4-view-ranks" class="k4-view k4-view-pad">
+						<Panel class="k4-rk-head">
+							<Panel class="k4-pager">
+								<Button id="k4-rk-prev" class="k4-arrow k4-arrow-left k4-gone" />
+								<Label class="k4-page stratum-medium-tf" text="{s:page}" />
+								<Button id="k4-rk-next" class="k4-arrow k4-arrow-right k4-gone" />
+							</Panel>
+						</Panel>
+						<Panel class="k4-grid">
+							<Panel class="k4-grid-row k4-first">
+								<Panel id="k4-rk0" class="k4-rk k4-first k4-gone">
+									<Panel class="k4-rk-body">
+										<Panel id="k4-rk0-icon" class="k4-rk-icon sg-0" />
+										<Label id="k4-rk0-name" class="k4-rk-name stratum-bold-tf" text="{s:name}" />
+										<Label class="k4-rk-points stratum-medium-tf" text="{s:points}" />
+									</Panel>
+									<Panel id="k4-rk0-gift" class="k4-rk-gift ic-gift k4-gone" />
+									<Panel id="k4-rk0-you" class="k4-rk-you k4-gone">
+										<Panel class="k4-rk-you-icon ic-profile" />
+									</Panel>
+								</Panel>
+								<Panel id="k4-rk1" class="k4-rk k4-gone">
+									<Panel class="k4-rk-body">
+										<Panel id="k4-rk1-icon" class="k4-rk-icon sg-0" />
+										<Label id="k4-rk1-name" class="k4-rk-name stratum-bold-tf" text="{s:name}" />
+										<Label class="k4-rk-points stratum-medium-tf" text="{s:points}" />
+									</Panel>
+									<Panel id="k4-rk1-gift" class="k4-rk-gift ic-gift k4-gone" />
+									<Panel id="k4-rk1-you" class="k4-rk-you k4-gone">
+										<Panel class="k4-rk-you-icon ic-profile" />
+									</Panel>
+								</Panel>
+								<Panel id="k4-rk2" class="k4-rk k4-gone">
+									<Panel class="k4-rk-body">
+										<Panel id="k4-rk2-icon" class="k4-rk-icon sg-0" />
+										<Label id="k4-rk2-name" class="k4-rk-name stratum-bold-tf" text="{s:name}" />
+										<Label class="k4-rk-points stratum-medium-tf" text="{s:points}" />
+									</Panel>
+									<Panel id="k4-rk2-gift" class="k4-rk-gift ic-gift k4-gone" />
+									<Panel id="k4-rk2-you" class="k4-rk-you k4-gone">
+										<Panel class="k4-rk-you-icon ic-profile" />
+									</Panel>
+								</Panel>
+								<Panel id="k4-rk3" class="k4-rk k4-gone">
+									<Panel class="k4-rk-body">
+										<Panel id="k4-rk3-icon" class="k4-rk-icon sg-0" />
+										<Label id="k4-rk3-name" class="k4-rk-name stratum-bold-tf" text="{s:name}" />
+										<Label class="k4-rk-points stratum-medium-tf" text="{s:points}" />
+									</Panel>
+									<Panel id="k4-rk3-gift" class="k4-rk-gift ic-gift k4-gone" />
+									<Panel id="k4-rk3-you" class="k4-rk-you k4-gone">
+										<Panel class="k4-rk-you-icon ic-profile" />
+									</Panel>
+								</Panel>
+								<Panel id="k4-rk4" class="k4-rk k4-gone">
+									<Panel class="k4-rk-body">
+										<Panel id="k4-rk4-icon" class="k4-rk-icon sg-0" />
+										<Label id="k4-rk4-name" class="k4-rk-name stratum-bold-tf" text="{s:name}" />
+										<Label class="k4-rk-points stratum-medium-tf" text="{s:points}" />
+									</Panel>
+									<Panel id="k4-rk4-gift" class="k4-rk-gift ic-gift k4-gone" />
+									<Panel id="k4-rk4-you" class="k4-rk-you k4-gone">
+										<Panel class="k4-rk-you-icon ic-profile" />
+									</Panel>
+								</Panel>
+							</Panel>
+							<Panel class="k4-grid-row">
+								<Panel id="k4-rk5" class="k4-rk k4-first k4-gone">
+									<Panel class="k4-rk-body">
+										<Panel id="k4-rk5-icon" class="k4-rk-icon sg-0" />
+										<Label id="k4-rk5-name" class="k4-rk-name stratum-bold-tf" text="{s:name}" />
+										<Label class="k4-rk-points stratum-medium-tf" text="{s:points}" />
+									</Panel>
+									<Panel id="k4-rk5-gift" class="k4-rk-gift ic-gift k4-gone" />
+									<Panel id="k4-rk5-you" class="k4-rk-you k4-gone">
+										<Panel class="k4-rk-you-icon ic-profile" />
+									</Panel>
+								</Panel>
+								<Panel id="k4-rk6" class="k4-rk k4-gone">
+									<Panel class="k4-rk-body">
+										<Panel id="k4-rk6-icon" class="k4-rk-icon sg-0" />
+										<Label id="k4-rk6-name" class="k4-rk-name stratum-bold-tf" text="{s:name}" />
+										<Label class="k4-rk-points stratum-medium-tf" text="{s:points}" />
+									</Panel>
+									<Panel id="k4-rk6-gift" class="k4-rk-gift ic-gift k4-gone" />
+									<Panel id="k4-rk6-you" class="k4-rk-you k4-gone">
+										<Panel class="k4-rk-you-icon ic-profile" />
+									</Panel>
+								</Panel>
+								<Panel id="k4-rk7" class="k4-rk k4-gone">
+									<Panel class="k4-rk-body">
+										<Panel id="k4-rk7-icon" class="k4-rk-icon sg-0" />
+										<Label id="k4-rk7-name" class="k4-rk-name stratum-bold-tf" text="{s:name}" />
+										<Label class="k4-rk-points stratum-medium-tf" text="{s:points}" />
+									</Panel>
+									<Panel id="k4-rk7-gift" class="k4-rk-gift ic-gift k4-gone" />
+									<Panel id="k4-rk7-you" class="k4-rk-you k4-gone">
+										<Panel class="k4-rk-you-icon ic-profile" />
+									</Panel>
+								</Panel>
+								<Panel id="k4-rk8" class="k4-rk k4-gone">
+									<Panel class="k4-rk-body">
+										<Panel id="k4-rk8-icon" class="k4-rk-icon sg-0" />
+										<Label id="k4-rk8-name" class="k4-rk-name stratum-bold-tf" text="{s:name}" />
+										<Label class="k4-rk-points stratum-medium-tf" text="{s:points}" />
+									</Panel>
+									<Panel id="k4-rk8-gift" class="k4-rk-gift ic-gift k4-gone" />
+									<Panel id="k4-rk8-you" class="k4-rk-you k4-gone">
+										<Panel class="k4-rk-you-icon ic-profile" />
+									</Panel>
+								</Panel>
+								<Panel id="k4-rk9" class="k4-rk k4-gone">
+									<Panel class="k4-rk-body">
+										<Panel id="k4-rk9-icon" class="k4-rk-icon sg-0" />
+										<Label id="k4-rk9-name" class="k4-rk-name stratum-bold-tf" text="{s:name}" />
+										<Label class="k4-rk-points stratum-medium-tf" text="{s:points}" />
+									</Panel>
+									<Panel id="k4-rk9-gift" class="k4-rk-gift ic-gift k4-gone" />
+									<Panel id="k4-rk9-you" class="k4-rk-you k4-gone">
+										<Panel class="k4-rk-you-icon ic-profile" />
+									</Panel>
+								</Panel>
+							</Panel>
+							<Panel class="k4-grid-row">
+								<Panel id="k4-rk10" class="k4-rk k4-first k4-gone">
+									<Panel class="k4-rk-body">
+										<Panel id="k4-rk10-icon" class="k4-rk-icon sg-0" />
+										<Label id="k4-rk10-name" class="k4-rk-name stratum-bold-tf" text="{s:name}" />
+										<Label class="k4-rk-points stratum-medium-tf" text="{s:points}" />
+									</Panel>
+									<Panel id="k4-rk10-gift" class="k4-rk-gift ic-gift k4-gone" />
+									<Panel id="k4-rk10-you" class="k4-rk-you k4-gone">
+										<Panel class="k4-rk-you-icon ic-profile" />
+									</Panel>
+								</Panel>
+								<Panel id="k4-rk11" class="k4-rk k4-gone">
+									<Panel class="k4-rk-body">
+										<Panel id="k4-rk11-icon" class="k4-rk-icon sg-0" />
+										<Label id="k4-rk11-name" class="k4-rk-name stratum-bold-tf" text="{s:name}" />
+										<Label class="k4-rk-points stratum-medium-tf" text="{s:points}" />
+									</Panel>
+									<Panel id="k4-rk11-gift" class="k4-rk-gift ic-gift k4-gone" />
+									<Panel id="k4-rk11-you" class="k4-rk-you k4-gone">
+										<Panel class="k4-rk-you-icon ic-profile" />
+									</Panel>
+								</Panel>
+								<Panel id="k4-rk12" class="k4-rk k4-gone">
+									<Panel class="k4-rk-body">
+										<Panel id="k4-rk12-icon" class="k4-rk-icon sg-0" />
+										<Label id="k4-rk12-name" class="k4-rk-name stratum-bold-tf" text="{s:name}" />
+										<Label class="k4-rk-points stratum-medium-tf" text="{s:points}" />
+									</Panel>
+									<Panel id="k4-rk12-gift" class="k4-rk-gift ic-gift k4-gone" />
+									<Panel id="k4-rk12-you" class="k4-rk-you k4-gone">
+										<Panel class="k4-rk-you-icon ic-profile" />
+									</Panel>
+								</Panel>
+								<Panel id="k4-rk13" class="k4-rk k4-gone">
+									<Panel class="k4-rk-body">
+										<Panel id="k4-rk13-icon" class="k4-rk-icon sg-0" />
+										<Label id="k4-rk13-name" class="k4-rk-name stratum-bold-tf" text="{s:name}" />
+										<Label class="k4-rk-points stratum-medium-tf" text="{s:points}" />
+									</Panel>
+									<Panel id="k4-rk13-gift" class="k4-rk-gift ic-gift k4-gone" />
+									<Panel id="k4-rk13-you" class="k4-rk-you k4-gone">
+										<Panel class="k4-rk-you-icon ic-profile" />
+									</Panel>
+								</Panel>
+								<Panel id="k4-rk14" class="k4-rk k4-gone">
+									<Panel class="k4-rk-body">
+										<Panel id="k4-rk14-icon" class="k4-rk-icon sg-0" />
+										<Label id="k4-rk14-name" class="k4-rk-name stratum-bold-tf" text="{s:name}" />
+										<Label class="k4-rk-points stratum-medium-tf" text="{s:points}" />
+									</Panel>
+									<Panel id="k4-rk14-gift" class="k4-rk-gift ic-gift k4-gone" />
+									<Panel id="k4-rk14-you" class="k4-rk-you k4-gone">
+										<Panel class="k4-rk-you-icon ic-profile" />
+									</Panel>
+								</Panel>
+							</Panel>
+							<Panel class="k4-grid-row">
+								<Panel id="k4-rk15" class="k4-rk k4-first k4-gone">
+									<Panel class="k4-rk-body">
+										<Panel id="k4-rk15-icon" class="k4-rk-icon sg-0" />
+										<Label id="k4-rk15-name" class="k4-rk-name stratum-bold-tf" text="{s:name}" />
+										<Label class="k4-rk-points stratum-medium-tf" text="{s:points}" />
+									</Panel>
+									<Panel id="k4-rk15-gift" class="k4-rk-gift ic-gift k4-gone" />
+									<Panel id="k4-rk15-you" class="k4-rk-you k4-gone">
+										<Panel class="k4-rk-you-icon ic-profile" />
+									</Panel>
+								</Panel>
+								<Panel id="k4-rk16" class="k4-rk k4-gone">
+									<Panel class="k4-rk-body">
+										<Panel id="k4-rk16-icon" class="k4-rk-icon sg-0" />
+										<Label id="k4-rk16-name" class="k4-rk-name stratum-bold-tf" text="{s:name}" />
+										<Label class="k4-rk-points stratum-medium-tf" text="{s:points}" />
+									</Panel>
+									<Panel id="k4-rk16-gift" class="k4-rk-gift ic-gift k4-gone" />
+									<Panel id="k4-rk16-you" class="k4-rk-you k4-gone">
+										<Panel class="k4-rk-you-icon ic-profile" />
+									</Panel>
+								</Panel>
+								<Panel id="k4-rk17" class="k4-rk k4-gone">
+									<Panel class="k4-rk-body">
+										<Panel id="k4-rk17-icon" class="k4-rk-icon sg-0" />
+										<Label id="k4-rk17-name" class="k4-rk-name stratum-bold-tf" text="{s:name}" />
+										<Label class="k4-rk-points stratum-medium-tf" text="{s:points}" />
+									</Panel>
+									<Panel id="k4-rk17-gift" class="k4-rk-gift ic-gift k4-gone" />
+									<Panel id="k4-rk17-you" class="k4-rk-you k4-gone">
+										<Panel class="k4-rk-you-icon ic-profile" />
+									</Panel>
+								</Panel>
+								<Panel id="k4-rk18" class="k4-rk k4-gone">
+									<Panel class="k4-rk-body">
+										<Panel id="k4-rk18-icon" class="k4-rk-icon sg-0" />
+										<Label id="k4-rk18-name" class="k4-rk-name stratum-bold-tf" text="{s:name}" />
+										<Label class="k4-rk-points stratum-medium-tf" text="{s:points}" />
+									</Panel>
+									<Panel id="k4-rk18-gift" class="k4-rk-gift ic-gift k4-gone" />
+									<Panel id="k4-rk18-you" class="k4-rk-you k4-gone">
+										<Panel class="k4-rk-you-icon ic-profile" />
+									</Panel>
+								</Panel>
+								<Panel id="k4-rk19" class="k4-rk k4-gone">
+									<Panel class="k4-rk-body">
+										<Panel id="k4-rk19-icon" class="k4-rk-icon sg-0" />
+										<Label id="k4-rk19-name" class="k4-rk-name stratum-bold-tf" text="{s:name}" />
+										<Label class="k4-rk-points stratum-medium-tf" text="{s:points}" />
+									</Panel>
+									<Panel id="k4-rk19-gift" class="k4-rk-gift ic-gift k4-gone" />
+									<Panel id="k4-rk19-you" class="k4-rk-you k4-gone">
+										<Panel class="k4-rk-you-icon ic-profile" />
+									</Panel>
+								</Panel>
+							</Panel>
+						</Panel>
+					</Panel>
+					<Panel id="k4-view-stats" class="k4-view k4-view-pad">
+						<Panel class="k4-header-space" />
+						<Panel class="k4-st-tiles">
+							<Panel class="k4-st-row k4-first">
+								<Panel id="k4-st0" class="k4-tile k4-st k4-first k4-gone">
+									<Panel id="k4-st0-icon" class="k4-st-icon" />
+									<Panel class="k4-st-text">
+										<Label class="k4-tile-value k4-st-value stratum-bold-tf" text="{s:value}" />
+										<Label class="k4-cap stratum-bold-tf" text="{s:label}" />
+									</Panel>
+								</Panel>
+								<Panel id="k4-st1" class="k4-tile k4-st k4-gone">
+									<Panel id="k4-st1-icon" class="k4-st-icon" />
+									<Panel class="k4-st-text">
+										<Label class="k4-tile-value k4-st-value stratum-bold-tf" text="{s:value}" />
+										<Label class="k4-cap stratum-bold-tf" text="{s:label}" />
+									</Panel>
+								</Panel>
+								<Panel id="k4-st2" class="k4-tile k4-st k4-gone">
+									<Panel id="k4-st2-icon" class="k4-st-icon" />
+									<Panel class="k4-st-text">
+										<Label class="k4-tile-value k4-st-value stratum-bold-tf" text="{s:value}" />
+										<Label class="k4-cap stratum-bold-tf" text="{s:label}" />
+									</Panel>
+								</Panel>
+								<Panel id="k4-st3" class="k4-tile k4-st k4-gone">
+									<Panel id="k4-st3-icon" class="k4-st-icon" />
+									<Panel class="k4-st-text">
+										<Label class="k4-tile-value k4-st-value stratum-bold-tf" text="{s:value}" />
+										<Label class="k4-cap stratum-bold-tf" text="{s:label}" />
+									</Panel>
+								</Panel>
+							</Panel>
+							<Panel class="k4-st-row">
+								<Panel id="k4-st4" class="k4-tile k4-st k4-first k4-gone">
+									<Panel id="k4-st4-icon" class="k4-st-icon" />
+									<Panel class="k4-st-text">
+										<Label class="k4-tile-value k4-st-value stratum-bold-tf" text="{s:value}" />
+										<Label class="k4-cap stratum-bold-tf" text="{s:label}" />
+									</Panel>
+								</Panel>
+								<Panel id="k4-st5" class="k4-tile k4-st k4-gone">
+									<Panel id="k4-st5-icon" class="k4-st-icon" />
+									<Panel class="k4-st-text">
+										<Label class="k4-tile-value k4-st-value stratum-bold-tf" text="{s:value}" />
+										<Label class="k4-cap stratum-bold-tf" text="{s:label}" />
+									</Panel>
+								</Panel>
+								<Panel id="k4-st6" class="k4-tile k4-st k4-gone">
+									<Panel id="k4-st6-icon" class="k4-st-icon" />
+									<Panel class="k4-st-text">
+										<Label class="k4-tile-value k4-st-value stratum-bold-tf" text="{s:value}" />
+										<Label class="k4-cap stratum-bold-tf" text="{s:label}" />
+									</Panel>
+								</Panel>
+								<Panel id="k4-st7" class="k4-tile k4-st k4-gone">
+									<Panel id="k4-st7-icon" class="k4-st-icon" />
+									<Panel class="k4-st-text">
+										<Label class="k4-tile-value k4-st-value stratum-bold-tf" text="{s:value}" />
+										<Label class="k4-cap stratum-bold-tf" text="{s:label}" />
+									</Panel>
+								</Panel>
+							</Panel>
+						</Panel>
+						<Panel class="k4-st-bottom">
+							<Panel class="k4-tile k4-st-weapons">
+								<Panel class="k4-sw-list">
+									<Panel id="k4-sw0" class="k4-sw k4-first k4-gone">
+										<Panel id="k4-sw0-icon" class="k4-sw-icon" />
+										<Panel class="k4-bar k4-bar-weapon">
+											<Panel id="k4-sw0-bar" class="k4-bar-fill w0" />
+										</Panel>
+										<Label class="k4-sw-kills stratum-bold-tf" text="{s:kills}" />
+									</Panel>
+									<Panel id="k4-sw1" class="k4-sw k4-gone">
+										<Panel id="k4-sw1-icon" class="k4-sw-icon" />
+										<Panel class="k4-bar k4-bar-weapon">
+											<Panel id="k4-sw1-bar" class="k4-bar-fill w0" />
+										</Panel>
+										<Label class="k4-sw-kills stratum-bold-tf" text="{s:kills}" />
+									</Panel>
+									<Panel id="k4-sw2" class="k4-sw k4-gone">
+										<Panel id="k4-sw2-icon" class="k4-sw-icon" />
+										<Panel class="k4-bar k4-bar-weapon">
+											<Panel id="k4-sw2-bar" class="k4-bar-fill w0" />
+										</Panel>
+										<Label class="k4-sw-kills stratum-bold-tf" text="{s:kills}" />
+									</Panel>
+								</Panel>
+							</Panel>
+							<Panel id="k4-pt" class="k4-tile k4-pt k4-gone">
+								<Panel class="k4-pt-list">
+									<Panel class="k4-pt-head">
+										<Panel class="k4-pt-head-icon ic-clock" />
+										<Label class="k4-tile-value k4-pt-total stratum-bold-tf" text="{s:total}" />
+									</Panel>
+									<Panel id="k4-pt-t" class="k4-pt-team k4-pt-t">
+										<Panel class="k4-pt-icon tp-t" />
+										<Panel class="k4-pt-text">
+											<Panel class="k4-pt-line">
+												<Label class="k4-pt-name stratum-bold-tf" text="{s:name}" />
+												<Panel class="k4-grow" />
+												<Label class="k4-pt-time stratum-bold-tf" text="{s:time}" />
+											</Panel>
+											<Panel class="k4-bar k4-bar-team">
+												<Panel id="k4-pt-t-bar" class="k4-bar-fill w0" />
+											</Panel>
+										</Panel>
+									</Panel>
+									<Panel id="k4-pt-ct" class="k4-pt-team k4-pt-ct">
+										<Panel class="k4-pt-icon tp-ct" />
+										<Panel class="k4-pt-text">
+											<Panel class="k4-pt-line">
+												<Label class="k4-pt-name stratum-bold-tf" text="{s:name}" />
+												<Panel class="k4-grow" />
+												<Label class="k4-pt-time stratum-bold-tf" text="{s:time}" />
+											</Panel>
+											<Panel class="k4-bar k4-bar-team">
+												<Panel id="k4-pt-ct-bar" class="k4-bar-fill w0" />
+											</Panel>
+										</Panel>
+									</Panel>
+									<Panel id="k4-pt-spec" class="k4-pt-team k4-pt-spec">
+										<Panel class="k4-pt-icon ic-watch" />
+										<Panel class="k4-pt-text">
+											<Panel class="k4-pt-line">
+												<Label class="k4-pt-name stratum-bold-tf" text="{s:name}" />
+												<Panel class="k4-grow" />
+												<Label class="k4-pt-time stratum-bold-tf" text="{s:time}" />
+											</Panel>
+											<Panel class="k4-bar k4-bar-team">
+												<Panel id="k4-pt-spec-bar" class="k4-bar-fill w0" />
+											</Panel>
+										</Panel>
+									</Panel>
+								</Panel>
+							</Panel>
+						</Panel>
+					</Panel>
+					<Panel class="k4-topbar">
+						<Panel id="k4-event" class="k4-event k4-gone">
+							<Panel class="k4-event-icon ic-hot_trend" />
+							<Label class="k4-event-text stratum-bold-tf" text="{s:event}" />
+						</Panel>
+						<Button id="k4-close" class="k4-close">
+							<Panel class="k4-close-icon ic-cancel" />
+						</Button>
+					</Panel>
 				</Panel>
 			</Panel>
 		</Panel>
-		<Panel id="k4-panel" class="k4-panel k4-closed">
-			<Panel class="k4-bg" />
-			<Panel class="k4-content">
-				<Panel class="k4-header">
-					<Button id="k4-subtitle" class="k4-subtitle-btn">
-						<Label class="k4-subtitle stratum-medium-tf" text="{s:subtitle}" />
-					</Button>
-					<Button id="k4-close" class="CloseButton k4-close" />
+		<Panel id="k4-promo" class="k4-promo k4-gone" hittest="false">
+			<Label class="k4-promo-title stratum-bold-tf" hittest="false" text="{s:title}" />
+			<Panel id="k4-promo-icon" class="k4-promo-icon sg-0" hittest="false" />
+			<Label class="k4-promo-rank stratum-bold-tf" hittest="false" text="{s:rank}" />
+		</Panel>
+		<Panel id="k4-toasts" class="k4-toasts" hittest="false">
+			<Panel id="k4-t0" class="k4-toast k4-toast-0 k4-tc-green k4-len-normal k4-gone" hittest="false">
+				<Panel class="k4-toast-strip" hittest="false" />
+				<Panel class="k4-toast-row" hittest="false">
+					<Panel class="k4-toast-pic" hittest="false">
+						<Panel id="k4-t0-ring" class="k4-ring k4-ring-toast t-locked k4-gone" hittest="false">
+							<Panel class="k4-disc" hittest="false" />
+						</Panel>
+						<Panel id="k4-t0-icon" class="k4-toast-icon" hittest="false" />
+					</Panel>
+					<Panel class="k4-toast-body" hittest="false">
+						<Label class="k4-toast-kind stratum-bold-tf" hittest="false" text="{s:kind}" />
+						<Label class="k4-toast-text stratum-medium-tf" hittest="false" text="{s:text}" />
+						<Panel id="k4-t0-prog" class="k4-bar k4-bar-toast k4-gone" hittest="false">
+							<Panel id="k4-t0-bar" class="k4-bar-fill w0" hittest="false" />
+						</Panel>
+					</Panel>
+					<Label class="k4-toast-value stratum-bold-tf" hittest="false" text="{s:value}" />
 				</Panel>
-				<Label id="k4-event" class="k4-event k4-gone stratum-medium-tf" text="{s:event}" />
-				<Panel class="k4-tabs">
-					<Button id="k4-tab-rank" class="k4-tab">
-						<Panel class="k4-tab-icon ic-xp_rank" />
-						<Label class="stratum-medium-tf" text="{s:label}" />
-					</Button>
-					<Button id="k4-tab-missions" class="k4-tab">
-						<Panel class="k4-tab-icon ic-quest" />
-						<Label class="stratum-medium-tf" text="{s:label}" />
-					</Button>
-					<Button id="k4-tab-top" class="k4-tab">
-						<Panel class="k4-tab-icon ic-leader" />
-						<Label class="stratum-medium-tf" text="{s:label}" />
-					</Button>
-					<Button id="k4-tab-ranks" class="k4-tab">
-						<Panel class="k4-tab-icon ic-trophy" />
-						<Label class="stratum-medium-tf" text="{s:label}" />
-					</Button>
-					<Button id="k4-tab-stats" class="k4-tab">
-						<Panel class="k4-tab-icon ic-stats" />
-						<Label class="stratum-medium-tf" text="{s:label}" />
-					</Button>
-					<Button id="k4-tab-achievements" class="k4-tab k4-gone">
-						<Panel class="k4-tab-icon ic-winner_ribbon" />
-						<Label class="stratum-medium-tf" text="{s:label}" />
-					</Button>
-				</Panel>
-				<Panel id="k4-view-rank" class="k4-view">
-					<Panel class="k4-hero">
-						<Panel class="k4-hero-emblem">
-							<Panel id="k4-rank-icon" class="k4-rank-icon sg-0" />
-							<Label id="k4-rank-badge" class="k4-badge k4-gone stratum-bold-tf" text="{s:tag}" />
-						</Panel>
-						<Panel class="k4-hero-text">
-							<Label class="k4-eyebrow stratum-medium-tf" text="{s:caption}" />
-							<Label id="k4-rank-name" class="k4-rank-name stratum-bold-tf" text="{s:rank}" />
-							<Panel class="k4-meta">
-								<Panel class="k4-meta-icon ic-leader" />
-								<Label class="k4-muted stratum-regular-tf" text="{s:summary}" />
-							</Panel>
-						</Panel>
-					</Panel>
-					<Panel class="k4-section">
-						<Panel class="k4-split">
-							<Label class="k4-next k4-fill stratum-medium-tf" text="{s:next}" />
-							<Label class="k4-accent k4-right stratum-regular-tf" text="{s:togo}" />
-						</Panel>
-						<Panel class="k4-bar k4-bar-large"><Panel id="k4-rank-bar" class="k4-bar-fill w0" /></Panel>
-						<Panel id="k4-rank-reward" class="k4-meta k4-reward">
-							<Panel class="k4-meta-icon ic-gift" />
-							<Label class="k4-accent stratum-regular-tf" text="{s:reward}" />
-						</Panel>
-					</Panel>
-					<Panel id="k4-showdown" class="k4-section k4-showdown k4-gone">
-						<Label id="k4-sd-wanted" class="k4-wanted k4-gone stratum-medium-tf" text="{s:wanted}" />
-						<Label id="k4-sd-duel" class="k4-accent k4-gone stratum-regular-tf" text="{s:duel}" />
-						<Panel id="k4-sd-challenge" class="k4-split k4-split-last k4-gone">
-							<Label class="k4-next k4-fill stratum-medium-tf" text="{s:challenge}" />
-							<Button id="k4-duel-accept" class="k4-small-btn k4-btn-primary">
-								<Label class="stratum-medium-tf" text="{s:accept}" />
-							</Button>
-							<Button id="k4-duel-decline" class="k4-small-btn">
-								<Label class="stratum-medium-tf" text="{s:decline}" />
-							</Button>
-						</Panel>
-						<Label id="k4-sd-hint" class="k4-muted k4-gone stratum-regular-tf" text="{s:hint}" />
-					</Panel>
-				</Panel>
-				<Panel id="k4-view-missions" class="k4-view">
-					<Panel id="k4-m0" class="k4-card">
-						<Panel class="k4-card-stripe" />
-						<Panel id="k4-m0-icon" class="k4-mission-icon" />
-						<Panel class="k4-card-body">
-							<Panel class="k4-split">
-								<Label id="k4-m0-diff" class="k4-diff stratum-bold-tf" text="{s:diff}" />
-								<Label class="k4-mission-desc stratum-medium-tf" text="{s:desc}" />
-							</Panel>
-							<Panel class="k4-split k4-split-last">
-								<Panel class="k4-bar k4-bar-short"><Panel id="k4-m0-bar" class="k4-bar-fill w0" /></Panel>
-								<Label class="k4-progress stratum-medium-tf" text="{s:progress}" />
-								<Button id="k4-reroll-0" class="k4-small-btn k4-gone">
-									<Panel class="k4-btn-icon ic-refresh_skinny" />
-									<Label class="stratum-medium-tf" text="{s:reroll}" />
-								</Button>
-							</Panel>
-						</Panel>
-					</Panel>
-					<Panel id="k4-m1" class="k4-card">
-						<Panel class="k4-card-stripe" />
-						<Panel id="k4-m1-icon" class="k4-mission-icon" />
-						<Panel class="k4-card-body">
-							<Panel class="k4-split">
-								<Label id="k4-m1-diff" class="k4-diff stratum-bold-tf" text="{s:diff}" />
-								<Label class="k4-mission-desc stratum-medium-tf" text="{s:desc}" />
-							</Panel>
-							<Panel class="k4-split k4-split-last">
-								<Panel class="k4-bar k4-bar-short"><Panel id="k4-m1-bar" class="k4-bar-fill w0" /></Panel>
-								<Label class="k4-progress stratum-medium-tf" text="{s:progress}" />
-								<Button id="k4-reroll-1" class="k4-small-btn k4-gone">
-									<Panel class="k4-btn-icon ic-refresh_skinny" />
-									<Label class="stratum-medium-tf" text="{s:reroll}" />
-								</Button>
-							</Panel>
-						</Panel>
-					</Panel>
-					<Panel id="k4-m2" class="k4-card">
-						<Panel class="k4-card-stripe" />
-						<Panel id="k4-m2-icon" class="k4-mission-icon" />
-						<Panel class="k4-card-body">
-							<Panel class="k4-split">
-								<Label id="k4-m2-diff" class="k4-diff stratum-bold-tf" text="{s:diff}" />
-								<Label class="k4-mission-desc stratum-medium-tf" text="{s:desc}" />
-							</Panel>
-							<Panel class="k4-split k4-split-last">
-								<Panel class="k4-bar k4-bar-short"><Panel id="k4-m2-bar" class="k4-bar-fill w0" /></Panel>
-								<Label class="k4-progress stratum-medium-tf" text="{s:progress}" />
-								<Button id="k4-reroll-2" class="k4-small-btn k4-gone">
-									<Panel class="k4-btn-icon ic-refresh_skinny" />
-									<Label class="stratum-medium-tf" text="{s:reroll}" />
-								</Button>
-							</Panel>
-						</Panel>
-					</Panel>
-					<Panel id="k4-m3" class="k4-card k4-gone">
-						<Panel class="k4-card-stripe" />
-						<Panel id="k4-m3-icon" class="k4-mission-icon" />
-						<Panel class="k4-card-body">
-							<Panel class="k4-split">
-								<Label id="k4-m3-diff" class="k4-diff stratum-bold-tf" text="{s:diff}" />
-								<Label class="k4-mission-desc stratum-medium-tf" text="{s:desc}" />
-							</Panel>
-							<Panel class="k4-split k4-split-last">
-								<Panel class="k4-bar k4-bar-short"><Panel id="k4-m3-bar" class="k4-bar-fill w0" /></Panel>
-								<Label class="k4-progress stratum-medium-tf" text="{s:progress}" />
-								<Button id="k4-reroll-3" class="k4-small-btn k4-gone">
-									<Panel class="k4-btn-icon ic-refresh_skinny" />
-									<Label class="stratum-medium-tf" text="{s:reroll}" />
-								</Button>
-							</Panel>
-						</Panel>
-					</Panel>
-					<Panel class="k4-footer">
-						<Panel class="k4-meta-icon ic-hot_trend" />
-						<Label class="k4-muted stratum-regular-tf" text="{s:footer}" />
-					</Panel>
-				</Panel>
-				<Panel id="k4-view-top" class="k4-view">
-					<Panel id="k4-top-season-bar" class="k4-season-bar k4-gone">
-						<Button id="k4-top-season-prev" class="k4-arrow k4-arrow-left" />
-						<Label id="k4-top-season" class="k4-season-name stratum-medium-tf" text="{s:season}" />
-						<Button id="k4-top-season-next" class="k4-arrow k4-arrow-right" />
-					</Panel>
-					<Panel class="k4-table">
-						<Button id="k4-top-0" class="k4-row k4-row-click">
-							<Panel id="k4-top-0-pos" class="k4-pos-cell">
-								<Label class="k4-pos stratum-bold-tf" text="{s:pos}" />
-							</Panel>
-							<Panel id="k4-top-0-icon" class="k4-row-icon sg-0" />
-							<Label class="k4-name stratum-medium-tf" text="{s:name}" />
-							<Label class="k4-row-info stratum-regular-tf" text="{s:info}" />
-						</Button>
-						<Button id="k4-top-1" class="k4-row k4-row-click k4-row-alt">
-							<Panel id="k4-top-1-pos" class="k4-pos-cell">
-								<Label class="k4-pos stratum-bold-tf" text="{s:pos}" />
-							</Panel>
-							<Panel id="k4-top-1-icon" class="k4-row-icon sg-0" />
-							<Label class="k4-name stratum-medium-tf" text="{s:name}" />
-							<Label class="k4-row-info stratum-regular-tf" text="{s:info}" />
-						</Button>
-						<Button id="k4-top-2" class="k4-row k4-row-click">
-							<Panel id="k4-top-2-pos" class="k4-pos-cell">
-								<Label class="k4-pos stratum-bold-tf" text="{s:pos}" />
-							</Panel>
-							<Panel id="k4-top-2-icon" class="k4-row-icon sg-0" />
-							<Label class="k4-name stratum-medium-tf" text="{s:name}" />
-							<Label class="k4-row-info stratum-regular-tf" text="{s:info}" />
-						</Button>
-						<Button id="k4-top-3" class="k4-row k4-row-click k4-row-alt">
-							<Panel id="k4-top-3-pos" class="k4-pos-cell">
-								<Label class="k4-pos stratum-bold-tf" text="{s:pos}" />
-							</Panel>
-							<Panel id="k4-top-3-icon" class="k4-row-icon sg-0" />
-							<Label class="k4-name stratum-medium-tf" text="{s:name}" />
-							<Label class="k4-row-info stratum-regular-tf" text="{s:info}" />
-						</Button>
-						<Button id="k4-top-4" class="k4-row k4-row-click">
-							<Panel id="k4-top-4-pos" class="k4-pos-cell">
-								<Label class="k4-pos stratum-bold-tf" text="{s:pos}" />
-							</Panel>
-							<Panel id="k4-top-4-icon" class="k4-row-icon sg-0" />
-							<Label class="k4-name stratum-medium-tf" text="{s:name}" />
-							<Label class="k4-row-info stratum-regular-tf" text="{s:info}" />
-						</Button>
-						<Button id="k4-top-5" class="k4-row k4-row-click k4-row-alt">
-							<Panel id="k4-top-5-pos" class="k4-pos-cell">
-								<Label class="k4-pos stratum-bold-tf" text="{s:pos}" />
-							</Panel>
-							<Panel id="k4-top-5-icon" class="k4-row-icon sg-0" />
-							<Label class="k4-name stratum-medium-tf" text="{s:name}" />
-							<Label class="k4-row-info stratum-regular-tf" text="{s:info}" />
-						</Button>
-						<Button id="k4-top-6" class="k4-row k4-row-click">
-							<Panel id="k4-top-6-pos" class="k4-pos-cell">
-								<Label class="k4-pos stratum-bold-tf" text="{s:pos}" />
-							</Panel>
-							<Panel id="k4-top-6-icon" class="k4-row-icon sg-0" />
-							<Label class="k4-name stratum-medium-tf" text="{s:name}" />
-							<Label class="k4-row-info stratum-regular-tf" text="{s:info}" />
-						</Button>
-						<Button id="k4-top-7" class="k4-row k4-row-click k4-row-alt">
-							<Panel id="k4-top-7-pos" class="k4-pos-cell">
-								<Label class="k4-pos stratum-bold-tf" text="{s:pos}" />
-							</Panel>
-							<Panel id="k4-top-7-icon" class="k4-row-icon sg-0" />
-							<Label class="k4-name stratum-medium-tf" text="{s:name}" />
-							<Label class="k4-row-info stratum-regular-tf" text="{s:info}" />
-						</Button>
-						<Button id="k4-top-8" class="k4-row k4-row-click">
-							<Panel id="k4-top-8-pos" class="k4-pos-cell">
-								<Label class="k4-pos stratum-bold-tf" text="{s:pos}" />
-							</Panel>
-							<Panel id="k4-top-8-icon" class="k4-row-icon sg-0" />
-							<Label class="k4-name stratum-medium-tf" text="{s:name}" />
-							<Label class="k4-row-info stratum-regular-tf" text="{s:info}" />
-						</Button>
-						<Button id="k4-top-9" class="k4-row k4-row-click k4-row-alt">
-							<Panel id="k4-top-9-pos" class="k4-pos-cell">
-								<Label class="k4-pos stratum-bold-tf" text="{s:pos}" />
-							</Panel>
-							<Panel id="k4-top-9-icon" class="k4-row-icon sg-0" />
-							<Label class="k4-name stratum-medium-tf" text="{s:name}" />
-							<Label class="k4-row-info stratum-regular-tf" text="{s:info}" />
-						</Button>
-					</Panel>
-					<Panel id="k4-top-me" class="k4-row k4-row-me">
-						<Panel id="k4-top-me-pos" class="k4-pos-cell">
-							<Label class="k4-pos stratum-bold-tf" text="{s:pos}" />
-						</Panel>
-						<Panel id="k4-top-me-icon" class="k4-row-icon sg-0" />
-						<Label class="k4-name stratum-medium-tf" text="{s:name}" />
-						<Label class="k4-row-info stratum-regular-tf" text="{s:info}" />
-					</Panel>
-					<Panel class="k4-pager">
-						<Button id="k4-top-prev" class="k4-arrow k4-arrow-left" />
-						<Label id="k4-top-page" class="k4-muted k4-page stratum-medium-tf" text="{s:page}" />
-						<Button id="k4-top-next" class="k4-arrow k4-arrow-right" />
-					</Panel>
-				</Panel>
-				<Panel id="k4-view-ranks" class="k4-view">
-					<Panel class="k4-table">
-						<Panel id="k4-rk-0" class="k4-row">
-							<Panel id="k4-rk-0-icon" class="k4-row-icon sg-0" />
-							<Label id="k4-rk-0-name" class="k4-name stratum-medium-tf" text="{s:name}" />
-							<Label class="k4-row-info stratum-regular-tf" text="{s:info}" />
-						</Panel>
-						<Panel id="k4-rk-1" class="k4-row k4-row-alt">
-							<Panel id="k4-rk-1-icon" class="k4-row-icon sg-0" />
-							<Label id="k4-rk-1-name" class="k4-name stratum-medium-tf" text="{s:name}" />
-							<Label class="k4-row-info stratum-regular-tf" text="{s:info}" />
-						</Panel>
-						<Panel id="k4-rk-2" class="k4-row">
-							<Panel id="k4-rk-2-icon" class="k4-row-icon sg-0" />
-							<Label id="k4-rk-2-name" class="k4-name stratum-medium-tf" text="{s:name}" />
-							<Label class="k4-row-info stratum-regular-tf" text="{s:info}" />
-						</Panel>
-						<Panel id="k4-rk-3" class="k4-row k4-row-alt">
-							<Panel id="k4-rk-3-icon" class="k4-row-icon sg-0" />
-							<Label id="k4-rk-3-name" class="k4-name stratum-medium-tf" text="{s:name}" />
-							<Label class="k4-row-info stratum-regular-tf" text="{s:info}" />
-						</Panel>
-						<Panel id="k4-rk-4" class="k4-row">
-							<Panel id="k4-rk-4-icon" class="k4-row-icon sg-0" />
-							<Label id="k4-rk-4-name" class="k4-name stratum-medium-tf" text="{s:name}" />
-							<Label class="k4-row-info stratum-regular-tf" text="{s:info}" />
-						</Panel>
-						<Panel id="k4-rk-5" class="k4-row k4-row-alt">
-							<Panel id="k4-rk-5-icon" class="k4-row-icon sg-0" />
-							<Label id="k4-rk-5-name" class="k4-name stratum-medium-tf" text="{s:name}" />
-							<Label class="k4-row-info stratum-regular-tf" text="{s:info}" />
-						</Panel>
-						<Panel id="k4-rk-6" class="k4-row">
-							<Panel id="k4-rk-6-icon" class="k4-row-icon sg-0" />
-							<Label id="k4-rk-6-name" class="k4-name stratum-medium-tf" text="{s:name}" />
-							<Label class="k4-row-info stratum-regular-tf" text="{s:info}" />
-						</Panel>
-						<Panel id="k4-rk-7" class="k4-row k4-row-alt">
-							<Panel id="k4-rk-7-icon" class="k4-row-icon sg-0" />
-							<Label id="k4-rk-7-name" class="k4-name stratum-medium-tf" text="{s:name}" />
-							<Label class="k4-row-info stratum-regular-tf" text="{s:info}" />
-						</Panel>
-						<Panel id="k4-rk-8" class="k4-row">
-							<Panel id="k4-rk-8-icon" class="k4-row-icon sg-0" />
-							<Label id="k4-rk-8-name" class="k4-name stratum-medium-tf" text="{s:name}" />
-							<Label class="k4-row-info stratum-regular-tf" text="{s:info}" />
-						</Panel>
-						<Panel id="k4-rk-9" class="k4-row k4-row-alt">
-							<Panel id="k4-rk-9-icon" class="k4-row-icon sg-0" />
-							<Label id="k4-rk-9-name" class="k4-name stratum-medium-tf" text="{s:name}" />
-							<Label class="k4-row-info stratum-regular-tf" text="{s:info}" />
-						</Panel>
-					</Panel>
-					<Panel class="k4-pager">
-						<Button id="k4-rk-prev" class="k4-arrow k4-arrow-left" />
-						<Label id="k4-rk-page" class="k4-muted k4-page stratum-medium-tf" text="{s:page}" />
-						<Button id="k4-rk-next" class="k4-arrow k4-arrow-right" />
-					</Panel>
-				</Panel>
-				<Panel id="k4-view-stats" class="k4-view">
-					<Panel class="k4-tiles">
-						<Panel id="k4-st-0" class="k4-tile">
-							<Panel id="k4-st-0-icon" class="k4-tile-icon" />
-							<Panel class="k4-tile-text">
-								<Label class="k4-tile-label stratum-medium-tf" text="{s:label}" />
-								<Label class="k4-tile-value stratum-bold-tf" text="{s:value}" />
-							</Panel>
-						</Panel>
-						<Panel id="k4-st-1" class="k4-tile">
-							<Panel id="k4-st-1-icon" class="k4-tile-icon" />
-							<Panel class="k4-tile-text">
-								<Label class="k4-tile-label stratum-medium-tf" text="{s:label}" />
-								<Label class="k4-tile-value stratum-bold-tf" text="{s:value}" />
-							</Panel>
-						</Panel>
-						<Panel id="k4-st-2" class="k4-tile">
-							<Panel id="k4-st-2-icon" class="k4-tile-icon" />
-							<Panel class="k4-tile-text">
-								<Label class="k4-tile-label stratum-medium-tf" text="{s:label}" />
-								<Label class="k4-tile-value stratum-bold-tf" text="{s:value}" />
-							</Panel>
-						</Panel>
-						<Panel id="k4-st-3" class="k4-tile">
-							<Panel id="k4-st-3-icon" class="k4-tile-icon" />
-							<Panel class="k4-tile-text">
-								<Label class="k4-tile-label stratum-medium-tf" text="{s:label}" />
-								<Label class="k4-tile-value stratum-bold-tf" text="{s:value}" />
-							</Panel>
-						</Panel>
-						<Panel id="k4-st-4" class="k4-tile">
-							<Panel id="k4-st-4-icon" class="k4-tile-icon" />
-							<Panel class="k4-tile-text">
-								<Label class="k4-tile-label stratum-medium-tf" text="{s:label}" />
-								<Label class="k4-tile-value stratum-bold-tf" text="{s:value}" />
-							</Panel>
-						</Panel>
-						<Panel id="k4-st-5" class="k4-tile">
-							<Panel id="k4-st-5-icon" class="k4-tile-icon" />
-							<Panel class="k4-tile-text">
-								<Label class="k4-tile-label stratum-medium-tf" text="{s:label}" />
-								<Label class="k4-tile-value stratum-bold-tf" text="{s:value}" />
-							</Panel>
-						</Panel>
-						<Panel id="k4-st-6" class="k4-tile">
-							<Panel id="k4-st-6-icon" class="k4-tile-icon" />
-							<Panel class="k4-tile-text">
-								<Label class="k4-tile-label stratum-medium-tf" text="{s:label}" />
-								<Label class="k4-tile-value stratum-bold-tf" text="{s:value}" />
-							</Panel>
-						</Panel>
-						<Panel id="k4-st-7" class="k4-tile">
-							<Panel id="k4-st-7-icon" class="k4-tile-icon" />
-							<Panel class="k4-tile-text">
-								<Label class="k4-tile-label stratum-medium-tf" text="{s:label}" />
-								<Label class="k4-tile-value stratum-bold-tf" text="{s:value}" />
-							</Panel>
-						</Panel>
-						<Panel id="k4-st-8" class="k4-tile">
-							<Panel id="k4-st-8-icon" class="k4-tile-icon" />
-							<Panel class="k4-tile-text">
-								<Label class="k4-tile-label stratum-medium-tf" text="{s:label}" />
-								<Label class="k4-tile-value stratum-bold-tf" text="{s:value}" />
-							</Panel>
-						</Panel>
-					</Panel>
-				</Panel>
-				<Panel id="k4-view-achievements" class="k4-view">
-					<Button id="k4-ach-0" class="k4-card k4-ach">
-						<Panel class="k4-card-stripe" />
-						<Panel id="k4-ach-0-icon" class="k4-mission-icon" />
-						<Panel class="k4-ach-pin ic-mission_star" />
-						<Panel class="k4-card-body">
-							<Panel class="k4-split">
-								<Label class="k4-ach-name stratum-bold-tf" text="{s:name}" />
-								<Label class="k4-mission-desc stratum-medium-tf" text="{s:desc}" />
-							</Panel>
-							<Panel class="k4-split k4-split-last">
-								<Panel class="k4-bar k4-bar-short"><Panel id="k4-ach-0-bar" class="k4-bar-fill w0" /></Panel>
-								<Label class="k4-progress stratum-medium-tf" text="{s:progress}" />
-							</Panel>
-						</Panel>
-					</Button>
-					<Button id="k4-ach-1" class="k4-card k4-ach">
-						<Panel class="k4-card-stripe" />
-						<Panel id="k4-ach-1-icon" class="k4-mission-icon" />
-						<Panel class="k4-ach-pin ic-mission_star" />
-						<Panel class="k4-card-body">
-							<Panel class="k4-split">
-								<Label class="k4-ach-name stratum-bold-tf" text="{s:name}" />
-								<Label class="k4-mission-desc stratum-medium-tf" text="{s:desc}" />
-							</Panel>
-							<Panel class="k4-split k4-split-last">
-								<Panel class="k4-bar k4-bar-short"><Panel id="k4-ach-1-bar" class="k4-bar-fill w0" /></Panel>
-								<Label class="k4-progress stratum-medium-tf" text="{s:progress}" />
-							</Panel>
-						</Panel>
-					</Button>
-					<Button id="k4-ach-2" class="k4-card k4-ach">
-						<Panel class="k4-card-stripe" />
-						<Panel id="k4-ach-2-icon" class="k4-mission-icon" />
-						<Panel class="k4-ach-pin ic-mission_star" />
-						<Panel class="k4-card-body">
-							<Panel class="k4-split">
-								<Label class="k4-ach-name stratum-bold-tf" text="{s:name}" />
-								<Label class="k4-mission-desc stratum-medium-tf" text="{s:desc}" />
-							</Panel>
-							<Panel class="k4-split k4-split-last">
-								<Panel class="k4-bar k4-bar-short"><Panel id="k4-ach-2-bar" class="k4-bar-fill w0" /></Panel>
-								<Label class="k4-progress stratum-medium-tf" text="{s:progress}" />
-							</Panel>
-						</Panel>
-					</Button>
-					<Button id="k4-ach-3" class="k4-card k4-ach">
-						<Panel class="k4-card-stripe" />
-						<Panel id="k4-ach-3-icon" class="k4-mission-icon" />
-						<Panel class="k4-ach-pin ic-mission_star" />
-						<Panel class="k4-card-body">
-							<Panel class="k4-split">
-								<Label class="k4-ach-name stratum-bold-tf" text="{s:name}" />
-								<Label class="k4-mission-desc stratum-medium-tf" text="{s:desc}" />
-							</Panel>
-							<Panel class="k4-split k4-split-last">
-								<Panel class="k4-bar k4-bar-short"><Panel id="k4-ach-3-bar" class="k4-bar-fill w0" /></Panel>
-								<Label class="k4-progress stratum-medium-tf" text="{s:progress}" />
-							</Panel>
-						</Panel>
-					</Button>
-					<Panel class="k4-footer">
-						<Panel class="k4-meta-icon ic-winner_ribbon" />
-						<Label class="k4-muted k4-fill stratum-regular-tf" text="{s:summary}" />
-					</Panel>
-					<Panel class="k4-pager">
-						<Button id="k4-ach-prev" class="k4-arrow k4-arrow-left" />
-						<Label id="k4-ach-page" class="k4-muted k4-page stratum-medium-tf" text="{s:page}" />
-						<Button id="k4-ach-next" class="k4-arrow k4-arrow-right" />
-					</Panel>
-				</Panel>
-				<Panel id="k4-view-profile" class="k4-view">
-					<Panel class="k4-hero">
-						<Panel class="k4-hero-emblem">
-							<Panel id="k4-pf-icon" class="k4-rank-icon sg-0" />
-							<Label id="k4-pf-badge" class="k4-badge k4-gone stratum-bold-tf" text="{s:tag}" />
-						</Panel>
-						<Panel class="k4-hero-text">
-							<Label id="k4-pf-rank" class="k4-eyebrow stratum-medium-tf" text="{s:rank}" />
-							<Label class="k4-rank-name stratum-bold-tf" text="{s:name}" />
-							<Panel class="k4-meta">
-								<Panel class="k4-meta-icon ic-leader" />
-								<Label class="k4-muted stratum-regular-tf" text="{s:summary}" />
-							</Panel>
-						</Panel>
-						<Button id="k4-pf-back" class="k4-small-btn k4-pf-back k4-gone">
-							<Label class="stratum-medium-tf" text="{s:back}" />
-						</Button>
-					</Panel>
-					<Panel class="k4-pf-chips">
-						<Panel id="k4-pf-sc-0" class="k4-pf-chip k4-gone">
-							<Panel id="k4-pf-sc-0-icon" class="k4-pf-chip-icon" />
-							<Label class="k4-pf-chip-name stratum-medium-tf" text="{s:name}" />
-						</Panel>
-						<Panel id="k4-pf-sc-1" class="k4-pf-chip k4-gone">
-							<Panel id="k4-pf-sc-1-icon" class="k4-pf-chip-icon" />
-							<Label class="k4-pf-chip-name stratum-medium-tf" text="{s:name}" />
-						</Panel>
-						<Panel id="k4-pf-sc-2" class="k4-pf-chip k4-gone">
-							<Panel id="k4-pf-sc-2-icon" class="k4-pf-chip-icon" />
-							<Label class="k4-pf-chip-name stratum-medium-tf" text="{s:name}" />
-						</Panel>
-						<Label id="k4-pf-sc-hint" class="k4-muted k4-gone stratum-regular-tf" text="{s:hint}" />
-					</Panel>
-					<Panel class="k4-tiles">
-						<Panel id="k4-pf-st-0" class="k4-tile">
-							<Panel id="k4-pf-st-0-icon" class="k4-tile-icon" />
-							<Panel class="k4-tile-text">
-								<Label class="k4-tile-label stratum-medium-tf" text="{s:label}" />
-								<Label class="k4-tile-value stratum-bold-tf" text="{s:value}" />
-							</Panel>
-						</Panel>
-						<Panel id="k4-pf-st-1" class="k4-tile">
-							<Panel id="k4-pf-st-1-icon" class="k4-tile-icon" />
-							<Panel class="k4-tile-text">
-								<Label class="k4-tile-label stratum-medium-tf" text="{s:label}" />
-								<Label class="k4-tile-value stratum-bold-tf" text="{s:value}" />
-							</Panel>
-						</Panel>
-						<Panel id="k4-pf-st-2" class="k4-tile">
-							<Panel id="k4-pf-st-2-icon" class="k4-tile-icon" />
-							<Panel class="k4-tile-text">
-								<Label class="k4-tile-label stratum-medium-tf" text="{s:label}" />
-								<Label class="k4-tile-value stratum-bold-tf" text="{s:value}" />
-							</Panel>
-						</Panel>
-						<Panel id="k4-pf-st-3" class="k4-tile">
-							<Panel id="k4-pf-st-3-icon" class="k4-tile-icon" />
-							<Panel class="k4-tile-text">
-								<Label class="k4-tile-label stratum-medium-tf" text="{s:label}" />
-								<Label class="k4-tile-value stratum-bold-tf" text="{s:value}" />
-							</Panel>
-						</Panel>
-						<Panel id="k4-pf-st-4" class="k4-tile">
-							<Panel id="k4-pf-st-4-icon" class="k4-tile-icon" />
-							<Panel class="k4-tile-text">
-								<Label class="k4-tile-label stratum-medium-tf" text="{s:label}" />
-								<Label class="k4-tile-value stratum-bold-tf" text="{s:value}" />
-							</Panel>
-						</Panel>
-						<Panel id="k4-pf-st-5" class="k4-tile">
-							<Panel id="k4-pf-st-5-icon" class="k4-tile-icon" />
-							<Panel class="k4-tile-text">
-								<Label class="k4-tile-label stratum-medium-tf" text="{s:label}" />
-								<Label class="k4-tile-value stratum-bold-tf" text="{s:value}" />
-							</Panel>
-						</Panel>
-					</Panel>
-					<Panel id="k4-pf-seasons" class="k4-pf-seasons k4-gone">
-						<Label class="k4-eyebrow stratum-medium-tf" text="{s:seasons}" />
-						<Panel class="k4-table">
-							<Panel id="k4-pf-ss-0" class="k4-row">
-								<Panel id="k4-pf-ss-0-icon" class="k4-row-icon sg-0" />
-								<Label class="k4-name stratum-medium-tf" text="{s:name}" />
-								<Label class="k4-row-info stratum-regular-tf" text="{s:info}" />
-							</Panel>
-							<Panel id="k4-pf-ss-1" class="k4-row k4-row-alt">
-								<Panel id="k4-pf-ss-1-icon" class="k4-row-icon sg-0" />
-								<Label class="k4-name stratum-medium-tf" text="{s:name}" />
-								<Label class="k4-row-info stratum-regular-tf" text="{s:info}" />
-							</Panel>
-							<Panel id="k4-pf-ss-2" class="k4-row">
-								<Panel id="k4-pf-ss-2-icon" class="k4-row-icon sg-0" />
-								<Label class="k4-name stratum-medium-tf" text="{s:name}" />
-								<Label class="k4-row-info stratum-regular-tf" text="{s:info}" />
-							</Panel>
-						</Panel>
-						<Label id="k4-pf-ss-none" class="k4-muted k4-gone stratum-regular-tf" text="{s:none}" />
-					</Panel>
-				</Panel>
-				<Label class="k4-copyright stratum-regular-tf" hittest="false" text="© 2026 karola3vax" />
+				<Panel id="k4-t0-timer" class="k4-toast-timer" hittest="false" />
 			</Panel>
+			<Panel id="k4-t1" class="k4-toast k4-toast-1 k4-tc-green k4-len-normal k4-gone" hittest="false">
+				<Panel class="k4-toast-strip" hittest="false" />
+				<Panel class="k4-toast-row" hittest="false">
+					<Panel class="k4-toast-pic" hittest="false">
+						<Panel id="k4-t1-ring" class="k4-ring k4-ring-toast t-locked k4-gone" hittest="false">
+							<Panel class="k4-disc" hittest="false" />
+						</Panel>
+						<Panel id="k4-t1-icon" class="k4-toast-icon" hittest="false" />
+					</Panel>
+					<Panel class="k4-toast-body" hittest="false">
+						<Label class="k4-toast-kind stratum-bold-tf" hittest="false" text="{s:kind}" />
+						<Label class="k4-toast-text stratum-medium-tf" hittest="false" text="{s:text}" />
+						<Panel id="k4-t1-prog" class="k4-bar k4-bar-toast k4-gone" hittest="false">
+							<Panel id="k4-t1-bar" class="k4-bar-fill w0" hittest="false" />
+						</Panel>
+					</Panel>
+					<Label class="k4-toast-value stratum-bold-tf" hittest="false" text="{s:value}" />
+				</Panel>
+				<Panel id="k4-t1-timer" class="k4-toast-timer" hittest="false" />
+			</Panel>
+			<Panel id="k4-t2" class="k4-toast k4-toast-2 k4-tc-green k4-len-normal k4-gone" hittest="false">
+				<Panel class="k4-toast-strip" hittest="false" />
+				<Panel class="k4-toast-row" hittest="false">
+					<Panel class="k4-toast-pic" hittest="false">
+						<Panel id="k4-t2-ring" class="k4-ring k4-ring-toast t-locked k4-gone" hittest="false">
+							<Panel class="k4-disc" hittest="false" />
+						</Panel>
+						<Panel id="k4-t2-icon" class="k4-toast-icon" hittest="false" />
+					</Panel>
+					<Panel class="k4-toast-body" hittest="false">
+						<Label class="k4-toast-kind stratum-bold-tf" hittest="false" text="{s:kind}" />
+						<Label class="k4-toast-text stratum-medium-tf" hittest="false" text="{s:text}" />
+						<Panel id="k4-t2-prog" class="k4-bar k4-bar-toast k4-gone" hittest="false">
+							<Panel id="k4-t2-bar" class="k4-bar-fill w0" hittest="false" />
+						</Panel>
+					</Panel>
+					<Label class="k4-toast-value stratum-bold-tf" hittest="false" text="{s:value}" />
+				</Panel>
+				<Panel id="k4-t2-timer" class="k4-toast-timer" hittest="false" />
+			</Panel>
+			<Label id="k4-t-more" class="k4-t-more k4-gone stratum-bold-tf" hittest="false" text="{s:more}" />
 		</Panel>
 	</Panel>
 </root>

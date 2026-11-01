@@ -85,6 +85,17 @@ public sealed class K4Player
 	/// <summary>Weapon kills and the achievement showcase. Null until loaded.</summary>
 	public PlayerProfile? Profile { get; set; }
 
+	/// <summary>The player turned panel pop-ups off (stored per player since 7.1).</summary>
+	public bool ToastsOff { get; set; }
+
+	/// <summary>Settings changed since the last save, handed to that save; null when unchanged.</summary>
+	internal bool? UnsavedToasts { get; set; }
+
+	internal bool? UnsavedPointMessages { get; set; }
+
+	/// <summary>One-time toasts already shown in this connection, such as "hold:&lt;rank key&gt;" or "ach90:&lt;id&gt;".</summary>
+	internal HashSet<string> ToastsShown { get; } = new(StringComparer.Ordinal);
+
 	/// <summary>The season the player's points belong to. Null while seasons are off.</summary>
 	public string? Season { get; set; }
 

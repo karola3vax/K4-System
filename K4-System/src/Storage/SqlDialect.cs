@@ -23,6 +23,7 @@ internal sealed record TableNames(string Prefix, string LevelRanks)
 	public string SeasonState => $"{Prefix}k4seasonstate";
 	public string WeaponKills => $"{Prefix}k4weaponkills";
 	public string Profiles => $"{Prefix}k4profiles";
+	public string Settings => $"{Prefix}k4settings";
 }
 
 /// <summary>
@@ -213,6 +214,12 @@ internal sealed class MySqlDialect(string connectionString, string databaseName)
 		yield return $@"CREATE TABLE IF NOT EXISTS `{tables.Profiles}` (
 			`steam_id` VARCHAR(32) COLLATE 'utf8mb4_unicode_ci' PRIMARY KEY NOT NULL,
 			`showcase` VARCHAR(255) COLLATE 'utf8mb4_unicode_ci' NOT NULL DEFAULT ''
+		) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
+
+		yield return $@"CREATE TABLE IF NOT EXISTS `{tables.Settings}` (
+			`steam_id` VARCHAR(32) COLLATE 'utf8mb4_unicode_ci' PRIMARY KEY NOT NULL,
+			`toasts` INT NOT NULL DEFAULT 1,
+			`point_messages` INT NOT NULL DEFAULT 1
 		) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
 	}
 
@@ -417,6 +424,12 @@ internal sealed class SqliteDialect(string filePath) : SqlDialect
 		yield return $@"CREATE TABLE IF NOT EXISTS `{tables.Profiles}` (
 			`steam_id` TEXT PRIMARY KEY NOT NULL,
 			`showcase` TEXT NOT NULL DEFAULT ''
+		);";
+
+		yield return $@"CREATE TABLE IF NOT EXISTS `{tables.Settings}` (
+			`steam_id` TEXT PRIMARY KEY NOT NULL,
+			`toasts` INTEGER NOT NULL DEFAULT 1,
+			`point_messages` INTEGER NOT NULL DEFAULT 1
 		);";
 	}
 

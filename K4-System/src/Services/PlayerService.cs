@@ -181,6 +181,9 @@ internal sealed class PlayerService(
 		player.LastPersonalRankResetUtc = record.LastPersonalRankResetUtc;
 		player.Profile = General.Modules.Profiles ? new PlayerProfile(record.WeaponKills, record.Showcase) : null;
 		player.Season = seasons is null ? null : record.Season;
+		player.ToastsOff = !record.Toasts;
+		if (player.Rank is not null)
+			player.Rank.MuteMessages = !record.PointMessages;
 
 		AddToRegistry(player);
 		seasons?.Join(player);
@@ -289,7 +292,7 @@ internal sealed class PlayerService(
 
 		player.RefreshName();
 
-		return new PlayerSnapshot(
+		PlayerSnapshot snapshot = new(
 			player.SteamId,
 			player.Name,
 			player.Rank?.Rank.Name,
@@ -302,7 +305,38 @@ internal sealed class PlayerService(
 			player.Achievements?.TakeUnsaved(),
 			player.Season,
 			player.Profile?.TakeUnsavedKills(),
-			player.Profile?.TakeUnsavedShowcase());
+			player.Profile?.TakeUnsavedShowcase(),
+			player.UnsavedToasts,
+			player.UnsavedPointMessages);
+
+		// Changed settings go with this save; the save queue keeps them until they are written, like the showcase.
+		player.UnsavedToasts = null;
+		player.UnsavedPointMessages = null;
+		return snapshot;
+	}
+
+	// ---------------------------------------------------------------- settings
+
+	/// <summary>Turns the player's panel pop-ups on or off and saves it. Used by !toasts and the profile button.</summary>
+	public void SetToasts(K4Player player, bool on)
+	{
+		if (!player.IsHuman)
+			return;
+
+		player.ToastsOff = !on;
+		player.UnsavedToasts = on;
+		Save(player);
+	}
+
+	/// <summary>Turns the player's point chat messages on or off and saves it. Used by !togglepointmsg and the profile button.</summary>
+	public void SetPointMessages(K4Player player, bool on)
+	{
+		if (!player.IsHuman || player.Rank is null)
+			return;
+
+		player.Rank.MuteMessages = !on;
+		player.UnsavedPointMessages = on;
+		Save(player);
 	}
 
 	/// <summary>Saves one player, then refreshes their leaderboard placement while they are still online.</summary>

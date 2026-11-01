@@ -13,6 +13,23 @@ The clickable K4 panel (`!k4`, `!rank`, `!missions`, `!top`, `!ranks`, `!stats`,
 
 The plugin finds the layout at `panorama/layout/custom_game/k4_ui.xml`. Keep that path.
 
+## The panel (7.1)
+
+The panel covers the whole screen in the style of CS2's main menu: a sidebar on the left (the player's rank and points, the seven pages, the season card, and the copyright line at the bottom) and the open page on the right, over a screenshot of the current map dimmed from left to right. The pages are Home, Profile, Missions, Achievements, Leaderboard, Ranks and Stats. Toasts stack at the right under the kill feed, newest on top, at most three at once, each with a timer bar that runs out over its length; a promotion shows as a large banner at the top centre. The panel captures the mouse while it is open; the toast stack and the banner never do.
+
+Every id, dialog variable and class the server uses is listed in [`docs/panel-contract.md`](../docs/panel-contract.md). The layout and the server code follow that page, and `PanoramaLayoutTests` checks the layout and stylesheet against it. Change the contract first, then both sides.
+
+Panorama scales the HUD by screen height, so heights in the stylesheet are fixed and widths flow: the sidebar is 300px wide and the page shares the rest, which looks the same at 16:9 and 16:10.
+
+The map background is two panels: `k4-bg` always draws CS2's season background, and `k4-bg-map` on top of it gets `map-<name>` from the server. The stylesheet defines `map-<name>` for every map that has a base 1080p screenshot in CS2 (`panorama/images/map_icons/screenshots/1080p/<map>_png`); any other map draws nothing there and the season background shows through. The list lives in `MAPS` in `gen_k4_css.py`, so the generator runs without the game. After a CS2 update that adds maps, print the current list and update `MAPS`:
+
+```bash
+cd panorama/tools
+python -c "import re, sys; from vpk import Vpk; print(sorted(m[1] for k in Vpk(sys.argv[1]).entries if (m := re.fullmatch(r'panorama/images/map_icons/screenshots/1080p/(.+)_png\.vtex_c', k)) and not re.search(r'_\d+$', m[1])))" "<CS2>/game/csgo/pak01_dir.vpk"
+```
+
+Leave out `random` and `lobby_mapveto`; they are not maps. `check_game_images.py` fails when an update removes a screenshot the stylesheet uses.
+
 CS2 checks this layout before showing it: K4 uses only `Panel`, `Label`, and `Button` elements. `Panel` may have `id`, `class`, and `hittest`; `Label` also `text`; `Button` only `id` and `class`. Any other element or attribute (for example `hittest` on a `Button`) makes every player's game reject the whole panel without a visible error; the client console then says *Layout xml did not pass CustomHud validation*. The layout tests enforce this.
 
 The panel reuses CS2's own stylesheet, icons (`panorama/images/icons/...`), and UI sounds. If a Valve update renames one of those files, that icon goes blank; the rest of the panel keeps working.
@@ -28,7 +45,9 @@ python panorama/tools/gen_k4_ranks.py "<CS2>/game/csgo/pak01_dir.vpk"
 
 ### Server and addon versions
 
-Players and servers update at different times, so every part a newer server fills starts hidden in the layout. A server older than the addon simply never shows those parts; a server newer than a player's addon writes to parts the player does not have, which does nothing. In 7.0 that is the season switch above the Top list and the parts of the Profile view that depend on the server's modules; in 6.5 the Achievements tab and the points-event line under the header; in 6.4 the bounty and duel lines on the Rank tab. The Profile view itself has no tab button: the player's name in the header opens it, so an older server never shows it. The layout tests check that each of them starts hidden.
+Players and servers update at different times, so every part a newer server fills starts hidden in the layout (`k4-gone`). A server older than the addon simply never shows those parts; a server newer than a player's addon writes to parts the player does not have, which does nothing. The contract marks each of them "starts `k4-gone`", and the layout tests check that each of them does.
+
+The 7.1 layout renamed almost every id of the 7.0 one (the tabs became the sidebar's pages and every view was rebuilt), so a 7.0 server cannot fill a 7.1 addon, or the other way round. Update the server and the addon together.
 
 ## The official addon
 
@@ -75,7 +94,31 @@ To update the panel later, repeat steps 3 to 5 and choose the existing item in t
 
 4. **Restart the server**, join, and type `!k4`.
 
-With the panel on, the K4 commands open their tab instead of printing to chat. Promotions, demotions, finished missions, unlocked achievements, and points events show as a small pop-up at the right side of the screen, below the kill feed, instead of a chat line. Point messages stay in chat. Click **✕** (top right) to close the panel. While it is open the mouse controls the panel, not your aim, so K4 also closes it when freeze time ends and after 45 seconds without a click.
+With the panel on, the K4 commands open their tab instead of printing to chat. Promotions, demotions, finished missions, unlocked achievements, the round summary, and more show as a small pop-up (a toast) at the right side of the screen, below the kill feed, instead of a chat line; see [Toasts](#toasts). Single point messages after the round summary stay in chat. Click **✕** (top right) to close the panel. While it is open the mouse controls the panel, not your aim, so K4 also closes it when freeze time ends and after 45 seconds without a click.
+
+## Toasts
+
+Toasts stack under the kill feed, newest on top, at most three at once. Each player can turn them off with `!toasts` (`commands.toasts`) or the button on their profile; K4 remembers it. A player with toasts off gets the chat line instead wherever one exists (round summary, rank changes, finished missions, the daily streak).
+
+| Event | Color and length | What it shows |
+| --- | --- | --- |
+| Round end, when `ranks.round-summary` is on | green (gain) or red (loss) | "Round won", "Round lost" or "Round"; the reasons such as "3× Kill · Headshot · Round won"; "+86" or "-12"; your team patch. Replaces the chat summary |
+| Promotion | the large banner | the new rank and its emblem |
+| Demotion | red | the new rank and its emblem |
+| Hold your rank | red | a point loss left you within 10% of the points between your rank and the one below; once per rank per connection |
+| Leaderboard move | blue, short | "Now #12" and "▲ 3" when your place improves, only inside the top 100, never on joining. Needs `tags.top-placement.enabled`, which keeps places up to date |
+| Mission progress | blue, short | a daily or weekly mission passed 50% or 90% (not on completion), "6/10" with a bar |
+| Mission complete | green | the mission, its icon and "+reward" |
+| All missions done | gold | the streak day and "+bonus" |
+| Achievement almost there | blue, short | 90% of the goal, "47/50" with a bar; once per achievement per connection, not for goals already at 90% when you join |
+| Achievement unlocked | gold, long | the achievement in a bronze, silver or gold medal ring: under 300 points bronze, under 800 silver, 800 and more gold |
+| Points event starts | gold, long | "2×" and the minutes left |
+| Bounty | red to everyone when someone is wanted; gold to the player who claims it | the wanted player and the reward |
+| Duel challenge | purple, to the challenged player | the challenger, the stake, and the `!duel accept` command |
+| New season | gold, long | the season name |
+| Season ending (last 3 days, on joining) | gold | the time left and your place, such as "#4" |
+
+Promotions use `PanoramaHud.Promote`; everything else goes through `PanoramaHud.Toast` (see `docs/panel-contract.md`). The rules for when a toast fires live in `K4-System/src/Hud/ToastRules.cs` and are tested in `ToastRulesTests` with real cases in `K4-System.Tests/Evals/toasts.json`.
 
 ## If something does not work
 

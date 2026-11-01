@@ -101,6 +101,8 @@ internal sealed class DuelService(PluginConfig config, PlayerRegistry players, R
 		pending.Add(challenge);
 		lastChallengeUtc[challenger.SteamId] = now;
 		chat.TellAll("duel.challenge", challenge.ChallengerName, challenge.OpponentName, stake);
+		hud.Hud?.Toast(opponent, new Toast(chat.For(opponent.Controller, "toast.duel", config.Commands.Duel.FirstOrDefault() ?? "duel"), challenge.ChallengerName,
+			stake.ToString(System.Globalization.CultureInfo.InvariantCulture), "ic-crosshair_circle", ToastColor.Purple));
 		RefreshPanels(challenge);
 
 		addTimer(Settings.AcceptSeconds, () =>

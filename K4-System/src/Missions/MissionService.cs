@@ -282,12 +282,15 @@ internal sealed class MissionService(
 			if (slot.Completed || slot.Mission.Type != type || (matches is not null && !matches(slot.Mission)))
 				continue;
 
+			int before = slot.Progress;
 			slot.Progress = slot.Mission.CountsBestTry
 				? Math.Max(slot.Progress, Math.Min(amount, slot.Mission.Target))
 				: (int)Math.Min((long)slot.Progress + amount, slot.Mission.Target);
 
 			if (slot.Progress >= slot.Mission.Target)
 				Complete(player, slot);
+			else if (ToastRules.MissionMilestone(before, slot.Progress, slot.Mission.Target) is not null && hud.Hud is PanoramaHud panel)
+				ShowMilestone(panel, player, slot, ReferenceEquals(slot, missions.Weekly));
 		}
 
 		if (!wasAllCompleted && missions.AllCompleted)
@@ -313,9 +316,12 @@ internal sealed class MissionService(
 
 		if (hud.Hud is PanoramaHud panel)
 		{
-			panel.ShowToast(player, "mission.html-completed", $"{description} · +{reward}", ToastKind.Success);
 			panel.Refresh(player, HudTab.Missions);
-			return;
+			if (!player.ToastsOff)
+			{
+				panel.Toast(player, new Toast(chat.For(controller, "toast.mission-complete"), description, $"+{reward}", PanoramaHud.MissionIcon(slot.Mission), ToastColor.Green));
+				return;
+			}
 		}
 
 		chat.Tell(controller, "mission.completed", description, reward);
@@ -339,10 +345,20 @@ internal sealed class MissionService(
 		int bonus = MissionRules.StreakBonus(missions.Streak, dayTotal, Settings.StreakBonusPercent, Settings.StreakMaxDays);
 		ranks.GrantPoints(player, bonus);
 
-		if (hud.Hud is PanoramaHud panel)
-			panel.ShowToast(player, "hud.toast.streak", chat.For(player.Controller, "hud.toast.streak-text", missions.Streak, bonus), ToastKind.Gold, "ic-hot_trend");
+		if (hud.Hud is PanoramaHud panel && !player.ToastsOff)
+			panel.Toast(player, new Toast(chat.For(player.Controller, "hud.toast.streak"), chat.For(player.Controller, "toast.streak-text", missions.Streak),
+				$"+{bonus}", "ic-hot_trend", ToastColor.Gold));
 		else
 			chat.Tell(player.Controller, "mission.all-completed", missions.Streak, bonus);
+	}
+
+	/// <summary>A short blue toast when a mission passes 50% or 90%, such as "6/10".</summary>
+	private void ShowMilestone(PanoramaHud panel, K4Player player, MissionProgress slot, bool weekly)
+	{
+		CCSPlayerController controller = player.Controller;
+		int target = slot.Mission.Target;
+		panel.Toast(player, new Toast(chat.For(controller, weekly ? "toast.weekly-progress" : "toast.mission-progress"), Describe(controller, slot.Mission),
+			$"{slot.Progress}/{target}", PanoramaHud.MissionIcon(slot.Mission), ToastColor.Blue, ToastLength.Short, ToastRules.Percent(slot.Progress, target)));
 	}
 
 	// ---------------------------------------------------------------- game events

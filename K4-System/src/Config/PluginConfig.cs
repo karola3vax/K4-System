@@ -558,4 +558,8 @@ public sealed class CommandSettings
 
 	[JsonPropertyName("season")]
 	public List<string> Season { get; set; } = ["season"];
+
+	/// <summary>Turns the player's own panel pop-ups on or off, such as !toasts. Remembered per player.</summary>
+	[JsonPropertyName("toasts")]
+	public List<string> Toasts { get; set; } = ["toasts"];
 }
