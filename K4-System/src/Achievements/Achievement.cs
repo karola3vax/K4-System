@@ -102,6 +102,17 @@ internal static class AchievementRules
 		AchievementType type => counters.Stats is int[] stats && StatOf(type) is StatField field ? stats[(int)field] : null
 	};
 
+	/// <summary>
+	/// The medal ring of the unlock toast, from the reward: "bronze" under 300 points, "silver" under 800, "gold" from 800.
+	/// The default achievements give 100 to 2500 points, so all three medals appear.
+	/// </summary>
+	public static string Tier(AchievementDefinition achievement) => achievement.Points switch
+	{
+		< 300 => "bronze",
+		< 800 => "silver",
+		_ => "gold"
+	};
+
 	/// <summary>Achievements whose goal is reached but that are not unlocked yet, in file order.</summary>
 	public static List<AchievementDefinition> NewlyMet(IEnumerable<AchievementDefinition> all, IReadOnlySet<string> unlocked, AchievementCounters counters)
 		=> all.Where(achievement => !unlocked.Contains(achievement.Id) && Progress(achievement, counters) >= achievement.Goal).ToList();

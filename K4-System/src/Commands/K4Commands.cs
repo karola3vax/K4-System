@@ -133,6 +133,12 @@ internal sealed class K4Commands(
 				plugin.AddCommand($"css_{alias}", "Show your profile or another player's", OnProfile);
 		}
 
+		if (hud is not null)
+		{
+			foreach (string alias in Aliases.Toasts)
+				plugin.AddCommand($"css_{alias}", "Turns your panel pop-ups on or off", OnToggleToasts);
+		}
+
 		if (seasons is not null)
 		{
 			foreach (string alias in Aliases.Season)
@@ -207,6 +213,8 @@ internal sealed class K4Commands(
 			other.AddRange(Aliases.Admins);
 		if (duels is not null)
 			other.AddRange(Aliases.Duel);
+		if (hud is not null)
+			other.AddRange(Aliases.Toasts);
 		categories[chat["help.other"]] = other;
 
 		StringBuilder line = new();
@@ -622,8 +630,17 @@ internal sealed class K4Commands(
 		if (!guard.Check(player, info, CommandUsage.CLIENT_ONLY) || LoadedPlayer(player!, info) is not K4Player k4player || k4player.Rank is null)
 			return;
 
-		k4player.Rank.MuteMessages = !k4player.Rank.MuteMessages;
+		playerService.SetPointMessages(k4player, k4player.Rank.MuteMessages);
 		info.ReplyToCommand(chat.Prefixed("toggle.point-messages", chat[k4player.Rank.MuteMessages ? "state.off" : "state.on"]));
+	}
+
+	private void OnToggleToasts(CCSPlayerController? player, CommandInfo info)
+	{
+		if (!guard.Check(player, info, CommandUsage.CLIENT_ONLY) || LoadedPlayer(player!, info) is not K4Player k4player)
+			return;
+
+		playerService.SetToasts(k4player, k4player.ToastsOff);
+		info.ReplyToCommand(chat.PrefixedFor(player, "toggle.toasts", chat.For(player, k4player.ToastsOff ? "state.off" : "state.on")));
 	}
 
 	private void OnRank(CCSPlayerController? player, CommandInfo info)

@@ -1,311 +1,431 @@
-"""Writes the K4 Panorama layout. Repeated rows are generated so ids stay consistent with the server code.
+"""Writes the K4 Panorama layout (7.1): a full-screen panel in the style of CS2's main menu, and a toast stack.
 
-The look follows CS2's own in-game panels (scoreboard frame, main-menu tabs, HUD mission panel) and uses
-images that already ship with the game; the addon adds only sharp copies of CS2's rank emblems.
+Every id, dialog variable and class the server uses is listed in docs/panel-contract.md; this script and
+PanoramaLayoutTests follow it. Repeated parts are generated so their ids stay consistent.
+
+CS2 validates server-driven HUD layouts: only Panel {id, class, hittest}, Label {id, class, hittest, text}
+and Button {id, class} pass. Any other element or attribute, hittest on a Button included, makes the client
+reject the whole layout. Pictures are therefore CSS background-image classes on Panels.
 """
+import contextlib
 import os
 
 OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "k4system", "panorama", "layout", "custom_game", "k4_ui.xml")
 
-TOP_ROWS = 10
-RANK_ROWS = 10
-STAT_TILES = 9
-MISSIONS = 4  # three daily missions and the weekly one
-ACHIEVEMENT_CARDS = 4  # one page of achievements
-PROFILE_TILES = 6
-SHOWCASE = 3  # achievements a profile shows
-PROFILE_SEASONS = 3  # finished seasons on a profile
+# Nav id -> CS2 icon (panorama/images/icons/ui/<name>.vsvg)
+NAV = [("home", "home"), ("profile", "profile"), ("missions", "quest"), ("achievements", "winner_ribbon"),
+       ("leaderboard", "leader"), ("ranks", "trophy"), ("stats", "stats")]
 
-# Tab id -> CS2 icon (panorama/images/icons/ui/<name>.vsvg)
-TABS = [("rank", "xp_rank"), ("missions", "quest"), ("top", "leader"), ("ranks", "trophy"), ("stats", "stats"), ("achievements", "winner_ribbon")]
+HOME_MISSIONS = 4
+HOME_ACHIEVEMENTS = 3
+HOME_QUICK = 5
+SHOWCASE = 3
+PROFILE_STATS = 6
+PROFILE_SEASONS = 3
+MISSIONS = 3
+STREAK_DAYS = 7
+ACH_COLUMNS, ACH_ROWS = 5, 3
+LB_ROWS = 7
+RANK_COLUMNS, RANK_ROWS = 5, 4
+STAT_TILES = 8
+STAT_WEAPONS = 3
+TOASTS = 3
 
-# Tabs added after 6.4 start hidden, so a server older than the addon shows exactly the tabs it can fill.
-NEW_TABS = {"achievements"}
-
-
-def icon(name, css):
-    """A static game icon, drawn by the stylesheet (ic-<name>).
-
-    CS2 validates server-driven HUD layouts: only Panel {id, class, hittest}, Label {id, class, hittest,
-    text} and Button {id, class} pass (the layout does not use Image). Any other element or attribute,
-    hittest on a Button included, makes the client reject the whole layout.
-    """
-    return f'<Panel class="{css} ic-{name}" />'
-
-
-def bar(panel_id, extra=""):
-    return f'<Panel class="k4-bar{extra}"><Panel id="{panel_id}" class="k4-bar-fill w0" /></Panel>'
-
+REGULAR, MEDIUM, BOLD = "stratum-regular-tf", "stratum-medium-tf", "stratum-bold-tf"
+GONE = "k4-gone"
 
 lines = []
+depth = 0
 
 
-def w(depth, text):
-    lines.append("\t" * depth + text)
+def tag(name, id=None, cls=None, hittest=None, text=None):
+    out = name
+    if id:
+        out += f' id="{id}"'
+    if cls:
+        out += f' class="{cls}"'
+    if hittest is not None:
+        out += f' hittest="{hittest}"'
+    if text is not None:
+        out += f' text="{text}"'
+    return out
 
 
-w(0, '<root>')
-w(1, '<styles>')
-w(2, '<include src="s2r://panorama/styles/csgostyles.vcss_c" />')
-w(2, '<include src="s2r://panorama/styles/custom_game/k4_ui.vcss_c" />')
-w(1, '</styles>')
-# The full-screen root and the toast let the mouse through (hittest="false"). The root sits above
-# every other HUD (z-index), so without it it took the hover from other plugins' mouse menus: their
-# :hover styles and hover sounds never fired while K4 ran (clicks still worked).
-w(1, '<Panel class="k4-root" hittest="false">')
-
-# ---------------------------------------------------------------- toast (CS2 HUD mission panel style)
-w(2, '<Panel id="k4-toast" class="k4-toast k4-toast-green k4-gone" hittest="false">')
-w(3, '<Panel class="k4-toast-bg" hittest="false" />')
-w(3, '<Panel class="k4-toast-line k4-toast-line-top" hittest="false" />')
-w(3, '<Panel class="k4-toast-line k4-toast-line-bottom" hittest="false" />')
-w(3, '<Panel class="k4-toast-content" hittest="false">')
-w(4, '<Panel id="k4-toast-icon" class="k4-toast-icon ic-check" hittest="false" />')
-w(4, '<Panel class="k4-toast-body" hittest="false">')
-w(5, '<Label class="k4-toast-title stratum-bold-tf" text="{s:title}" hittest="false" />')
-w(5, '<Label class="k4-toast-text stratum-regular-tf" text="{s:text}" hittest="false" />')
-w(4, '</Panel>')
-w(3, '</Panel>')
-w(2, '</Panel>')
-
-# ---------------------------------------------------------------- main panel (CS2 scoreboard frame)
-w(2, '<Panel id="k4-panel" class="k4-panel k4-closed">')
-w(3, '<Panel class="k4-bg" />')
-w(3, '<Panel class="k4-content">')
-
-# Header
-w(4, '<Panel class="k4-header">')
-# The player's name opens their profile (K4 7.0). Dialog variables reach the label inside, so older servers still fill it.
-w(5, '<Button id="k4-subtitle" class="k4-subtitle-btn">')
-w(6, '<Label class="k4-subtitle stratum-medium-tf" text="{s:subtitle}" />')
-w(5, '</Button>')
-w(5, '<Button id="k4-close" class="CloseButton k4-close" />')
-w(4, '</Panel>')
-
-# Points event banner (K4 6.5). Hidden until a 6.5+ server shows it during an event.
-w(4, '<Label id="k4-event" class="k4-event k4-gone stratum-medium-tf" text="{s:event}" />')
-
-# Tabs (CS2 main-menu navbar)
-w(4, '<Panel class="k4-tabs">')
-for tab, name in TABS:
-    w(5, f'<Button id="k4-tab-{tab}" class="k4-tab{" k4-gone" if tab in NEW_TABS else ""}">')
-    w(6, icon(name, "k4-tab-icon"))
-    w(6, '<Label class="stratum-medium-tf" text="{s:label}" />')
-    w(5, '</Button>')
-w(4, '</Panel>')
-
-# Rank view
-w(4, '<Panel id="k4-view-rank" class="k4-view">')
-w(5, '<Panel class="k4-hero">')
-w(6, '<Panel class="k4-hero-emblem">')
-w(7, '<Panel id="k4-rank-icon" class="k4-rank-icon sg-0" />')
-w(7, '<Label id="k4-rank-badge" class="k4-badge k4-gone stratum-bold-tf" text="{s:tag}" />')
-w(6, '</Panel>')
-w(6, '<Panel class="k4-hero-text">')
-w(7, '<Label class="k4-eyebrow stratum-medium-tf" text="{s:caption}" />')
-w(7, '<Label id="k4-rank-name" class="k4-rank-name stratum-bold-tf" text="{s:rank}" />')
-w(7, '<Panel class="k4-meta">')
-w(8, icon("leader", "k4-meta-icon"))
-w(8, '<Label class="k4-muted stratum-regular-tf" text="{s:summary}" />')
-w(7, '</Panel>')
-w(6, '</Panel>')
-w(5, '</Panel>')
-w(5, '<Panel class="k4-section">')
-w(6, '<Panel class="k4-split">')
-w(7, '<Label class="k4-next k4-fill stratum-medium-tf" text="{s:next}" />')
-w(7, '<Label class="k4-accent k4-right stratum-regular-tf" text="{s:togo}" />')
-w(6, '</Panel>')
-w(6, bar("k4-rank-bar", " k4-bar-large"))
-w(6, '<Panel id="k4-rank-reward" class="k4-meta k4-reward">')
-w(7, icon("gift", "k4-meta-icon"))
-w(7, '<Label class="k4-accent stratum-regular-tf" text="{s:reward}" />')
-w(6, '</Panel>')
-w(5, '</Panel>')
-# Bounty and duels (K4 6.4). Hidden until a 6.4+ server fills it, so older servers show nothing new.
-w(5, '<Panel id="k4-showdown" class="k4-section k4-showdown k4-gone">')
-w(6, '<Label id="k4-sd-wanted" class="k4-wanted k4-gone stratum-medium-tf" text="{s:wanted}" />')
-w(6, '<Label id="k4-sd-duel" class="k4-accent k4-gone stratum-regular-tf" text="{s:duel}" />')
-w(6, '<Panel id="k4-sd-challenge" class="k4-split k4-split-last k4-gone">')
-w(7, '<Label class="k4-next k4-fill stratum-medium-tf" text="{s:challenge}" />')
-w(7, '<Button id="k4-duel-accept" class="k4-small-btn k4-btn-primary">')
-w(8, '<Label class="stratum-medium-tf" text="{s:accept}" />')
-w(7, '</Button>')
-w(7, '<Button id="k4-duel-decline" class="k4-small-btn">')
-w(8, '<Label class="stratum-medium-tf" text="{s:decline}" />')
-w(7, '</Button>')
-w(6, '</Panel>')
-w(6, '<Label id="k4-sd-hint" class="k4-muted k4-gone stratum-regular-tf" text="{s:hint}" />')
-w(5, '</Panel>')
-w(4, '</Panel>')
-
-# Missions view (CS2 mission tiles)
-w(4, '<Panel id="k4-view-missions" class="k4-view">')
-for i in range(MISSIONS):
-    # The weekly card starts hidden: K4 6.2.x never fills it, and 6.3+ shows it when there is a weekly mission.
-    w(5, f'<Panel id="k4-m{i}" class="k4-card{" k4-gone" if i >= 3 else ""}">')
-    w(6, '<Panel class="k4-card-stripe" />')
-    w(6, f'<Panel id="k4-m{i}-icon" class="k4-mission-icon" />')
-    w(6, '<Panel class="k4-card-body">')
-    w(7, '<Panel class="k4-split">')
-    w(8, f'<Label id="k4-m{i}-diff" class="k4-diff stratum-bold-tf" text="{{s:diff}}" />')
-    w(8, '<Label class="k4-mission-desc stratum-medium-tf" text="{s:desc}" />')
-    w(7, '</Panel>')
-    w(7, '<Panel class="k4-split k4-split-last">')
-    w(8, bar(f"k4-m{i}-bar", " k4-bar-short"))
-    w(8, '<Label class="k4-progress stratum-medium-tf" text="{s:progress}" />')
-    w(8, f'<Button id="k4-reroll-{i}" class="k4-small-btn k4-gone">')
-    w(9, icon("refresh_skinny", "k4-btn-icon"))
-    w(9, '<Label class="stratum-medium-tf" text="{s:reroll}" />')
-    w(8, '</Button>')
-    w(7, '</Panel>')
-    w(6, '</Panel>')
-    w(5, '</Panel>')
-w(5, '<Panel class="k4-footer">')
-w(6, icon("hot_trend", "k4-meta-icon"))
-w(6, '<Label class="k4-muted stratum-regular-tf" text="{s:footer}" />')
-w(5, '</Panel>')
-w(4, '</Panel>')
+def leaf(name, **attrs):
+    lines.append("\t" * depth + f"<{tag(name, **attrs)} />")
 
 
-def row(row_id, depth, name_id=None, position=True, css="k4-row", element="Panel"):
-    w(depth, f'<{element} id="{row_id}" class="{css}">')
-    if position:
-        w(depth + 1, f'<Panel id="{row_id}-pos" class="k4-pos-cell">')
-        w(depth + 2, '<Label class="k4-pos stratum-bold-tf" text="{s:pos}" />')
-        w(depth + 1, '</Panel>')
-    w(depth + 1, f'<Panel id="{row_id}-icon" class="k4-row-icon sg-0" />')
-    name_attr = f' id="{name_id}"' if name_id else ""
-    w(depth + 1, f'<Label{name_attr} class="k4-name stratum-medium-tf" text="{{s:name}}" />')
-    w(depth + 1, '<Label class="k4-row-info stratum-regular-tf" text="{s:info}" />')
-    w(depth, f'</{element}>')
+@contextlib.contextmanager
+def box(name="Panel", **attrs):
+    global depth
+    lines.append("\t" * depth + f"<{tag(name, **attrs)}>")
+    depth += 1
+    yield
+    depth -= 1
+    lines.append("\t" * depth + f"</{name}>")
 
 
-def pager(prefix, page_id):
-    w(5, '<Panel class="k4-pager">')
-    w(6, f'<Button id="{prefix}-prev" class="k4-arrow k4-arrow-left" />')
-    w(6, f'<Label id="{page_id}" class="k4-muted k4-page stratum-medium-tf" text="{{s:page}}" />')
-    w(6, f'<Button id="{prefix}-next" class="k4-arrow k4-arrow-right" />')
-    w(5, '</Panel>')
+def panel(cls, id=None, **attrs):
+    leaf("Panel", id=id, cls=cls, **attrs)
 
 
-# Top view (CS2 scoreboard rows)
-w(4, '<Panel id="k4-view-top" class="k4-view">')
-# Season switch (K4 7.0): the current season and finished ones. Hidden until a 7.0+ server with seasons shows it.
-w(5, '<Panel id="k4-top-season-bar" class="k4-season-bar k4-gone">')
-w(6, '<Button id="k4-top-season-prev" class="k4-arrow k4-arrow-left" />')
-w(6, '<Label id="k4-top-season" class="k4-season-name stratum-medium-tf" text="{s:season}" />')
-w(6, '<Button id="k4-top-season-next" class="k4-arrow k4-arrow-right" />')
-w(5, '</Panel>')
-w(5, '<Panel class="k4-table">')
-for i in range(TOP_ROWS):
-    # Every other row is a shade darker (Panorama has no :nth-child). Rows are buttons: a click opens that profile.
-    row(f"k4-top-{i}", 6, css="k4-row k4-row-click k4-row-alt" if i % 2 else "k4-row k4-row-click", element="Button")
-w(5, '</Panel>')
-row("k4-top-me", 5, css="k4-row k4-row-me")
-pager("k4-top", "k4-top-page")
-w(4, '</Panel>')
+def label(text, cls, font=MEDIUM, id=None, **attrs):
+    leaf("Label", id=id, cls=f"{cls} {font}", text=text, **attrs)
 
-# Ranks view
-w(4, '<Panel id="k4-view-ranks" class="k4-view">')
-w(5, '<Panel class="k4-table">')
-for i in range(RANK_ROWS):
-    row(f"k4-rk-{i}", 6, name_id=f"k4-rk-{i}-name", position=False, css="k4-row k4-row-alt" if i % 2 else "k4-row")
-w(5, '</Panel>')
-pager("k4-rk", "k4-rk-page")
-w(4, '</Panel>')
 
-# Stats view
-w(4, '<Panel id="k4-view-stats" class="k4-view">')
-w(5, '<Panel class="k4-tiles">')
-for i in range(STAT_TILES):
-    w(6, f'<Panel id="k4-st-{i}" class="k4-tile">')
-    w(7, f'<Panel id="k4-st-{i}-icon" class="k4-tile-icon" />')
-    w(7, '<Panel class="k4-tile-text">')
-    w(8, '<Label class="k4-tile-label stratum-medium-tf" text="{s:label}" />')
-    w(8, '<Label class="k4-tile-value stratum-bold-tf" text="{s:value}" />')
-    w(7, '</Panel>')
-    w(6, '</Panel>')
-w(5, '</Panel>')
-w(4, '</Panel>')
+def bar(fill_id, cls="", **attrs):
+    with box(cls=f"k4-bar {cls}".strip(), **attrs):
+        panel("k4-bar-fill w0", id=fill_id, **attrs)
 
-# Achievements view (K4 6.5): one page of cards in the mission style, unfinished ones closest to done first.
-w(4, '<Panel id="k4-view-achievements" class="k4-view">')
-for i in range(ACHIEVEMENT_CARDS):
-    # A click on an unlocked card shows it on the profile (K4 7.0); the star marks the ones shown.
-    w(5, f'<Button id="k4-ach-{i}" class="k4-card k4-ach">')
-    w(6, '<Panel class="k4-card-stripe" />')
-    w(6, f'<Panel id="k4-ach-{i}-icon" class="k4-mission-icon" />')
-    w(6, '<Panel class="k4-ach-pin ic-mission_star" />')
-    w(6, '<Panel class="k4-card-body">')
-    w(7, '<Panel class="k4-split">')
-    w(8, '<Label class="k4-ach-name stratum-bold-tf" text="{s:name}" />')
-    w(8, '<Label class="k4-mission-desc stratum-medium-tf" text="{s:desc}" />')
-    w(7, '</Panel>')
-    w(7, '<Panel class="k4-split k4-split-last">')
-    w(8, bar(f"k4-ach-{i}-bar", " k4-bar-short"))
-    w(8, '<Label class="k4-progress stratum-medium-tf" text="{s:progress}" />')
-    w(7, '</Panel>')
-    w(6, '</Panel>')
-    w(5, '</Button>')
-w(5, '<Panel class="k4-footer">')
-w(6, icon("winner_ribbon", "k4-meta-icon"))
-w(6, '<Label class="k4-muted k4-fill stratum-regular-tf" text="{s:summary}" />')
-w(5, '</Panel>')
-pager("k4-ach", "k4-ach-page")
-w(4, '</Panel>')
 
-# Profile view (K4 7.0): opened by the player's name in the header, a name in Top, or !profile.
-w(4, '<Panel id="k4-view-profile" class="k4-view">')
-w(5, '<Panel class="k4-hero">')
-w(6, '<Panel class="k4-hero-emblem">')
-w(7, '<Panel id="k4-pf-icon" class="k4-rank-icon sg-0" />')
-w(7, '<Label id="k4-pf-badge" class="k4-badge k4-gone stratum-bold-tf" text="{s:tag}" />')
-w(6, '</Panel>')
-w(6, '<Panel class="k4-hero-text">')
-w(7, '<Label id="k4-pf-rank" class="k4-eyebrow stratum-medium-tf" text="{s:rank}" />')
-w(7, '<Label class="k4-rank-name stratum-bold-tf" text="{s:name}" />')
-w(7, '<Panel class="k4-meta">')
-w(8, icon("leader", "k4-meta-icon"))
-w(8, '<Label class="k4-muted stratum-regular-tf" text="{s:summary}" />')
-w(7, '</Panel>')
-w(6, '</Panel>')
-w(6, '<Button id="k4-pf-back" class="k4-small-btn k4-pf-back k4-gone">')
-w(7, '<Label class="stratum-medium-tf" text="{s:back}" />')
-w(6, '</Button>')
-w(5, '</Panel>')
-w(5, '<Panel class="k4-pf-chips">')
-for i in range(SHOWCASE):
-    w(6, f'<Panel id="k4-pf-sc-{i}" class="k4-pf-chip k4-gone">')
-    w(7, f'<Panel id="k4-pf-sc-{i}-icon" class="k4-pf-chip-icon" />')
-    w(7, '<Label class="k4-pf-chip-name stratum-medium-tf" text="{s:name}" />')
-    w(6, '</Panel>')
-w(6, '<Label id="k4-pf-sc-hint" class="k4-muted k4-gone stratum-regular-tf" text="{s:hint}" />')
-w(5, '</Panel>')
-w(5, '<Panel class="k4-tiles">')
-for i in range(PROFILE_TILES):
-    w(6, f'<Panel id="k4-pf-st-{i}" class="k4-tile">')
-    w(7, f'<Panel id="k4-pf-st-{i}-icon" class="k4-tile-icon" />')
-    w(7, '<Panel class="k4-tile-text">')
-    w(8, '<Label class="k4-tile-label stratum-medium-tf" text="{s:label}" />')
-    w(8, '<Label class="k4-tile-value stratum-bold-tf" text="{s:value}" />')
-    w(7, '</Panel>')
-    w(6, '</Panel>')
-w(5, '</Panel>')
-w(5, '<Panel id="k4-pf-seasons" class="k4-pf-seasons k4-gone">')
-w(6, '<Label class="k4-eyebrow stratum-medium-tf" text="{s:seasons}" />')
-w(6, '<Panel class="k4-table">')
-for i in range(PROFILE_SEASONS):
-    row(f"k4-pf-ss-{i}", 7, position=False, css="k4-row k4-row-alt" if i % 2 else "k4-row")
-w(6, '</Panel>')
-w(6, '<Label id="k4-pf-ss-none" class="k4-muted k4-gone stratum-regular-tf" text="{s:none}" />')
-w(5, '</Panel>')
-w(4, '</Panel>')
+def medal(ring_id, icon_id, cls, **attrs):
+    """A medal: tier ring (t-gold, t-silver, t-bronze, t-locked) around a dark disc with a white icon."""
+    with box(id=ring_id, cls=f"k4-ring {cls} t-locked", **attrs):
+        with box(cls="k4-disc", **attrs):
+            panel("k4-medal-icon", id=icon_id, **attrs)
 
-w(4, '<Label class="k4-copyright stratum-regular-tf" hittest="false" text="© 2026 karola3vax" />')
-w(3, '</Panel>')
-w(2, '</Panel>')
-w(1, '</Panel>')
-w(0, '</root>')
 
-open(OUT, 'w', encoding='utf-8', newline='\n').write('\n'.join(lines) + '\n')
+def first(i):
+    # Grid cells are spaced by a left margin; the first cell of a row has none (Panorama has no :first-child).
+    return " k4-first" if i == 0 else ""
+
+
+def grow():
+    panel("k4-grow")
+
+
+def vgrow():
+    panel("k4-vgrow")
+
+
+def header_space():
+    # The close button and the event badge float over every view's top right corner (k4-topbar), so view
+    # headers keep their own items on the left.
+    panel("k4-header-space")
+
+
+def pager(prev_id, next_id, cls=""):
+    with box(cls=f"k4-pager {cls}".strip()):
+        leaf("Button", id=prev_id, cls="k4-arrow k4-arrow-left")
+        label("{s:page}", "k4-page", MEDIUM)
+        leaf("Button", id=next_id, cls="k4-arrow k4-arrow-right")
+
+
+with box("root"):
+    with box("styles"):
+        for src in ("s2r://panorama/styles/csgostyles.vcss_c", "s2r://panorama/styles/custom_game/k4_ui.vcss_c"):
+            lines.append("\t" * depth + f'<include src="{src}" />')
+    # The full-screen root, the toast stack and the banner let the mouse through (hittest="false"): the root
+    # sits above every other HUD, and without it it took the hover from other plugins' mouse menus.
+    with box(cls="k4-root", hittest="false"):
+
+        # ------------------------------------------------------------ panel
+        with box(id="k4-panel", cls="k4-panel k4-closed"):
+            with box(id="k4-bg", cls="k4-bg map-default"):
+                panel("k4-bg-map", id="k4-bg-map")
+            panel("k4-shade")
+            with box(cls="k4-frame"):
+
+                # Sidebar
+                with box(cls="k4-sidebar"):
+                    with box(cls="k4-brand"):
+                        label("K4", "k4-brand-name", BOLD)
+                        label("SYSTEM", "k4-brand-sub", BOLD)
+                    with box("Button", id="k4-me", cls="k4-me"):
+                        panel("k4-me-icon sg-0", id="k4-me-icon")
+                        with box(cls="k4-me-text"):
+                            label("{s:name}", "k4-me-name", BOLD)
+                            label("{s:meta}", "k4-me-meta", MEDIUM)
+                    for nav, icon in NAV:
+                        with box("Button", id=f"k4-nav-{nav}", cls="k4-nav"):
+                            panel(f"k4-nav-icon ic-{icon}")
+                            label("{s:label}", "k4-nav-label", MEDIUM)
+                    vgrow()
+                    with box(id="k4-season", cls=f"k4-season {GONE}"):
+                        label("{s:title}", "k4-season-title", BOLD)
+                        label("{s:left}", "k4-season-left", BOLD)
+                        bar("k4-season-bar", "k4-bar-season")
+                    with box(cls="k4-copyright-box"):
+                        label("© 2026 karola3vax", "k4-copyright", BOLD)
+
+                with box(cls="k4-main"):
+
+                    # Home
+                    with box(id="k4-view-home", cls="k4-view k4-view-pad"):
+                        header_space()
+                        with box(cls="k4-h-hero"):
+                            panel("k4-h-rank-icon sg-0", id="k4-h-rank-icon")
+                            with box(cls="k4-h-hero-text"):
+                                label("{s:rank}", "k4-h-rank-name", BOLD, id="k4-h-rank-name")
+                                with box(cls="k4-h-points-row"):
+                                    label("{s:points}", "k4-h-points", BOLD)
+                                    label("{s:place}", "k4-place", BOLD)
+                                bar("k4-h-bar", "k4-bar-hero")
+                                label("{s:next}", "k4-h-next", MEDIUM)
+                        with box(cls="k4-h-cards"):
+                            with box("Button", id="k4-h-missions", cls="k4-tile k4-h-card k4-first"):
+                                panel("k4-cap-icon ic-quest")
+                                with box(cls="k4-h-slots"):
+                                    for i in range(HOME_MISSIONS):
+                                        with box(id=f"k4-h-m{i}", cls=f"k4-h-m{first(i)} {GONE}"):
+                                            panel("k4-h-m-icon", id=f"k4-h-m{i}-icon")
+                                            label("{s:value}", "k4-h-m-value", BOLD)
+                            with box("Button", id="k4-h-ach", cls="k4-tile k4-h-card"):
+                                panel("k4-cap-icon ic-winner_ribbon")
+                                with box(cls="k4-h-slots"):
+                                    for i in range(HOME_ACHIEVEMENTS):
+                                        with box(id=f"k4-h-a{i}", cls=f"k4-h-a{first(i)} {GONE}"):
+                                            medal(f"k4-h-a{i}-ring", f"k4-h-a{i}-icon", "k4-ring-home")
+                                            label("{s:name}", "k4-h-a-name", BOLD)
+                                            bar(f"k4-h-a{i}-bar", "k4-bar-small")
+                            with box("Button", id="k4-h-top", cls="k4-tile k4-h-card"):
+                                panel("k4-cap-icon ic-leader")
+                                with box(cls="k4-h-slots"):
+                                    # Left to right: 2nd, 1st, 3rd, like a podium.
+                                    for i, place in enumerate((2, 1, 3)):
+                                        with box(id=f"k4-h-p{i}", cls=f"k4-h-p k4-place-{place}{first(i)} {GONE}"):
+                                            panel("k4-h-p-icon sg-0", id=f"k4-h-p{i}-icon")
+                                            label("{s:name}", "k4-h-p-name", BOLD)
+                                            with box(cls="k4-step"):
+                                                label("{s:pos}", "k4-step-pos", BOLD)
+                        with box(cls="k4-h-quick"):
+                            for i in range(HOME_QUICK):
+                                with box("Button", id=f"k4-h-q{i}", cls=f"k4-tile k4-h-q{' k4-h-q-wide' if i == HOME_QUICK - 1 else ''}{first(i)} {GONE}"):
+                                    with box(cls="k4-h-q-inner"):
+                                        panel("k4-h-q-icon", id=f"k4-h-q{i}-icon")
+                                        label("{s:value}", "k4-tile-value k4-h-q-value", BOLD)
+
+                    # Profile
+                    with box(id="k4-view-profile", cls="k4-view k4-view-pad"):
+                        with box(cls="k4-pf-head"):
+                            with box("Button", id="k4-pf-back", cls=f"k4-btn {GONE}"):
+                                panel("k4-btn-icon k4-icon-back ic-expand")
+                                label("{s:back}", "k4-btn-label", BOLD)
+                            for toggle in ("toasts", "chat"):
+                                with box("Button", id=f"k4-pf-{toggle}", cls=f"k4-btn k4-toggle {GONE}"):
+                                    panel("k4-toggle-dot")
+                                    label("{s:label}", "k4-btn-label", BOLD)
+                        with box(cls="k4-pf-banner"):
+                            with box(cls="k4-pf-emblem"):
+                                panel("k4-pf-icon sg-0", id="k4-pf-icon")
+                                label("{s:tag}", f"k4-pf-badge {GONE}", BOLD, id="k4-pf-badge")
+                            with box(cls="k4-pf-text"):
+                                label("{s:name}", "k4-pf-name", BOLD)
+                                with box(cls="k4-pf-line"):
+                                    label("{s:rank}", "k4-pf-rank", BOLD, id="k4-pf-rank")
+                                    label("{s:points}", "k4-pf-points", BOLD)
+                                    label("{s:place}", "k4-place", BOLD)
+                            with box(cls="k4-pf-showcase"):
+                                with box(cls="k4-pf-sc-row"):
+                                    for i in range(SHOWCASE):
+                                        with box(id=f"k4-pf-sc{i}", cls=f"k4-pf-sc{first(i)} {GONE}"):
+                                            medal(f"k4-pf-sc{i}-ring", f"k4-pf-sc{i}-icon", "k4-ring-showcase")
+                                            label("{s:name}", "k4-pf-sc-name", BOLD)
+                                label("{s:hint}", f"k4-pf-sc-hint {GONE}", MEDIUM, id="k4-pf-sc-hint")
+                        with box(cls="k4-pf-stats"):
+                            for i in range(PROFILE_STATS):
+                                with box(id=f"k4-pf-st{i}", cls=f"k4-tile k4-pf-st{first(i)}"):
+                                    panel("k4-pf-st-icon", id=f"k4-pf-st{i}-icon")
+                                    label("{s:value}", "k4-tile-value k4-pf-st-value", BOLD)
+                                    label("{s:label}", "k4-cap k4-pf-st-label", BOLD)
+                        with box(cls="k4-pf-bottom"):
+                            with box(id="k4-pf-fav", cls=f"k4-tile k4-pf-fav {GONE}"):
+                                panel("k4-pf-fav-icon", id="k4-pf-fav-icon")
+                                with box(cls="k4-pf-fav-line"):
+                                    label("{s:fav}", "k4-pf-fav-name", BOLD)
+                                    label("{s:favkills}", "k4-pf-fav-kills", MEDIUM)
+                            with box(cls="k4-pf-seasons"):
+                                for i in range(PROFILE_SEASONS):
+                                    with box(id=f"k4-pf-ss{i}", cls=f"k4-tile k4-pf-ss{first(i)} {GONE}"):
+                                        label("{s:season}", "k4-cap k4-pf-ss-season", BOLD)
+                                        panel("k4-pf-ss-icon sg-0", id=f"k4-pf-ss{i}-icon")
+                                        label("{s:pos}", "k4-pf-ss-pos", BOLD)
+                                label("{s:none}", f"k4-pf-ss-none {GONE}", MEDIUM, id="k4-pf-ss-none")
+
+                    # Missions
+                    with box(id="k4-view-missions", cls="k4-view k4-view-pad"):
+                        with box(cls="k4-m-head"):
+                            panel("k4-m-head-icon ic-clock")
+                            label("{s:reset}", "k4-m-reset", BOLD)
+                        with box(cls="k4-m-cards"):
+                            for i in range(MISSIONS):
+                                with box(id=f"k4-m{i}", cls=f"k4-m{first(i)} {GONE}"):
+                                    with box(cls="k4-m-top"):
+                                        label("{s:diff}", "k4-m-diff", BOLD)
+                                        grow()
+                                        label("{s:reward}", "k4-reward", BOLD)
+                                    vgrow()
+                                    panel("k4-m-icon", id=f"k4-m{i}-icon")
+                                    label("{s:desc}", "k4-m-desc", MEDIUM)
+                                    bar(f"k4-m{i}-bar", "k4-bar-mission")
+                                    with box(cls="k4-m-bottom"):
+                                        label("{s:progress}", "k4-m-progress", BOLD)
+                                        grow()
+                                        with box("Button", id=f"k4-reroll-{i}", cls=f"k4-btn {GONE}"):
+                                            panel("k4-btn-icon ic-refresh_skinny")
+                                            label("{s:label}", "k4-btn-label", BOLD)
+                        with box(id="k4-mw", cls=f"k4-mw {GONE}"):
+                            panel("k4-mw-icon", id="k4-mw-icon")
+                            with box(cls="k4-mw-text"):
+                                label("{s:left}", "k4-mw-left", BOLD)
+                                label("{s:desc}", "k4-mw-desc", MEDIUM)
+                                bar("k4-mw-bar", "k4-bar-mission")
+                            with box(cls="k4-mw-side"):
+                                label("{s:progress}", "k4-mw-progress", BOLD)
+                                label("{s:reward}", "k4-reward k4-mw-reward", BOLD)
+                        with box(cls="k4-streak"):
+                            panel("k4-streak-icon ic-hot_trend")
+                            label("{s:streak}", "k4-streak-count", BOLD)
+                            for i in range(STREAK_DAYS):
+                                with box(id=f"k4-sd{i}", cls="k4-sd"):
+                                    panel("k4-sd-icon")
+                            label("{s:bonus}", "k4-reward k4-streak-bonus", BOLD)
+
+                    # Achievements
+                    with box(id="k4-view-achievements", cls="k4-view k4-view-pad"):
+                        with box(cls="k4-a-head"):
+                            for name in ("all", "progress", "unlocked", "shown"):
+                                with box("Button", id=f"k4-af-{name}", cls="k4-chip"):
+                                    if name == "shown":
+                                        panel("k4-chip-icon ic-icon_star")
+                                    label("{s:label}", "k4-chip-label", BOLD)
+                            label("{s:count}", "k4-a-count", BOLD)
+                        with box(cls="k4-grid"):
+                            for row in range(ACH_ROWS):
+                                with box(cls=f"k4-grid-row{first(row)}"):
+                                    for column in range(ACH_COLUMNS):
+                                        i = row * ACH_COLUMNS + column
+                                        with box("Button", id=f"k4-a{i}", cls=f"k4-a{first(column)} {GONE}"):
+                                            with box(cls="k4-a-medal"):
+                                                medal(f"k4-a{i}-ring", f"k4-a{i}-icon", "k4-ring-card")
+                                                panel("k4-a-pin ic-icon_star")
+                                            label("{s:name}", "k4-a-name", BOLD)
+                                            label("{s:goal}", "k4-a-goal", MEDIUM)
+                                            bar(f"k4-a{i}-bar", "k4-bar-card")
+                        pager("k4-ach-prev", "k4-ach-next", "k4-pager-bottom")
+
+                    # Leaderboard
+                    with box(id="k4-view-leaderboard", cls="k4-view"):
+                        with box(cls="k4-lb-stage"):
+                            with box(cls="k4-lb-head"):
+                                leaf("Button", id="k4-lb-newer", cls="k4-arrow k4-arrow-left")
+                                with box(cls="k4-lb-season"):
+                                    label("{s:season}", "k4-lb-season-name", BOLD)
+                                    label("{s:status}", "k4-lb-status", BOLD)
+                                leaf("Button", id="k4-lb-older", cls="k4-arrow k4-arrow-right")
+                                pager("k4-lb-prev", "k4-lb-next")
+                            with box(cls="k4-lb-podium"):
+                                for i, place in enumerate((2, 1, 3)):
+                                    with box("Button", id=f"k4-lb-p{i}", cls=f"k4-lb-p k4-place-{place}{first(i)} {GONE}"):
+                                        panel("k4-lb-p-icon sg-0", id=f"k4-lb-p{i}-icon")
+                                        label("{s:name}", "k4-lb-p-name", BOLD)
+                                        label("{s:points}", "k4-lb-p-points", MEDIUM)
+                                        with box(cls="k4-step"):
+                                            label("{s:pos}", "k4-step-pos", BOLD)
+                        with box(cls="k4-lb-list"):
+                            for i in range(LB_ROWS):
+                                with box("Button", id=f"k4-lb-{i}", cls=f"k4-lb-row{' k4-lb-alt' if i % 2 else ''} {GONE}"):
+                                    label("{s:pos}", "k4-lb-pos", BOLD)
+                                    panel("k4-lb-icon sg-0", id=f"k4-lb-{i}-icon")
+                                    label("{s:name}", "k4-lb-name", MEDIUM)
+                                    label("{s:points}", "k4-lb-points", BOLD)
+                            vgrow()
+                            with box(id="k4-lb-me", cls=f"k4-lb-row k4-lb-me {GONE}"):
+                                label("{s:pos}", "k4-lb-pos", BOLD)
+                                panel("k4-lb-icon sg-0", id="k4-lb-me-icon")
+                                label("{s:name}", "k4-lb-name", BOLD)
+                                label("{s:points}", "k4-lb-points", BOLD)
+
+                    # Ranks
+                    with box(id="k4-view-ranks", cls="k4-view k4-view-pad"):
+                        with box(cls="k4-rk-head"):
+                            with box(cls="k4-pager"):
+                                leaf("Button", id="k4-rk-prev", cls=f"k4-arrow k4-arrow-left {GONE}")
+                                label("{s:page}", "k4-page", MEDIUM)
+                                leaf("Button", id="k4-rk-next", cls=f"k4-arrow k4-arrow-right {GONE}")
+                        with box(cls="k4-grid"):
+                            for row in range(RANK_ROWS):
+                                with box(cls=f"k4-grid-row{first(row)}"):
+                                    for column in range(RANK_COLUMNS):
+                                        i = row * RANK_COLUMNS + column
+                                        with box(id=f"k4-rk{i}", cls=f"k4-rk{first(column)} {GONE}"):
+                                            with box(cls="k4-rk-body"):
+                                                panel("k4-rk-icon sg-0", id=f"k4-rk{i}-icon")
+                                                label("{s:name}", "k4-rk-name", BOLD, id=f"k4-rk{i}-name")
+                                                label("{s:points}", "k4-rk-points", MEDIUM)
+                                            panel(f"k4-rk-gift ic-gift {GONE}", id=f"k4-rk{i}-gift")
+                                            with box(id=f"k4-rk{i}-you", cls=f"k4-rk-you {GONE}"):
+                                                panel("k4-rk-you-icon ic-profile")
+
+                    # Stats
+                    with box(id="k4-view-stats", cls="k4-view k4-view-pad"):
+                        header_space()
+                        with box(cls="k4-st-tiles"):
+                            for row in range(2):
+                                with box(cls=f"k4-st-row{first(row)}"):
+                                    for column in range(STAT_TILES // 2):
+                                        i = row * (STAT_TILES // 2) + column
+                                        with box(id=f"k4-st{i}", cls=f"k4-tile k4-st{first(column)} {GONE}"):
+                                            panel("k4-st-icon", id=f"k4-st{i}-icon")
+                                            with box(cls="k4-st-text"):
+                                                label("{s:value}", "k4-tile-value k4-st-value", BOLD)
+                                                label("{s:label}", "k4-cap", BOLD)
+                        with box(cls="k4-st-bottom"):
+                            with box(cls="k4-tile k4-st-weapons"):
+                                with box(cls="k4-sw-list"):
+                                    for i in range(STAT_WEAPONS):
+                                        with box(id=f"k4-sw{i}", cls=f"k4-sw{first(i)} {GONE}"):
+                                            panel("k4-sw-icon", id=f"k4-sw{i}-icon")
+                                            bar(f"k4-sw{i}-bar", "k4-bar-weapon")
+                                            label("{s:kills}", "k4-sw-kills", BOLD)
+                            with box(id="k4-pt", cls=f"k4-tile k4-pt {GONE}"):
+                                with box(cls="k4-pt-list"):
+                                    with box(cls="k4-pt-head"):
+                                        panel("k4-pt-head-icon ic-clock")
+                                        label("{s:total}", "k4-tile-value k4-pt-total", BOLD)
+                                    for team, picture in (("t", "tp-t"), ("ct", "tp-ct"), ("spec", "ic-watch")):
+                                        with box(id=f"k4-pt-{team}", cls=f"k4-pt-team k4-pt-{team}"):
+                                            panel(f"k4-pt-icon {picture}")
+                                            with box(cls="k4-pt-text"):
+                                                with box(cls="k4-pt-line"):
+                                                    label("{s:name}", "k4-pt-name", BOLD)
+                                                    grow()
+                                                    label("{s:time}", "k4-pt-time", BOLD)
+                                                bar(f"k4-pt-{team}-bar", "k4-bar-team")
+
+                    # Close button and points event, over the top right corner of every view
+                    with box(cls="k4-topbar"):
+                        with box(id="k4-event", cls=f"k4-event {GONE}"):
+                            panel("k4-event-icon ic-hot_trend")
+                            label("{s:event}", "k4-event-text", BOLD)
+                        with box("Button", id="k4-close", cls="k4-close"):
+                            panel("k4-close-icon ic-cancel")
+
+        # ------------------------------------------------------------ promotion banner
+        with box(id="k4-promo", cls=f"k4-promo {GONE}", hittest="false"):
+            label("{s:title}", "k4-promo-title", BOLD, hittest="false")
+            panel("k4-promo-icon sg-0", id="k4-promo-icon", hittest="false")
+            label("{s:rank}", "k4-promo-rank", BOLD, hittest="false")
+
+        # ------------------------------------------------------------ toasts: under the kill feed, newest on top
+        with box(id="k4-toasts", cls="k4-toasts", hittest="false"):
+            for i in range(TOASTS):
+                with box(id=f"k4-t{i}", cls=f"k4-toast k4-toast-{i} k4-tc-green k4-len-normal {GONE}", hittest="false"):
+                    panel("k4-toast-strip", hittest="false")
+                    with box(cls="k4-toast-row", hittest="false"):
+                        with box(cls="k4-toast-pic", hittest="false"):
+                            # The ring is behind the icon, not around it: a toast without a medal hides only the ring.
+                            with box(id=f"k4-t{i}-ring", cls=f"k4-ring k4-ring-toast t-locked {GONE}", hittest="false"):
+                                panel("k4-disc", hittest="false")
+                            panel("k4-toast-icon", id=f"k4-t{i}-icon", hittest="false")
+                        with box(cls="k4-toast-body", hittest="false"):
+                            label("{s:kind}", "k4-toast-kind", BOLD, hittest="false")
+                            label("{s:text}", "k4-toast-text", MEDIUM, hittest="false")
+                            with box(id=f"k4-t{i}-prog", cls=f"k4-bar k4-bar-toast {GONE}", hittest="false"):
+                                panel("k4-bar-fill w0", id=f"k4-t{i}-bar", hittest="false")
+                        label("{s:value}", "k4-toast-value", BOLD, hittest="false")
+                    panel("k4-toast-timer", id=f"k4-t{i}-timer", hittest="false")
+            label("{s:more}", f"k4-t-more {GONE}", BOLD, id="k4-t-more", hittest="false")
+
+open(OUT, "w", encoding="utf-8", newline="\n").write("\n".join(lines) + "\n")
 print(f"wrote {len(lines)} lines")

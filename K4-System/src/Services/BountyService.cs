@@ -60,7 +60,7 @@ internal sealed class BountyService(PluginConfig config, PlayerRegistry players,
 		if (hud.Hud is PanoramaHud panel)
 		{
 			foreach (K4Player viewer in players.ValidHumans.ToArray())
-				panel.ShowToast(viewer, "hud.toast.wanted", wantedName, ToastKind.Warning);
+				panel.Toast(viewer, new Toast(chat.For(viewer.Controller, "hud.toast.wanted"), wantedName, $"+{Settings.Reward}", "ic-crosshair", ToastColor.Red));
 		}
 		RefreshPanels();
 	}
@@ -84,6 +84,7 @@ internal sealed class BountyService(PluginConfig config, PlayerRegistry players,
 		{
 			ranks.GrantPoints(hunter, Settings.Reward);
 			chat.TellAll("bounty.claimed", hunter.Controller.PlayerName, wantedName, Settings.Reward);
+			hud.Hud?.Toast(hunter, new Toast(chat.For(hunter.Controller, "toast.bounty-claimed"), wantedName, $"+{Settings.Reward}", "ic-winner_ribbon", ToastColor.Gold));
 		}
 		else
 			chat.TellAll("bounty.ended", wantedName);

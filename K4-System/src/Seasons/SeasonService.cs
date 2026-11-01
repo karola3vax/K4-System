@@ -133,7 +133,8 @@ internal sealed class SeasonService(
 		{
 			string name = SeasonClock.Name(season, player.Controller.GetLanguage());
 			chat.Tell(player.Controller, "season.started", name, config.Ranks.StartPoints);
-			hud.Hud?.ShowToast(player, "hud.toast.season", chat.For(player.Controller, "hud.toast.season-text", name), ToastKind.Gold, "ic-trophy");
+			hud.Hud?.Toast(player, new Toast(chat.For(player.Controller, "hud.toast.season"), chat.For(player.Controller, "hud.toast.season-text", name),
+				"", "ic-trophy", ToastColor.Gold, ToastLength.Long));
 		}
 
 		ranks.RefreshPlacements();
@@ -164,8 +165,16 @@ internal sealed class SeasonService(
 	/// <summary>Reminds a joining player in the season's last days.</summary>
 	public void Greet(K4Player player)
 	{
-		if (Current is string current && SeasonClock.EndsSoon(current, DateTime.UtcNow, zone) && player.IsValid)
-			chat.Tell(player.Controller, "season.ending", SeasonClock.Name(current, player.Controller.GetLanguage()), TimeLeft(player.Controller, current));
+		if (Current is not string current || !SeasonClock.EndsSoon(current, DateTime.UtcNow, zone) || !player.IsValid)
+			return;
+
+		string name = SeasonClock.Name(current, player.Controller.GetLanguage());
+		string left = TimeLeft(player.Controller, current);
+		chat.Tell(player.Controller, "season.ending", name, left);
+
+		int placement = player.Rank?.TopPlacement ?? 0;
+		hud.Hud?.Toast(player, new Toast(chat.For(player.Controller, "toast.season-ending"), chat.For(player.Controller, "toast.season-ending-text", name, left),
+			placement > 0 ? $"#{placement}" : "", "ic-clock", ToastColor.Gold));
 	}
 
 	/// <summary>"2d, 4h" until the season ends, with the reader's unit names.</summary>

@@ -1,3 +1,12 @@
+-- 2026.11.01 - V7.1.0
+
+- feat: The panel is rebuilt as a full-screen menu in CS2's main-menu style, with pictures first. A sidebar (your rank and name, Home, Profile, Missions, Achievements, Leaderboard, Ranks, Stats, the season countdown) and the map being played as the background, dimmed. `!k4` opens Home: your rank emblem and progress, today's missions, the three achievements closest to done, the leaderboard podium and quick stats
+- feat: Achievements are medals: the CS2 icon of what they count inside a bronze, silver or gold ring by difficulty, grey while locked. Filters for all, in progress, unlocked and the ones on your profile; 15 per page
+- feat: Leaderboard with a podium for the top three, seven rows per page, your own row, and the season switch. Ranks shows every rank emblem with its points, a gift where the rank gives a reward, and yours marked. Stats adds kills by weapon and playtime per team with CS2's team patches
+- feat: Toasts rebuilt: up to three stack under the kill feed, newest on top, each with a picture, one line, the reward and a timer bar; promotions get a large banner with the new emblem. New toasts: a round summary (instead of the chat lines), mission progress at 50% and 90%, achievements almost reached, climbing the leaderboard, a warning when a demotion is close, and the season's last days. Achievement toasts show the medal
+- feat: Players choose for themselves: `!toasts` (or the button on their profile) turns pop-ups off, and the point messages switch (`!togglepointmsg`, or the profile button) is now remembered. Players with pop-ups off get the chat lines instead. New table `k4settings`
+- setup: Needs the updated Workshop addon `3811667212`; the 7.0 addon does not have the new panel, so update both together. New texts in all 36 languages. The new table is created on the next start; existing tables and config files need no changes
+
 -- 2026.11.01 - V7.0.0
 
 - feat: Monthly seasons, on by default (`modules.seasons`). On the 1st of each month at midnight (`missions.timezone`) everyone's points and rank go back to the start and rank rewards can be earned again. Stats, playtime, achievements and missions stay. Each player's final points, rank and position are kept in the new `k4seasons` table first, so no result is lost and a reset can be undone (docs/seasons.md). Players are told in the last 3 days, and everyone online gets a chat line and a pop-up when a new season starts

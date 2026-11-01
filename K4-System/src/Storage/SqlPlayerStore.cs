@@ -233,7 +233,7 @@ internal sealed class SqlPlayerStore
 		return record;
 	}
 
-	/// <summary>Adds what the main load query does not read: achievements, weapon kills, the showcase and the season.</summary>
+	/// <summary>Adds what the main load query does not read: achievements, weapon kills, the showcase, the settings and the season.</summary>
 	private async Task<PlayerRecord> WithProfileDataAsync(DbConnection connection, DbTransaction? transaction, PlayerRecord record, string steamId)
 	{
 		var parameters = new { SteamId = steamId };
@@ -245,15 +245,23 @@ internal sealed class SqlPlayerStore
 			$"SELECT `showcase` FROM `{tables.Profiles}` WHERE `steam_id` = @SteamId;", parameters, transaction);
 		string? season = await connection.ExecuteScalarAsync<string?>(
 			$"SELECT `season` FROM `{tables.SeasonState}` WHERE `id` = 1;", transaction: transaction);
+		// No settings row means both settings are still on.
+		(long Toasts, long PointMessages)? settings = (await connection.QueryAsync<(long, long)>(
+			$"SELECT `toasts`, `point_messages` FROM `{tables.Settings}` WHERE `steam_id` = @SteamId;", parameters, transaction))
+			.Select(row => ((long, long)?)row).FirstOrDefault();
 
 		return record with
 		{
 			Achievements = achievements.ToArray(),
 			WeaponKills = weapons.ToDictionary(row => row.Weapon, row => (int)Math.Clamp(row.Kills, 0, int.MaxValue), StringComparer.Ordinal),
 			Showcase = ParseShowcase(showcase),
-			Season = season
+			Season = season,
+			Toasts = settings is not { Toasts: 0 },
+			PointMessages = settings is not { PointMessages: 0 }
 		};
 	}
+
+	private static int? Flag(bool? value) => value is bool on ? (on ? 1 : 0) : null;
 
 	internal static IReadOnlyList<string> ParseShowcase(string? stored)
 		=> (stored ?? "").Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
@@ -332,6 +340,15 @@ internal sealed class SqlPlayerStore
 						VALUES (@SteamId, @Showcase)
 						{dialect.UpsertClause("`steam_id`")} `showcase` = @Showcase;",
 						new { SteamId = steamId, Showcase = Truncate(snapshot.Showcase, 255) }, transaction);
+				}
+
+				// A setting left null keeps its stored value; a new row starts with both on.
+				if (snapshot.Toasts is not null || snapshot.PointMessages is not null)
+				{
+					await connection.ExecuteAsync($@"INSERT INTO `{tables.Settings}` (`steam_id`, `toasts`, `point_messages`)
+						VALUES (@SteamId, COALESCE(@Toasts, 1), COALESCE(@PointMessages, 1))
+						{dialect.UpsertClause("`steam_id`")} `toasts` = COALESCE(@Toasts, `toasts`), `point_messages` = COALESCE(@PointMessages, `point_messages`);",
+						new { SteamId = steamId, Toasts = Flag(snapshot.Toasts), PointMessages = Flag(snapshot.PointMessages) }, transaction);
 				}
 
 				if (snapshot.Stats is not null)
@@ -522,7 +539,7 @@ internal sealed class SqlPlayerStore
 			foreach (string table in new[] { tables.Times, tables.Stats, tables.Ranks })
 				await connection.ExecuteAsync($"DELETE FROM `{table}` WHERE {dialect.OlderThanDays("lastseen")};", parameters, transaction);
 
-			foreach (string table in new[] { tables.Rewards, tables.Resets, tables.Missions, tables.MissionState, tables.PointLog, tables.Achievements, tables.WeaponKills, tables.Profiles })
+			foreach (string table in new[] { tables.Rewards, tables.Resets, tables.Missions, tables.MissionState, tables.PointLog, tables.Achievements, tables.WeaponKills, tables.Profiles, tables.Settings })
 			{
 				await connection.ExecuteAsync($@"DELETE FROM `{table}`
 					WHERE NOT EXISTS (SELECT 1 FROM `{tables.Ranks}` r WHERE r.`steam_id` = `{table}`.`steam_id`);", transaction: transaction);

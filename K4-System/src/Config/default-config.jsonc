@@ -207,6 +207,7 @@
     "duel": ["duel"],
     "achievements": ["achievements", "achievement", "ach"],
     "profile": ["profile"],
-    "season": ["season"]
+    "season": ["season"],
+    "toasts": ["toasts"] // Turns your own panel pop-ups on or off; remembered per player
   }
 }

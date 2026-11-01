@@ -1,0 +1,24 @@
+[
+  { "Name": "mission 4/10 to 5/10 crosses 50%", "Rule": "milestone", "Before": 4, "After": 5, "Target": 10, "ExpectedPercent": 50 },
+  { "Name": "mission 5/10 to 6/10 crosses nothing new", "Rule": "milestone", "Before": 5, "After": 6, "Target": 10, "ExpectedPercent": null },
+  { "Name": "mission 8/10 to 9/10 crosses 90%", "Rule": "milestone", "Before": 8, "After": 9, "Target": 10, "ExpectedPercent": 90 },
+  { "Name": "a jump over both milestones toasts only 90%", "Rule": "milestone", "Before": 2, "After": 9, "Target": 10, "ExpectedPercent": 90 },
+  { "Name": "completing the mission is the completion toast, not a milestone", "Rule": "milestone", "Before": 8, "After": 10, "Target": 10, "ExpectedPercent": null },
+  { "Name": "a target of 1 has no milestones", "Rule": "milestone", "Before": 0, "After": 1, "Target": 1, "ExpectedPercent": null },
+  { "Name": "a target of 2: 1/2 is exactly 50%", "Rule": "milestone", "Before": 0, "After": 1, "Target": 2, "ExpectedPercent": 50 },
+  { "Name": "weekly 49/100 to 50/100 crosses 50%", "Rule": "milestone", "Before": 49, "After": 50, "Target": 100, "ExpectedPercent": 50 },
+  { "Name": "weekly 89/100 to 90/100 crosses 90%", "Rule": "milestone", "Before": 89, "After": 90, "Target": 100, "ExpectedPercent": 90 },
+  { "Name": "best-try mission that did not improve", "Rule": "milestone", "Before": 3, "After": 3, "Target": 5, "ExpectedPercent": null },
+  { "Name": "best-try 3 kills in one round of 5 crosses 50%", "Rule": "milestone", "Before": 2, "After": 3, "Target": 5, "ExpectedPercent": 50 },
+  { "Name": "5 of 7 is 71%, below 90%, and 50% was crossed earlier", "Rule": "milestone", "Before": 4, "After": 5, "Target": 7, "ExpectedPercent": null },
+
+  { "Name": "Gold Nova at 1000, rank below at 800: 1015 after a death is within 20 points", "Rule": "hold-rank", "Before": 1020, "After": 1015, "RankPoint": 1000, "BelowPoint": 800, "ExpectedWarn": true },
+  { "Name": "exactly 10% above the rank still warns", "Rule": "hold-rank", "Before": 1030, "After": 1020, "RankPoint": 1000, "BelowPoint": 800, "ExpectedWarn": true },
+  { "Name": "just over 10% does not warn", "Rule": "hold-rank", "Before": 1030, "After": 1021, "RankPoint": 1000, "BelowPoint": 800, "ExpectedWarn": false },
+  { "Name": "a gain never warns", "Rule": "hold-rank", "Before": 1000, "After": 1005, "RankPoint": 1000, "BelowPoint": 800, "ExpectedWarn": false },
+  { "Name": "already demoted (below the rank) is the demotion toast, not a warning", "Rule": "hold-rank", "Before": 1005, "After": 995, "RankPoint": 1000, "BelowPoint": 800, "ExpectedWarn": false },
+  { "Name": "standing exactly on the rank line warns", "Rule": "hold-rank", "Before": 1010, "After": 1000, "RankPoint": 1000, "BelowPoint": 800, "ExpectedWarn": true },
+  { "Name": "a rank at 0 points has nothing to fall to", "Rule": "hold-rank", "Before": 5, "After": 0, "RankPoint": 0, "BelowPoint": -1, "ExpectedWarn": false },
+  { "Name": "the default rank below (-1) counts as 0: first rank at 100, 108 after a loss", "Rule": "hold-rank", "Before": 115, "After": 108, "RankPoint": 100, "BelowPoint": -1, "ExpectedWarn": true },
+  { "Name": "first rank at 100, 111 after a loss is safe", "Rule": "hold-rank", "Before": 115, "After": 111, "RankPoint": 100, "BelowPoint": -1, "ExpectedWarn": false }
+]

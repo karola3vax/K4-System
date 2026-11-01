@@ -38,6 +38,14 @@ internal sealed class AchievementService(
 		foreach (AchievementDefinition achievement in met)
 			mine.Unlock(achievement.Id);
 
+		// Goals already at 90% when joining do not toast "almost there"; only reaching 90% while playing does.
+		AchievementCounters counters = CountersOf(player);
+		foreach (AchievementDefinition achievement in achievements)
+		{
+			if (AchievementRules.Progress(achievement, counters) is int progress && ToastRules.AlmostThere(progress, achievement.Goal))
+				player.ToastsShown.Add(AlmostKey(achievement));
+		}
+
 		if (met.Count > 0 && player.IsValid)
 			chat.Tell(player.Controller, "achievement.retro", met.Count, command);
 	}
@@ -55,10 +63,31 @@ internal sealed class AchievementService(
 		if (player.Achievements is not PlayerAchievements mine || !player.IsHuman)
 			return;
 
-		foreach (AchievementDefinition achievement in AchievementRules.NewlyMet(achievements, mine.Unlocked, CountersOf(player)))
+		AchievementCounters counters = CountersOf(player);
+		foreach (AchievementDefinition achievement in AchievementRules.NewlyMet(achievements, mine.Unlocked, counters))
 		{
 			mine.Unlock(achievement.Id);
 			Reward(player, achievement, leaving);
+		}
+
+		if (!leaving && hud.Hud is PanoramaHud panel && player.IsValid)
+			ShowAlmostThere(panel, player, mine, counters);
+	}
+
+	private static string AlmostKey(AchievementDefinition achievement) => "ach90:" + achievement.Id;
+
+	/// <summary>A short blue toast, once per achievement per connection, when progress first reaches 90% of the goal.</summary>
+	private void ShowAlmostThere(PanoramaHud panel, K4Player player, PlayerAchievements mine, AchievementCounters counters)
+	{
+		foreach (AchievementDefinition achievement in achievements)
+		{
+			if (mine.Unlocked.Contains(achievement.Id) || AchievementRules.Progress(achievement, counters) is not int progress
+				|| !ToastRules.AlmostThere(progress, achievement.Goal) || !player.ToastsShown.Add(AlmostKey(achievement)))
+				continue;
+
+			panel.Toast(player, new Toast(chat.For(player.Controller, "toast.achievement-close"), NameFor(achievement, player.Controller),
+				$"{progress}/{achievement.Goal}", PanoramaHud.AchievementIcon(achievement.Type), ToastColor.Blue, ToastLength.Short,
+				ToastRules.Percent(progress, achievement.Goal)));
 		}
 	}
 
@@ -103,7 +132,9 @@ internal sealed class AchievementService(
 		}
 
 		if (hud.Hud is PanoramaHud panel && player.IsValid)
-			panel.ShowToast(player, "hud.toast.achievement", NameFor(achievement, player.Controller), ToastKind.Gold, "ic-trophy");
+			panel.Toast(player, new Toast(chat.For(player.Controller, "hud.toast.achievement"), NameFor(achievement, player.Controller),
+				achievement.Points > 0 ? $"+{achievement.Points}" : "", PanoramaHud.AchievementIcon(achievement.Type), ToastColor.Gold, ToastLength.Long,
+				Tier: AchievementRules.Tier(achievement)));
 	}
 
 	public string NameFor(AchievementDefinition achievement, CCSPlayerController? reader)

@@ -47,7 +47,8 @@ internal sealed class EventService(EventState state, PlayerRegistry players, Cha
 			if (hud.Hud is PanoramaHud panel)
 			{
 				foreach (K4Player player in players.ValidHumans.ToArray())
-					panel.ShowToast(player, "hud.toast.event", chat.For(player.Controller, "hud.toast.event-text", multiplier, minutes), ToastKind.Gold, "ic-trade_up");
+					panel.Toast(player, new Toast(chat.For(player.Controller, "hud.toast.event"), chat.For(player.Controller, "toast.event-text", minutes),
+						$"{multiplier}×", "ic-trade_up", ToastColor.Gold, ToastLength.Long));
 			}
 		}
 

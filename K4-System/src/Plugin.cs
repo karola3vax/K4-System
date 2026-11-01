@@ -27,7 +27,7 @@ public sealed class Plugin : BasePlugin
 
 	public override string ModuleAuthor => "K4ryuu; maintained by karola3vax";
 
-	public override string ModuleVersion => "7.0.0 " +
+	public override string ModuleVersion => "7.1.0 " +
 #if RELEASE
 		"(release)";
 #else
@@ -179,7 +179,7 @@ public sealed class Plugin : BasePlugin
 
 		if (Config.Panorama.Enabled)
 		{
-			hud = new PanoramaHud(this, Config, players, ranks, missions, bounty, duels, achievements, events, seasons, playtime, store, gameThread, background, chat, Logger);
+			hud = new PanoramaHud(this, Config, players, ranks, missions, achievements, events, seasons, playtime, store, playerService, gameThread, background, chat, Logger);
 			hudBridge.Hud = hud;
 			RegisterHudListeners(hud, players);
 			hud.Warmup();
