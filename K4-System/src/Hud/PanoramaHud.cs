@@ -66,6 +66,8 @@ internal sealed class PanoramaHud(
 	private const int TopPages = 10;
 	private const int RankRows = 10;
 	private const int StatTiles = 9;
+	// "2d, 23h, 59m, 48s" wrapped out of its stat tile; two units fit.
+	private const int StatTimeUnits = 2;
 	private const float ToastSeconds = 3.5f;
 
 	// CS2 can kick a player when a chat command and a HUD update share a frame, so drawing waits a
@@ -973,7 +975,7 @@ internal sealed class PanoramaHud(
 		}
 
 		if (player.Playtime is not null)
-			tiles.Add((Text(player, "hud.stat.playtime"), playtime.Format(playtime.CurrentSeconds(player)[(int)PlaytimeField.All]), "ic-clock"));
+			tiles.Add((Text(player, "hud.stat.playtime"), playtime.Format(playtime.CurrentSeconds(player)[(int)PlaytimeField.All], StatTimeUnits), "ic-clock"));
 
 		for (int i = 0; i < StatTiles; i++)
 		{
