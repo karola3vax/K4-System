@@ -1,3 +1,14 @@
+-- 2026.11.01 - V7.1.1
+
+- feat: The panel is a centered 1240x760 window instead of covering the whole screen, so the game stays visible around it. Every page is fitted to it
+- feat: Everything on the panel explains itself. Hover a mission, medal, quick stat, rank, streak day or achievement and a short explanation appears over it: what it is, how far you are, what it pays, and what a click does
+- feat: Achievements say what they are right under their name, on the Achievements page and on the profile. Clicking one of your own shown medals on your profile opens Achievements on the ones you show, where you change them
+- feat: The mission streak explains itself: "days in a row", the day number and bonus of each of the seven days of its current week, finished days lit and today marked. Past day 7 it moves on to the next week instead of staying full
+- fix: The panel's icons are sharp: the addon carries copies of CS2's icons at 256px (gen_k4_icons.py), because CS2 stretched its 32px icons and they looked blurry on the full-screen panel
+- feat: Kills by weapon shows each weapon's name next to its picture
+- fix: Toasts and the promotion banner slide out instead of vanishing at once
+- setup: Needs the updated Workshop addon `3811667212`; update the server with it, because a 7.1.0 server leaves the explanations empty and hovering a card shows an empty box. New texts in all 36 languages
+
 -- 2026.11.01 - V7.1.0
 
 - feat: The panel is rebuilt as a full-screen menu in CS2's main-menu style, with pictures first. A sidebar (your rank and name, Home, Profile, Missions, Achievements, Leaderboard, Ranks, Stats, the season countdown) and the map being played as the background, dimmed. `!k4` opens Home: your rank emblem and progress, today's missions, the three achievements closest to done, the leaderboard podium and quick stats

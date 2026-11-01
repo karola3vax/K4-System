@@ -2,7 +2,7 @@
 
 The K4 panel is two halves that ship apart: the layout and stylesheet in the Workshop addon (`panorama/`), and the server code that fills them (`K4-System/src/Hud/PanoramaHud.cs`). This page is the contract between them: every id, dialog variable and class the server uses. Change both sides together, and the layout tests (`PanoramaLayoutTests`) check the ids and classes listed here.
 
-The design is the canvas "K4 Panel Redesign" (full screen, CS2 main-menu style, visual first).
+The design is the canvas "K4 Panel Redesign" (a centered 1240x760 window since 7.1.1, CS2 main-menu style, visual first).
 
 ## Rules the layout must follow
 
@@ -24,14 +24,14 @@ The design is the canvas "K4 Panel Redesign" (full screen, CS2 main-menu style, 
 | Map background | `map-<mapname>` for every map with a screenshot in CS2 (`map_icons/screenshots/1080p/<map>_png`), else `map-default` | `map-default` |
 | Toast color | `k4-tc-green`, `k4-tc-gold`, `k4-tc-red`, `k4-tc-blue`, `k4-tc-purple` | `k4-tc-green` |
 | Toast length | `k4-len-short` (2.5 s), `k4-len-normal` (3.5 s), `k4-len-long` (5 s): the timer bar's shrink time | `k4-len-normal` |
-| State | `k4-closed`, `k4-show`, `k4-gone`, `k4-active`, `k4-done`, `k4-disabled`, `k4-current`, `k4-pinned`, `k4-locked`, `k4-on`, `k4-today`, `k4-easy`, `k4-medium`, `k4-hard`, `k4-run` | |
+| State | `k4-closed`, `k4-show`, `k4-gone`, `k4-active`, `k4-done`, `k4-disabled`, `k4-current`, `k4-pinned`, `k4-locked`, `k4-on`, `k4-today`, `k4-easy`, `k4-medium`, `k4-hard`, `k4-run`, `k4-out` (a toast or the promotion banner sliding out before it is hidden) | |
 
 ## Frame
 
 | Id | Kind | Variables and classes |
 | --- | --- | --- |
-| `k4-panel` | Panel, full screen | `k4-closed` while closed |
-| `k4-bg` | Panel, full screen, class `map-default` always | the fallback background |
+| `k4-panel` | Panel, a centered 1240x760 window | `k4-closed` while closed |
+| `k4-bg` | Panel, filling the window, class `map-default` always | the fallback background |
 | `k4-bg-map` | Panel inside `k4-bg`, covering it | map background group; a `map-<name>` the stylesheet does not define draws nothing, so the fallback shows through |
 | `k4-me` | Button (opens the profile) | `{s:name}`, `{s:meta}`; inside `k4-me-icon` (rank emblem group) |
 | `k4-nav-home`, `k4-nav-profile`, `k4-nav-missions`, `k4-nav-achievements`, `k4-nav-leaderboard`, `k4-nav-ranks`, `k4-nav-stats` | Button | `{s:label}`; `k4-active` on the open page; `k4-gone` when the module is off |
@@ -141,3 +141,22 @@ hud.Hud?.Promote(player, rank);   // the large promotion banner
 ```
 
 `kind`, `text` and `value` are already in the player's language. `visual` is one picture class from the groups above.
+
+## Explanations (7.1.1)
+
+Every card that shows a picture or number without words explains itself on hover. A card with the class
+`k4-has-tip` holds a `k4-tip` panel (`hittest="false"`) with a `{s:tip}` label, laid over the card and shown
+while the card is hovered. Cards that stack their content keep it in a body panel (`k4-a-body`,
+`k4-h-a-body`, `k4-pf-sc-body`, `k4-sd-body`) so the explanation can lie over it.
+
+| Panel | `{s:tip}` says |
+| --- | --- |
+| `k4-h-m0` … `k4-h-m3` | the mission and its reward |
+| `k4-h-a0` … `k4-h-a2` | what the achievement asks, progress, reward |
+| `k4-h-q0` … `k4-h-q4` | what the number is |
+| `k4-pf-sc0` … `k4-pf-sc2` (Buttons since 7.1.1: a click on your own opens Achievements on the shown ones) | what it is, its reward; also `{s:desc}` under the name |
+| `k4-a0` … `k4-a14` | status, reward, and what a click does; also `{s:desc}` under the name |
+| `k4-rk0` … `k4-rk19` | what reaching the rank gives |
+| `k4-sd0` … `k4-sd6` | that day of the streak; also `{s:day}` and `{s:bonus}` |
+
+Also: `k4-view-missions` `{s:streakhint}` explains the streak, and `k4-sw0` … `k4-sw2` show `{s:weapon}`.
