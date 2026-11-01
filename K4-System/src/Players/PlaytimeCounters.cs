@@ -83,15 +83,17 @@ public sealed class PlaytimeCounters
 		_ => PlaytimeField.Spec
 	};
 
-	/// <summary>Formats seconds as "1d, 2h, 5m" using the localized unit suffixes.</summary>
-	public static string Format(int totalSeconds, Func<string, string> unitSuffix)
+	/// <summary>Formats seconds as "1d, 2h, 5m" using the localized unit suffixes. <paramref name="units"/> limits it to that
+	/// many units from the largest one, so 2 gives "2d, 23h" for a panel tile.</summary>
+	public static string Format(int totalSeconds, Func<string, string> unitSuffix, int units = 6)
 	{
-		string[] units = ["year", "month", "day", "hour", "minute", "second"];
+		string[] names = ["year", "month", "day", "hour", "minute", "second"];
 		int[] divisors = [31536000, 2592000, 86400, 3600, 60, 1];
 		StringBuilder builder = new();
 		int remaining = Math.Max(0, totalSeconds);
+		int last = names.Length - 1;
 
-		for (int i = 0; i < units.Length; i++)
+		for (int i = 0; i <= last; i++)
 		{
 			int value = remaining / divisors[i];
 			remaining %= divisors[i];
@@ -99,9 +101,12 @@ public sealed class PlaytimeCounters
 			if (value <= 0)
 				continue;
 
+			if (builder.Length == 0)
+				last = Math.Min(last, i + units - 1);
+
 			if (builder.Length > 0)
 				builder.Append(", ");
-			builder.Append(value).Append(unitSuffix(units[i]));
+			builder.Append(value).Append(unitSuffix(names[i]));
 		}
 
 		return builder.Length > 0 ? builder.ToString() : "0" + unitSuffix("second");

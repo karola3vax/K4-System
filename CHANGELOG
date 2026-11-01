@@ -1,3 +1,7 @@
+-- Unreleased (after V6.5.1)
+
+- fix: The panel's Playtime tile shows the two largest units, such as "2d, 23h". The full "2d, 23h, 59m, 48s" wrapped onto a second line and was cut off. `!time` in chat still shows every unit
+
 -- 2026.10.31 - V6.5.1
 
 - fix: Panel tabs, captions, buttons and pop-up titles no longer show a dotted capital İ ("MİSSİONS", "ACHİEVEMENTS") for players whose CS2 runs in Turkish. CS2 capitalized these with the player's game language; K4 now sends them already capitalized in the player's K4 language, so English reads "MISSIONS" and Turkish keeps its own capitals

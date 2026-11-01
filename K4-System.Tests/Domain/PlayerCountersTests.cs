@@ -13,6 +13,15 @@ public class PlayerCountersTests
 	public void KillDeathRatioShowsKillsWhenThereAreNoDeaths(int kills, int deaths, float expected)
 		=> Assert.Equal(expected, StatCounters.KillDeathRatio(kills, deaths), 4);
 
+	[Theory]
+	[InlineData(259188, 6, "2d, 23h, 59m, 48s")]
+	[InlineData(259188, 2, "2d, 23h")]
+	[InlineData(86700, 2, "1d")]
+	[InlineData(2710, 2, "45m, 10s")]
+	[InlineData(0, 2, "0s")]
+	public void PlaytimeKeepsTheLargestUnits(int seconds, int units, string expected)
+		=> Assert.Equal(expected, PlaytimeCounters.Format(seconds, unit => unit[..1], units));
+
 	[Fact]
 	public void RankToEveryoneIsOffUnlessTheServerTurnsItOn()
 		=> Assert.False(new K4System.Config.PluginConfig().Commands.RankToEveryone);

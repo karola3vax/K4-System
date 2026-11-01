@@ -93,6 +93,6 @@ internal sealed class PlaytimeService(Chat chat)
 		return seconds;
 	}
 
-	public string Format(int seconds)
-		=> PlaytimeCounters.Format(seconds, unit => chat[$"unit.{unit}"]);
+	public string Format(int seconds, int units = 6)
+		=> PlaytimeCounters.Format(seconds, unit => chat[$"unit.{unit}"], units);
 }
