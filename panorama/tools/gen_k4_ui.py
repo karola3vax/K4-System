@@ -1,4 +1,4 @@
-"""Writes the K4 Panorama layout (7.1): a full-screen panel in the style of CS2's main menu, and a toast stack.
+"""Writes the K4 Panorama layout (7.1): a centered window panel (1240x760) in the style of CS2's main menu, and a toast stack.
 
 Every id, dialog variable and class the server uses is listed in docs/panel-contract.md; this script and
 PanoramaLayoutTests follow it. Repeated parts are generated so their ids stay consistent.
@@ -85,6 +85,12 @@ def medal(ring_id, icon_id, cls, **attrs):
             panel("k4-medal-icon", id=icon_id, **attrs)
 
 
+def tip():
+    """A hover explanation laid over its card: hidden until the card is hovered, never takes the mouse."""
+    with box(cls="k4-tip", hittest="false"):
+        label("{s:tip}", "k4-tip-text", MEDIUM, hittest="false")
+
+
 def first(i):
     # Grid cells are spaced by a left margin; the first cell of a row has none (Panorama has no :first-child).
     return " k4-first" if i == 0 else ""
@@ -115,7 +121,7 @@ with box("root"):
     with box("styles"):
         for src in ("s2r://panorama/styles/csgostyles.vcss_c", "s2r://panorama/styles/custom_game/k4_ui.vcss_c"):
             lines.append("\t" * depth + f'<include src="{src}" />')
-    # The full-screen root, the toast stack and the banner let the mouse through (hittest="false"): the root
+    # The screen-wide root, the toast stack and the banner let the mouse through (hittest="false"): the root
     # sits above every other HUD, and without it it took the hover from other plugins' mouse menus.
     with box(cls="k4-root", hittest="false"):
 
@@ -167,17 +173,20 @@ with box("root"):
                                 panel("k4-cap-icon ic-quest")
                                 with box(cls="k4-h-slots"):
                                     for i in range(HOME_MISSIONS):
-                                        with box(id=f"k4-h-m{i}", cls=f"k4-h-m{first(i)} {GONE}"):
+                                        with box(id=f"k4-h-m{i}", cls=f"k4-h-m k4-has-tip{first(i)} {GONE}"):
                                             panel("k4-h-m-icon", id=f"k4-h-m{i}-icon")
                                             label("{s:value}", "k4-h-m-value", BOLD)
+                                            tip()
                             with box("Button", id="k4-h-ach", cls="k4-tile k4-h-card"):
                                 panel("k4-cap-icon ic-winner_ribbon")
                                 with box(cls="k4-h-slots"):
                                     for i in range(HOME_ACHIEVEMENTS):
-                                        with box(id=f"k4-h-a{i}", cls=f"k4-h-a{first(i)} {GONE}"):
-                                            medal(f"k4-h-a{i}-ring", f"k4-h-a{i}-icon", "k4-ring-home")
-                                            label("{s:name}", "k4-h-a-name", BOLD)
-                                            bar(f"k4-h-a{i}-bar", "k4-bar-small")
+                                        with box(id=f"k4-h-a{i}", cls=f"k4-h-a k4-has-tip{first(i)} {GONE}"):
+                                            with box(cls="k4-h-a-body"):
+                                                medal(f"k4-h-a{i}-ring", f"k4-h-a{i}-icon", "k4-ring-home")
+                                                label("{s:name}", "k4-h-a-name", BOLD)
+                                                bar(f"k4-h-a{i}-bar", "k4-bar-small")
+                                            tip()
                             with box("Button", id="k4-h-top", cls="k4-tile k4-h-card"):
                                 panel("k4-cap-icon ic-leader")
                                 with box(cls="k4-h-slots"):
@@ -190,10 +199,11 @@ with box("root"):
                                                 label("{s:pos}", "k4-step-pos", BOLD)
                         with box(cls="k4-h-quick"):
                             for i in range(HOME_QUICK):
-                                with box("Button", id=f"k4-h-q{i}", cls=f"k4-tile k4-h-q{' k4-h-q-wide' if i == HOME_QUICK - 1 else ''}{first(i)} {GONE}"):
+                                with box("Button", id=f"k4-h-q{i}", cls=f"k4-tile k4-h-q k4-has-tip{' k4-h-q-wide' if i == HOME_QUICK - 1 else ''}{first(i)} {GONE}"):
                                     with box(cls="k4-h-q-inner"):
                                         panel("k4-h-q-icon", id=f"k4-h-q{i}-icon")
                                         label("{s:value}", "k4-tile-value k4-h-q-value", BOLD)
+                                    tip()
 
                     # Profile
                     with box(id="k4-view-profile", cls="k4-view k4-view-pad"):
@@ -218,9 +228,12 @@ with box("root"):
                             with box(cls="k4-pf-showcase"):
                                 with box(cls="k4-pf-sc-row"):
                                     for i in range(SHOWCASE):
-                                        with box(id=f"k4-pf-sc{i}", cls=f"k4-pf-sc{first(i)} {GONE}"):
-                                            medal(f"k4-pf-sc{i}-ring", f"k4-pf-sc{i}-icon", "k4-ring-showcase")
-                                            label("{s:name}", "k4-pf-sc-name", BOLD)
+                                        with box("Button", id=f"k4-pf-sc{i}", cls=f"k4-pf-sc k4-has-tip{first(i)} {GONE}"):
+                                            with box(cls="k4-pf-sc-body"):
+                                                medal(f"k4-pf-sc{i}-ring", f"k4-pf-sc{i}-icon", "k4-ring-showcase")
+                                                label("{s:name}", "k4-pf-sc-name", BOLD)
+                                                label("{s:desc}", "k4-pf-sc-desc", MEDIUM)
+                                            tip()
                                 label("{s:hint}", f"k4-pf-sc-hint {GONE}", MEDIUM, id="k4-pf-sc-hint")
                         with box(cls="k4-pf-stats"):
                             for i in range(PROFILE_STATS):
@@ -273,13 +286,19 @@ with box("root"):
                             with box(cls="k4-mw-side"):
                                 label("{s:progress}", "k4-mw-progress", BOLD)
                                 label("{s:reward}", "k4-reward k4-mw-reward", BOLD)
-                        with box(cls="k4-streak"):
-                            panel("k4-streak-icon ic-hot_trend")
-                            label("{s:streak}", "k4-streak-count", BOLD)
-                            for i in range(STREAK_DAYS):
-                                with box(id=f"k4-sd{i}", cls="k4-sd"):
-                                    panel("k4-sd-icon")
-                            label("{s:bonus}", "k4-reward k4-streak-bonus", BOLD)
+                        with box(cls="k4-streak-wrap"):
+                            with box(cls="k4-streak-head"):
+                                panel("k4-streak-icon ic-hot_trend")
+                                label("{s:streak}", "k4-streak-count", BOLD)
+                                label("{s:streakhint}", "k4-streak-hint", MEDIUM)
+                            with box(cls="k4-streak"):
+                                for i in range(STREAK_DAYS):
+                                    with box(id=f"k4-sd{i}", cls=f"k4-sd k4-has-tip{first(i)}"):
+                                        with box(cls="k4-sd-body"):
+                                            panel("k4-sd-icon")
+                                            label("{s:day}", "k4-sd-day", BOLD)
+                                            label("{s:bonus}", "k4-sd-bonus", BOLD)
+                                        tip()
 
                     # Achievements
                     with box(id="k4-view-achievements", cls="k4-view k4-view-pad"):
@@ -295,13 +314,16 @@ with box("root"):
                                 with box(cls=f"k4-grid-row{first(row)}"):
                                     for column in range(ACH_COLUMNS):
                                         i = row * ACH_COLUMNS + column
-                                        with box("Button", id=f"k4-a{i}", cls=f"k4-a{first(column)} {GONE}"):
-                                            with box(cls="k4-a-medal"):
-                                                medal(f"k4-a{i}-ring", f"k4-a{i}-icon", "k4-ring-card")
-                                                panel("k4-a-pin ic-icon_star")
-                                            label("{s:name}", "k4-a-name", BOLD)
-                                            label("{s:goal}", "k4-a-goal", MEDIUM)
-                                            bar(f"k4-a{i}-bar", "k4-bar-card")
+                                        with box("Button", id=f"k4-a{i}", cls=f"k4-a k4-has-tip{first(column)} {GONE}"):
+                                            with box(cls="k4-a-body"):
+                                                with box(cls="k4-a-medal"):
+                                                    medal(f"k4-a{i}-ring", f"k4-a{i}-icon", "k4-ring-card")
+                                                    panel("k4-a-pin ic-icon_star")
+                                                label("{s:name}", "k4-a-name", BOLD)
+                                                label("{s:desc}", "k4-a-desc", MEDIUM)
+                                                label("{s:goal}", "k4-a-goal", MEDIUM)
+                                                bar(f"k4-a{i}-bar", "k4-bar-card")
+                                            tip()
                         pager("k4-ach-prev", "k4-ach-next", "k4-pager-bottom")
 
                     # Leaderboard
@@ -348,7 +370,7 @@ with box("root"):
                                 with box(cls=f"k4-grid-row{first(row)}"):
                                     for column in range(RANK_COLUMNS):
                                         i = row * RANK_COLUMNS + column
-                                        with box(id=f"k4-rk{i}", cls=f"k4-rk{first(column)} {GONE}"):
+                                        with box(id=f"k4-rk{i}", cls=f"k4-rk k4-has-tip{first(column)} {GONE}"):
                                             with box(cls="k4-rk-body"):
                                                 panel("k4-rk-icon sg-0", id=f"k4-rk{i}-icon")
                                                 label("{s:name}", "k4-rk-name", BOLD, id=f"k4-rk{i}-name")
@@ -356,6 +378,7 @@ with box("root"):
                                             panel(f"k4-rk-gift ic-gift {GONE}", id=f"k4-rk{i}-gift")
                                             with box(id=f"k4-rk{i}-you", cls=f"k4-rk-you {GONE}"):
                                                 panel("k4-rk-you-icon ic-profile")
+                                            tip()
 
                     # Stats
                     with box(id="k4-view-stats", cls="k4-view k4-view-pad"):
@@ -376,6 +399,7 @@ with box("root"):
                                     for i in range(STAT_WEAPONS):
                                         with box(id=f"k4-sw{i}", cls=f"k4-sw{first(i)} {GONE}"):
                                             panel("k4-sw-icon", id=f"k4-sw{i}-icon")
+                                            label("{s:weapon}", "k4-sw-name", BOLD)
                                             bar(f"k4-sw{i}-bar", "k4-bar-weapon")
                                             label("{s:kills}", "k4-sw-kills", BOLD)
                             with box(id="k4-pt", cls=f"k4-tile k4-pt {GONE}"):

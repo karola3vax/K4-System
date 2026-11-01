@@ -313,11 +313,13 @@ public partial class PanoramaLayoutTests
 	}
 
 	[Fact]
-	public void The_panel_covers_the_full_screen()
+	public void The_panel_is_a_centered_1240_by_760_window()
 	{
 		string rule = Rule("k4-panel");
-		Assert.Contains("width: 100%;", rule, StringComparison.Ordinal);
-		Assert.Contains("height: 100%;", rule, StringComparison.Ordinal);
+		Assert.Contains("width: 1240px;", rule, StringComparison.Ordinal);
+		Assert.Contains("height: 760px;", rule, StringComparison.Ordinal);
+		Assert.Contains("horizontal-align: center;", rule, StringComparison.Ordinal);
+		Assert.Contains("vertical-align: middle;", rule, StringComparison.Ordinal);
 	}
 
 	[Fact]

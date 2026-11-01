@@ -1,4 +1,4 @@
-"""Writes the K4 Panorama stylesheet (7.1): a full-screen panel in the style of CS2's main menu, and the toast stack.
+"""Writes the K4 Panorama stylesheet (7.1): a centered 1240x760 window in the style of CS2's main menu, and the toast stack.
 
 The classes the server swaps (docs/panel-contract.md) are generated at the bottom: game icons, rank emblems,
 team patches, map backgrounds, medal tiers, bar widths, rank colors, toast colors and lengths.
@@ -8,8 +8,10 @@ The exceptions are the rank emblems and the icons: the addon carries sharp copie
 because the game draws them at 32x13 and 32x32 and they looked blurry at the panel's sizes.
 Sounds are CS2's own UI sound events, the ones Valve's Panorama files use.
 
-Panorama scales the whole HUD by screen height (1080 is 1:1), so heights are fixed px and widths flow:
-the sidebar is 300px and everything right of it shares the rest, which keeps 16:9 and 16:10 alike.
+Panorama scales the whole HUD by screen height (1080 is 1:1), so the window is a fixed 1240x760 at every
+aspect ratio, centered over the game with no dim around it. Inside its 1px padding the sidebar is 220px and
+the pages get 1018x758; every page is sized to fit that without scrolling (page padding 24px 28px, so
+962x710 of content). The toasts and the promotion banner stay anchored to the screen, outside the window.
 """
 import os
 import re
@@ -87,10 +89,10 @@ PICTURES = [
 
 # Grid cells spaced by a left margin, and rows spaced by a top margin; k4-first cancels it (see gen_k4_ui.py).
 GAPS_LEFT = {
-    "k4-h-card": 22, "k4-h-m": 14, "k4-h-a": 14, "k4-h-p": 14, "k4-h-q": 22, "k4-pf-sc": 26, "k4-pf-st": 18,
-    "k4-pf-ss": 18, "k4-m": 22, "k4-a": 16, "k4-rk": 14, "k4-st": 18, "k4-lb-p": 30,
+    "k4-h-card": 16, "k4-h-m": 10, "k4-h-a": 10, "k4-h-p": 10, "k4-h-q": 14, "k4-pf-sc": 12, "k4-pf-st": 12,
+    "k4-pf-ss": 12, "k4-m": 16, "k4-a": 10, "k4-rk": 10, "k4-st": 12, "k4-lb-p": 20,
 }
-GAPS_TOP = {"k4-grid-row": 16, "k4-st-row": 18, "k4-sw": 30}
+GAPS_TOP = {"k4-grid-row": 10, "k4-st-row": 12, "k4-sw": 28}
 
 # No text-transform: uppercase anywhere. The client uppercases with its own locale (a Turkish client writes
 # "MİSSİONS"), so K4 sends labels already capitalized in each reader's language.
@@ -141,12 +143,19 @@ Label
 
 .k4-panel
 {
-	width: 100%;
-	height: 100%;
+	width: 1240px;
+	height: 760px;
 	opacity: 1;
 	transition-property: opacity;
 	transition-duration: 0.2s;
 	transition-timing-function: ease-out;
+	horizontal-align: center;
+	vertical-align: middle;
+	padding: 1px;
+	border-radius: 8px;
+	border: 1px solid #FFFFFF2E;
+	background-color: #080B10;
+	box-shadow: #000000B3 0px 16px 48px 0px;
 }
 
 .k4-panel.k4-closed
@@ -160,6 +169,7 @@ Label
 {
 	width: 100%;
 	height: 100%;
+	border-radius: 7px;
 }
 
 .k4-bg
@@ -173,6 +183,7 @@ Label
 	width: 100%;
 	height: 100%;
 	background-color: gradient( linear, 0% 0%, 100% 0%, from( #070A0EF5 ), color-stop( 0.45, #070A0EE0 ), to( #070A0EB0 ) );
+	border-radius: 7px;
 }
 
 .k4-frame
@@ -180,6 +191,7 @@ Label
 	width: 100%;
 	height: 100%;
 	flow-children: right;
+	overflow: clip;
 }
 
 .k4-main
@@ -207,14 +219,14 @@ Label
 
 .k4-view-pad
 {
-	padding: 40px 60px 40px 60px;
+	padding: 24px 28px 24px 28px;
 }
 
 .k4-header-space
 {
 	width: 100%;
-	height: 52px;
-	margin-bottom: 26px;
+	height: 36px;
+	margin-bottom: 16px;
 }
 
 .k4-tile
@@ -228,8 +240,8 @@ Label
 
 .k4-cap
 {
-	font-size: 14px;
-	letter-spacing: 3px;
+	font-size: 12px;
+	letter-spacing: 2px;
 	color: k4-muted;
 }
 
@@ -243,14 +255,14 @@ Label
 
 .k4-place
 {
-	font-size: 30px;
+	font-size: 20px;
 	color: k4-gold;
-	margin-left: 26px;
+	margin-left: 14px;
 }
 
 .k4-reward
 {
-	font-size: 28px;
+	font-size: 20px;
 	color: k4-gold-light;
 	vertical-align: center;
 }
@@ -259,41 +271,42 @@ Label
 
 .k4-sidebar
 {
-	width: 300px;
+	width: 220px;
 	height: 100%;
 	flow-children: down;
 	background-color: #06090DB8;
 	border-right: 1px solid #FFFFFF12;
+	border-radius: 7px 0px 0px 7px;
 }
 
 .k4-brand
 {
 	flow-children: right;
-	margin: 40px 28px 28px 28px;
+	margin: 22px 18px 16px 18px;
 }
 
 .k4-brand-name
 {
-	font-size: 40px;
+	font-size: 30px;
 	letter-spacing: 1px;
 }
 
 .k4-brand-sub
 {
-	font-size: 16px;
-	letter-spacing: 4px;
+	font-size: 13px;
+	letter-spacing: 3px;
 	color: k4-accent;
 	vertical-align: bottom;
-	margin: 0px 0px 9px 10px;
+	margin: 0px 0px 6px 8px;
 }
 
 .k4-me
 {
-	width: 260px;
+	width: 196px;
 	horizontal-align: center;
 	flow-children: right;
-	margin-bottom: 24px;
-	padding: 14px;
+	margin-bottom: 16px;
+	padding: 10px;
 	border-radius: 4px;
 	background-color: #FFFFFF0D;
 	border: 1px solid #FFFFFF14;
@@ -315,8 +328,8 @@ Label
 
 .k4-me-icon
 {
-	width: 72px;
-	height: 29px;
+	width: 52px;
+	height: 21px;
 	vertical-align: center;
 }
 
@@ -324,14 +337,14 @@ Label
 {
 	width: fill-parent-flow( 1.0 );
 	flow-children: down;
-	margin-left: 14px;
+	margin-left: 10px;
 	vertical-align: center;
 }
 
 .k4-me-name
 {
 	width: 100%;
-	font-size: 20px;
+	font-size: 16px;
 	white-space: nowrap;
 	text-overflow: ellipsis;
 }
@@ -339,7 +352,7 @@ Label
 .k4-me-meta
 {
 	width: 100%;
-	font-size: 15px;
+	font-size: 13px;
 	color: k4-muted;
 	white-space: nowrap;
 	text-overflow: ellipsis;
@@ -348,9 +361,9 @@ Label
 .k4-nav
 {
 	width: 100%;
-	height: 52px;
+	height: 44px;
 	flow-children: right;
-	padding-left: 21px;
+	padding-left: 15px;
 	border-left: 3px solid #6BB6F500;
 	transition-property: background-color;
 	transition-duration: k4-dur;
@@ -358,8 +371,8 @@ Label
 
 .k4-nav-icon
 {
-	width: 22px;
-	height: 22px;
+	width: 18px;
+	height: 18px;
 	vertical-align: center;
 	opacity: 0.7;
 	transition-property: opacity;
@@ -368,13 +381,17 @@ Label
 
 .k4-nav-label
 {
-	margin-left: 16px;
+	margin-left: 12px;
 	vertical-align: center;
-	font-size: 19px;
-	letter-spacing: 1.5px;
+	font-size: 15px;
+	letter-spacing: 1px;
 	color: k4-muted;
 	transition-property: color;
 	transition-duration: k4-dur;
+	width: fill-parent-flow( 1.0 );
+	margin-right: 8px;
+	white-space: nowrap;
+	text-overflow: shrink;
 }
 
 .k4-nav:hover
@@ -411,11 +428,11 @@ Label
 
 .k4-season
 {
-	width: 260px;
+	width: 196px;
 	horizontal-align: center;
 	flow-children: down;
-	margin-bottom: 16px;
-	padding: 16px 18px;
+	margin-bottom: 12px;
+	padding: 12px 14px;
 	border-radius: 4px;
 	background-color: #E4AE3914;
 	border: 1px solid #E4AE3947;
@@ -424,8 +441,8 @@ Label
 .k4-season-title
 {
 	width: 100%;
-	font-size: 14px;
-	letter-spacing: 2px;
+	font-size: 12px;
+	letter-spacing: 1px;
 	color: k4-gold;
 	white-space: nowrap;
 	text-overflow: shrink;
@@ -434,7 +451,7 @@ Label
 .k4-season-left
 {
 	width: 100%;
-	font-size: 26px;
+	font-size: 20px;
 	margin-top: 2px;
 	white-space: nowrap;
 	text-overflow: shrink;
@@ -443,7 +460,7 @@ Label
 .k4-bar-season
 {
 	height: 4px;
-	margin-top: 10px;
+	margin-top: 8px;
 }
 
 .k4-bar-season .k4-bar-fill
@@ -454,7 +471,7 @@ Label
 .k4-copyright-box
 {
 	width: 100%;
-	padding: 18px 28px 28px 28px;
+	padding: 12px 10px 16px 10px;
 	border-top: 1px solid #FFFFFF12;
 }
 
@@ -463,7 +480,7 @@ Label
 	horizontal-align: center;
 	text-align: center;
 	font-size: 18px;
-	letter-spacing: 1px;
+	letter-spacing: 0px;
 	color: #FFFFFF;
 }
 
@@ -471,19 +488,19 @@ Label
 
 .k4-topbar
 {
-	height: 52px;
+	height: 36px;
 	flow-children: right;
 	horizontal-align: right;
 	vertical-align: top;
-	margin: 40px 60px 0px 0px;
+	margin: 24px 28px 0px 0px;
 }
 
 .k4-event
 {
-	height: 52px;
+	height: 36px;
 	flow-children: right;
-	padding: 0px 20px;
-	margin-right: 20px;
+	padding: 0px 14px;
+	margin-right: 12px;
 	border-radius: 4px;
 	background-color: #E4AE392E;
 	border: 1px solid k4-gold;
@@ -491,25 +508,25 @@ Label
 
 .k4-event-icon
 {
-	width: 24px;
-	height: 24px;
+	width: 18px;
+	height: 18px;
 	vertical-align: center;
 	wash-color: k4-gold-light;
 }
 
 .k4-event-text
 {
-	margin-left: 12px;
+	margin-left: 8px;
 	vertical-align: center;
-	font-size: 22px;
-	letter-spacing: 2px;
+	font-size: 16px;
+	letter-spacing: 1px;
 	color: k4-gold-light;
 }
 
 .k4-close
 {
-	width: 52px;
-	height: 52px;
+	width: 36px;
+	height: 36px;
 	border-radius: 4px;
 	border: 1px solid #FFFFFF33;
 	background-color: #0000004D;
@@ -519,8 +536,8 @@ Label
 
 .k4-close-icon
 {
-	width: 22px;
-	height: 22px;
+	width: 16px;
+	height: 16px;
 	horizontal-align: center;
 	vertical-align: center;
 }
@@ -559,10 +576,10 @@ Label
 
 .k4-btn
 {
-	height: 48px;
+	height: 36px;
 	flow-children: right;
-	padding: 0px 20px;
-	margin-right: 12px;
+	padding: 0px 14px;
+	margin-right: 10px;
 	border-radius: 4px;
 	border: 1px solid #FFFFFF4D;
 	background-color: #00000066;
@@ -584,9 +601,9 @@ Label
 
 .k4-btn-icon
 {
-	width: 20px;
-	height: 20px;
-	margin-right: 10px;
+	width: 16px;
+	height: 16px;
+	margin-right: 8px;
 	vertical-align: center;
 }
 
@@ -598,17 +615,17 @@ Label
 .k4-btn-label
 {
 	vertical-align: center;
-	font-size: 17px;
-	letter-spacing: 2px;
+	font-size: 14px;
+	letter-spacing: 1px;
 }
 
 .k4-toggle-dot
 {
-	width: 12px;
-	height: 12px;
-	margin-right: 10px;
+	width: 10px;
+	height: 10px;
+	margin-right: 8px;
 	vertical-align: center;
-	border-radius: 6px;
+	border-radius: 5px;
 	background-color: #FFFFFF40;
 }
 
@@ -624,15 +641,15 @@ Label
 
 .k4-arrow
 {
-	width: 44px;
-	height: 44px;
+	width: 32px;
+	height: 32px;
 	vertical-align: center;
 	border-radius: 4px;
 	border: 1px solid #FFFFFF40;
 	background-color: #00000059;
 	background-image: url("s2r://panorama/images/icons/ui/expand.vsvg");
 	background-repeat: no-repeat;
-	background-size: 20px 20px;
+	background-size: 16px 16px;
 	background-position: 50% 50%;
 	transition-property: background-color, border, opacity;
 	transition-duration: k4-dur;
@@ -660,23 +677,23 @@ Label
 
 .k4-pager
 {
-	height: 52px;
+	height: 36px;
 	flow-children: right;
 }
 
 .k4-pager-bottom
 {
 	horizontal-align: center;
-	margin-top: 16px;
+	margin-top: 10px;
 }
 
 .k4-page
 {
-	min-width: 80px;
-	margin: 0px 16px;
+	min-width: 60px;
+	margin: 0px 12px;
 	vertical-align: center;
 	text-align: center;
-	font-size: 18px;
+	font-size: 14px;
 	color: k4-muted;
 }
 
@@ -714,9 +731,9 @@ Label
 	opacity: 0.35;
 }
 
-.k4-ring-home { width: 104px; height: 104px; padding: 6px; }
-.k4-ring-showcase { width: 130px; height: 130px; padding: 7px; }
-.k4-ring-card { width: 118px; height: 118px; padding: 7px; }
+.k4-ring-home { width: 68px; height: 68px; padding: 5px; }
+.k4-ring-showcase { width: 92px; height: 92px; padding: 6px; }
+.k4-ring-card { width: 70px; height: 70px; padding: 5px; }
 .k4-ring-toast { width: 72px; height: 72px; padding: 5px; vertical-align: center; }
 
 /* ---------------------------------------------------------------- home */
@@ -724,15 +741,15 @@ Label
 .k4-h-hero
 {
 	width: 100%;
-	height: 330px;
+	height: 180px;
 	flow-children: right;
-	margin-bottom: 26px;
+	margin-bottom: 16px;
 }
 
 .k4-h-rank-icon
 {
-	width: 560px;
-	height: 228px;
+	width: 320px;
+	height: 130px;
 	vertical-align: center;
 }
 
@@ -740,14 +757,14 @@ Label
 {
 	width: fill-parent-flow( 1.0 );
 	flow-children: down;
-	margin-left: 44px;
+	margin-left: 28px;
 	vertical-align: center;
 }
 
 .k4-h-rank-name
 {
 	width: 100%;
-	font-size: 92px;
+	font-size: 60px;
 	color: k4-text;
 	white-space: nowrap;
 	text-overflow: shrink;
@@ -756,33 +773,33 @@ Label
 .k4-h-points-row
 {
 	flow-children: right;
-	margin-top: 8px;
+	margin-top: 6px;
 }
 
 .k4-h-points
 {
-	font-size: 30px;
+	font-size: 22px;
 }
 
 .k4-bar-hero
 {
-	width: 620px;
+	width: 420px;
 	max-width: 100%;
-	height: 10px;
-	margin-top: 18px;
-	border-radius: 5px;
+	height: 8px;
+	margin-top: 12px;
+	border-radius: 4px;
 }
 
 .k4-bar-hero .k4-bar-fill
 {
-	border-radius: 5px;
+	border-radius: 4px;
 	background-color: gradient( linear, 0% 0%, 100% 0%, from( #C8922B ), to( k4-gold-light ) );
 }
 
 .k4-h-next
 {
-	margin-top: 12px;
-	font-size: 20px;
+	margin-top: 8px;
+	font-size: 15px;
 	color: k4-muted;
 }
 
@@ -798,7 +815,7 @@ Label
 	width: fill-parent-flow( 1.0 );
 	height: 100%;
 	flow-children: down;
-	padding: 24px;
+	padding: 16px;
 }
 
 .k4-h-card:hover, .k4-h-q:hover
@@ -815,9 +832,9 @@ Label
 
 .k4-cap-icon
 {
-	width: 24px;
-	height: 24px;
-	margin-bottom: 14px;
+	width: 20px;
+	height: 20px;
+	margin-bottom: 10px;
 	opacity: 0.6;
 }
 
@@ -839,20 +856,20 @@ Label
 
 .k4-h-m-icon
 {
-	width: 60px;
-	height: 60px;
+	width: 40px;
+	height: 40px;
 	horizontal-align: center;
 	vertical-align: center;
-	margin-bottom: 44px;
+	margin-bottom: 30px;
 }
 
 .k4-h-m-value
 {
 	horizontal-align: center;
 	vertical-align: center;
-	margin-top: 60px;
+	margin-top: 40px;
 	text-align: center;
-	font-size: 24px;
+	font-size: 18px;
 	white-space: nowrap;
 	text-overflow: shrink;
 	max-width: 100%;
@@ -880,19 +897,19 @@ Label
 .k4-h-a-name
 {
 	width: 100%;
-	margin-top: 10px;
+	margin-top: 8px;
 	text-align: center;
-	font-size: 18px;
+	font-size: 14px;
 	white-space: nowrap;
 	text-overflow: ellipsis;
 }
 
 .k4-bar-small
 {
-	width: 120px;
+	width: 72px;
 	max-width: 100%;
 	horizontal-align: center;
-	margin-top: 10px;
+	margin-top: 8px;
 }
 
 .k4-h-p
@@ -905,17 +922,17 @@ Label
 
 .k4-h-p-icon
 {
-	width: 130px;
-	height: 53px;
+	width: 80px;
+	height: 33px;
 	horizontal-align: center;
 }
 
 .k4-h-p-name
 {
 	width: 100%;
-	margin: 8px 0px;
+	margin: 6px 0px;
 	text-align: center;
-	font-size: 19px;
+	font-size: 14px;
 	white-space: nowrap;
 	text-overflow: ellipsis;
 }
@@ -930,22 +947,22 @@ Label
 {
 	horizontal-align: center;
 	vertical-align: center;
-	font-size: 40px;
+	font-size: 30px;
 }
 
 .k4-place-1 .k4-step { background-color: gradient( linear, 0% 0%, 0% 100%, from( #E4AE39 ), to( #8A6316 ) ); }
 .k4-place-2 .k4-step { background-color: gradient( linear, 0% 0%, 0% 100%, from( #8E99A6 ), to( #4F5863 ) ); }
 .k4-place-3 .k4-step { background-color: gradient( linear, 0% 0%, 0% 100%, from( #C98A5B ), to( #6E4426 ) ); }
-.k4-h-p.k4-place-1 .k4-step { height: 130px; }
-.k4-h-p.k4-place-2 .k4-step { height: 90px; }
-.k4-h-p.k4-place-3 .k4-step { height: 64px; }
+.k4-h-p.k4-place-1 .k4-step { height: 110px; }
+.k4-h-p.k4-place-2 .k4-step { height: 78px; }
+.k4-h-p.k4-place-3 .k4-step { height: 54px; }
 
 .k4-h-quick
 {
 	width: 100%;
-	height: 96px;
+	height: 72px;
 	flow-children: right;
-	margin-top: 22px;
+	margin-top: 16px;
 }
 
 .k4-h-q
@@ -960,26 +977,26 @@ Label
 	flow-children: right;
 	horizontal-align: center;
 	vertical-align: center;
-	padding: 0px 12px;
+	padding: 0px 10px;
 }
 
 .k4-h-q-icon
 {
-	width: 44px;
-	height: 44px;
+	width: 32px;
+	height: 32px;
 	vertical-align: center;
 }
 
 .k4-h-q-wide .k4-h-q-icon
 {
-	width: 120px;
+	width: 80px;
 }
 
 .k4-h-q-value
 {
-	margin-left: 18px;
+	margin-left: 12px;
 	vertical-align: center;
-	font-size: 38px;
+	font-size: 28px;
 }
 
 /* ---------------------------------------------------------------- profile */
@@ -987,21 +1004,21 @@ Label
 .k4-pf-head
 {
 	width: 100%;
-	height: 52px;
+	height: 36px;
 	flow-children: right;
 }
 
 .k4-pf-banner
 {
 	width: 100%;
-	height: 360px;
+	height: 190px;
 	flow-children: right;
 }
 
 .k4-pf-emblem
 {
-	width: 360px;
-	height: 146px;
+	width: 200px;
+	height: 81px;
 	vertical-align: center;
 }
 
@@ -1015,21 +1032,21 @@ Label
 {
 	horizontal-align: center;
 	vertical-align: center;
-	font-size: 64px;
+	font-size: 36px;
 }
 
 .k4-pf-text
 {
 	width: fill-parent-flow( 1.0 );
 	flow-children: down;
-	margin-left: 40px;
+	margin-left: 20px;
 	vertical-align: center;
 }
 
 .k4-pf-name
 {
 	width: 100%;
-	font-size: 96px;
+	font-size: 48px;
 	white-space: nowrap;
 	text-overflow: shrink;
 }
@@ -1037,25 +1054,25 @@ Label
 .k4-pf-line
 {
 	flow-children: right;
-	margin-top: 6px;
+	margin-top: 4px;
 }
 
 .k4-pf-rank
 {
-	font-size: 30px;
+	font-size: 20px;
 	color: k4-text;
 }
 
 .k4-pf-points
 {
-	margin-left: 26px;
-	font-size: 30px;
+	margin-left: 14px;
+	font-size: 20px;
 }
 
 .k4-pf-showcase
 {
 	flow-children: down;
-	margin-left: 26px;
+	margin-left: 16px;
 	vertical-align: center;
 }
 
@@ -1067,26 +1084,26 @@ Label
 
 .k4-pf-sc
 {
-	width: 150px;
+	width: 124px;
 	flow-children: down;
 }
 
 .k4-pf-sc-name
 {
 	width: 100%;
-	margin-top: 10px;
+	margin-top: 6px;
 	text-align: center;
-	font-size: 20px;
+	font-size: 15px;
 	white-space: nowrap;
 	text-overflow: ellipsis;
 }
 
 .k4-pf-sc-hint
 {
-	width: 500px;
+	width: 396px;
 	horizontal-align: right;
 	text-align: right;
-	font-size: 18px;
+	font-size: 13px;
 	color: k4-dim;
 	white-space: nowrap;
 	text-overflow: shrink;
@@ -1095,9 +1112,9 @@ Label
 .k4-pf-stats
 {
 	width: 100%;
-	height: 150px;
+	height: 116px;
 	flow-children: right;
-	margin-top: 22px;
+	margin-top: 14px;
 }
 
 .k4-pf-st
@@ -1105,13 +1122,13 @@ Label
 	width: fill-parent-flow( 1.0 );
 	height: 100%;
 	flow-children: down;
-	padding: 18px 10px;
+	padding: 12px 8px;
 }
 
 .k4-pf-st-icon
 {
-	width: 40px;
-	height: 40px;
+	width: 28px;
+	height: 28px;
 	horizontal-align: center;
 	opacity: 0.9;
 }
@@ -1120,16 +1137,16 @@ Label
 {
 	max-width: 100%;
 	horizontal-align: center;
-	margin-top: 8px;
-	font-size: 38px;
+	margin-top: 6px;
+	font-size: 28px;
 }
 
 .k4-pf-st-label
 {
 	max-width: 100%;
 	horizontal-align: center;
-	margin-top: 8px;
-	font-size: 13px;
+	margin-top: 4px;
+	font-size: 12px;
 	white-space: nowrap;
 	text-overflow: shrink;
 }
@@ -1139,23 +1156,23 @@ Label
 	width: 100%;
 	height: fill-parent-flow( 1.0 );
 	flow-children: right;
-	margin-top: 22px;
+	margin-top: 14px;
 }
 
 .k4-pf-fav
 {
 	width: fill-parent-flow( 1.0 );
 	height: 100%;
-	margin-right: 22px;
+	margin-right: 14px;
 }
 
 .k4-pf-fav-icon
 {
 	width: 90%;
-	height: 120px;
+	height: 80px;
 	horizontal-align: center;
 	vertical-align: center;
-	margin-bottom: 60px;
+	margin-bottom: 44px;
 }
 
 .k4-pf-fav-line
@@ -1164,19 +1181,19 @@ Label
 	flow-children: right;
 	horizontal-align: center;
 	vertical-align: center;
-	margin-top: 120px;
+	margin-top: 80px;
 }
 
 .k4-pf-fav-name
 {
-	font-size: 36px;
+	font-size: 24px;
 }
 
 .k4-pf-fav-kills
 {
-	margin-left: 10px;
+	margin-left: 8px;
 	vertical-align: center;
-	font-size: 26px;
+	font-size: 17px;
 	color: k4-muted;
 }
 
@@ -1197,14 +1214,14 @@ Label
 {
 	horizontal-align: center;
 	vertical-align: center;
-	margin-bottom: 150px;
+	margin-bottom: 120px;
 }
 
 .k4-pf-ss-icon
 {
-	width: 220px;
+	width: 150px;
 	max-width: 90%;
-	height: 89px;
+	height: 61px;
 	horizontal-align: center;
 	vertical-align: center;
 }
@@ -1213,14 +1230,14 @@ Label
 {
 	horizontal-align: center;
 	vertical-align: center;
-	margin-top: 150px;
-	font-size: 44px;
+	margin-top: 120px;
+	font-size: 30px;
 }
 
 .k4-pf-ss-none
 {
 	vertical-align: center;
-	font-size: 22px;
+	font-size: 16px;
 	color: k4-dim;
 }
 
@@ -1229,30 +1246,30 @@ Label
 .k4-m-head
 {
 	width: 100%;
-	height: 52px;
+	height: 36px;
 	flow-children: right;
 }
 
 .k4-m-head-icon
 {
-	width: 30px;
-	height: 30px;
+	width: 22px;
+	height: 22px;
 	vertical-align: center;
 }
 
 .k4-m-reset
 {
-	margin-left: 18px;
+	margin-left: 12px;
 	vertical-align: center;
-	font-size: 30px;
+	font-size: 22px;
 }
 
 .k4-m-cards
 {
 	width: 100%;
-	height: 520px;
+	height: 400px;
 	flow-children: right;
-	margin-top: 24px;
+	margin-top: 16px;
 }
 
 .k4-m
@@ -1260,7 +1277,7 @@ Label
 	width: fill-parent-flow( 1.0 );
 	height: 100%;
 	flow-children: down;
-	padding: 24px 28px 28px 28px;
+	padding: 16px 20px 20px 20px;
 	border-radius: 6px;
 	border: 2px solid #FFFFFF26;
 	background-color: #0A0E1499;
@@ -1279,11 +1296,11 @@ Label
 
 .k4-m-diff
 {
-	padding: 6px 14px;
+	padding: 4px 10px;
 	border-radius: 3px;
 	vertical-align: center;
-	font-size: 17px;
-	letter-spacing: 2px;
+	font-size: 13px;
+	letter-spacing: 1px;
 	color: #0B1016;
 	background-color: k4-muted;
 }
@@ -1295,24 +1312,24 @@ Label
 .k4-m-icon
 {
 	width: 100%;
-	height: 120px;
-	margin-bottom: 16px;
+	height: 84px;
+	margin-bottom: 12px;
 }
 
 .k4-m-desc
 {
 	width: 100%;
-	font-size: 30px;
+	font-size: 20px;
 }
 
 .k4-bar-mission
 {
-	height: 10px;
-	margin-top: 16px;
-	border-radius: 5px;
+	height: 8px;
+	margin-top: 12px;
+	border-radius: 4px;
 }
 
-.k4-bar-mission .k4-bar-fill { border-radius: 5px; }
+.k4-bar-mission .k4-bar-fill { border-radius: 4px; }
 .k4-easy .k4-bar-fill { background-color: k4-green; }
 .k4-medium .k4-bar-fill { background-color: k4-gold; }
 .k4-hard .k4-bar-fill { background-color: k4-red; }
@@ -1321,15 +1338,15 @@ Label
 .k4-m-bottom
 {
 	width: 100%;
-	height: 48px;
+	height: 36px;
 	flow-children: right;
-	margin-top: 16px;
+	margin-top: 12px;
 }
 
 .k4-m-progress
 {
 	vertical-align: center;
-	font-size: 28px;
+	font-size: 20px;
 }
 
 .k4-done .k4-m-progress, .k4-done .k4-mw-progress
@@ -1346,8 +1363,8 @@ Label
 {
 	width: 100%;
 	flow-children: right;
-	margin-top: 24px;
-	padding: 24px 36px;
+	margin-top: 16px;
+	padding: 16px 24px;
 	border-radius: 6px;
 	border: 2px solid #B99BFFB3;
 	background-color: gradient( linear, 0% 0%, 100% 0%, from( #825ADC4D ), color-stop( 0.7, #0A0E14B3 ), to( #0A0E14B3 ) );
@@ -1360,8 +1377,8 @@ Label
 
 .k4-mw-icon
 {
-	width: 96px;
-	height: 96px;
+	width: 64px;
+	height: 64px;
 	vertical-align: center;
 }
 
@@ -1369,22 +1386,22 @@ Label
 {
 	width: fill-parent-flow( 1.0 );
 	flow-children: down;
-	margin-left: 36px;
+	margin-left: 20px;
 	vertical-align: center;
 }
 
 .k4-mw-left
 {
-	font-size: 17px;
-	letter-spacing: 3px;
+	font-size: 13px;
+	letter-spacing: 2px;
 	color: #CDB6FF;
 }
 
 .k4-mw-desc
 {
 	width: 100%;
-	margin-top: 8px;
-	font-size: 34px;
+	margin-top: 6px;
+	font-size: 24px;
 	white-space: nowrap;
 	text-overflow: shrink;
 }
@@ -1395,20 +1412,20 @@ Label
 .k4-mw-side
 {
 	flow-children: down;
-	margin-left: 36px;
+	margin-left: 20px;
 	vertical-align: center;
 }
 
 .k4-mw-progress
 {
 	horizontal-align: right;
-	font-size: 44px;
+	font-size: 30px;
 }
 
 .k4-mw-reward
 {
 	horizontal-align: right;
-	font-size: 30px;
+	font-size: 20px;
 }
 
 .k4-streak
@@ -1416,30 +1433,30 @@ Label
 	width: 100%;
 	height: fill-parent-flow( 1.0 );
 	flow-children: right;
-	margin-top: 24px;
+	margin-top: 8px;
 }
 
 .k4-streak-icon
 {
-	width: 44px;
-	height: 44px;
+	width: 32px;
+	height: 32px;
 	vertical-align: center;
 }
 
 .k4-streak-count
 {
-	width: 120px;
-	margin-left: 18px;
+	width: 90px;
+	margin-left: 12px;
 	vertical-align: center;
-	font-size: 40px;
+	font-size: 28px;
 	color: k4-gold;
 }
 
 .k4-sd
 {
 	width: fill-parent-flow( 1.0 );
-	height: 64px;
-	margin-left: 18px;
+	height: 72px;
+	margin-left: 10px;
 	vertical-align: center;
 	border-radius: 6px;
 	background-color: #FFFFFF0D;
@@ -1448,8 +1465,8 @@ Label
 
 .k4-sd-icon
 {
-	width: 30px;
-	height: 30px;
+	width: 22px;
+	height: 22px;
 	horizontal-align: center;
 	vertical-align: center;
 	background-image: url("s2r://panorama/images/icons/ui/hot_trend.vsvg");
@@ -1481,10 +1498,10 @@ Label
 
 .k4-streak-bonus
 {
-	width: 110px;
-	margin-left: 18px;
+	width: 80px;
+	margin-left: 12px;
 	text-align: right;
-	font-size: 30px;
+	font-size: 22px;
 }
 
 /* ---------------------------------------------------------------- achievements */
@@ -1492,18 +1509,18 @@ Label
 .k4-a-head
 {
 	width: 100%;
-	height: 52px;
+	height: 36px;
 	flow-children: right;
 }
 
 .k4-chip
 {
-	height: 44px;
+	height: 32px;
 	flow-children: right;
-	padding: 0px 20px;
-	margin-right: 14px;
+	padding: 0px 14px;
+	margin-right: 10px;
 	vertical-align: center;
-	border-radius: 22px;
+	border-radius: 16px;
 	border: 1px solid #FFFFFF33;
 	background-color: #00000040;
 	transition-property: background-color, border;
@@ -1512,9 +1529,9 @@ Label
 
 .k4-chip-icon
 {
-	width: 18px;
-	height: 18px;
-	margin-right: 8px;
+	width: 14px;
+	height: 14px;
+	margin-right: 6px;
 	vertical-align: center;
 	wash-color: k4-gold;
 }
@@ -1522,8 +1539,8 @@ Label
 .k4-chip-label
 {
 	vertical-align: center;
-	font-size: 17px;
-	letter-spacing: 2px;
+	font-size: 13px;
+	letter-spacing: 1px;
 	color: k4-soft;
 }
 
@@ -1551,9 +1568,9 @@ Label
 
 .k4-a-count
 {
-	margin-left: 24px;
+	margin-left: 16px;
 	vertical-align: center;
-	font-size: 34px;
+	font-size: 24px;
 }
 
 .k4-grid
@@ -1561,7 +1578,7 @@ Label
 	width: 100%;
 	height: fill-parent-flow( 1.0 );
 	flow-children: down;
-	margin-top: 22px;
+	margin-top: 14px;
 }
 
 .k4-grid-row
@@ -1576,7 +1593,7 @@ Label
 	width: fill-parent-flow( 1.0 );
 	height: 100%;
 	flow-children: down;
-	padding: 18px 10px 16px 10px;
+	padding: 10px 8px 10px 8px;
 	border-radius: 6px;
 	background-color: #0A0E148C;
 	border: 1px solid #FFFFFF14;
@@ -1603,15 +1620,15 @@ Label
 
 .k4-a-medal
 {
-	width: 150px;
-	height: 118px;
+	width: 110px;
+	height: 82px;
 	horizontal-align: center;
 }
 
 .k4-a-pin
 {
-	width: 34px;
-	height: 34px;
+	width: 24px;
+	height: 24px;
 	horizontal-align: right;
 	vertical-align: top;
 	wash-color: k4-gold;
@@ -1626,9 +1643,9 @@ Label
 .k4-a-name
 {
 	width: 100%;
-	margin-top: 10px;
+	margin-top: 6px;
 	text-align: center;
-	font-size: 21px;
+	font-size: 15px;
 	white-space: nowrap;
 	text-overflow: ellipsis;
 }
@@ -1636,9 +1653,9 @@ Label
 .k4-a-goal
 {
 	width: 100%;
-	margin-top: 4px;
+	margin-top: 2px;
 	text-align: center;
-	font-size: 18px;
+	font-size: 13px;
 	color: k4-soft;
 	white-space: nowrap;
 	text-overflow: shrink;
@@ -1646,10 +1663,10 @@ Label
 
 .k4-bar-card
 {
-	width: 150px;
+	width: 120px;
 	max-width: 100%;
 	horizontal-align: center;
-	margin-top: 10px;
+	margin-top: 6px;
 }
 
 /* A full bar is a finished achievement: gold, like its ring */
@@ -1660,33 +1677,34 @@ Label
 .k4-lb-stage
 {
 	width: 100%;
-	height: 480px;
+	height: 380px;
 	flow-children: down;
-	padding: 40px 60px 0px 60px;
+	padding: 24px 28px 0px 28px;
 	background-color: gradient( linear, 0% 0%, 0% 100%, from( #070A0E00 ), to( #080B10F2 ) );
 }
 
 .k4-lb-head
 {
 	width: 100%;
-	height: 52px;
+	height: 44px;
 	flow-children: right;
 }
 
 .k4-lb-head .k4-arrow
 {
-	width: 52px;
-	height: 52px;
+	width: 40px;
+	height: 40px;
 }
 
 .k4-lb-head .k4-pager
 {
-	margin-left: 40px;
+	margin-left: 24px;
+	height: 44px;
 }
 
 .k4-lb-season
 {
-	width: 340px;
+	width: 260px;
 	flow-children: down;
 	vertical-align: center;
 }
@@ -1695,7 +1713,7 @@ Label
 {
 	width: 100%;
 	text-align: center;
-	font-size: 30px;
+	font-size: 20px;
 	white-space: nowrap;
 	text-overflow: shrink;
 }
@@ -1704,8 +1722,8 @@ Label
 {
 	width: 100%;
 	text-align: center;
-	font-size: 16px;
-	letter-spacing: 3px;
+	font-size: 12px;
+	letter-spacing: 2px;
 	color: k4-muted;
 }
 
@@ -1719,30 +1737,30 @@ Label
 
 .k4-lb-p
 {
-	width: 330px;
+	width: 230px;
 	flow-children: down;
 	vertical-align: bottom;
 }
 
 .k4-lb-p-icon
 {
-	width: 200px;
-	height: 81px;
+	width: 130px;
+	height: 53px;
 	horizontal-align: center;
 }
 
 .k4-lb-p.k4-place-1 .k4-lb-p-icon
 {
-	width: 260px;
-	height: 105px;
+	width: 170px;
+	height: 69px;
 }
 
 .k4-lb-p-name
 {
 	width: 100%;
-	margin-top: 8px;
+	margin-top: 6px;
 	text-align: center;
-	font-size: 30px;
+	font-size: 20px;
 	white-space: nowrap;
 	text-overflow: ellipsis;
 	transition-property: color;
@@ -1752,27 +1770,27 @@ Label
 .k4-lb-p-points
 {
 	horizontal-align: center;
-	font-size: 22px;
+	font-size: 15px;
 	color: k4-soft;
 }
 
 .k4-lb-p .k4-step
 {
-	margin-top: 8px;
+	margin-top: 6px;
 	border-radius: 6px 6px 0px 0px;
 }
 
 .k4-lb-p .k4-step-pos
 {
 	vertical-align: top;
-	margin-top: 6px;
-	font-size: 56px;
+	margin-top: 4px;
+	font-size: 40px;
 	color: #0000008C;
 }
 
-.k4-lb-p.k4-place-1 .k4-step { height: 150px; background-color: gradient( linear, 0% 0%, 0% 100%, from( #FFD27A ), to( #B07F1E ) ); }
-.k4-lb-p.k4-place-2 .k4-step { height: 105px; background-color: gradient( linear, 0% 0%, 0% 100%, from( #DDE3EA ), to( #7D8894 ) ); }
-.k4-lb-p.k4-place-3 .k4-step { height: 76px; background-color: gradient( linear, 0% 0%, 0% 100%, from( #E3A57A ), to( #8A5330 ) ); }
+.k4-lb-p.k4-place-1 .k4-step { height: 120px; background-color: gradient( linear, 0% 0%, 0% 100%, from( #FFD27A ), to( #B07F1E ) ); }
+.k4-lb-p.k4-place-2 .k4-step { height: 84px; background-color: gradient( linear, 0% 0%, 0% 100%, from( #DDE3EA ), to( #7D8894 ) ); }
+.k4-lb-p.k4-place-3 .k4-step { height: 60px; background-color: gradient( linear, 0% 0%, 0% 100%, from( #E3A57A ), to( #8A5330 ) ); }
 
 .k4-lb-p:hover
 {
@@ -1789,16 +1807,16 @@ Label
 	width: 100%;
 	height: fill-parent-flow( 1.0 );
 	flow-children: down;
-	padding: 16px 60px 36px 60px;
+	padding: 10px 28px 24px 28px;
 }
 
 .k4-lb-row
 {
 	width: 100%;
-	height: 56px;
+	height: 38px;
 	flow-children: right;
-	margin-bottom: 4px;
-	padding: 0px 26px;
+	margin-bottom: 3px;
+	padding: 0px 18px;
 	border-radius: 4px;
 	transition-property: background-color;
 	transition-duration: k4-dur;
@@ -1817,40 +1835,40 @@ Button.k4-lb-row:hover
 
 .k4-lb-pos
 {
-	width: 64px;
+	width: 48px;
 	vertical-align: center;
-	font-size: 26px;
+	font-size: 18px;
 	color: k4-muted;
 }
 
 .k4-lb-icon
 {
-	width: 110px;
-	height: 44px;
-	margin-left: 22px;
+	width: 80px;
+	height: 32px;
+	margin-left: 16px;
 	vertical-align: center;
 }
 
 .k4-lb-name
 {
 	width: fill-parent-flow( 1.0 );
-	margin-left: 22px;
+	margin-left: 16px;
 	vertical-align: center;
-	font-size: 24px;
+	font-size: 17px;
 	white-space: nowrap;
 	text-overflow: ellipsis;
 }
 
 .k4-lb-points
 {
-	margin-left: 22px;
+	margin-left: 16px;
 	vertical-align: center;
-	font-size: 24px;
+	font-size: 17px;
 }
 
 .k4-lb-me
 {
-	height: 60px;
+	height: 42px;
 	margin: 0px;
 	border: 2px solid k4-accent;
 	background-color: #6BB6F529;
@@ -1866,7 +1884,7 @@ Button.k4-lb-row:hover
 .k4-rk-head
 {
 	width: 100%;
-	height: 52px;
+	height: 36px;
 	flow-children: right;
 }
 
@@ -1894,9 +1912,9 @@ Button.k4-lb-row:hover
 
 .k4-rk-icon
 {
-	width: 200px;
+	width: 130px;
 	max-width: 86%;
-	height: 81px;
+	height: 53px;
 	horizontal-align: center;
 }
 
@@ -1904,42 +1922,42 @@ Button.k4-lb-row:hover
 {
 	width: 92%;
 	horizontal-align: center;
-	margin-top: 6px;
+	margin-top: 4px;
 	text-align: center;
-	font-size: 19px;
+	font-size: 15px;
 	color: k4-text;
 }
 
 .k4-rk-points
 {
 	horizontal-align: center;
-	margin-top: 4px;
-	font-size: 18px;
+	margin-top: 2px;
+	font-size: 13px;
 	color: k4-muted;
 }
 
 .k4-rk-gift
 {
-	width: 24px;
-	height: 24px;
+	width: 20px;
+	height: 20px;
 	horizontal-align: right;
 	vertical-align: top;
-	margin: 10px 10px 0px 0px;
+	margin: 8px 8px 0px 0px;
 	wash-color: k4-gold-light;
 }
 
 .k4-rk-you
 {
-	padding: 3px 10px;
-	margin: 10px 0px 0px 10px;
+	padding: 2px 8px;
+	margin: 8px 0px 0px 8px;
 	border-radius: 3px;
 	background-color: k4-accent;
 }
 
 .k4-rk-you-icon
 {
-	width: 16px;
-	height: 16px;
+	width: 14px;
+	height: 14px;
 	wash-color: #0B1016;
 }
 
@@ -1954,7 +1972,7 @@ Button.k4-lb-row:hover
 .k4-st-row
 {
 	width: 100%;
-	height: 104px;
+	height: 80px;
 	flow-children: right;
 }
 
@@ -1963,13 +1981,13 @@ Button.k4-lb-row:hover
 	width: fill-parent-flow( 1.0 );
 	height: 100%;
 	flow-children: right;
-	padding: 0px 26px;
+	padding: 0px 16px;
 }
 
 .k4-st-icon
 {
-	width: 60px;
-	height: 60px;
+	width: 40px;
+	height: 40px;
 	vertical-align: center;
 }
 
@@ -1977,14 +1995,14 @@ Button.k4-lb-row:hover
 {
 	width: fill-parent-flow( 1.0 );
 	flow-children: down;
-	margin-left: 22px;
+	margin-left: 14px;
 	vertical-align: center;
 }
 
 .k4-st-value
 {
 	width: 100%;
-	font-size: 50px;
+	font-size: 34px;
 }
 
 .k4-st-bottom
@@ -1992,14 +2010,14 @@ Button.k4-lb-row:hover
 	width: 100%;
 	height: fill-parent-flow( 1.0 );
 	flow-children: right;
-	margin-top: 22px;
+	margin-top: 14px;
 }
 
 .k4-st-weapons
 {
 	width: fill-parent-flow( 3.0 );
 	height: 100%;
-	padding: 30px 36px;
+	padding: 20px 24px;
 }
 
 .k4-sw-list
@@ -2012,46 +2030,47 @@ Button.k4-lb-row:hover
 .k4-sw
 {
 	width: 100%;
-	height: 70px;
+	height: 64px;
 	flow-children: right;
 }
 
 .k4-sw-icon
 {
-	width: 220px;
-	height: 70px;
+	width: 170px;
+	height: 54px;
+	vertical-align: center;
 }
 
 .k4-bar-weapon
 {
 	width: fill-parent-flow( 1.0 );
-	height: 14px;
-	margin: 0px 26px;
+	height: 10px;
+	margin: 0px 16px;
 	vertical-align: center;
-	border-radius: 7px;
+	border-radius: 5px;
 	background-color: #FFFFFF1A;
 }
 
 .k4-bar-weapon .k4-bar-fill
 {
-	border-radius: 7px;
+	border-radius: 5px;
 	background-color: gradient( linear, 0% 0%, 100% 0%, from( #3A8FD9 ), to( #8CCBFF ) );
 }
 
 .k4-sw-kills
 {
-	width: 90px;
+	width: 70px;
 	vertical-align: center;
 	text-align: right;
-	font-size: 34px;
+	font-size: 24px;
 }
 
 .k4-pt
 {
 	width: fill-parent-flow( 2.0 );
 	height: 100%;
-	margin-left: 22px;
-	padding: 28px 34px;
+	margin-left: 14px;
+	padding: 20px 22px;
 }
 
 .k4-pt-list
@@ -2069,45 +2088,45 @@ Button.k4-lb-row:hover
 
 .k4-pt-head-icon
 {
-	width: 44px;
-	height: 44px;
+	width: 32px;
+	height: 32px;
 	vertical-align: center;
 }
 
 .k4-pt-total
 {
 	width: fill-parent-flow( 1.0 );
-	margin-left: 16px;
+	margin-left: 12px;
 	vertical-align: center;
-	font-size: 50px;
+	font-size: 34px;
 }
 
 .k4-pt-team
 {
 	width: 100%;
 	flow-children: right;
-	margin-top: 22px;
+	margin-top: 16px;
 }
 
 .k4-pt-icon
 {
-	width: 76px;
-	height: 76px;
+	width: 56px;
+	height: 56px;
 	vertical-align: center;
 }
 
 .k4-pt-spec .k4-pt-icon
 {
-	width: 44px;
-	height: 44px;
-	margin: 0px 16px;
+	width: 32px;
+	height: 32px;
+	margin: 0px 12px;
 }
 
 .k4-pt-text
 {
 	width: fill-parent-flow( 1.0 );
 	flow-children: down;
-	margin-left: 20px;
+	margin-left: 14px;
 	vertical-align: center;
 }
 
@@ -2120,8 +2139,8 @@ Button.k4-lb-row:hover
 .k4-pt-name
 {
 	vertical-align: bottom;
-	font-size: 20px;
-	letter-spacing: 2px;
+	font-size: 15px;
+	letter-spacing: 1px;
 	white-space: nowrap;
 	text-overflow: shrink;
 }
@@ -2129,19 +2148,19 @@ Button.k4-lb-row:hover
 .k4-pt-time
 {
 	vertical-align: bottom;
-	font-size: 30px;
+	font-size: 22px;
 	white-space: nowrap;
 }
 
 .k4-bar-team
 {
-	height: 10px;
-	margin-top: 8px;
-	border-radius: 5px;
+	height: 8px;
+	margin-top: 6px;
+	border-radius: 4px;
 	background-color: #FFFFFF1A;
 }
 
-.k4-bar-team .k4-bar-fill { border-radius: 5px; }
+.k4-bar-team .k4-bar-fill { border-radius: 4px; }
 .k4-pt-t .k4-pt-name { color: k4-gold; }
 .k4-pt-t .k4-bar-fill { background-color: k4-gold; }
 .k4-pt-ct .k4-pt-name { color: k4-accent; }
@@ -2206,6 +2225,33 @@ Button.k4-lb-row:hover
 	animation-duration: 0.25s;
 	animation-timing-function: ease-out;
 	animation-iteration-count: 1;
+}
+
+/* Leaving: the server adds k4-out, waits for this slide-out, then hides the toast. */
+.k4-toast
+{
+	transition-property: opacity, transform;
+	transition-duration: 0.3s;
+	transition-timing-function: ease-in;
+}
+
+.k4-toast.k4-out
+{
+	opacity: 0;
+	transform: translateX( 120px );
+}
+
+.k4-promo
+{
+	transition-property: opacity, transform;
+	transition-duration: 0.3s;
+	transition-timing-function: ease-in;
+}
+
+.k4-promo.k4-out
+{
+	opacity: 0;
+	transform: scale3d( 0.9, 0.9, 1 );
 }
 
 .k4-toast-0 { border: 1px solid #FFFFFF40; }
@@ -2356,6 +2402,179 @@ Button.k4-lb-row:hover
 }
 
 /* ---------------------------------------------------------------- generated */
+
+/* ---------------------------------------------------------------- explanations (7.1.1) */
+
+/* Everything shown as a picture explains itself: hovering a card lays a short explanation over it. */
+.k4-tip
+{
+	width: 100%;
+	height: 100%;
+	border-radius: 6px;
+	background-color: #05080CF2;
+	border: 1px solid #6BB6F566;
+	opacity: 0;
+	transition-property: opacity;
+	transition-duration: 0.12s;
+}
+
+.k4-has-tip:hover .k4-tip
+{
+	opacity: 1;
+}
+
+.k4-tip-text
+{
+	width: 90%;
+	horizontal-align: center;
+	vertical-align: center;
+	text-align: center;
+	font-size: 13px;
+	color: #FFFFFF;
+}
+
+/* Cards that stack their content keep it in a body, so the explanation can lie over it instead of below. */
+.k4-a
+{
+	flow-children: none;
+}
+
+.k4-a-body
+{
+	width: 100%;
+	height: 100%;
+	flow-children: down;
+}
+
+.k4-a-desc
+{
+	width: 100%;
+	margin: 2px 6px 4px 6px;
+	text-align: center;
+	font-size: 12px;
+	color: #AEB7C2;
+	max-height: 30px;
+	text-overflow: ellipsis;
+}
+
+.k4-h-a
+{
+	flow-children: none;
+}
+
+.k4-h-a-body
+{
+	width: 100%;
+	flow-children: down;
+}
+
+.k4-pf-sc
+{
+	width: 124px;
+	flow-children: none;
+}
+
+.k4-pf-sc-body
+{
+	width: 100%;
+	flow-children: down;
+}
+
+.k4-pf-sc-desc
+{
+	width: 100%;
+	margin-top: 2px;
+	text-align: center;
+	font-size: 12px;
+	color: #AEB7C2;
+}
+
+/* The mission streak: what it is, and what each day of it pays. */
+.k4-streak-wrap
+{
+	width: 100%;
+	height: fill-parent-flow( 1.0 );
+	flow-children: down;
+	margin-top: 16px;
+}
+
+.k4-streak-head
+{
+	width: 100%;
+	height: 36px;
+	flow-children: right;
+}
+
+.k4-streak-head .k4-streak-count
+{
+	width: 60px;
+}
+
+.k4-streak-hint
+{
+	margin-left: 8px;
+	vertical-align: center;
+	font-size: 15px;
+	color: #C9D1DA;
+}
+
+.k4-streak
+{
+	height: 72px;
+	margin-top: 8px;
+}
+
+.k4-sd
+{
+	height: 72px;
+	margin-left: 10px;
+	flow-children: none;
+}
+
+.k4-sd.k4-first
+{
+	margin-left: 0px;
+}
+
+.k4-sd-body
+{
+	width: 100%;
+	height: 100%;
+	flow-children: down;
+}
+
+.k4-sd-body .k4-sd-icon
+{
+	vertical-align: top;
+	margin-top: 10px;
+}
+
+.k4-sd-day
+{
+	horizontal-align: center;
+	margin-top: 2px;
+	font-size: 13px;
+	letter-spacing: 1px;
+	color: #FFFFFF;
+}
+
+.k4-sd-bonus
+{
+	horizontal-align: center;
+	font-size: 13px;
+	color: k4-gold-light;
+}
+
+.k4-sw-name
+{
+	width: 110px;
+	margin-left: 12px;
+	vertical-align: center;
+	font-size: 17px;
+	white-space: nowrap;
+	text-overflow: shrink;
+}
+
 """
 
 css += "\n/* Pictures: a game image as background (CS2's custom HUD allows no Image elements) */\n"
@@ -2376,7 +2595,7 @@ css += "\n/* Medal tiers */\n"
 for tier, (light, middle, dark, glow) in TIERS.items():
     css += (f".t-{tier} {{ background-color: gradient( linear, 0% 0%, 100% 100%, from( {light} ), "
             f"color-stop( 0.45, {middle} ), to( {dark} ) ); }}\n")
-    css += f".t-{tier}.k4-ring-showcase, .t-{tier}.k4-ring-card {{ box-shadow: {glow} 0px 0px 26px 0px; }}\n"
+    css += f".t-{tier}.k4-ring-showcase, .t-{tier}.k4-ring-card {{ box-shadow: {glow} 0px 0px 18px 0px; }}\n"
 
 css += "\n/* Toast colors and their sounds */\n"
 for name, (color, sound) in TOAST_COLORS.items():

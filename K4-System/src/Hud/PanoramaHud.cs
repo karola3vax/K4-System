@@ -172,7 +172,14 @@ internal sealed class PanoramaHud(
 		public bool Fresh => DateTime.UtcNow - LoadedUtc < CacheFor;
 	}
 
-	private sealed record ShownToast(Toast Toast, int Id);
+	private sealed record ShownToast(Toast Toast, int Id)
+	{
+		/// <summary>Sliding out: still drawn in its slot until the slide-out ends.</summary>
+		public bool Leaving { get; set; }
+	}
+
+	// Matches the slide-out transition of .k4-toast.k4-out and .k4-promo.k4-out in the stylesheet.
+	private const float LeaveSeconds = 0.3f;
 
 	private readonly Dictionary<int, HudState> open = [];
 	private readonly Dictionary<int, List<ShownToast>> toasts = [];
@@ -468,6 +475,13 @@ internal sealed class PanoramaHud(
 
 		if (id.StartsWith("k4-h-q", StringComparison.Ordinal))
 			return Go(state, HudTab.Stats);
+
+		if (id.StartsWith("k4-pf-sc", StringComparison.Ordinal) && state.ProfileOf == 0 && Go(state, HudTab.Achievements))
+		{
+			state.Filter = AchievementFilter.Shown;
+			state.AchievementsPage = 0;
+			return true;
+		}
 
 		if (id.StartsWith("k4-af-", StringComparison.Ordinal) && Enum.TryParse(id["k4-af-".Length..], ignoreCase: true, out AchievementFilter filter))
 		{
@@ -871,6 +885,7 @@ internal sealed class PanoramaHud(
 			SetPicture(player, $"{slot}-icon", MissionIcon(mission.Mission));
 			SetClass(player, slot, "k4-done", mission.Completed);
 			SetVar(player, slot, "value", mission.Completed ? "✓" : $"{mission.Progress}/{mission.Mission.Target}");
+			SetVar(player, slot, "tip", Text(player, "hud.tip.mission", missions!.DescribeHere(player.Controller, mission), Number(missions.RewardOf(mission.Mission))));
 		}
 
 		// The three unfinished achievements closest to done.
@@ -884,6 +899,8 @@ internal sealed class PanoramaHud(
 				continue;
 			(Achievements.AchievementDefinition achievement, int progress, _) = closest[i];
 			SetVar(player, slot, "name", achievements!.NameFor(achievement, player.Controller));
+			SetVar(player, slot, "tip", Text(player, "hud.tip.progress", achievements.DescriptionFor(achievement, player.Controller),
+				Number(progress), Number(achievement.Goal), Number(achievement.Points)));
 			SwapClass(player, $"{slot}-ring", "tier", "t-locked");
 			SetPicture(player, $"{slot}-icon", AchievementIcon(achievement.Type));
 			SetBar(player, $"{slot}-bar", progress, achievement.Goal);
@@ -920,19 +937,19 @@ internal sealed class PanoramaHud(
 		}
 
 		// Quick stats.
-		List<(string Value, string Icon)> quick = [];
+		List<(string Value, string Icon, string Tip)> quick = [];
 		if (player.Stats is StatCounters stats)
 		{
 			int kills = stats[StatField.Kills];
 			int shots = stats[StatField.Shoots];
-			quick.Add((StatCounters.KillDeathRatio(kills, stats[StatField.Deaths]).ToString("0.00", CultureInfo.InvariantCulture), "ic-stats"));
-			quick.Add(($"{StatService.HeadshotPercentage(stats[StatField.Headshots], kills).ToString("0", CultureInfo.InvariantCulture)}%", "ic-stat_headshots"));
-			quick.Add(($"{(shots > 0 ? stats[StatField.HitsGiven] * 100.0 / shots : 0).ToString("0", CultureInfo.InvariantCulture)}%", "ic-crosshair_circle"));
+			quick.Add((StatCounters.KillDeathRatio(kills, stats[StatField.Deaths]).ToString("0.00", CultureInfo.InvariantCulture), "ic-stats", Text(player, "hud.stat.kd")));
+			quick.Add(($"{StatService.HeadshotPercentage(stats[StatField.Headshots], kills).ToString("0", CultureInfo.InvariantCulture)}%", "ic-stat_headshots", Text(player, "hud.stat.headshots")));
+			quick.Add(($"{(shots > 0 ? stats[StatField.HitsGiven] * 100.0 / shots : 0).ToString("0", CultureInfo.InvariantCulture)}%", "ic-crosshair_circle", Text(player, "hud.stat.accuracy")));
 		}
 		if (player.Playtime is not null)
-			quick.Add((playtime.Format(playtime.CurrentSeconds(player)[(int)PlaytimeField.All], StatTimeUnits), "ic-clock"));
+			quick.Add((playtime.Format(playtime.CurrentSeconds(player)[(int)PlaytimeField.All], StatTimeUnits), "ic-clock", Text(player, "hud.stat.playtime")));
 		if (player.Stats is not null && player.Profile is PlayerProfile profile && PlayerProfile.Favorite(profile.WeaponKills) is (string weapon, int weaponKills))
-			quick.Add((Number(weaponKills), WeaponIcon(weapon)));
+			quick.Add((Number(weaponKills), WeaponIcon(weapon), Text(player, "hud.tip.favorite", WeaponCatalog.DisplayName(weapon), Number(weaponKills))));
 
 		for (int i = 0; i < HomeQuick; i++)
 		{
@@ -941,6 +958,7 @@ internal sealed class PanoramaHud(
 			if (i >= quick.Count)
 				continue;
 			SetVar(player, tile, "value", quick[i].Value);
+			SetVar(player, tile, "tip", quick[i].Tip);
 			SetPicture(player, $"{tile}-icon", quick[i].Icon);
 		}
 	}
@@ -1077,7 +1095,12 @@ internal sealed class PanoramaHud(
 			Gone(player, slot, i >= shown.Count);
 			if (i >= shown.Count)
 				continue;
-			SetVar(player, slot, "name", achievements!.NameFor(shown[i], player.Controller));
+			string description = achievements!.DescriptionFor(shown[i], player.Controller);
+			SetVar(player, slot, "name", achievements.NameFor(shown[i], player.Controller));
+			SetVar(player, slot, "desc", description);
+			SetVar(player, slot, "tip", own
+				? Text(player, "hud.tip.showcase-own", description, Number(shown[i].Points))
+				: Text(player, "hud.tip.unlocked", description, Number(shown[i].Points)));
 			SwapClass(player, $"{slot}-ring", "tier", MedalTier(shown[i]));
 			SetPicture(player, $"{slot}-icon", AchievementIcon(shown[i].Type));
 		}
@@ -1200,18 +1223,38 @@ internal sealed class PanoramaHud(
 			SetBar(player, "k4-mw-bar", weekly.Completed ? 1 : weekly.Progress, weekly.Completed ? 1 : weekly.Mission.Target);
 		}
 
-		// The streak: finished days light up and today is marked.
+		// The streak: the seven days of its current week, finished days lit, today marked, each with its bonus.
 		int streak = MissionRules.CurrentStreak(today.Streak, today.LastCompletedDay, today.Day);
 		bool doneToday = today.LastCompletedDay == today.Day;
-		int lit = Math.Min(streak, doneToday ? StreakDays : StreakDays - 1);
-		for (int i = 0; i < StreakDays; i++)
-		{
-			SetClass(player, $"k4-sd{i}", "k4-on", i < lit);
-			SetClass(player, $"k4-sd{i}", "k4-today", doneToday ? i == lit - 1 : i == lit);
-		}
+		(int firstDay, int lit, int todayIndex) = StreakWindow(streak, doneToday);
+		int dayTotal = (int)Math.Min(int.MaxValue, today.Slots.Sum(slot => (long)missions.RewardOf(slot.Mission)));
+
 		SetVar(player, view, "streak", Number(streak));
 		SetVar(player, view, "reset", missions.Footer(player));
-		SetVar(player, view, "bonus", "");
+		SetVar(player, view, "streakhint", Text(player, "hud.streak-hint"));
+
+		for (int i = 0; i < StreakDays; i++)
+		{
+			int day = firstDay + i;
+			int bonus = MissionRules.StreakBonus(day, dayTotal, config.Missions.StreakBonusPercent, config.Missions.StreakMaxDays);
+			string slot = $"k4-sd{i}";
+			SetClass(player, slot, "k4-on", i < lit);
+			SetClass(player, slot, "k4-today", i == todayIndex);
+			SetVar(player, slot, "day", Upper(player, Text(player, "hud.streak-day", day)));
+			SetVar(player, slot, "bonus", $"+{Number(bonus)}");
+			SetVar(player, slot, "tip", Text(player, i < lit ? "hud.tip.streak-done" : i == todayIndex ? "hud.tip.streak-today" : "hud.tip.streak-next", day, Number(bonus)));
+		}
+	}
+
+	/// <summary>
+	/// The streak's current week: the number of its first day, how many of its days are finished, and which one is
+	/// today. Today is the day being played for (the streak plus one) until all missions are done, then the streak.
+	/// </summary>
+	internal static (int FirstDay, int Lit, int TodayIndex) StreakWindow(int streak, bool doneToday)
+	{
+		int todayNumber = doneToday ? Math.Max(1, streak) : streak + 1;
+		int firstDay = (todayNumber - 1) / StreakDays * StreakDays + 1;
+		return (firstDay, Math.Clamp(streak - firstDay + 1, 0, StreakDays), todayNumber - firstDay);
 	}
 
 	// ---------------------------------------------------------------- achievements
@@ -1274,8 +1317,17 @@ internal sealed class PanoramaHud(
 			Gone(player, card, false);
 			SetClass(player, card, "k4-locked", !done);
 			SetClass(player, card, "k4-pinned", done && showcase.Contains(achievement.Id));
-			SetVar(player, card, "name", achievements!.NameFor(achievement, player.Controller));
+			string description = achievements!.DescriptionFor(achievement, player.Controller);
+			bool pinned = done && showcase.Contains(achievement.Id);
+			SetVar(player, card, "name", achievements.NameFor(achievement, player.Controller));
+			SetVar(player, card, "desc", description);
 			SetVar(player, card, "goal", done ? $"{Number(achievement.Goal)} ✓" : $"{Number(progress)}/{Number(achievement.Goal)}");
+			string status = done
+				? Text(player, "hud.tip.unlocked", description, Number(achievement.Points))
+				: Text(player, "hud.tip.progress", description, Number(progress), Number(achievement.Goal), Number(achievement.Points));
+			SetVar(player, card, "tip", done && player.Profile is not null
+				? $"{status} · {Text(player, pinned ? "hud.tip.unpin" : "hud.tip.pin")}"
+				: status);
 			SwapClass(player, $"{card}-ring", "tier", done ? MedalTier(achievement) : "t-locked");
 			SetPicture(player, $"{card}-icon", AchievementIcon(achievement.Type));
 			SetBar(player, $"{card}-bar", progress, achievement.Goal);
@@ -1465,7 +1517,11 @@ internal sealed class PanoramaHud(
 			SetVar(player, tile, "name", rank.Name);
 			SetColor(player, $"{tile}-name", rank.ColorName);
 			SetVar(player, tile, "points", rank.IsDefault ? Text(player, "hud.rank-start") : Number(rank.Point));
-			Gone(player, $"{tile}-gift", RankRewards.DescriptionLines(rank).Count == 0);
+			IReadOnlyList<string> rewards = RankRewards.DescriptionLines(rank);
+			Gone(player, $"{tile}-gift", rewards.Count == 0);
+			SetVar(player, tile, "tip", rewards.Count > 0
+				? Text(player, "hud.tip.rank-reward", StripColors(string.Join(" · ", rewards)))
+				: Text(player, "hud.tip.rank-none"));
 			Gone(player, $"{tile}-you", !mine);
 		}
 	}
@@ -1519,6 +1575,7 @@ internal sealed class PanoramaHud(
 			if (i >= weapons.Count)
 				continue;
 			SetPicture(player, $"{row}-icon", WeaponIcon(weapons[i].Key));
+			SetVar(player, row, "weapon", WeaponCatalog.DisplayName(weapons[i].Key));
 			SetVar(player, row, "kills", Number(weapons[i].Value));
 			SetBar(player, $"{row}-bar", weapons[i].Value, weapons[0].Value);
 		}
@@ -1556,10 +1613,20 @@ internal sealed class PanoramaHud(
 
 		plugin.AddTimer(global::K4System.Hud.Toast.Seconds(toast.Length), () =>
 		{
-			if (!gameThread.IsActive || !toasts.TryGetValue(player.Slot, out List<ShownToast>? current) || !current.Remove(shown))
+			if (!gameThread.IsActive || !toasts.TryGetValue(player.Slot, out List<ShownToast>? current) || !current.Contains(shown)
+				|| layout is not { IsValid: true } || !player.HasController)
 				return;
-			if (layout is { IsValid: true } && player.HasController)
-				DrawToasts(player, restart: false);
+
+			// Slide out first, then free the slot.
+			shown.Leaving = true;
+			DrawToasts(player, restart: false);
+			plugin.AddTimer(LeaveSeconds, () =>
+			{
+				if (!gameThread.IsActive || !toasts.TryGetValue(player.Slot, out List<ShownToast>? now) || !now.Remove(shown))
+					return;
+				if (layout is { IsValid: true } && player.HasController)
+					DrawToasts(player, restart: false);
+			}, TimerFlags.STOP_ON_MAPCHANGE);
 		}, TimerFlags.STOP_ON_MAPCHANGE);
 	}
 
@@ -1586,9 +1653,12 @@ internal sealed class PanoramaHud(
 			if (i >= stack.Count)
 			{
 				Gone(player, slot, true);
+				SetClass(player, slot, "k4-out", false);
 				continue;
 			}
 
+			// The class follows the toast, so a toast leaving while a new one pushes it down keeps sliding out.
+			SetClass(player, slot, "k4-out", stack[i].Leaving);
 			Toast toast = stack[i].Toast;
 			SetVar(player, slot, "kind", toast.Kind);
 			SetVar(player, slot, "text", StripColors(toast.Text));
@@ -1630,6 +1700,7 @@ internal sealed class PanoramaHud(
 			return;
 
 		int version = promotions[player.Slot] = NextVersion();
+		SetClass(player, "k4-promo", "k4-out", false);
 		SetVar(player, "k4-promo", "title", Upper(player, Text(player, "hud.toast.promoted")));
 		SetVar(player, "k4-promo", "rank", rank.Name);
 		SetEmblem(player, "k4-promo-icon", rank);
@@ -1637,8 +1708,18 @@ internal sealed class PanoramaHud(
 
 		plugin.AddTimer(PromotionSeconds, () =>
 		{
-			if (gameThread.IsActive && promotions.GetValueOrDefault(player.Slot) == version && layout is { IsValid: true } && player.HasController)
-				layout.SetHasClassForPlayer(player.Controller, "k4-promo", "k4-gone", true);
+			if (!gameThread.IsActive || promotions.GetValueOrDefault(player.Slot) != version || layout is not { IsValid: true } || !player.HasController)
+				return;
+
+			layout.SetHasClassForPlayer(player.Controller, "k4-promo", "k4-out", true);
+			plugin.AddTimer(LeaveSeconds, () =>
+			{
+				if (gameThread.IsActive && promotions.GetValueOrDefault(player.Slot) == version && layout is { IsValid: true } && player.HasController)
+				{
+					layout.SetHasClassForPlayer(player.Controller, "k4-promo", "k4-gone", true);
+					layout.SetHasClassForPlayer(player.Controller, "k4-promo", "k4-out", false);
+				}
+			}, TimerFlags.STOP_ON_MAPCHANGE);
 		}, TimerFlags.STOP_ON_MAPCHANGE);
 	}
 
