@@ -417,6 +417,28 @@ public partial class PanoramaLayoutTests
 	public void Weapon_missions_use_the_killfeed_icon_when_there_is_one(string? weapon, string expected)
 		=> Assert.Equal(expected, PanoramaHud.WeaponIcon(weapon));
 
+	// Regression: CS2 draws an SVG at its written size (about 32px for icons) and stretches it, so the game's own
+	// icons were blurry on the full-screen panel. Every icon must use the addon's sharp copy (gen_k4_icons.py).
+	[Fact]
+	public void Icons_use_the_sharp_copies()
+	{
+		string css = Stylesheet;
+		Assert.DoesNotMatch(@"s2r://panorama/images/(icons/ui|icons/equipment|hud/deathnotice)/", css);
+
+		List<string> copies = Regex.Matches(css, @"s2r://panorama/images/custom_game/k4/icons/([a-z]+/[a-z0-9_]+)\.vsvg").Select(match => match.Groups[1].Value).Distinct().ToList();
+		Assert.NotEmpty(copies);
+		foreach (string copy in copies)
+		{
+			string svg = File.ReadAllText(Path.Combine(AddonRoot, "panorama", "images", "custom_game", "k4", "icons", $"{copy}.svg"));
+			Match root = Regex.Match(svg, @"<svg\b[^>]*>");
+			Match width = Regex.Match(root.Value, @"width=""([\d.]+)px""");
+			Match height = Regex.Match(root.Value, @"height=""([\d.]+)px""");
+			Assert.True(width.Success && height.Success, copy);
+			Assert.Equal(256d, Math.Max(double.Parse(width.Groups[1].Value, System.Globalization.CultureInfo.InvariantCulture), double.Parse(height.Groups[1].Value, System.Globalization.CultureInfo.InvariantCulture)), 3);
+			Assert.Contains("viewBox=", root.Value);
+		}
+	}
+
 	[Fact]
 	public void Rank_icons_use_the_sharp_copies()
 	{
