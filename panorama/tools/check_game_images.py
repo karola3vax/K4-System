@@ -9,6 +9,7 @@ import re
 import sys
 
 from gen_k4_ranks import GAME_FOLDER, OUT, RANKS, scaled
+import gen_k4_icons
 from vpk import Vpk
 
 ADDON = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "k4system")
@@ -43,9 +44,20 @@ def main() -> int:
             if ours != scaled(game.svg(f"{GAME_FOLDER}/{name}.vsvg_c").replace("\r\n", "\n")):
                 problems.append(f"emblem differs from the game: {name}.svg")
 
+    # The sharp icon copies (gen_k4_icons.py) must still be the game's current artwork.
+    icons = gen_k4_icons.referenced()
+    for group, name in icons:
+        path = os.path.join(gen_k4_icons.OUT, group, f"{name}.svg")
+        if not os.path.exists(path):
+            problems.append(f"icon copy missing: {group}/{name}.svg (run gen_k4_icons.py)")
+            continue
+        with open(path, encoding="utf-8") as file:
+            if file.read() != gen_k4_icons.scaled(gen_k4_icons.source(game, group, name)):
+                problems.append(f"icon differs from the game: {group}/{name}.svg (run gen_k4_icons.py)")
+
     for problem in problems:
         print(problem)
-    print(f"{len(refs)} image references, {2 * len(RANKS)} emblems: " + ("all match the game" if not problems else f"{len(problems)} problem(s)"))
+    print(f"{len(refs)} image references, {2 * len(RANKS)} emblems, {len(icons)} icons: " + ("all match the game" if not problems else f"{len(problems)} problem(s)"))
     return 1 if problems else 0
 
 

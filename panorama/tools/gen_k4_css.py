@@ -3,14 +3,16 @@
 The classes the server swaps (docs/panel-contract.md) are generated at the bottom: game icons, rank emblems,
 team patches, map backgrounds, medal tiers, bar widths, rank colors, toast colors and lengths.
 Every image is one CS2 already ships, referenced the way Valve's stylesheets do (s2r://panorama/images/...).
-The one exception is the rank emblems: the addon carries sharp copies of CS2's own
-(panorama/images/custom_game/k4/ranks, written by gen_k4_ranks.py), because the game's are 32x13.
+The exceptions are the rank emblems and the icons: the addon carries sharp copies of CS2's own
+(panorama/images/custom_game/k4/ranks and .../icons, written by gen_k4_ranks.py and gen_k4_icons.py),
+because the game draws them at 32x13 and 32x32 and they looked blurry at the panel's sizes.
 Sounds are CS2's own UI sound events, the ones Valve's Panorama files use.
 
 Panorama scales the whole HUD by screen height (1080 is 1:1), so heights are fixed px and widths flow:
 the sidebar is 300px and everything right of it shares the rest, which keeps 16:9 and 16:10 alike.
 """
 import os
+import re
 
 OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "k4system", "panorama", "styles", "custom_game", "k4_ui.css")
 
@@ -2416,6 +2418,13 @@ for step in range(21):
 css += "\n/* Rank colors */\n"
 for name, color in COLORS.items():
     css += f".col-{name} {{ color: {color}; }}\n"
+
+# CS2 draws an SVG at the size written in the file, then stretches it: its icons are about 32px, so on the
+# full-screen panel they looked blurry. Every icon points at the addon's sharp copy instead
+# (panorama/images/custom_game/k4/icons, written by gen_k4_icons.py from this stylesheet's references).
+ICON_FOLDERS = {"icons/ui": "ui", "icons/equipment": "equipment", "hud/deathnotice": "deathnotice"}
+css = re.sub(r"s2r://panorama/images/(icons/ui|icons/equipment|hud/deathnotice)/([a-z0-9_]+)\.vsvg",
+             lambda match: f"s2r://panorama/images/custom_game/k4/icons/{ICON_FOLDERS[match.group(1)]}/{match.group(2)}.vsvg", css)
 
 open(OUT, "w", encoding="utf-8", newline="\n").write(css)
 print(f"ok: {len(MAPS)} maps")
