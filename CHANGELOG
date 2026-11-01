@@ -1,6 +1,7 @@
 -- Unreleased (after V6.5.1)
 
 - fix: The panel's Playtime tile shows the two largest units, such as "2d, 23h". The full "2d, 23h, 59m, 48s" wrapped onto a second line and was cut off. `!time` in chat still shows every unit
+- fix: Workshop addon: every stat tile value stays on one line and shrinks to fit, so a long number or a long translation can no longer be cut off. Needs the addon `3811667212` republished; works with any 6.x server
 
 -- 2026.10.31 - V6.5.1
 

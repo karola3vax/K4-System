@@ -760,6 +760,8 @@ css = r"""@define k4-text: #FFFFFF;
 {
 	flow-children: down;
 	vertical-align: center;
+	width: fill-parent-flow(1.0);
+	margin-right: 8px;
 }
 
 .k4-tile-label
@@ -769,10 +771,14 @@ css = r"""@define k4-text: #FFFFFF;
 	letter-spacing: 1px;
 }
 
+/* One line, shrunk to fit: a long value (big playtime, a long translation) wrapped and was cut off. */
 .k4-tile-value
 {
 	color: k4-text;
 	font-size: 26px;
+	width: 100%;
+	white-space: nowrap;
+	text-overflow: shrink;
 }
 
 /* ---------------------------------------------------------------- toast: the CS2 HUD mission panel */

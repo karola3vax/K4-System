@@ -218,6 +218,15 @@ public partial class PanoramaLayoutTests
 	public void Stylesheet_never_uppercases_text()
 		=> Assert.DoesNotContain("text-transform", Stylesheet, StringComparison.Ordinal);
 
+	// Regression: "2d, 23h, 59m, 48s" wrapped onto a second line that the stat tile cut off.
+	[Fact]
+	public void Stat_values_stay_on_one_line()
+	{
+		string rule = Regex.Match(Stylesheet, @"\.k4-tile-value\s*\{[^}]*\}").Value;
+		Assert.Contains("white-space: nowrap;", rule, StringComparison.Ordinal);
+		Assert.Contains("text-overflow: shrink;", rule, StringComparison.Ordinal);
+	}
+
 	[Theory]
 	[InlineData("en", "Missions", "MISSIONS")]
 	[InlineData("en", "Achievements", "ACHIEVEMENTS")]
