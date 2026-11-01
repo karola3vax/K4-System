@@ -886,6 +886,108 @@ css = r"""@define k4-text: #FFFFFF;
 .k4-showdown { margin-top: 8px; }
 .k4-wanted { color: #EB4B4B; font-size: 15px; vertical-align: center; border-left: 3px solid #EB4B4B; padding-left: 8px; }
 
+/* The player's name in the header opens their profile (7.0) */
+.k4-subtitle-btn
+{
+	width: fill-parent-flow(1.0);
+	vertical-align: center;
+}
+
+.k4-subtitle-btn .k4-subtitle { width: 100%; transition-property: color; transition-duration: k4-dur; }
+.k4-subtitle-btn:hover .k4-subtitle { color: k4-accent; }
+
+/* Top rows open the player's profile (7.0) */
+.k4-row-click { transition-property: background-color; transition-duration: k4-dur; }
+.k4-row-click:hover { background-color: k4-cell-light; }
+
+/* Season switch above the Top list (7.0) */
+.k4-season-bar
+{
+	width: 100%;
+	flow-children: right;
+	margin-bottom: 8px;
+}
+
+.k4-season-name
+{
+	width: fill-parent-flow(1.0);
+	vertical-align: center;
+	text-align: center;
+	color: k4-text;
+	font-size: 15px;
+}
+
+/* Achievements chosen for the profile carry a gold star (7.0) */
+.k4-ach-pin
+{
+	width: 16px;
+	height: 16px;
+	margin: 0px 6px 0px -4px;
+	vertical-align: center;
+	background-size: contain;
+	background-repeat: no-repeat;
+	wash-color: k4-gold;
+	visibility: collapse;
+}
+
+.k4-ach.k4-pinned .k4-ach-pin { visibility: visible; }
+.k4-ach.k4-done { transition-property: background-color; transition-duration: k4-dur; }
+.k4-ach.k4-done:hover { background-color: k4-cell-light; }
+
+/* Profile (7.0) */
+#k4-view-profile .k4-hero-text { width: fill-parent-flow(1.0); }
+.k4-pf-back { vertical-align: top; }
+
+.k4-pf-chips
+{
+	width: 100%;
+	height: 32px;
+	flow-children: right;
+	margin-bottom: 8px;
+}
+
+.k4-pf-chip
+{
+	height: 30px;
+	flow-children: right;
+	padding: 0px 12px 0px 8px;
+	margin-right: 8px;
+	border-radius: 4px;
+	border: 1px solid #e4ae3955;
+	background-color: #e4ae3914;
+}
+
+.k4-pf-chip-icon
+{
+	width: 18px;
+	height: 18px;
+	vertical-align: center;
+	background-size: contain;
+	background-repeat: no-repeat;
+	background-position: center;
+	wash-color: k4-gold;
+}
+
+.k4-pf-chip-name
+{
+	margin-left: 6px;
+	vertical-align: center;
+	color: k4-text;
+	font-size: 14px;
+}
+
+/* Long translations of the hint stay on one line and shrink to fit */
+#k4-pf-sc-hint { width: 100%; vertical-align: center; white-space: nowrap; text-overflow: shrink; }
+
+.k4-pf-seasons
+{
+	width: 100%;
+	flow-children: down;
+	margin-top: 4px;
+}
+
+.k4-pf-seasons .k4-eyebrow { margin-bottom: 4px; }
+
 /* CS2's own sounds when a toast appears */
 .k4-toast.k4-toast-green:not(.k4-gone) { sound: "UI.Mission.Complete"; }
 .k4-toast.k4-toast-gold:not(.k4-gone) { sound: "UIPanorama.EOM.CardReveal"; }

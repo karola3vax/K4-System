@@ -12,6 +12,9 @@ RANK_ROWS = 10
 STAT_TILES = 9
 MISSIONS = 4  # three daily missions and the weekly one
 ACHIEVEMENT_CARDS = 4  # one page of achievements
+PROFILE_TILES = 6
+SHOWCASE = 3  # achievements a profile shows
+PROFILE_SEASONS = 3  # finished seasons on a profile
 
 # Tab id -> CS2 icon (panorama/images/icons/ui/<name>.vsvg)
 TABS = [("rank", "xp_rank"), ("missions", "quest"), ("top", "leader"), ("ranks", "trophy"), ("stats", "stats"), ("achievements", "winner_ribbon")]
@@ -72,7 +75,10 @@ w(3, '<Panel class="k4-content">')
 
 # Header
 w(4, '<Panel class="k4-header">')
-w(5, '<Label id="k4-subtitle" class="k4-subtitle stratum-medium-tf" text="{s:subtitle}" />')
+# The player's name opens their profile (K4 7.0). Dialog variables reach the label inside, so older servers still fill it.
+w(5, '<Button id="k4-subtitle" class="k4-subtitle-btn">')
+w(6, '<Label class="k4-subtitle stratum-medium-tf" text="{s:subtitle}" />')
+w(5, '</Button>')
 w(5, '<Button id="k4-close" class="CloseButton k4-close" />')
 w(4, '</Panel>')
 
@@ -161,8 +167,8 @@ w(5, '</Panel>')
 w(4, '</Panel>')
 
 
-def row(row_id, depth, name_id=None, position=True, css="k4-row"):
-    w(depth, f'<Panel id="{row_id}" class="{css}">')
+def row(row_id, depth, name_id=None, position=True, css="k4-row", element="Panel"):
+    w(depth, f'<{element} id="{row_id}" class="{css}">')
     if position:
         w(depth + 1, f'<Panel id="{row_id}-pos" class="k4-pos-cell">')
         w(depth + 2, '<Label class="k4-pos stratum-bold-tf" text="{s:pos}" />')
@@ -171,7 +177,7 @@ def row(row_id, depth, name_id=None, position=True, css="k4-row"):
     name_attr = f' id="{name_id}"' if name_id else ""
     w(depth + 1, f'<Label{name_attr} class="k4-name stratum-medium-tf" text="{{s:name}}" />')
     w(depth + 1, '<Label class="k4-row-info stratum-regular-tf" text="{s:info}" />')
-    w(depth, '</Panel>')
+    w(depth, f'</{element}>')
 
 
 def pager(prefix, page_id):
@@ -184,10 +190,16 @@ def pager(prefix, page_id):
 
 # Top view (CS2 scoreboard rows)
 w(4, '<Panel id="k4-view-top" class="k4-view">')
+# Season switch (K4 7.0): the current season and finished ones. Hidden until a 7.0+ server with seasons shows it.
+w(5, '<Panel id="k4-top-season-bar" class="k4-season-bar k4-gone">')
+w(6, '<Button id="k4-top-season-prev" class="k4-arrow k4-arrow-left" />')
+w(6, '<Label id="k4-top-season" class="k4-season-name stratum-medium-tf" text="{s:season}" />')
+w(6, '<Button id="k4-top-season-next" class="k4-arrow k4-arrow-right" />')
+w(5, '</Panel>')
 w(5, '<Panel class="k4-table">')
 for i in range(TOP_ROWS):
-    # Every other row is a shade darker (Panorama has no :nth-child).
-    row(f"k4-top-{i}", 6, css="k4-row k4-row-alt" if i % 2 else "k4-row")
+    # Every other row is a shade darker (Panorama has no :nth-child). Rows are buttons: a click opens that profile.
+    row(f"k4-top-{i}", 6, css="k4-row k4-row-click k4-row-alt" if i % 2 else "k4-row k4-row-click", element="Button")
 w(5, '</Panel>')
 row("k4-top-me", 5, css="k4-row k4-row-me")
 pager("k4-top", "k4-top-page")
@@ -219,9 +231,11 @@ w(4, '</Panel>')
 # Achievements view (K4 6.5): one page of cards in the mission style, unfinished ones closest to done first.
 w(4, '<Panel id="k4-view-achievements" class="k4-view">')
 for i in range(ACHIEVEMENT_CARDS):
-    w(5, f'<Panel id="k4-ach-{i}" class="k4-card k4-ach">')
+    # A click on an unlocked card shows it on the profile (K4 7.0); the star marks the ones shown.
+    w(5, f'<Button id="k4-ach-{i}" class="k4-card k4-ach">')
     w(6, '<Panel class="k4-card-stripe" />')
     w(6, f'<Panel id="k4-ach-{i}-icon" class="k4-mission-icon" />')
+    w(6, '<Panel class="k4-ach-pin ic-mission_star" />')
     w(6, '<Panel class="k4-card-body">')
     w(7, '<Panel class="k4-split">')
     w(8, '<Label class="k4-ach-name stratum-bold-tf" text="{s:name}" />')
@@ -232,12 +246,59 @@ for i in range(ACHIEVEMENT_CARDS):
     w(8, '<Label class="k4-progress stratum-medium-tf" text="{s:progress}" />')
     w(7, '</Panel>')
     w(6, '</Panel>')
-    w(5, '</Panel>')
+    w(5, '</Button>')
 w(5, '<Panel class="k4-footer">')
 w(6, icon("winner_ribbon", "k4-meta-icon"))
 w(6, '<Label class="k4-muted k4-fill stratum-regular-tf" text="{s:summary}" />')
 w(5, '</Panel>')
 pager("k4-ach", "k4-ach-page")
+w(4, '</Panel>')
+
+# Profile view (K4 7.0): opened by the player's name in the header, a name in Top, or !profile.
+w(4, '<Panel id="k4-view-profile" class="k4-view">')
+w(5, '<Panel class="k4-hero">')
+w(6, '<Panel class="k4-hero-emblem">')
+w(7, '<Panel id="k4-pf-icon" class="k4-rank-icon sg-0" />')
+w(7, '<Label id="k4-pf-badge" class="k4-badge k4-gone stratum-bold-tf" text="{s:tag}" />')
+w(6, '</Panel>')
+w(6, '<Panel class="k4-hero-text">')
+w(7, '<Label id="k4-pf-rank" class="k4-eyebrow stratum-medium-tf" text="{s:rank}" />')
+w(7, '<Label class="k4-rank-name stratum-bold-tf" text="{s:name}" />')
+w(7, '<Panel class="k4-meta">')
+w(8, icon("leader", "k4-meta-icon"))
+w(8, '<Label class="k4-muted stratum-regular-tf" text="{s:summary}" />')
+w(7, '</Panel>')
+w(6, '</Panel>')
+w(6, '<Button id="k4-pf-back" class="k4-small-btn k4-pf-back k4-gone">')
+w(7, '<Label class="stratum-medium-tf" text="{s:back}" />')
+w(6, '</Button>')
+w(5, '</Panel>')
+w(5, '<Panel class="k4-pf-chips">')
+for i in range(SHOWCASE):
+    w(6, f'<Panel id="k4-pf-sc-{i}" class="k4-pf-chip k4-gone">')
+    w(7, f'<Panel id="k4-pf-sc-{i}-icon" class="k4-pf-chip-icon" />')
+    w(7, '<Label class="k4-pf-chip-name stratum-medium-tf" text="{s:name}" />')
+    w(6, '</Panel>')
+w(6, '<Label id="k4-pf-sc-hint" class="k4-muted k4-gone stratum-regular-tf" text="{s:hint}" />')
+w(5, '</Panel>')
+w(5, '<Panel class="k4-tiles">')
+for i in range(PROFILE_TILES):
+    w(6, f'<Panel id="k4-pf-st-{i}" class="k4-tile">')
+    w(7, f'<Panel id="k4-pf-st-{i}-icon" class="k4-tile-icon" />')
+    w(7, '<Panel class="k4-tile-text">')
+    w(8, '<Label class="k4-tile-label stratum-medium-tf" text="{s:label}" />')
+    w(8, '<Label class="k4-tile-value stratum-bold-tf" text="{s:value}" />')
+    w(7, '</Panel>')
+    w(6, '</Panel>')
+w(5, '</Panel>')
+w(5, '<Panel id="k4-pf-seasons" class="k4-pf-seasons k4-gone">')
+w(6, '<Label class="k4-eyebrow stratum-medium-tf" text="{s:seasons}" />')
+w(6, '<Panel class="k4-table">')
+for i in range(PROFILE_SEASONS):
+    row(f"k4-pf-ss-{i}", 7, position=False, css="k4-row k4-row-alt" if i % 2 else "k4-row")
+w(6, '</Panel>')
+w(6, '<Label id="k4-pf-ss-none" class="k4-muted k4-gone stratum-regular-tf" text="{s:none}" />')
+w(5, '</Panel>')
 w(4, '</Panel>')
 
 w(4, '<Label class="k4-copyright stratum-regular-tf" hittest="false" text="© 2026 karola3vax" />')

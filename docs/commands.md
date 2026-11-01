@@ -18,6 +18,8 @@ Command names are set in `commands` in `k4-system.jsonc`. These are the defaults
 | Missions | `!missions`, `!mission`, `!daily`; `!missions reroll <1-3>` (daily missions only) |
 | Duels | `!duel <player> <points>`, `!duel accept`, `!duel decline` (`decline` also takes back your own challenge) |
 | Achievements | `!achievements`, `!achievement`, `!ach` |
+| Profile | `!profile`, `!profile <name>`, `!profile <steamid64>` ([profiles](profiles.md)) |
+| Season | `!season` ([seasons](seasons.md)) |
 
 Set `commands.rank-to-everyone` to `true` to make `!rank` work like LVL Ranks: everyone in chat then sees the player's leaderboard place, points, kills, deaths and KDR (each reader in their own language). Without the stats module the line shows the place and points only. `!rank` then only posts that one line, which the player sees too, and does not open the panel (`!k4` still does), and the usual `commands.cooldown-seconds` limits how often the line can be posted. The default is `false`.
 
@@ -34,6 +36,7 @@ css_setpoints <target> <amount>
 css_resetdata <target> [all|time|stat|rank]
 css_k4_history <target|steamid64> [count]   shows who changed a player's points (default 10, up to 25)
 css_k4_event <multiplier> <minutes> | stop   starts or ends a points event, such as css_k4_event 2 60
+css_k4_season [end]   shows the season, or ends it now and starts a new one today (see seasons.md)
 css_k4_reload     checks k4-system.jsonc, ranks.jsonc and missions.jsonc, then reloads K4-System without a restart
 css_k4_hud        (server console only) shows whether the panel works for each player
 ```

@@ -71,6 +71,12 @@ addons/counterstrikesharp/
 3. Remove K4-System-MMRanks and FakeRanks RevealAll if they were installed. FakeRanks is a Metamod plugin, so this needs a full server restart.
 4. Restart the server.
 
+### Updating to 7.0
+
+7.0 adds monthly [seasons](seasons.md), on by default: on the 1st of each month everyone's points go back to the start. Updating itself resets nothing. The month you update in is the first season and keeps everyone's current points; the first reset is on the 1st of the next month. To keep points growing forever as before, set `modules.seasons` to `false` before that date. On a shared database, use the same setting on every server.
+
+The new tables `k4seasons`, `k4seasonstate`, `k4weaponkills` and `k4profiles` are created on the next start. Existing tables and config files need no changes. For the Profile view and the season switch on the Top tab, players need the updated Workshop addon; servers and players on the old addon keep working without them.
+
 ### Upgrading from 5.x
 
 <details>

@@ -45,6 +45,22 @@ public class ConfigTests
 	}
 
 	[Fact]
+	public void Seasons_and_profiles_are_on_by_default_and_seasons_need_ranks()
+	{
+		PluginConfig config = new();
+		Assert.True(config.Modules.Seasons);
+		Assert.True(config.Modules.Profiles);
+
+		config.Modules.Ranks = false;
+		List<string> warnings = [.. ConfigValidator.ValidateAndNormalize(config)];
+
+		Assert.False(config.Modules.Seasons);
+		Assert.Contains(warnings, warning => warning.Contains("modules.seasons needs modules.ranks"));
+		// A profile still shows stats and playtime without ranks.
+		Assert.True(config.Modules.Profiles);
+	}
+
+	[Fact]
 	public void Anti_farm_values_are_kept_in_range()
 	{
 		PluginConfig config = new();

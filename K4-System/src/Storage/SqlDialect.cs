@@ -19,6 +19,10 @@ internal sealed record TableNames(string Prefix, string LevelRanks)
 	public string MissionState => $"{Prefix}k4missionstate";
 	public string PointLog => $"{Prefix}k4pointlog";
 	public string Achievements => $"{Prefix}k4achievements";
+	public string Seasons => $"{Prefix}k4seasons";
+	public string SeasonState => $"{Prefix}k4seasonstate";
+	public string WeaponKills => $"{Prefix}k4weaponkills";
+	public string Profiles => $"{Prefix}k4profiles";
 }
 
 /// <summary>
@@ -40,6 +44,9 @@ internal abstract class SqlDialect
 	public abstract string UpsertClause(string keyColumns);
 
 	public abstract string UnixTimestampNow { get; }
+
+	/// <summary>The larger of two values: GREATEST in MySQL, the two-argument MAX in SQLite.</summary>
+	public abstract string Greatest { get; }
 
 	/// <summary>A database-clock time @Seconds seconds ago, comparable with columns filled by CURRENT_TIMESTAMP.</summary>
 	public abstract string SecondsAgo { get; }
@@ -80,6 +87,8 @@ internal sealed class MySqlDialect(string connectionString, string databaseName)
 	public override string UpsertClause(string keyColumns) => "ON DUPLICATE KEY UPDATE";
 
 	public override string UnixTimestampNow => "UNIX_TIMESTAMP()";
+
+	public override string Greatest => "GREATEST";
 
 	public override string SecondsAgo => "CURRENT_TIMESTAMP - INTERVAL @Seconds SECOND";
 
@@ -175,6 +184,36 @@ internal sealed class MySqlDialect(string connectionString, string databaseName)
 			`unlocked_at` DATETIME NOT NULL,
 			PRIMARY KEY (`steam_id`, `achievement_id`)
 		) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
+
+		// One row per player and season. points and rank stay NULL while the season runs and get the final values when it ends.
+		yield return $@"CREATE TABLE IF NOT EXISTS `{tables.Seasons}` (
+			`season` CHAR(10) COLLATE 'utf8mb4_unicode_ci' NOT NULL,
+			`steam_id` VARCHAR(32) COLLATE 'utf8mb4_unicode_ci' NOT NULL,
+			`name` VARCHAR(255) COLLATE 'utf8mb4_unicode_ci' NOT NULL,
+			`peak_points` INT NOT NULL DEFAULT 0,
+			`points` INT NULL,
+			`rank` VARCHAR(255) COLLATE 'utf8mb4_unicode_ci' NULL,
+			PRIMARY KEY (`season`, `steam_id`),
+			INDEX `idx_season_points` (`season`, `points`),
+			INDEX `idx_steam` (`steam_id`)
+		) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
+
+		yield return $@"CREATE TABLE IF NOT EXISTS `{tables.SeasonState}` (
+			`id` INT PRIMARY KEY NOT NULL,
+			`season` CHAR(10) COLLATE 'utf8mb4_unicode_ci' NOT NULL
+		) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
+
+		yield return $@"CREATE TABLE IF NOT EXISTS `{tables.WeaponKills}` (
+			`steam_id` VARCHAR(32) COLLATE 'utf8mb4_unicode_ci' NOT NULL,
+			`weapon` VARCHAR(64) COLLATE 'utf8mb4_unicode_ci' NOT NULL,
+			`kills` INT NOT NULL DEFAULT 0,
+			PRIMARY KEY (`steam_id`, `weapon`)
+		) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
+
+		yield return $@"CREATE TABLE IF NOT EXISTS `{tables.Profiles}` (
+			`steam_id` VARCHAR(32) COLLATE 'utf8mb4_unicode_ci' PRIMARY KEY NOT NULL,
+			`showcase` VARCHAR(255) COLLATE 'utf8mb4_unicode_ci' NOT NULL DEFAULT ''
+		) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
 	}
 
 	public override string CreateLevelRanksTable(string table) => $@"CREATE TABLE IF NOT EXISTS `{table}` (
@@ -254,6 +293,8 @@ internal sealed class SqliteDialect(string filePath) : SqlDialect
 	public override string UpsertClause(string keyColumns) => $"ON CONFLICT({keyColumns}) DO UPDATE SET";
 
 	public override string UnixTimestampNow => "CAST(strftime('%s', 'now') AS INTEGER)";
+
+	public override string Greatest => "MAX";
 
 	public override string SecondsAgo => "datetime('now', (-@Seconds) || ' seconds')";
 
@@ -346,6 +387,36 @@ internal sealed class SqliteDialect(string filePath) : SqlDialect
 			`achievement_id` TEXT NOT NULL,
 			`unlocked_at` TEXT NOT NULL,
 			PRIMARY KEY (`steam_id`, `achievement_id`)
+		);";
+
+		yield return $@"CREATE TABLE IF NOT EXISTS `{tables.Seasons}` (
+			`season` TEXT NOT NULL,
+			`steam_id` TEXT NOT NULL,
+			`name` TEXT NOT NULL,
+			`peak_points` INTEGER NOT NULL DEFAULT 0,
+			`points` INTEGER NULL,
+			`rank` TEXT NULL,
+			PRIMARY KEY (`season`, `steam_id`)
+		);";
+
+		yield return $"CREATE INDEX IF NOT EXISTS `idx_{tables.Seasons}_points` ON `{tables.Seasons}` (`season`, `points`);";
+		yield return $"CREATE INDEX IF NOT EXISTS `idx_{tables.Seasons}_steam` ON `{tables.Seasons}` (`steam_id`);";
+
+		yield return $@"CREATE TABLE IF NOT EXISTS `{tables.SeasonState}` (
+			`id` INTEGER PRIMARY KEY NOT NULL,
+			`season` TEXT NOT NULL
+		);";
+
+		yield return $@"CREATE TABLE IF NOT EXISTS `{tables.WeaponKills}` (
+			`steam_id` TEXT NOT NULL,
+			`weapon` TEXT NOT NULL,
+			`kills` INTEGER NOT NULL DEFAULT 0,
+			PRIMARY KEY (`steam_id`, `weapon`)
+		);";
+
+		yield return $@"CREATE TABLE IF NOT EXISTS `{tables.Profiles}` (
+			`steam_id` TEXT PRIMARY KEY NOT NULL,
+			`showcase` TEXT NOT NULL DEFAULT ''
 		);";
 	}
 

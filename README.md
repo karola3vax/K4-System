@@ -37,6 +37,8 @@ K4-System gives your Counter-Strike 2 server a rank ladder that players climb wi
 - **A rank that grows with them.** Points for kills, headshots, objectives and round wins, shown as a CS2 rank icon on the scoreboard.
 - **Missions every day.** Three daily missions and one weekly mission that fit the current map, with a streak bonus for playing several days in a row.
 - **Achievements to chase.** 21 long-term goals, from 100 kills to a 30-day mission streak, each with a one-time reward. Progress counts from a player's first game.
+- **Monthly seasons.** Points start over on the 1st of each month, so new players can reach the top. Final results are kept, and the Top tab shows every past season.
+- **Profiles.** Rank, key stats, favorite weapon, three achievements to show off and past seasons. Click any name in the Top tab to see theirs.
 - **Points events.** Double points on weekend evenings, or whenever an admin starts one.
 - **Bounties and duels.** A long kill streak makes a player WANTED, with bonus points for whoever ends it. Players can bet points on who gets more kills this map with `!duel`. Both are rare, so they stay special.
 - **A clickable panel** in CS2's own style for their rank, missions, the top players, all ranks and their stats (optional, through a free Workshop addon).
@@ -89,6 +91,8 @@ Players type `!k4` to see everything they can do. For the clickable panel, add t
 | [Commands and permissions](docs/commands.md) | Player commands, admin commands, permissions |
 | [Missions](docs/missions.md) | How missions work, every mission type, map rules, the weekly mission |
 | [Achievements](docs/achievements.md) | Long-term goals with one-time rewards, the achievement list, your own achievements |
+| [Seasons](docs/seasons.md) | Monthly point resets, past season results, ending a season early, undoing a reset |
+| [Profiles](docs/profiles.md) | Player profiles, favorite weapon, choosing achievements to show |
 | [Panel guide](panorama/README.md) | Setting up the clickable in-game panel and the Workshop addon |
 | [Common problems](docs/troubleshooting.md) | What to check when something does not work |
 | [For developers](docs/developers.md) | How it works, the shared API, building from source |
