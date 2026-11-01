@@ -12,6 +12,7 @@ using K4System.Hud;
 using K4System.Missions;
 using K4System.Players;
 using K4System.Ranks;
+using K4System.Seasons;
 using K4System.Services;
 using K4System.Storage;
 using Microsoft.Extensions.Logging;
@@ -26,7 +27,7 @@ public sealed class Plugin : BasePlugin
 
 	public override string ModuleAuthor => "K4ryuu; maintained by karola3vax";
 
-	public override string ModuleVersion => "6.5.1 " +
+	public override string ModuleVersion => "7.0.0 " +
 #if RELEASE
 		"(release)";
 #else
@@ -158,7 +159,12 @@ public sealed class Plugin : BasePlugin
 			? new AchievementService(list, players, ranks, chat, hudBridge, Logger)
 			: null;
 
-		playerService = new PlayerService(this, Config, players, store, saves, storageReady, ranks, rewards, missions, playtime, game, gameThread, background, countries, chat, events, achievements, Logger);
+		// The season service saves everyone before a season ends; playerService exists by the time that runs.
+		SeasonService? seasons = ranks is not null && Config.Modules.Seasons
+			? new SeasonService(Config, players, ranks, store, () => playerService!.SaveAll(), zone, gameThread, background, chat, hudBridge, Logger)
+			: null;
+
+		playerService = new PlayerService(this, Config, players, store, saves, storageReady, ranks, rewards, missions, playtime, game, gameThread, background, countries, chat, events, achievements, seasons, Logger);
 
 		RankService? rankService = ranks;
 		PointAudit? audit = ranks is not null ? new PointAudit(store, background) : null;
@@ -173,17 +179,23 @@ public sealed class Plugin : BasePlugin
 
 		if (Config.Panorama.Enabled)
 		{
-			hud = new PanoramaHud(this, Config, players, ranks, missions, bounty, duels, achievements, events, playtime, store, gameThread, background, chat, Logger);
+			hud = new PanoramaHud(this, Config, players, ranks, missions, bounty, duels, achievements, events, seasons, playtime, store, gameThread, background, chat, Logger);
 			hudBridge.Hud = hud;
 			RegisterHudListeners(hud, players);
 			hud.Warmup();
 		}
 
 		new GameEvents(this, Config, players, playerService, ranks, stats, Config.Modules.Playtime ? playtime : null, scoreboard, missions, bounty, duels, achievements, store, game, gameThread, background, chat, Logger).Register();
-		new K4Commands(this, Config, players, playerService, ranks, rewards, missions, duels, playtime, store, gameThread, background, chat, new CommandGuard(chat), hud, audit, events, achievements).Register();
+		new K4Commands(this, Config, players, playerService, ranks, rewards, missions, duels, playtime, store, gameThread, background, chat, new CommandGuard(chat), hud, audit, events, achievements, seasons).Register();
 
 		if (events is not null)
 			AddTimer(15.0f, events.Tick, CounterStrikeSharp.API.Modules.Timers.TimerFlags.REPEAT);
+
+		if (seasons is not null)
+		{
+			seasons.Start(storageReady);
+			AddTimer(SeasonService.CheckSeconds, seasons.Tick, CounterStrikeSharp.API.Modules.Timers.TimerFlags.REPEAT);
+		}
 
 		scoreboard?.Start(hotReload);
 

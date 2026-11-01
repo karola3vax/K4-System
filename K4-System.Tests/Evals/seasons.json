@@ -1,0 +1,72 @@
+[
+  {
+    "Name": "mid-month in Istanbul (UTC+3): the November season runs until 1 December 00:00 local",
+    "TimeZone": "Europe/Istanbul",
+    "Season": "2026-11-01",
+    "NowUtc": "2026-11-15T12:00:00Z",
+    "ExpectedOver": false, "ExpectedEndsUtc": "2026-11-30T21:00:00Z", "ExpectedEndsSoon": false, "ExpectedNext": "2026-11-01"
+  },
+  {
+    "Name": "the last evening of the month in Istanbul is still the old season",
+    "TimeZone": "Europe/Istanbul",
+    "Season": "2026-11-01",
+    "NowUtc": "2026-11-30T20:59:00Z",
+    "ExpectedOver": false, "ExpectedEndsUtc": "2026-11-30T21:00:00Z", "ExpectedEndsSoon": true, "ExpectedNext": "2026-11-01"
+  },
+  {
+    "Name": "midnight on the 1st local ends it, while UTC still says 30 November",
+    "TimeZone": "Europe/Istanbul",
+    "Season": "2026-11-01",
+    "NowUtc": "2026-11-30T21:00:00Z",
+    "ExpectedOver": true, "ExpectedEndsUtc": "2026-11-30T21:00:00Z", "ExpectedEndsSoon": false, "ExpectedNext": "2026-12-01"
+  },
+  {
+    "Name": "three days before the end the reminder starts",
+    "TimeZone": "UTC",
+    "Season": "2026-11-01",
+    "NowUtc": "2026-11-28T00:00:00Z",
+    "ExpectedOver": false, "ExpectedEndsUtc": "2026-12-01T00:00:00Z", "ExpectedEndsSoon": true, "ExpectedNext": "2026-11-01"
+  },
+  {
+    "Name": "a day earlier there is no reminder yet",
+    "TimeZone": "UTC",
+    "Season": "2026-11-01",
+    "NowUtc": "2026-11-27T23:59:00Z",
+    "ExpectedOver": false, "ExpectedEndsUtc": "2026-12-01T00:00:00Z", "ExpectedEndsSoon": false, "ExpectedNext": "2026-11-01"
+  },
+  {
+    "Name": "a season an admin started on the 15th still ends on the 1st of the next month",
+    "TimeZone": "UTC",
+    "Season": "2026-11-15",
+    "NowUtc": "2026-11-20T10:00:00Z",
+    "ExpectedOver": false, "ExpectedEndsUtc": "2026-12-01T00:00:00Z", "ExpectedEndsSoon": false, "ExpectedNext": "2026-11-01"
+  },
+  {
+    "Name": "December ends at the new year",
+    "TimeZone": "UTC",
+    "Season": "2026-12-01",
+    "NowUtc": "2027-01-01T00:00:00Z",
+    "ExpectedOver": true, "ExpectedEndsUtc": "2027-01-01T00:00:00Z", "ExpectedEndsSoon": false, "ExpectedNext": "2027-01-01"
+  },
+  {
+    "Name": "a server that was off for two months starts the current month, not the missed ones",
+    "TimeZone": "UTC",
+    "Season": "2026-09-01",
+    "NowUtc": "2026-11-10T08:00:00Z",
+    "ExpectedOver": true, "ExpectedEndsUtc": "2026-10-01T00:00:00Z", "ExpectedEndsSoon": false, "ExpectedNext": "2026-11-01"
+  },
+  {
+    "Name": "New York in winter (UTC-5): the season ends at 05:00 UTC",
+    "TimeZone": "America/New_York",
+    "Season": "2026-12-01",
+    "NowUtc": "2027-01-01T04:59:00Z",
+    "ExpectedOver": false, "ExpectedEndsUtc": "2027-01-01T05:00:00Z", "ExpectedEndsSoon": true, "ExpectedNext": "2026-12-01"
+  },
+  {
+    "Name": "New York across the daylight saving change in March uses the summer offset at the end",
+    "TimeZone": "America/New_York",
+    "Season": "2027-03-01",
+    "NowUtc": "2027-03-20T00:00:00Z",
+    "ExpectedOver": false, "ExpectedEndsUtc": "2027-04-01T04:00:00Z", "ExpectedEndsSoon": false, "ExpectedNext": "2027-03-01"
+  }
+]

@@ -42,8 +42,14 @@ public partial class PanoramaLayoutTests
 			"k4-rank-badge", "k4-rank-icon", "k4-rank-name", "k4-rank-bar", "k4-rank-reward", "k4-toast-icon",
 			"k4-top-me", "k4-top-me-icon", "k4-top-me-pos", "k4-top-prev", "k4-top-next", "k4-rk-prev", "k4-rk-next",
 			"k4-showdown", "k4-sd-wanted", "k4-sd-duel", "k4-sd-challenge", "k4-sd-hint", "k4-duel-accept", "k4-duel-decline",
-			"k4-event", "k4-view-achievements", "k4-ach-prev", "k4-ach-next", "k4-ach-page"
+			"k4-event", "k4-view-achievements", "k4-ach-prev", "k4-ach-next", "k4-ach-page",
+			"k4-view-profile", "k4-pf-icon", "k4-pf-badge", "k4-pf-back", "k4-pf-sc-hint", "k4-pf-seasons", "k4-pf-ss-none",
+			"k4-top-season-bar", "k4-top-season", "k4-top-season-prev", "k4-top-season-next"
 		];
+		for (int i = 0; i < 3; i++)
+			expected.AddRange([$"k4-pf-sc-{i}", $"k4-pf-sc-{i}-icon", $"k4-pf-ss-{i}", $"k4-pf-ss-{i}-icon"]);
+		for (int i = 0; i < PanoramaHud.ProfileTiles; i++)
+			expected.AddRange([$"k4-pf-st-{i}", $"k4-pf-st-{i}-icon"]);
 		expected.AddRange(new[] { "rank", "missions", "top", "ranks", "stats", "achievements" }.Select(tab => $"k4-tab-{tab}"));
 		for (int i = 0; i < PanoramaHud.AchievementCards; i++)
 			expected.AddRange([$"k4-ach-{i}", $"k4-ach-{i}-icon", $"k4-ach-{i}-bar"]);
@@ -63,7 +69,10 @@ public partial class PanoramaLayoutTests
 	[Fact]
 	public void Every_clickable_id_is_a_button()
 	{
-		List<string> clickable = ["k4-close", "k4-top-prev", "k4-top-next", "k4-rk-prev", "k4-rk-next", "k4-duel-accept", "k4-duel-decline", "k4-ach-prev", "k4-ach-next"];
+		List<string> clickable = ["k4-close", "k4-top-prev", "k4-top-next", "k4-rk-prev", "k4-rk-next", "k4-duel-accept", "k4-duel-decline", "k4-ach-prev", "k4-ach-next",
+			"k4-subtitle", "k4-pf-back", "k4-top-season-prev", "k4-top-season-next"];
+		clickable.AddRange(Enumerable.Range(0, 10).Select(i => $"k4-top-{i}"));
+		clickable.AddRange(Enumerable.Range(0, PanoramaHud.AchievementCards).Select(i => $"k4-ach-{i}"));
 		clickable.AddRange(Enumerable.Range(0, 3).Select(i => $"k4-reroll-{i}"));
 		clickable.AddRange(new[] { "rank", "missions", "top", "ranks", "stats", "achievements" }.Select(tab => $"k4-tab-{tab}"));
 		Dictionary<string, string> elements = Layout.Descendants()
@@ -94,11 +103,27 @@ public partial class PanoramaLayoutTests
 	[InlineData("k4-tab-achievements")]
 	[InlineData("k4-event")]
 	[InlineData("k4-showdown")]
+	[InlineData("k4-top-season-bar")]
+	[InlineData("k4-pf-back")]
+	[InlineData("k4-pf-seasons")]
+	[InlineData("k4-pf-sc-hint")]
+	[InlineData("k4-pf-ss-none")]
+	[InlineData("k4-pf-sc-0")]
 	public void Parts_newer_servers_fill_start_hidden(string panel)
 	{
 		string? classes = Layout.Descendants().Where(element => (string?)element.Attribute("id") == panel)
 			.Select(element => (string?)element.Attribute("class")).Single();
 		Assert.Contains("k4-gone", (classes ?? "").Split(' '));
+	}
+
+	// 6.5 servers write the player's name to k4-subtitle. Since 7.0 that id is the button around the label,
+	// and dialog variables reach the label inside, so the name still shows.
+	[Fact]
+	public void The_header_name_is_a_button_around_the_subtitle_label()
+	{
+		XElement subtitle = Layout.Descendants().Single(element => (string?)element.Attribute("id") == "k4-subtitle");
+		Assert.Equal("Button", subtitle.Name.LocalName);
+		Assert.Contains(subtitle.Elements("Label"), label => (string?)label.Attribute("text") == "{s:subtitle}");
 	}
 
 	[Fact]
@@ -110,7 +135,8 @@ public partial class PanoramaLayoutTests
 			.Where(id => id.StartsWith("k4-tab-", StringComparison.Ordinal))
 			.Select(id => id["k4-tab-".Length..])
 			.ToList();
-		Assert.Equal(Enum.GetNames<HudTab>().Select(name => name.ToLowerInvariant()), layoutTabs);
+		// The Profile view has no tab button: the player's name in the header opens it.
+		Assert.Equal(Enum.GetValues<HudTab>().Where(tab => tab != HudTab.Profile).Select(tab => tab.ToString().ToLowerInvariant()), layoutTabs);
 	}
 
 	[Theory]
@@ -129,7 +155,7 @@ public partial class PanoramaLayoutTests
 		List<string> classes =
 		[
 			"k4-closed", "k4-show", "k4-gone", "k4-active", "k4-done", "k4-easy", "k4-medium", "k4-hard", "k4-weekly", "k4-blocked",
-			"k4-current", "k4-disabled", "k4-toast-green", "k4-toast-gold", "k4-toast-red", "k4-place-1", "k4-place-2", "k4-place-3"
+			"k4-current", "k4-disabled", "k4-pinned", "k4-toast-green", "k4-toast-gold", "k4-toast-red", "k4-place-1", "k4-place-2", "k4-place-3"
 		];
 		classes.AddRange(PanoramaHud.IconClasses());
 		classes.AddRange(Enumerable.Range(0, 21).Select(step => $"w{step}"));

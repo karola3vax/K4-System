@@ -27,6 +27,7 @@ internal sealed class PlayerService(
 	Chat chat,
 	EventService? events,
 	Achievements.AchievementService? achievements,
+	Seasons.SeasonService? seasons,
 	ILogger logger)
 {
 	// CS2 reports this disconnect reason for players moving to the next map.
@@ -178,8 +179,11 @@ internal sealed class PlayerService(
 		player.Stats = General.Modules.Stats ? new StatCounters(record.Stats) : null;
 		player.Playtime = General.Modules.Playtime ? new PlaytimeCounters(record.Playtime, now) : null;
 		player.LastPersonalRankResetUtc = record.LastPersonalRankResetUtc;
+		player.Profile = General.Modules.Profiles ? new PlayerProfile(record.WeaponKills, record.Showcase) : null;
+		player.Season = seasons is null ? null : record.Season;
 
 		AddToRegistry(player);
+		seasons?.Join(player);
 
 		if (ranks is not null)
 		{
@@ -191,6 +195,7 @@ internal sealed class PlayerService(
 		missions?.Load(player);
 		achievements?.Restore(player, record.Achievements, config.Commands.Achievements.FirstOrDefault() ?? "achievements");
 		events?.Greet(player);
+		seasons?.Greet(player);
 
 		if (config.Messages.Connect)
 			Announce(player, "announce.connect");
@@ -294,7 +299,10 @@ internal sealed class PlayerService(
 			player.Playtime?.ToArray(),
 			personalRankResetUtc,
 			player.Missions?.Snapshot(),
-			player.Achievements?.TakeUnsaved());
+			player.Achievements?.TakeUnsaved(),
+			player.Season,
+			player.Profile?.TakeUnsavedKills(),
+			player.Profile?.TakeUnsavedShowcase());
 	}
 
 	/// <summary>Saves one player, then refreshes their leaderboard placement while they are still online.</summary>

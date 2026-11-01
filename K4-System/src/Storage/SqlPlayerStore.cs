@@ -227,15 +227,36 @@ internal sealed class SqlPlayerStore
 		}
 
 		if (record is not null)
-		{
-			IEnumerable<string> achievements = await connection.QueryAsync<string>(
-				$"SELECT `achievement_id` FROM `{tables.Achievements}` WHERE `steam_id` = @SteamId;", parameters, transaction);
-			record = record with { Achievements = achievements.ToArray() };
-		}
+			record = await WithProfileDataAsync(connection, transaction, record, parameters.SteamId);
 
 		await transaction.CommitAsync();
 		return record;
 	}
+
+	/// <summary>Adds what the main load query does not read: achievements, weapon kills, the showcase and the season.</summary>
+	private async Task<PlayerRecord> WithProfileDataAsync(DbConnection connection, DbTransaction? transaction, PlayerRecord record, string steamId)
+	{
+		var parameters = new { SteamId = steamId };
+		IEnumerable<string> achievements = await connection.QueryAsync<string>(
+			$"SELECT `achievement_id` FROM `{tables.Achievements}` WHERE `steam_id` = @SteamId;", parameters, transaction);
+		IEnumerable<(string Weapon, long Kills)> weapons = await connection.QueryAsync<(string, long)>(
+			$"SELECT `weapon`, `kills` FROM `{tables.WeaponKills}` WHERE `steam_id` = @SteamId;", parameters, transaction);
+		string? showcase = await connection.ExecuteScalarAsync<string?>(
+			$"SELECT `showcase` FROM `{tables.Profiles}` WHERE `steam_id` = @SteamId;", parameters, transaction);
+		string? season = await connection.ExecuteScalarAsync<string?>(
+			$"SELECT `season` FROM `{tables.SeasonState}` WHERE `id` = 1;", transaction: transaction);
+
+		return record with
+		{
+			Achievements = achievements.ToArray(),
+			WeaponKills = weapons.ToDictionary(row => row.Weapon, row => (int)Math.Clamp(row.Kills, 0, int.MaxValue), StringComparer.Ordinal),
+			Showcase = ParseShowcase(showcase),
+			Season = season
+		};
+	}
+
+	internal static IReadOnlyList<string> ParseShowcase(string? stored)
+		=> (stored ?? "").Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
 
 	private PlayerRecord ReadRecord(DbDataReader reader)
 	{
@@ -270,16 +291,47 @@ internal sealed class SqlPlayerStore
 
 		await using (DbTransaction transaction = await connection.BeginTransactionAsync())
 		{
+			// Read once per save: points captured before a season ended must not undo its reset.
+			string? storedSeason = snapshots.Any(snapshot => snapshot.Season is not null)
+				? await connection.ExecuteScalarAsync<string?>($"SELECT `season` FROM `{tables.SeasonState}` WHERE `id` = 1;", transaction: transaction)
+				: null;
+
 			foreach (PlayerSnapshot snapshot in snapshots)
 			{
 				string steamId = Id(snapshot.SteamId);
+				bool currentSeason = snapshot.Season is null || storedSeason is null || snapshot.Season == storedSeason;
 
-				if (snapshot.RankName is not null)
+				if (snapshot.RankName is not null && currentSeason)
 				{
 					await connection.ExecuteAsync($@"INSERT INTO `{tables.Ranks}` (`name`, `steam_id`, `rank`, `points`, `lastseen`)
 						VALUES (@Name, @SteamId, @Rank, @Points, CURRENT_TIMESTAMP)
 						{dialect.UpsertClause("`steam_id`")} `name` = @Name, `points` = @Points, `lastseen` = CURRENT_TIMESTAMP, `rank` = @Rank;",
 						new { snapshot.Name, SteamId = steamId, Rank = snapshot.RankName, snapshot.Points }, transaction);
+
+					// The season row marks the player as part of this season and remembers their best points in it.
+					if (snapshot.Season is not null)
+					{
+						await connection.ExecuteAsync($@"INSERT INTO `{tables.Seasons}` (`season`, `steam_id`, `name`, `peak_points`)
+							VALUES (@Season, @SteamId, @Name, @Points)
+							{dialect.UpsertClause("`season`, `steam_id`")} `name` = @Name, `peak_points` = {dialect.Greatest}(`peak_points`, @Points);",
+							new { snapshot.Season, SteamId = steamId, snapshot.Name, snapshot.Points }, transaction);
+					}
+				}
+
+				foreach ((string weapon, int kills) in snapshot.WeaponKills ?? new Dictionary<string, int>())
+				{
+					await connection.ExecuteAsync($@"INSERT INTO `{tables.WeaponKills}` (`steam_id`, `weapon`, `kills`)
+						VALUES (@SteamId, @Weapon, @Kills)
+						{dialect.UpsertClause("`steam_id`, `weapon`")} `kills` = @Kills;",
+						new { SteamId = steamId, Weapon = Truncate(weapon, 64), Kills = kills }, transaction);
+				}
+
+				if (snapshot.Showcase is not null)
+				{
+					await connection.ExecuteAsync($@"INSERT INTO `{tables.Profiles}` (`steam_id`, `showcase`)
+						VALUES (@SteamId, @Showcase)
+						{dialect.UpsertClause("`steam_id`")} `showcase` = @Showcase;",
+						new { SteamId = steamId, Showcase = Truncate(snapshot.Showcase, 255) }, transaction);
 				}
 
 				if (snapshot.Stats is not null)
@@ -470,7 +522,7 @@ internal sealed class SqlPlayerStore
 			foreach (string table in new[] { tables.Times, tables.Stats, tables.Ranks })
 				await connection.ExecuteAsync($"DELETE FROM `{table}` WHERE {dialect.OlderThanDays("lastseen")};", parameters, transaction);
 
-			foreach (string table in new[] { tables.Rewards, tables.Resets, tables.Missions, tables.MissionState, tables.PointLog, tables.Achievements })
+			foreach (string table in new[] { tables.Rewards, tables.Resets, tables.Missions, tables.MissionState, tables.PointLog, tables.Achievements, tables.WeaponKills, tables.Profiles })
 			{
 				await connection.ExecuteAsync($@"DELETE FROM `{table}`
 					WHERE NOT EXISTS (SELECT 1 FROM `{tables.Ranks}` r WHERE r.`steam_id` = `{table}`.`steam_id`);", transaction: transaction);
@@ -568,11 +620,163 @@ internal sealed class SqlPlayerStore
 	public async Task<List<TopEntry>> GetTopAsync(int count)
 	{
 		await using DbConnection connection = await OpenAsync();
-		IEnumerable<(long Points, string Name, string Rank)> rows = await connection.QueryAsync<(long, string, string)>(
-			$"SELECT `points`, `name`, `rank` FROM `{tables.Ranks}` ORDER BY `points` DESC LIMIT @Count;",
+		IEnumerable<(long Points, string Name, string Rank, string SteamId)> rows = await connection.QueryAsync<(long, string, string, string)>(
+			$"SELECT `points`, `name`, `rank`, `steam_id` FROM `{tables.Ranks}` ORDER BY `points` DESC LIMIT @Count;",
 			new { Count = count });
 
-		return rows.Select(row => new TopEntry((int)Math.Clamp(row.Points, int.MinValue, int.MaxValue), row.Name, row.Rank)).ToList();
+		return rows.Select(ToTopEntry).ToList();
+	}
+
+	private static TopEntry ToTopEntry((long Points, string Name, string Rank, string SteamId) row)
+		=> new((int)Math.Clamp(row.Points, int.MinValue, int.MaxValue), row.Name, row.Rank, ulong.TryParse(row.SteamId, out ulong id) ? id : 0);
+
+	// ---------------------------------------------------------------- profiles
+
+	/// <summary>A stored player's profile for the panel, or null for an unknown player. Creates no rows.</summary>
+	public async Task<ProfileRecord?> GetProfileAsync(ulong steamId, int seasons)
+	{
+		await using DbConnection connection = await OpenAsync();
+		var parameters = new { SteamId = Id(steamId) };
+
+		PlayerRecord? record = null;
+		await using (DbDataReader reader = await connection.ExecuteReaderAsync(loadSelect, parameters))
+		{
+			if (await reader.ReadAsync())
+				record = ReadRecord(reader);
+		}
+
+		if (record is null)
+			return null;
+
+		record = await WithProfileDataAsync(connection, null, record, parameters.SteamId);
+		(string name, string rank) = await connection.QuerySingleAsync<(string, string)>(
+			$"SELECT `name`, `rank` FROM `{tables.Ranks}` WHERE `steam_id` = @SteamId;", parameters);
+		long total = await connection.ExecuteScalarAsync<long>($"SELECT COUNT(*) FROM `{tables.Ranks}`;");
+
+		return new ProfileRecord(steamId, name, rank, record, (int)Math.Min(total, int.MaxValue), await ReadSeasonResultsAsync(connection, steamId, seasons));
+	}
+
+	// ---------------------------------------------------------------- seasons
+
+	/// <summary>The season stored in the database, writing <paramref name="fresh"/> when there is none yet.</summary>
+	public async Task<string> EnsureSeasonAsync(string fresh)
+	{
+		await using DbConnection connection = await OpenAsync();
+		await connection.ExecuteAsync($"{dialect.InsertIgnore} `{tables.SeasonState}` (`id`, `season`) VALUES (1, @Season);", new { Season = fresh });
+		return await connection.ExecuteScalarAsync<string?>($"SELECT `season` FROM `{tables.SeasonState}` WHERE `id` = 1;") ?? fresh;
+	}
+
+	public async Task<string?> GetSeasonAsync()
+	{
+		await using DbConnection connection = await OpenAsync();
+		return await connection.ExecuteScalarAsync<string?>($"SELECT `season` FROM `{tables.SeasonState}` WHERE `id` = 1;");
+	}
+
+	/// <summary>
+	/// Ends season <paramref name="from"/> and starts <paramref name="to"/>: stores everyone's final points and rank,
+	/// puts all points back to the start, and clears rank reward claims so rewards can be earned again. Returns false
+	/// when the stored season is no longer <paramref name="from"/>, such as when another server sharing the database
+	/// ended it first; nothing is changed then.
+	/// </summary>
+	public async Task<bool> EndSeasonAsync(string from, string to, int startPoints, string startRank)
+	{
+		await using DbConnection connection = await OpenAsync();
+		await using DbTransaction transaction = await connection.BeginTransactionAsync();
+		var parameters = new { From = from, To = to, Start = startPoints, Rank = startRank };
+
+		int moved = await connection.ExecuteAsync(
+			$"UPDATE `{tables.SeasonState}` SET `season` = @To WHERE `id` = 1 AND `season` = @From;", parameters, transaction);
+		if (moved == 0)
+		{
+			await transaction.RollbackAsync();
+			return false;
+		}
+
+		// Players with points who did not play this season (such as everyone's points from before seasons) are kept too,
+		// so every reset can be undone from this table.
+		await connection.ExecuteAsync($@"{dialect.InsertIgnore} `{tables.Seasons}` (`season`, `steam_id`, `name`, `peak_points`, `points`, `rank`)
+			SELECT @From, `steam_id`, `name`, `points`, `points`, `rank` FROM `{tables.Ranks}` WHERE `points` <> @Start;", parameters, transaction);
+
+		string season = $"`{tables.Seasons}`";
+		await connection.ExecuteAsync($@"UPDATE {season} SET
+				`points` = (SELECT r.`points` FROM `{tables.Ranks}` r WHERE r.`steam_id` = {season}.`steam_id`),
+				`rank` = (SELECT r.`rank` FROM `{tables.Ranks}` r WHERE r.`steam_id` = {season}.`steam_id`)
+			WHERE `season` = @From;", parameters, transaction);
+
+		// Purged players have no ranks row left to finish with.
+		await connection.ExecuteAsync($"DELETE FROM {season} WHERE `season` = @From AND `points` IS NULL;", parameters, transaction);
+		await connection.ExecuteAsync($"UPDATE {season} SET `peak_points` = `points` WHERE `season` = @From AND `points` > `peak_points`;", parameters, transaction);
+
+		await connection.ExecuteAsync($"UPDATE `{tables.Ranks}` SET `points` = @Start, `rank` = @Rank;", parameters, transaction);
+		await connection.ExecuteAsync($"DELETE FROM `{tables.Rewards}`;", transaction: transaction);
+
+		await transaction.CommitAsync();
+
+		if (levelRanks)
+		{
+			// Like every save's mirror, this runs after the commit and cannot undo it. -1 is the starting rank's id there.
+			try
+			{
+				await connection.ExecuteAsync($"UPDATE `{tables.LevelRanks}` SET `value` = @Start, `rank` = -1;", parameters);
+			}
+			catch (Exception ex)
+			{
+				logger.LogError("The season ended, but the optional LevelRanks table could not be reset: {ErrorMessage}", ex.Message);
+			}
+		}
+
+		return true;
+	}
+
+	/// <summary>Finished seasons, newest first.</summary>
+	public async Task<List<string>> GetFinishedSeasonsAsync(int count)
+	{
+		await using DbConnection connection = await OpenAsync();
+		IEnumerable<string> seasons = await connection.QueryAsync<string>(
+			$"SELECT DISTINCT `season` FROM `{tables.Seasons}` WHERE `points` IS NOT NULL ORDER BY `season` DESC LIMIT @Count;",
+			new { Count = count });
+		return seasons.ToList();
+	}
+
+	/// <summary>A finished season's top players and how many players it had.</summary>
+	public async Task<(List<TopEntry> Top, int Players)> GetSeasonTopAsync(string season, int count)
+	{
+		await using DbConnection connection = await OpenAsync();
+		var parameters = new { Season = season, Count = count };
+		IEnumerable<(long Points, string Name, string Rank, string SteamId)> rows = await connection.QueryAsync<(long, string, string, string)>(
+			$"SELECT `points`, `name`, `rank`, `steam_id` FROM `{tables.Seasons}` WHERE `season` = @Season AND `points` IS NOT NULL ORDER BY `points` DESC LIMIT @Count;",
+			parameters);
+		long players = await connection.ExecuteScalarAsync<long>(
+			$"SELECT COUNT(*) FROM `{tables.Seasons}` WHERE `season` = @Season AND `points` IS NOT NULL;", parameters);
+		return (rows.Select(ToTopEntry).ToList(), (int)Math.Min(players, int.MaxValue));
+	}
+
+	/// <summary>The player's finished seasons, newest first.</summary>
+	public async Task<List<SeasonResult>> GetPlayerSeasonsAsync(ulong steamId, int count)
+	{
+		await using DbConnection connection = await OpenAsync();
+		return await ReadSeasonResultsAsync(connection, steamId, count);
+	}
+
+	private async Task<List<SeasonResult>> ReadSeasonResultsAsync(DbConnection connection, ulong steamId, int count)
+	{
+		string season = $"`{tables.Seasons}`";
+		IEnumerable<(string Season, long Points, string? Rank, long Peak, long Better, long Players)> rows = await connection.QueryAsync<(string, long, string?, long, long, long)>(
+			$@"SELECT s.`season`, s.`points`, s.`rank`, s.`peak_points`,
+					(SELECT COUNT(*) FROM {season} b WHERE b.`season` = s.`season` AND b.`points` > s.`points`),
+					(SELECT COUNT(*) FROM {season} c WHERE c.`season` = s.`season` AND c.`points` IS NOT NULL)
+				FROM {season} s
+				WHERE s.`steam_id` = @SteamId AND s.`points` IS NOT NULL
+				ORDER BY s.`season` DESC LIMIT @Count;",
+			new { SteamId = Id(steamId), Count = count });
+
+		return rows.Select(row => new SeasonResult(
+			row.Season,
+			(int)Math.Clamp(row.Points, int.MinValue, int.MaxValue),
+			row.Rank ?? "",
+			(int)Math.Clamp(row.Peak, int.MinValue, int.MaxValue),
+			(int)Math.Min(row.Better + 1, int.MaxValue),
+			(int)Math.Min(row.Players, int.MaxValue))).ToList();
 	}
 
 	public async Task<(int Players, float Percentage)> GetRankShareAsync(string rankName)

@@ -82,6 +82,12 @@ public sealed class K4Player
 	/// <summary>Null while achievements are off or not loaded yet.</summary>
 	public Achievements.PlayerAchievements? Achievements { get; set; }
 
+	/// <summary>Weapon kills and the achievement showcase. Null until loaded.</summary>
+	public PlayerProfile? Profile { get; set; }
+
+	/// <summary>The season the player's points belong to. Null while seasons are off.</summary>
+	public string? Season { get; set; }
+
 	public int KillStreak { get; set; }
 
 	public DateTime LastKillUtc { get; set; } = DateTime.MinValue;

@@ -28,7 +28,7 @@ python panorama/tools/gen_k4_ranks.py "<CS2>/game/csgo/pak01_dir.vpk"
 
 ### Server and addon versions
 
-Players and servers update at different times, so every part a newer server fills starts hidden in the layout. A server older than the addon simply never shows those parts; a server newer than a player's addon writes to parts the player does not have, which does nothing. In 6.5 that is the Achievements tab and the points-event line under the header; in 6.4 the bounty and duel lines on the Rank tab. The layout tests check that each of them starts hidden.
+Players and servers update at different times, so every part a newer server fills starts hidden in the layout. A server older than the addon simply never shows those parts; a server newer than a player's addon writes to parts the player does not have, which does nothing. In 7.0 that is the season switch above the Top list and the parts of the Profile view that depend on the server's modules; in 6.5 the Achievements tab and the points-event line under the header; in 6.4 the bounty and duel lines on the Rank tab. The Profile view itself has no tab button: the player's name in the header opens it, so an older server never shows it. The layout tests check that each of them starts hidden.
 
 ## The official addon
 

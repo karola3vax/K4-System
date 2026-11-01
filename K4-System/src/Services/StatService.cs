@@ -26,6 +26,13 @@ internal sealed class StatService(PluginConfig config, PlayerRegistry players, G
 
 	public void OnRoundStart() => firstBloodTaken = false;
 
+	/// <summary>The kill-event weapon name a profile counts: every knife model is "knife".</summary>
+	internal static string ProfileWeapon(string? weapon)
+	{
+		string name = Missions.WeaponCatalog.Normalize(weapon);
+		return Missions.WeaponCatalog.IsKnife(name) ? "knife" : name;
+	}
+
 	public void OnPlayerDeath(EventPlayerDeath @event, DeathActor? victimActor, DeathActor? attackerActor, DeathActor? assisterActor)
 	{
 		if (!victimActor.HasValue || !IsStatsAllowed())
@@ -40,6 +47,7 @@ internal sealed class StatService(PluginConfig config, PlayerRegistry players, G
 		if (decision.CountAttacker && attacker is { IsValid: true, IsHuman: true })
 		{
 			Count(attacker, StatField.Kills);
+			attacker.Profile?.AddKill(ProfileWeapon(@event.Weapon));
 
 			if (!firstBloodTaken)
 			{

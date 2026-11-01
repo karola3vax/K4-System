@@ -31,6 +31,23 @@ internal static class WeaponCatalog
 
 	public static string? NameOf(int itemIndex) => ByItemIndex.GetValueOrDefault(itemIndex);
 
+	// The names CS2's buy menu shows, for the profile's favorite weapon.
+	private static readonly Dictionary<string, string> DisplayNames = new(StringComparer.Ordinal)
+	{
+		["deagle"] = "Desert Eagle", ["elite"] = "Dual Berettas", ["fiveseven"] = "Five-SeveN", ["glock"] = "Glock-18", ["ak47"] = "AK-47",
+		["aug"] = "AUG", ["awp"] = "AWP", ["famas"] = "FAMAS", ["g3sg1"] = "G3SG1", ["galilar"] = "Galil AR", ["m249"] = "M249",
+		["m4a1"] = "M4A4", ["m4a1_silencer"] = "M4A1-S", ["mac10"] = "MAC-10", ["p90"] = "P90", ["mp5sd"] = "MP5-SD", ["ump45"] = "UMP-45",
+		["xm1014"] = "XM1014", ["bizon"] = "PP-Bizon", ["mag7"] = "MAG-7", ["negev"] = "Negev", ["sawedoff"] = "Sawed-Off",
+		["tec9"] = "Tec-9", ["taser"] = "Zeus x27", ["hkp2000"] = "P2000", ["mp7"] = "MP7", ["mp9"] = "MP9", ["nova"] = "Nova",
+		["p250"] = "P250", ["scar20"] = "SCAR-20", ["sg556"] = "SG 553", ["ssg08"] = "SSG 08", ["usp_silencer"] = "USP-S",
+		["cz75a"] = "CZ75-Auto", ["revolver"] = "R8 Revolver", ["knife"] = "Knife", ["hegrenade"] = "HE Grenade",
+		["inferno"] = "Molotov", ["molotov"] = "Molotov", ["incgrenade"] = "Incendiary", ["flashbang"] = "Flashbang",
+		["smokegrenade"] = "Smoke", ["decoy"] = "Decoy", ["planted_c4"] = "C4"
+	};
+
+	/// <summary>"ak47" as "AK-47"; an unknown name is shown as it is.</summary>
+	public static string DisplayName(string name) => DisplayNames.GetValueOrDefault(name, name);
+
 	/// <summary>"weapon_ak47" or "AK47" as the kill-event name "ak47".</summary>
 	public static string Normalize(string? weapon)
 		=> (weapon ?? string.Empty).Trim().ToLowerInvariant().Replace("weapon_", "", StringComparison.Ordinal);

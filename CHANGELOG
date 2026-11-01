@@ -1,7 +1,15 @@
--- Unreleased (after V6.5.1)
+-- 2026.11.01 - V7.0.0
 
+- feat: Monthly seasons, on by default (`modules.seasons`). On the 1st of each month at midnight (`missions.timezone`) everyone's points and rank go back to the start and rank rewards can be earned again. Stats, playtime, achievements and missions stay. Each player's final points, rank and position are kept in the new `k4seasons` table first, so no result is lost and a reset can be undone (docs/seasons.md). Players are told in the last 3 days, and everyone online gets a chat line and a pop-up when a new season starts
+- setup: Updating resets nothing. The month you update in is the first season and keeps everyone's current points; the first reset is on the 1st of the next month. Set `modules.seasons` to `false` before then to keep points growing as before. On a shared database, use the same setting on every server
+- feat: `!season` shows the current season and how long is left; `css_k4_season end` (admin) ends it now and starts a new one today. Several servers on one database share the season: one ends it, the others follow within a minute. Points saved for an ended season can no longer be written over the reset
+- feat: Profiles (`modules.profiles`). `!profile`, `!profile <name>` or `!profile <steamid64>`, the player's name at the top of the panel, or any name in the Top tab opens a profile: rank, points, position, kills, K/D, headshots, playtime, favorite weapon, unlocked achievements, three achievements the player chose to show, and the last three seasons with final rank, position and best rank. Offline players work too. Without the panel `!profile` prints it in chat
+- feat: Favorite weapon. Kills are now counted per weapon (new table `k4weaponkills`), from 7.0 on. Every knife counts as one weapon. A stat reset also resets these
+- feat: Click an unlocked achievement in the Achievements tab to show it on your profile (gold star; up to three, new table `k4profiles`)
+- feat: The Top tab can switch to any finished season's final standings with the arrows above the list
 - fix: The panel's Playtime tile shows the two largest units, such as "2d, 23h". The full "2d, 23h, 59m, 48s" wrapped onto a second line and was cut off. `!time` in chat still shows every unit
 - fix: Workshop addon: every stat tile value stays on one line and shrinks to fit, so a long number or a long translation can no longer be cut off. Needs the addon `3811667212` republished; works with any 6.x server
+- setup: Needs the updated Workshop addon `3811667212` for the Profile view, the season switch, clickable Top rows and choosing achievements. A 6.5 server with the new addon keeps working; a 7.0 server with the old addon works too, without those parts. New texts in all 36 languages. New tables are created on the next start; existing tables and config files need no changes
 
 -- 2026.10.31 - V6.5.1
 

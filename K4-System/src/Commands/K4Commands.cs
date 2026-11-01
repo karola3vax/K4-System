@@ -3,6 +3,7 @@ namespace K4System.Commands;
 using System.Text;
 using CounterStrikeSharp.API;
 using CounterStrikeSharp.API.Core;
+using CounterStrikeSharp.API.Core.Translations;
 using CounterStrikeSharp.API.Modules.Admin;
 using CounterStrikeSharp.API.Modules.Commands;
 using CounterStrikeSharp.API.Modules.Commands.Targeting;
@@ -36,7 +37,8 @@ internal sealed class K4Commands(
 	PanoramaHud? hud,
 	PointAudit? audit,
 	EventService? events,
-	Achievements.AchievementService? achievements)
+	Achievements.AchievementService? achievements,
+	Seasons.SeasonService? seasons)
 {
 	private enum PointCommand
 	{
@@ -124,6 +126,19 @@ internal sealed class K4Commands(
 			foreach (string alias in Aliases.Achievements)
 				plugin.AddCommand($"css_{alias}", "Show your achievements", OnAchievements);
 		}
+
+		if (General.Modules.Profiles)
+		{
+			foreach (string alias in Aliases.Profile)
+				plugin.AddCommand($"css_{alias}", "Show your profile or another player's", OnProfile);
+		}
+
+		if (seasons is not null)
+		{
+			foreach (string alias in Aliases.Season)
+				plugin.AddCommand($"css_{alias}", "Show the current season and when it ends", OnSeason);
+			plugin.AddCommand("css_k4_season", "Shows the season, or ends it now: [end]", OnSeasonAdmin);
+		}
 	}
 
 	/// <summary>The command's player once loaded. Replies with a loading message otherwise.</summary>
@@ -184,6 +199,10 @@ internal sealed class K4Commands(
 			categories[chat["help.achievements"]] = [.. Aliases.Achievements];
 
 		List<string> other = [.. Aliases.Reset];
+		if (General.Modules.Profiles)
+			other.AddRange(Aliases.Profile);
+		if (seasons is not null)
+			other.AddRange(Aliases.Season);
 		if (General.Modules.AdminList)
 			other.AddRange(Aliases.Admins);
 		if (duels is not null)
@@ -350,6 +369,7 @@ internal sealed class K4Commands(
 		if (ResetPolicy.Includes(target, ResetPolicy.Stat) && player.Stats is not null)
 		{
 			player.Stats.Reset();
+			player.Profile?.ResetKills();
 			resetAny = true;
 		}
 
@@ -893,6 +913,140 @@ internal sealed class K4Commands(
 
 		if (unlocked == achievements.All.Count)
 			chat.TellLine(controller, "achievement.all-done");
+	}
+
+	// ---------------------------------------------------------------- profiles and seasons
+
+	private const int ProfileChatSeasons = 1;
+
+	private void OnProfile(CCSPlayerController? player, CommandInfo info)
+	{
+		if (!guard.Check(player, info, CommandUsage.CLIENT_ONLY) || LoadedPlayer(player!, info) is not K4Player k4player)
+			return;
+
+		ulong target = k4player.SteamId;
+		if (info.ArgCount >= 2)
+		{
+			string pattern = info.ArgByIndex(1);
+			// A SteamID64 also finds players who are offline.
+			if (pattern.Length == 17 && ulong.TryParse(pattern, out ulong steamId))
+				target = steamId;
+			else
+			{
+				List<K4Player> matches = info.GetArgTargetResult(1).Players
+					.Select(found => players.Get(found))
+					.OfType<K4Player>()
+					.Where(found => found.IsHuman)
+					.ToList();
+
+				if (matches.Count != 1)
+				{
+					info.ReplyToCommand(chat.Prefixed(matches.Count == 0 ? "error.target-not-found" : "error.target-many", pattern, matches.Count));
+					return;
+				}
+
+				target = matches[0].SteamId;
+			}
+		}
+
+		if (hud is not null && hud.OpenProfile(k4player, target))
+			return;
+
+		if (!TryStartExpensiveCommand(k4player, info))
+			return;
+
+		ulong reader = k4player.SteamId;
+		background.Run(async () =>
+		{
+			ProfileRecord? profile = await store.GetProfileAsync(target, ProfileChatSeasons);
+			gameThread.Post(() =>
+			{
+				if (players.Get(reader) is K4Player current && current.IsValid)
+					PrintProfile(current.Controller, profile);
+			});
+		}, "Loading a profile for chat");
+	}
+
+	private void PrintProfile(CCSPlayerController reader, ProfileRecord? profile)
+	{
+		if (profile is null)
+		{
+			chat.Tell(reader, "error.target-not-found");
+			return;
+		}
+
+		chat.Tell(reader, "profile.title", profile.Name);
+
+		PlayerRecord record = profile.Record;
+		if (ranks is not null)
+			chat.TellLine(reader, "profile.rank", profile.Rank, record.Points, record.Placement, profile.Total);
+
+		if (General.Modules.Stats)
+		{
+			int kills = record.Stats[(int)StatField.Kills];
+			chat.TellLine(reader, "profile.stats",
+				kills,
+				StatCounters.KillDeathRatio(kills, record.Stats[(int)StatField.Deaths]).ToString("0.00", System.Globalization.CultureInfo.InvariantCulture),
+				StatService.HeadshotPercentage(record.Stats[(int)StatField.Headshots], kills).ToString("0", System.Globalization.CultureInfo.InvariantCulture));
+
+			if (PlayerProfile.Favorite(record.WeaponKills ?? new Dictionary<string, int>()) is (string weapon, int weaponKills))
+				chat.TellLine(reader, "profile.favorite", WeaponCatalog.DisplayName(weapon), weaponKills);
+		}
+
+		if (General.Modules.Playtime)
+			chat.TellLine(reader, "profile.playtime", playtime.Format(record.Playtime[(int)PlaytimeField.All], 2));
+
+		if (achievements is not null && record.Showcase is { Count: > 0 } showcase)
+		{
+			IEnumerable<string> names = showcase
+				.Select(id => achievements.All.FirstOrDefault(achievement => achievement.Id == id))
+				.OfType<Achievements.AchievementDefinition>()
+				.Select(achievement => achievements.NameFor(achievement, reader));
+			chat.TellLine(reader, "profile.showcase", string.Join(", ", names));
+		}
+
+		if (seasons is not null && profile.Seasons is [SeasonResult last, ..])
+		{
+			chat.TellLine(reader, "profile.season", Seasons.SeasonClock.Name(last.Season, reader.GetLanguage()),
+				last.Rank, last.Points, last.Placement, last.Players);
+		}
+	}
+
+	private void OnSeason(CCSPlayerController? player, CommandInfo info)
+	{
+		if (seasons is null || !guard.Check(player, info, CommandUsage.CLIENT_AND_SERVER))
+			return;
+
+		if (seasons.Current is not string current)
+		{
+			info.ReplyToCommand(chat.Prefixed("error.loading"));
+			return;
+		}
+
+		System.Globalization.CultureInfo language = player is null
+			? System.Globalization.CultureInfo.CurrentUICulture
+			: player.GetLanguage();
+		info.ReplyToCommand(chat.Prefixed("season.current", Seasons.SeasonClock.Name(current, language), seasons.TimeLeft(player, current)));
+	}
+
+	private void OnSeasonAdmin(CCSPlayerController? player, CommandInfo info)
+	{
+		if (seasons is null || !guard.Check(player, info, CommandUsage.CLIENT_AND_SERVER, 0, "[end]", Permissions.Admin))
+			return;
+
+		if (info.ArgCount < 2)
+		{
+			OnSeason(player, info);
+			return;
+		}
+
+		if (!info.ArgByIndex(1).Equals("end", StringComparison.OrdinalIgnoreCase))
+		{
+			info.ReplyToCommand(chat.Prefixed("usage", CommandGuard.CommandName(info), "[end]"));
+			return;
+		}
+
+		info.ReplyToCommand(chat.Prefixed(seasons.EndNow(CommandGuard.CallerName(player)) ? "season.ending-now" : "season.end-refused"));
 	}
 
 	// ---------------------------------------------------------------- utilities

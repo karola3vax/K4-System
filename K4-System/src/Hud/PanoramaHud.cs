@@ -11,6 +11,7 @@ using K4System.Domain;
 using K4System.Missions;
 using K4System.Players;
 using K4System.Ranks;
+using K4System.Seasons;
 using K4System.Services;
 using K4System.Storage;
 using Microsoft.Extensions.Logging;
@@ -22,7 +23,9 @@ public enum HudTab
 	Top,
 	Ranks,
 	Stats,
-	Achievements
+	Achievements,
+	/// <summary>Opened by the player's name in the header, a name in Top, or !profile; it has no tab button.</summary>
+	Profile
 }
 
 public enum ToastKind
@@ -47,6 +50,7 @@ internal sealed class PanoramaHud(
 	DuelService? duels,
 	Achievements.AchievementService? achievements,
 	EventService? events,
+	SeasonService? seasons,
 	PlaytimeService playtime,
 	SqlPlayerStore store,
 	GameThread gameThread,
@@ -82,7 +86,13 @@ internal sealed class PanoramaHud(
 	private static readonly TimeSpan CacheFor = TimeSpan.FromSeconds(15);
 
 	private static readonly string[] TabIds = ["rank", "missions", "top", "ranks", "stats", "achievements"];
-	private static readonly string[] Views = ["k4-view-rank", "k4-view-missions", "k4-view-top", "k4-view-ranks", "k4-view-stats", "k4-view-achievements"];
+	private static readonly string[] Views = ["k4-view-rank", "k4-view-missions", "k4-view-top", "k4-view-ranks", "k4-view-stats", "k4-view-achievements", "k4-view-profile"];
+
+	internal const int ProfileTiles = 6;
+	internal const int ProfileSeasons = 3;
+
+	// Finished seasons the Top tab can switch through.
+	private const int SeasonsShown = 24;
 
 	/// <summary>Achievement cards on one page of the Achievements tab.</summary>
 	internal const int AchievementCards = 4;
@@ -118,6 +128,18 @@ internal sealed class PanoramaHud(
 		public int RanksPage { get; set; }
 		public int AchievementsPage { get; set; }
 		public int Version { get; set; }
+
+		/// <summary>0 shows the current season; 1 and up the finished seasons, newest first.</summary>
+		public int TopSeason { get; set; }
+
+		/// <summary>The players in the drawn Top rows, so a click can open their profile.</summary>
+		public ulong[] TopIds { get; } = new ulong[TopRows];
+
+		/// <summary>The achievements on the drawn cards, so a click can add one to the showcase.</summary>
+		public string?[] AchievementIds { get; } = new string?[AchievementCards];
+
+		/// <summary>Whose profile the Profile view shows; 0 for the player's own.</summary>
+		public ulong ProfileOf { get; set; }
 	}
 
 	// Versions come from one counter that never restarts, so a timer or database draw from an earlier
@@ -140,6 +162,11 @@ internal sealed class PanoramaHud(
 	private readonly Dictionary<int, Cached<List<TopEntry>>> topCache = [];
 	private readonly Dictionary<ulong, Cached<(int Placement, int Total)>> placementCache = [];
 	private Cached<(Dictionary<string, int> Counts, int Total)>? rankCountCache;
+	private readonly Dictionary<ulong, Cached<ProfileRecord?>> profileCache = [];
+
+	// Finished seasons never change, so these stay until the next season ends.
+	private List<string>? finishedSeasons;
+	private readonly Dictionary<(string Season, int Count), (List<TopEntry> Top, int Players)> seasonTopCache = [];
 
 	private CCSCustomHudLayout? layout;
 
@@ -160,6 +187,7 @@ internal sealed class PanoramaHud(
 		toastVersions.Clear();
 		applied.Clear();
 		placementCache.Clear();
+		profileCache.Clear();
 		plugin.AddTimer(1.0f, () => gameThread.PostWorldUpdate(() => EnsureLayout()));
 	}
 
@@ -238,6 +266,30 @@ internal sealed class PanoramaHud(
 		open[player.Slot] = state;
 		ShowLater(player, state, enableCapture: true);
 		return true;
+	}
+
+	/// <summary>Opens the Profile view on a player's profile, the caller's own for their own Steam id.</summary>
+	public bool OpenProfile(K4Player player, ulong steamId)
+	{
+		if (!config.Modules.Profiles || !Open(player, HudTab.Profile))
+			return false;
+
+		open[player.Slot].ProfileOf = steamId == player.SteamId ? 0 : steamId;
+		return true;
+	}
+
+	/// <summary>A season ended: every cached leaderboard is out of date.</summary>
+	public void SeasonChanged()
+	{
+		topCache.Clear();
+		placementCache.Clear();
+		profileCache.Clear();
+		rankCountCache = null;
+		finishedSeasons = null;
+		seasonTopCache.Clear();
+		foreach (HudState state in open.Values)
+			state.TopSeason = 0;
+		RefreshOpenPanels();
 	}
 
 	/// <summary>Redraws the panel if it is open on this tab, for changes made outside the panel.</summary>
@@ -353,6 +405,21 @@ internal sealed class PanoramaHud(
 			case "k4-ach-next" when (state.AchievementsPage + 1) * AchievementCards < AchievementOrder(player).Count:
 				state.AchievementsPage++;
 				break;
+			case "k4-subtitle" when config.Modules.Profiles:
+				state.Tab = HudTab.Profile;
+				state.ProfileOf = 0;
+				break;
+			case "k4-pf-back":
+				state.ProfileOf = 0;
+				break;
+			case "k4-top-season-prev" when state.TopSeason > 0:
+				state.TopSeason--;
+				state.TopPage = 0;
+				break;
+			case "k4-top-season-next" when finishedSeasons is not null && state.TopSeason < finishedSeasons.Count:
+				state.TopSeason++;
+				state.TopPage = 0;
+				break;
 			default:
 				if (buttonId.StartsWith("k4-tab-", StringComparison.Ordinal) && Array.IndexOf(TabIds, buttonId["k4-tab-".Length..]) is int tab and >= 0)
 				{
@@ -364,6 +431,21 @@ internal sealed class PanoramaHud(
 					&& int.TryParse(buttonId["k4-reroll-".Length..], out int index))
 				{
 					missions.Reroll(player, (index + 1).ToString(CultureInfo.InvariantCulture));
+					break;
+				}
+
+				if (config.Modules.Profiles && buttonId.StartsWith("k4-top-", StringComparison.Ordinal)
+					&& int.TryParse(buttonId["k4-top-".Length..], out int row) && row is >= 0 and < TopRows && state.TopIds[row] is ulong target and not 0)
+				{
+					state.Tab = HudTab.Profile;
+					state.ProfileOf = target == player.SteamId ? 0 : target;
+					break;
+				}
+
+				if (buttonId.StartsWith("k4-ach-", StringComparison.Ordinal) && int.TryParse(buttonId["k4-ach-".Length..], out int card)
+					&& card is >= 0 and < AchievementCards && state.AchievementIds[card] is string achievement)
+				{
+					ToggleShowcase(player, achievement);
 					break;
 				}
 
@@ -390,8 +472,10 @@ internal sealed class PanoramaHud(
 			SetVar(player, tabId, "label", Upper(player, Text(player, $"hud.tab.{TabIds[i]}")));
 			SetClass(player, tabId, "k4-active", (int)state.Tab == i);
 			SetClass(player, tabId, "k4-gone", !IsTabAvailable((HudTab)i));
-			SetClass(player, Views[i], "k4-show", (int)state.Tab == i);
 		}
+
+		for (int i = 0; i < Views.Length; i++)
+			SetClass(player, Views[i], "k4-show", (int)state.Tab == i);
 
 		switch (state.Tab)
 		{
@@ -409,6 +493,9 @@ internal sealed class PanoramaHud(
 				break;
 			case HudTab.Achievements:
 				DrawAchievements(player, state);
+				break;
+			case HudTab.Profile:
+				DrawProfile(player, state);
 				break;
 			default:
 				DrawStats(player);
@@ -439,6 +526,7 @@ internal sealed class PanoramaHud(
 		HudTab.Rank or HudTab.Top or HudTab.Ranks => ranks is not null,
 		HudTab.Missions => missions is not null,
 		HudTab.Achievements => achievements is not null,
+		HudTab.Profile => config.Modules.Profiles,
 		_ => config.Modules.Stats || config.Modules.Playtime
 	};
 
@@ -792,12 +880,15 @@ internal sealed class PanoramaHud(
 			if (i >= rows.Count)
 			{
 				SetClass(player, card, "k4-gone", true);
+				state.AchievementIds[i] = null;
 				continue;
 			}
 
 			(Achievements.AchievementDefinition achievement, int progress, bool done) = rows[i];
+			state.AchievementIds[i] = done && player.Profile is not null ? achievement.Id : null;
 			SetClass(player, card, "k4-gone", false);
 			SetClass(player, card, "k4-done", done);
+			SetClass(player, card, "k4-pinned", done && player.Profile?.Showcase.Contains(achievement.Id) == true);
 			SetVar(player, card, "name", achievements!.NameFor(achievement, player.Controller));
 			SetVar(player, card, "desc", achievements.DescriptionFor(achievement, player.Controller));
 			SetVar(player, card, "progress", done
@@ -808,10 +899,192 @@ internal sealed class PanoramaHud(
 		}
 
 		int unlocked = player.Achievements is Achievements.PlayerAchievements mine ? achievements?.All.Count(achievement => mine.Unlocked.Contains(achievement.Id)) ?? 0 : 0;
-		SetVar(player, view, "summary", Text(player, "hud.ach-summary", unlocked, achievements?.All.Count ?? 0));
+		string summary = Text(player, "hud.ach-summary", unlocked, achievements?.All.Count ?? 0);
+		if (player.Profile is PlayerProfile profile && unlocked > 0)
+			summary += " · " + Text(player, "hud.ach-showcase", profile.Showcase.Count, PlayerProfile.ShowcaseSize);
+		SetVar(player, view, "summary", summary);
 		SetVar(player, "k4-ach-page", "page", Text(player, "hud.page", state.AchievementsPage + 1, pages));
 		SetClass(player, "k4-ach-prev", "k4-disabled", state.AchievementsPage == 0);
 		SetClass(player, "k4-ach-next", "k4-disabled", state.AchievementsPage + 1 >= pages);
+	}
+
+	/// <summary>Shows an unlocked achievement on the player's profile, or takes it off again.</summary>
+	private void ToggleShowcase(K4Player player, string achievement)
+	{
+		if (player.Profile is not PlayerProfile profile || player.Achievements?.Unlocked.Contains(achievement) != true)
+			return;
+
+		if (profile.Toggle(achievement) == PlayerProfile.ShowcaseChange.Full)
+			chat.Tell(player.Controller, "profile.showcase-full", PlayerProfile.ShowcaseSize);
+	}
+
+	/// <summary>A profile as the panel shows it: stored data, with live values when the player is on this server.</summary>
+	internal sealed record ProfileData(
+		string Name,
+		int Points,
+		RankDefinition? Rank,
+		int Placement,
+		int Total,
+		int[]? Stats,
+		int? PlaytimeSeconds,
+		IReadOnlyCollection<string> Achievements,
+		IReadOnlyList<string> Showcase,
+		IReadOnlyDictionary<string, int> WeaponKills,
+		IReadOnlyList<SeasonResult> Seasons);
+
+	private ProfileData? BuildProfile(ProfileRecord? stored, K4Player? live)
+	{
+		if (stored is null && live is null)
+			return null;
+
+		RankDefinition? rank = live?.Rank?.Rank
+			?? (ranks is null || stored is null ? null : ranks.Ladder.FindByName(stored.Rank) ?? ranks.Ladder.ResolveIgnoringPermissions(stored.Record.Points));
+
+		int[]? stats = live is not null ? live.Stats?.ToArray() : config.Modules.Stats ? stored!.Record.Stats : null;
+		int? seconds = live is not null
+			? live.Playtime is null ? null : playtime.CurrentSeconds(live)[(int)PlaytimeField.All]
+			: config.Modules.Playtime ? stored!.Record.Playtime[(int)PlaytimeField.All] : null;
+
+		return new ProfileData(
+			live?.Name ?? stored!.Name,
+			live?.Rank?.Points ?? stored?.Record.Points ?? 0,
+			rank,
+			stored?.Record.Placement ?? 0,
+			stored?.Total ?? 0,
+			stats,
+			seconds,
+			live?.Achievements?.Unlocked ?? stored?.Record.Achievements ?? [],
+			live?.Profile?.Showcase ?? stored?.Record.Showcase ?? [],
+			live?.Profile?.WeaponKills ?? stored?.Record.WeaponKills ?? new Dictionary<string, int>(),
+			stored?.Seasons ?? []);
+	}
+
+	private void DrawProfile(K4Player player, HudState state)
+	{
+		ulong target = state.ProfileOf == 0 ? player.SteamId : state.ProfileOf;
+		SetClass(player, "k4-pf-back", "k4-gone", state.ProfileOf == 0);
+		SetVar(player, "k4-view-profile", "back", Upper(player, Text(player, "hud.pf-back")));
+
+		void Draw(ProfileRecord? stored)
+		{
+			K4Player? live = players.Get(target) is { IsHuman: true } online && (online.Rank is not null || online.Stats is not null) ? online : null;
+			if (BuildProfile(stored, live) is ProfileData profile)
+				DrawProfileData(player, profile, own: state.ProfileOf == 0);
+			else
+				SetVar(player, "k4-view-profile", "summary", StripColors(Text(player, "error.loading")));
+		}
+
+		if (profileCache.TryGetValue(target, out Cached<ProfileRecord?>? cached) && cached.Fresh)
+		{
+			Draw(cached.Value);
+			return;
+		}
+
+		// The own profile draws at once from memory; finished seasons and the position follow from the database.
+		if (state.ProfileOf == 0)
+			Draw(null);
+		Later(player, state, () => store.GetProfileAsync(target, ProfileSeasons),
+			result => profileCache[target] = new Cached<ProfileRecord?>(result, DateTime.UtcNow), Draw, "Loading a profile");
+	}
+
+	private void DrawProfileData(K4Player player, ProfileData profile, bool own)
+	{
+		const string view = "k4-view-profile";
+		CultureInfo invariant = CultureInfo.InvariantCulture;
+		bool textBadge = IconSet == IconsText;
+
+		SetVar(player, view, "name", profile.Name);
+		if (profile.Rank is RankDefinition rank)
+		{
+			SetIcon(player, "k4-pf-icon", rank);
+			SetVar(player, view, "tag", string.IsNullOrWhiteSpace(rank.Tag) ? rank.Name : rank.Tag.Trim('[', ']'));
+			SetVar(player, view, "rank", Upper(player, rank.Name));
+			SetColor(player, "k4-pf-badge", rank.ColorName);
+		}
+		else
+			SetVar(player, view, "rank", "");
+		SetClass(player, "k4-pf-icon", "k4-gone", textBadge || profile.Rank is null);
+		SetClass(player, "k4-pf-badge", "k4-gone", !textBadge || profile.Rank is null);
+
+		string summary = ranks is null ? "" : Text(player, "hud.points", Number(profile.Points));
+		if (profile.Placement > 0)
+			summary = $"{summary} · {Text(player, "hud.position", Number(profile.Placement), Number(profile.Total))}";
+		SetVar(player, view, "summary", summary);
+
+		// Showcase: up to three chosen achievements.
+		List<Achievements.AchievementDefinition> shown = achievements is null ? [] : [.. profile.Showcase
+			.Where(profile.Achievements.Contains)
+			.Select(id => achievements.All.FirstOrDefault(achievement => achievement.Id == id))
+			.OfType<Achievements.AchievementDefinition>()];
+		for (int i = 0; i < PlayerProfile.ShowcaseSize; i++)
+		{
+			string chip = $"k4-pf-sc-{i}";
+			SetClass(player, chip, "k4-gone", i >= shown.Count);
+			if (i < shown.Count)
+			{
+				SetVar(player, chip, "name", achievements!.NameFor(shown[i], player.Controller));
+				SwapClass(player, $"{chip}-icon", "mission-icon", AchievementIcon(shown[i].Type));
+			}
+		}
+		SetVar(player, view, "hint", Text(player, own ? "hud.pf-showcase-hint" : "hud.pf-showcase-none"));
+		SetClass(player, "k4-pf-sc-hint", "k4-gone", achievements is null || shown.Count > 0);
+
+		// Key stats.
+		List<(string Label, string Value, string Icon)> tiles = [];
+		if (profile.Stats is int[] stats)
+		{
+			int kills = stats[(int)StatField.Kills];
+			int deaths = stats[(int)StatField.Deaths];
+			tiles.Add((Text(player, "hud.stat.kills"), Number(kills), "ic-kill"));
+			tiles.Add((Text(player, "hud.stat.kd"), StatCounters.KillDeathRatio(kills, deaths).ToString("0.00", invariant), "ic-stats"));
+			tiles.Add((Text(player, "hud.stat.headshots"), $"{StatService.HeadshotPercentage(stats[(int)StatField.Headshots], kills).ToString("0", invariant)}%", "ic-stat_headshots"));
+		}
+		if (profile.PlaytimeSeconds is int seconds)
+			tiles.Add((Text(player, "hud.stat.playtime"), playtime.Format(seconds, StatTimeUnits), "ic-clock"));
+		if (profile.Stats is not null)
+		{
+			tiles.Add(PlayerProfile.Favorite(profile.WeaponKills) is (string weapon, int weaponKills)
+				? (Text(player, "hud.pf-favorite"), $"{WeaponCatalog.DisplayName(weapon)} · {Number(weaponKills)}", WeaponIcon(weapon))
+				: (Text(player, "hud.pf-favorite"), "-", "ic-bullet"));
+		}
+		if (achievements is not null)
+			tiles.Add((Text(player, "hud.tab.achievements"), $"{achievements.All.Count(achievement => profile.Achievements.Contains(achievement.Id))}/{achievements.All.Count}", "ic-winner_ribbon"));
+
+		for (int i = 0; i < ProfileTiles; i++)
+		{
+			string tile = $"k4-pf-st-{i}";
+			SetClass(player, tile, "k4-gone", i >= tiles.Count);
+			if (i < tiles.Count)
+			{
+				SetVar(player, tile, "label", Upper(player, tiles[i].Label));
+				SetVar(player, tile, "value", tiles[i].Value);
+				SwapClass(player, $"{tile}-icon", "stat-icon", tiles[i].Icon);
+			}
+		}
+
+		// Finished seasons.
+		SetClass(player, "k4-pf-seasons", "k4-gone", seasons is null || ranks is null);
+		if (seasons is null || ranks is null)
+			return;
+
+		SetVar(player, "k4-pf-seasons", "seasons", Upper(player, Text(player, "hud.pf-seasons")));
+		SetVar(player, "k4-pf-seasons", "none", Text(player, "hud.pf-seasons-none"));
+		SetClass(player, "k4-pf-ss-none", "k4-gone", profile.Seasons.Count > 0);
+		CultureInfo language = player.Controller.GetLanguage();
+		for (int i = 0; i < ProfileSeasons; i++)
+		{
+			string row = $"k4-pf-ss-{i}";
+			SetClass(player, row, "k4-gone", i >= profile.Seasons.Count);
+			if (i >= profile.Seasons.Count)
+				continue;
+
+			SeasonResult result = profile.Seasons[i];
+			RankDefinition final = ranks.Ladder.FindByName(result.Rank) ?? ranks.Ladder.ResolveIgnoringPermissions(result.Points);
+			RankDefinition best = ranks.Ladder.ResolveIgnoringPermissions(result.PeakPoints);
+			SetIcon(player, $"{row}-icon", final);
+			SetVar(player, row, "name", SeasonClock.Name(result.Season, language));
+			SetVar(player, row, "info", Text(player, "hud.pf-season-info", final.Name, Number(result.Points), Number(result.Placement), Number(result.Players), best.Name));
+		}
 	}
 
 	/// <summary>The mission icon of the same kind of goal; the streak gets the hot-trend icon of the mission footer.</summary>
@@ -830,46 +1103,55 @@ internal sealed class PanoramaHud(
 		const string view = "k4-view-top";
 		int page = state.TopPage;
 		ulong steamId = player.SteamId;
+		int needed = (page + 1) * TopRows;
 
-		void Draw(List<TopEntry> top, (int Placement, int Total) me)
+		void Pages(int players)
 		{
-			List<TopEntry> rows = top.Skip(page * TopRows).Take(TopRows).ToList();
-
-			for (int i = 0; i < TopRows; i++)
-			{
-				string row = $"k4-top-{i}";
-				if (i >= rows.Count)
-				{
-					SetClass(player, row, "k4-gone", true);
-					continue;
-				}
-
-				TopEntry entry = rows[i];
-				RankDefinition rank = ranks.Ladder.FindByName(entry.Rank) ?? ranks.Ladder.ResolveIgnoringPermissions(entry.Points);
-				SetClass(player, row, "k4-gone", false);
-				SetIcon(player, $"{row}-icon", rank);
-				int position = page * TopRows + i + 1;
-				SetPlace(player, $"{row}-pos", position);
-				SetVar(player, row, "pos", $"#{position}");
-				SetVar(player, row, "name", entry.Name);
-				SetVar(player, row, "info", Text(player, "hud.top-info", rank.Name, Number(entry.Points)));
-			}
-
-			if (player.Rank is RankState own)
-				SetIcon(player, "k4-top-me-icon", own.Rank);
-			SetPlace(player, "k4-top-me-pos", me.Placement);
-			SetVar(player, "k4-top-me", "pos", $"#{Number(me.Placement)}");
-			SetVar(player, "k4-top-me", "name", Text(player, "hud.you"));
-			SetVar(player, "k4-top-me", "info", Text(player, "hud.top-info", player.Rank?.Rank.Name ?? "", Number(player.Rank?.Points ?? 0)));
-
-			int pages = Math.Clamp((me.Total + TopRows - 1) / TopRows, 1, TopPages);
+			int pages = Math.Clamp((players + TopRows - 1) / TopRows, 1, TopPages);
 			state.TopPageCount = pages;
 			SetVar(player, view, "page", Text(player, "hud.page", page + 1, pages));
 			SetClass(player, "k4-top-prev", "k4-disabled", page == 0);
 			SetClass(player, "k4-top-next", "k4-disabled", page + 1 >= pages);
 		}
 
-		int needed = (page + 1) * TopRows;
+		void Draw(List<TopEntry> top, (int Placement, int Total) me)
+		{
+			DrawTopRows(player, state, top, page);
+			SetClass(player, "k4-top-me", "k4-gone", false);
+			if (player.Rank is RankState own)
+				SetIcon(player, "k4-top-me-icon", own.Rank);
+			SetPlace(player, "k4-top-me-pos", me.Placement);
+			SetVar(player, "k4-top-me", "pos", $"#{Number(me.Placement)}");
+			SetVar(player, "k4-top-me", "name", Text(player, "hud.you"));
+			SetVar(player, "k4-top-me", "info", Text(player, "hud.top-info", player.Rank?.Rank.Name ?? "", Number(player.Rank?.Points ?? 0)));
+			Pages(me.Total);
+		}
+
+		DrawSeasonBar(player, state);
+
+		if (state.TopSeason > 0 && finishedSeasons is { } finished && state.TopSeason <= finished.Count)
+		{
+			string season = finished[state.TopSeason - 1];
+			SetClass(player, "k4-top-me", "k4-gone", true);
+
+			void DrawPast((List<TopEntry> Top, int Players) result)
+			{
+				DrawTopRows(player, state, result.Top, page);
+				Pages(result.Players);
+			}
+
+			if (seasonTopCache.TryGetValue((season, needed), out (List<TopEntry>, int) past))
+			{
+				DrawPast(past);
+				return;
+			}
+
+			HideTopRows(player, state, page);
+			Later(player, state, () => store.GetSeasonTopAsync(season, needed),
+				result => seasonTopCache[(season, needed)] = result, DrawPast, "Loading a past season's top list");
+			return;
+		}
+
 		if (topCache.TryGetValue(needed, out Cached<List<TopEntry>>? top) && top.Fresh
 			&& placementCache.TryGetValue(steamId, out Cached<(int, int)>? me) && me.Fresh)
 		{
@@ -877,10 +1159,7 @@ internal sealed class PanoramaHud(
 			return;
 		}
 
-		for (int i = 0; i < TopRows; i++)
-			SetClass(player, $"k4-top-{i}", "k4-gone", true);
-		SetVar(player, view, "page", Text(player, "hud.page", page + 1, "…"));
-
+		HideTopRows(player, state, page);
 		Later(player, state, async () =>
 		{
 			List<TopEntry> entries = await store.GetTopAsync(needed);
@@ -891,6 +1170,73 @@ internal sealed class PanoramaHud(
 			topCache[needed] = new Cached<List<TopEntry>>(result.entries, DateTime.UtcNow);
 			placementCache[steamId] = new Cached<(int, int)>(result.Item2, DateTime.UtcNow);
 		}, result => Draw(result.entries, result.Item2), "Loading the top list panel");
+	}
+
+	private void HideTopRows(K4Player player, HudState state, int page)
+	{
+		for (int i = 0; i < TopRows; i++)
+		{
+			SetClass(player, $"k4-top-{i}", "k4-gone", true);
+			state.TopIds[i] = 0;
+		}
+		SetVar(player, "k4-view-top", "page", Text(player, "hud.page", page + 1, "…"));
+	}
+
+	private void DrawTopRows(K4Player player, HudState state, List<TopEntry> top, int page)
+	{
+		List<TopEntry> rows = top.Skip(page * TopRows).Take(TopRows).ToList();
+
+		for (int i = 0; i < TopRows; i++)
+		{
+			string row = $"k4-top-{i}";
+			if (i >= rows.Count)
+			{
+				SetClass(player, row, "k4-gone", true);
+				state.TopIds[i] = 0;
+				continue;
+			}
+
+			TopEntry entry = rows[i];
+			RankDefinition rank = ranks!.Ladder.FindByName(entry.Rank) ?? ranks.Ladder.ResolveIgnoringPermissions(entry.Points);
+			state.TopIds[i] = entry.SteamId;
+			SetClass(player, row, "k4-gone", false);
+			SetIcon(player, $"{row}-icon", rank);
+			int position = page * TopRows + i + 1;
+			SetPlace(player, $"{row}-pos", position);
+			SetVar(player, row, "pos", $"#{position}");
+			SetVar(player, row, "name", entry.Name);
+			SetVar(player, row, "info", Text(player, "hud.top-info", rank.Name, Number(entry.Points)));
+		}
+	}
+
+	/// <summary>The current season and arrows to the finished ones above the Top list. Hidden without seasons.</summary>
+	private void DrawSeasonBar(K4Player player, HudState state)
+	{
+		if (seasons?.Current is not string current)
+		{
+			SetClass(player, "k4-top-season-bar", "k4-gone", true);
+			return;
+		}
+
+		SetClass(player, "k4-top-season-bar", "k4-gone", false);
+		CultureInfo language = player.Controller.GetLanguage();
+
+		if (finishedSeasons is null)
+		{
+			SetVar(player, "k4-top-season", "season", Text(player, "hud.season-current", SeasonClock.Name(current, language), seasons.TimeLeft(player.Controller, current)));
+			SetClass(player, "k4-top-season-prev", "k4-disabled", true);
+			SetClass(player, "k4-top-season-next", "k4-disabled", true);
+			Later(player, state, () => store.GetFinishedSeasonsAsync(SeasonsShown), result => finishedSeasons = result,
+				_ => DrawSeasonBar(player, state), "Loading the finished seasons");
+			return;
+		}
+
+		state.TopSeason = Math.Clamp(state.TopSeason, 0, finishedSeasons.Count);
+		SetVar(player, "k4-top-season", "season", state.TopSeason == 0
+			? Text(player, "hud.season-current", SeasonClock.Name(current, language), seasons.TimeLeft(player.Controller, current))
+			: Text(player, "hud.season-past", SeasonClock.Name(finishedSeasons[state.TopSeason - 1], language)));
+		SetClass(player, "k4-top-season-prev", "k4-disabled", state.TopSeason == 0);
+		SetClass(player, "k4-top-season-next", "k4-disabled", state.TopSeason >= finishedSeasons.Count);
 	}
 
 	/// <summary>CS2's gold, silver and bronze laurels around the top three positions.</summary>

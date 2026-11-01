@@ -133,6 +133,12 @@ public sealed class ModuleSettings
 
 	[JsonPropertyName("achievements")]
 	public bool Achievements { get; set; } = true;
+
+	[JsonPropertyName("seasons")]
+	public bool Seasons { get; set; } = true;
+
+	[JsonPropertyName("profiles")]
+	public bool Profiles { get; set; } = true;
 }
 
 /// <summary>When points and stats count at all.</summary>
@@ -546,4 +552,10 @@ public sealed class CommandSettings
 
 	[JsonPropertyName("achievements")]
 	public List<string> Achievements { get; set; } = ["achievements", "achievement", "ach"];
+
+	[JsonPropertyName("profile")]
+	public List<string> Profile { get; set; } = ["profile"];
+
+	[JsonPropertyName("season")]
+	public List<string> Season { get; set; } = ["season"];
 }
