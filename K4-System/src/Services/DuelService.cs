@@ -1,23 +1,29 @@
 namespace K4System.Services;
 
+using System.Globalization;
 using CounterStrikeSharp.API.Core;
 using K4System.Config;
 using K4System.Domain;
 using K4System.Hud;
+using K4System.Missions;
 using K4System.Players;
 
 /// <summary>
-/// Point wagers: a challenge, an accept, then most kills from that moment until the match ends wins
-/// both stakes. Stakes are taken at the accept, so a player who leaves has already paid. Each player
-/// can duel once per map. Game thread only.
+/// Point wagers: a challenge with a type, an accept, then only kills between the two players that fit the type
+/// count. First to the target wins at once; at the time limit the leader wins and a tie returns both stakes.
+/// Stakes are taken at the accept, so a player who leaves has already paid. After a duel both players wait a
+/// cooldown. Several duels can run at once, each player in at most one. Game thread only.
 /// </summary>
-internal sealed class DuelService(PluginConfig config, PlayerRegistry players, RankService ranks, GameState game, Chat chat, HudBridge hud, Action<float, Action> addTimer)
+/// <param name="map">What the current map offers (MissionService.Map); null or a null result rules no type out.</param>
+internal sealed class DuelService(PluginConfig config, PlayerRegistry players, RankService ranks, GameState game, Chat chat, HudBridge hud, Action<float, Action> addTimer, Func<MapAbilities?>? map = null)
 {
-	private sealed record Offer(int Id, ulong Challenger, string ChallengerName, ulong Opponent, string OpponentName, int Stake);
+	private sealed record Offer(int Id, ulong Challenger, string ChallengerName, ulong Opponent, string OpponentName, int Stake, DuelType Type, DateTime ExpiresUtc);
 
-	private sealed class Duel(Offer terms)
+	private sealed class Duel(Offer terms, int target, DateTime endsUtc)
 	{
 		public Offer Terms { get; } = terms;
+		public int Target { get; } = target;
+		public DateTime EndsUtc { get; } = endsUtc;
 		public int ChallengerKills { get; set; }
 		public int OpponentKills { get; set; }
 	}
@@ -29,88 +35,150 @@ internal sealed class DuelService(PluginConfig config, PlayerRegistry players, R
 
 	private readonly List<Offer> pending = [];
 	private readonly List<Duel> running = [];
-	private readonly HashSet<ulong> dueledThisMap = [];
 	private readonly Dictionary<ulong, DateTime> lastChallengeUtc = [];
+	private readonly Dictionary<ulong, DateTime> lastDuelEndUtc = [];
 	private int nextId;
+	private bool ticking;
 
 	/// <summary>Set at the match end: no new duels in the intermission before the map changes.</summary>
 	private bool matchOver;
 
 	public int AcceptSeconds => Settings.AcceptSeconds;
 
-	/// <summary>The player's running duel, for the panel: the other player, both kill counts, and the stake.</summary>
-	public (string Opponent, int Mine, int Theirs, int Stake)? RunningFor(ulong steamId)
+	// ---------------------------------------------------------------- what the panel reads
+
+	/// <summary>Enabled types the current map can offer, in panel order.</summary>
+	public IReadOnlyList<DuelType> AvailableTypes => DuelRules.Available(Settings.Types, map?.Invoke()?.Weapons);
+
+	/// <summary>The stake buttons; "max" is MaxStake.</summary>
+	public IReadOnlyList<int> StakePresets => Settings.Stakes;
+
+	/// <summary>The largest stake these two can put up now, or 0 when they cannot duel for points.</summary>
+	public int MaxStake(K4Player challenger, K4Player opponent)
+		=> challenger.Rank is null || opponent.Rank is null ? 0
+			: DuelRules.MaxStake(challenger.Rank.Points, opponent.Rank.Points, Settings.MaxStakePercent, Settings.MinStake);
+
+	/// <summary>A duel is running or a challenge waits for an answer, so countdowns are moving.</summary>
+	public bool Live => running.Count > 0 || pending.Count > 0;
+
+	public IReadOnlyList<DuelView> Running
 	{
-		foreach (Duel duel in running)
+		get
 		{
-			if (duel.Terms.Challenger == steamId)
-				return (duel.Terms.OpponentName, duel.ChallengerKills, duel.OpponentKills, duel.Terms.Stake);
-			if (duel.Terms.Opponent == steamId)
-				return (duel.Terms.ChallengerName, duel.OpponentKills, duel.ChallengerKills, duel.Terms.Stake);
-		}
-		return null;
-	}
-
-	/// <summary>A challenge waiting for this player's answer, for the panel.</summary>
-	public (string Challenger, int Stake)? IncomingFor(ulong steamId)
-		=> pending.Find(challenge => challenge.Opponent == steamId) is Offer offer ? (offer.ChallengerName, offer.Stake) : null;
-
-	private void RefreshPanels(Offer terms)
-	{
-		if (hud.Hud is not PanoramaHud panel)
-			return;
-
-		foreach (ulong steamId in new[] { terms.Challenger, terms.Opponent })
-		{
-			if (players.Get(steamId) is { IsValid: true } player)
-				panel.Refresh(player, HudTab.Rank);
+			DateTime now = DateTime.UtcNow;
+			return [.. running.Select(duel => View(duel, now))];
 		}
 	}
+
+	public DuelView? RunningFor(ulong steamId)
+		=> FindRunning(steamId) is Duel duel ? View(duel, DateTime.UtcNow) : null;
+
+	/// <summary>A challenge waiting for this player's answer.</summary>
+	public DuelOffer? IncomingFor(ulong steamId)
+		=> pending.Find(offer => offer.Opponent == steamId) is Offer offer ? View(offer, DateTime.UtcNow) : null;
+
+	/// <summary>A challenge this player sent that is still waiting for an answer.</summary>
+	public DuelOffer? OutgoingFor(ulong steamId)
+		=> pending.Find(offer => offer.Challenger == steamId) is Offer offer ? View(offer, DateTime.UtcNow) : null;
+
+	/// <summary>Time until this player may start or accept a duel again.</summary>
+	public TimeSpan CooldownLeft(ulong steamId)
+		=> ResetPolicy.CommandCooldownRemaining(DateTime.UtcNow, lastDuelEndUtc.TryGetValue(steamId, out DateTime ended) ? ended : null, Settings.CooldownSeconds);
+
+	private static DuelView View(Duel duel, DateTime now)
+	{
+		Offer terms = duel.Terms;
+		return new DuelView(terms.Id, terms.Challenger, terms.ChallengerName, terms.Opponent, terms.OpponentName,
+			duel.ChallengerKills, duel.OpponentKills, terms.Stake, terms.Type, duel.Target, DuelRules.WholeSeconds(duel.EndsUtc - now));
+	}
+
+	private static DuelOffer View(Offer offer, DateTime now)
+		=> new(offer.Id, offer.Challenger, offer.ChallengerName, offer.Opponent, offer.OpponentName, offer.Stake, offer.Type, DuelRules.WholeSeconds(offer.ExpiresUtc - now));
+
+	private Duel? FindRunning(ulong steamId) => running.Find(duel => duel.Terms.Challenger == steamId || duel.Terms.Opponent == steamId);
+
+	private void RefreshPanels() => hud.Hud?.RefreshOpenPanels();
 
 	// ---------------------------------------------------------------- commands
 
-	public Refusal? Challenge(K4Player challenger, K4Player opponent, int stake)
+	/// <summary>
+	/// Null when the challenger may challenge now (and, when given, this opponent): for greying out the panel.
+	/// Stake and type are checked by Challenge.
+	/// </summary>
+	public Refusal? CanChallenge(K4Player challenger, K4Player? opponent)
 	{
 		if (matchOver || !ranks.IsPointsAllowed())
 			return new Refusal("duel.error.not-now", []);
-		if (challenger.SteamId == opponent.SteamId)
+		if (opponent is not null && challenger.SteamId == opponent.SteamId)
 			return new Refusal("duel.error.self", []);
-		if (dueledThisMap.Contains(challenger.SteamId))
-			return new Refusal("duel.error.used", []);
-		if (dueledThisMap.Contains(opponent.SteamId))
-			return new Refusal("duel.error.target-used", [opponent.Controller.PlayerName]);
+		if (Cooldown(challenger, opponent) is Refusal cooldown)
+			return cooldown;
 		if (Involved(challenger.SteamId))
 			return new Refusal("duel.error.busy", [challenger.Controller.PlayerName]);
-		if (Involved(opponent.SteamId))
+		if (opponent is not null && Involved(opponent.SteamId))
 			return new Refusal("duel.error.busy", [opponent.Controller.PlayerName]);
 		// Every challenge is announced to everyone, so sending and taking back challenges cannot flood the chat.
-		DateTime now = DateTime.UtcNow;
-		TimeSpan wait = ResetPolicy.CommandCooldownRemaining(now, lastChallengeUtc.TryGetValue(challenger.SteamId, out DateTime last) ? last : (DateTime?)null, Settings.AcceptSeconds);
+		TimeSpan wait = ResetPolicy.CommandCooldownRemaining(DateTime.UtcNow, lastChallengeUtc.TryGetValue(challenger.SteamId, out DateTime last) ? last : null, Settings.AcceptSeconds);
 		if (wait > TimeSpan.Zero)
-			return new Refusal("error.cooldown", [(int)Math.Ceiling(wait.TotalSeconds)]);
-		if (Settings.BlockSameIp && Showdowns.SameAddress(challenger.Controller.IpAddress, opponent.Controller.IpAddress))
+			return new Refusal("error.cooldown", [DuelRules.WholeSeconds(wait)]);
+		if (opponent is not null && Settings.BlockSameIp && Showdowns.SameAddress(challenger.Controller.IpAddress, opponent.Controller.IpAddress))
 			return new Refusal("duel.error.same-ip", []);
+		return null;
+	}
 
-		int max = Showdowns.MaxStake(challenger.Rank?.Points ?? 0, opponent.Rank?.Points ?? 0, Settings.MaxStakePercent);
-		if (max < Settings.MinStake)
+	private Refusal? Cooldown(K4Player player, K4Player? other)
+	{
+		int mine = DuelRules.WholeSeconds(CooldownLeft(player.SteamId));
+		if (mine > 0)
+			return new Refusal("duel.error.cooldown", [mine]);
+		int theirs = other is null ? 0 : DuelRules.WholeSeconds(CooldownLeft(other.SteamId));
+		return theirs > 0 ? new Refusal("duel.error.target-cooldown", [other!.Controller.PlayerName, theirs]) : null;
+	}
+
+	public Refusal? Challenge(K4Player challenger, K4Player opponent, int stake) => Challenge(challenger, opponent, stake, DuelType.Any);
+
+	public Refusal? Challenge(K4Player challenger, K4Player opponent, int stake, DuelType type)
+	{
+		if (CanChallenge(challenger, opponent) is Refusal refusal)
+			return refusal;
+
+		IReadOnlyList<DuelType> types = AvailableTypes;
+		if (!types.Contains(type))
+			return new Refusal("duel.error.type", [DuelRules.Name(type), string.Join(", ", types.Select(DuelRules.Name))]);
+
+		int max = MaxStake(challenger, opponent);
+		if (max == 0)
 			return new Refusal("duel.error.no-points", []);
-		if (stake < Settings.MinStake || stake > max)
+		if (!DuelRules.StakeAllowed(stake, Settings.MinStake, max))
 			return new Refusal("duel.error.stake", [Settings.MinStake, max]);
 
-		Offer challenge = new(++nextId, challenger.SteamId, challenger.Controller.PlayerName, opponent.SteamId, opponent.Controller.PlayerName, stake);
+		DateTime now = DateTime.UtcNow;
+		Offer challenge = new(++nextId, challenger.SteamId, challenger.Controller.PlayerName, opponent.SteamId, opponent.Controller.PlayerName,
+			stake, type, now.AddSeconds(Settings.AcceptSeconds));
 		pending.Add(challenge);
 		lastChallengeUtc[challenger.SteamId] = now;
-		chat.TellAll("duel.challenge", challenge.ChallengerName, challenge.OpponentName, stake);
-		hud.Hud?.Toast(opponent, new Toast(chat.For(opponent.Controller, "toast.duel", config.Commands.Duel.FirstOrDefault() ?? "duel"), challenge.ChallengerName,
-			stake.ToString(System.Globalization.CultureInfo.InvariantCulture), "ic-crosshair_circle", ToastColor.Purple));
-		RefreshPanels(challenge);
+
+		foreach (K4Player reader in players.ValidHumans)
+		{
+			chat.Tell(reader.Controller, "duel.challenge-typed", challenge.ChallengerName, challenge.OpponentName, TypeName(reader, type), stake,
+				Settings.TargetKills, Settings.Minutes);
+		}
+
+		string command = config.Commands.Duel.FirstOrDefault() ?? "duel";
+		if (!ToastTo(opponent, chat.For(opponent.Controller, "toast.duel", command), $"{challenge.ChallengerName} · {TypeName(opponent, type)}",
+			Number(stake), ToastColor.Purple, type, ToastLength.Long))
+		{
+			chat.Tell(opponent.Controller, "duel.how-to", command, Settings.AcceptSeconds);
+		}
+
+		RefreshPanels();
 
 		addTimer(Settings.AcceptSeconds, () =>
 		{
 			if (!pending.Remove(challenge))
 				return;
 			TellBoth(challenge, "duel.expired", challenge.ChallengerName, challenge.OpponentName);
-			RefreshPanels(challenge);
+			RefreshPanels();
 		});
 
 		return null;
@@ -124,23 +192,34 @@ internal sealed class DuelService(PluginConfig config, PlayerRegistry players, R
 		if (matchOver || !ranks.IsPointsAllowed())
 			return new Refusal("duel.error.not-now", []);
 
-		pending.Remove(challenge);
 		K4Player? challenger = players.Get(challenge.Challenger);
+		if (challenger is not null && Cooldown(opponent, challenger) is Refusal cooldown)
+			return cooldown;
+
+		pending.Remove(challenge);
 		// Points may have dropped since the challenge, so the stake must still be within the cap now.
 		if (challenger is not { IsHuman: true, Rank: not null } || opponent.Rank is null
 			|| challenge.Stake > Showdowns.MaxStake(challenger.Rank.Points, opponent.Rank.Points, Settings.MaxStakePercent))
 		{
 			TellBoth(challenge, "duel.declined", challenge.ChallengerName, challenge.OpponentName);
+			RefreshPanels();
 			return new Refusal("duel.error.no-points", []);
 		}
 
 		Hold(challenger, challenge.Stake);
 		Hold(opponent, challenge.Stake);
-		dueledThisMap.Add(challenge.Challenger);
-		dueledThisMap.Add(challenge.Opponent);
-		running.Add(new Duel(challenge));
-		chat.TellAll("duel.started", challenge.ChallengerName, challenge.OpponentName, challenge.Stake);
-		RefreshPanels(challenge);
+		running.Add(new Duel(challenge, Settings.TargetKills, DateTime.UtcNow.AddMinutes(Settings.Minutes)));
+
+		foreach (K4Player reader in players.ValidHumans)
+			chat.Tell(reader.Controller, "duel.started-typed", challenge.ChallengerName, challenge.OpponentName, TypeName(reader, challenge.Type), challenge.Stake, Settings.TargetKills);
+
+		ToastTo(challenger, chat.For(challenger.Controller, "toast.duel-started"), chat.For(challenger.Controller, "toast.duel-vs", challenge.OpponentName, TypeName(challenger, challenge.Type), Settings.TargetKills),
+			Number(challenge.Stake), ToastColor.Purple, challenge.Type);
+		ToastTo(opponent, chat.For(opponent.Controller, "toast.duel-started"), chat.For(opponent.Controller, "toast.duel-vs", challenge.ChallengerName, TypeName(opponent, challenge.Type), Settings.TargetKills),
+			Number(challenge.Stake), ToastColor.Purple, challenge.Type);
+
+		RefreshPanels();
+		EnsureTicking();
 		return null;
 	}
 
@@ -152,13 +231,12 @@ internal sealed class DuelService(PluginConfig config, PlayerRegistry players, R
 
 		pending.Remove(challenge);
 		TellBoth(challenge, "duel.declined", challenge.ChallengerName, challenge.OpponentName);
-		RefreshPanels(challenge);
+		RefreshPanels();
 		return null;
 	}
 
 	private bool Involved(ulong steamId)
-		=> pending.Exists(challenge => challenge.Challenger == steamId || challenge.Opponent == steamId)
-			|| running.Exists(duel => duel.Terms.Challenger == steamId || duel.Terms.Opponent == steamId);
+		=> pending.Exists(challenge => challenge.Challenger == steamId || challenge.Opponent == steamId) || FindRunning(steamId) is not null;
 
 	private void Hold(K4Player player, int stake) => ranks.DebitPoints(player, stake);
 
@@ -171,25 +249,80 @@ internal sealed class DuelService(PluginConfig config, PlayerRegistry players, R
 		}
 	}
 
+	private string TypeName(K4Player reader, DuelType type) => chat.For(reader.Controller, "duel.type." + DuelRules.Name(type));
+
+	private static string Number(int value) => value.ToString(CultureInfo.InvariantCulture);
+
+	/// <summary>Picture for each type, from docs/panel-contract.md.</summary>
+	public static string TypeVisual(DuelType type) => type switch
+	{
+		DuelType.Noscope => "dn-noscope",
+		DuelType.Zeus => "eq-taser",
+		DuelType.Knife => "eq-knife",
+		DuelType.Scout => "eq-ssg08",
+		DuelType.Headshot => "ic-kill_headshot",
+		_ => "ic-kill"
+	};
+
+	/// <summary>Shows a duel toast; false when the player has no panel or turned toasts off, so the caller uses chat.</summary>
+	private bool ToastTo(K4Player player, string kind, string text, string value, ToastColor color, DuelType type, ToastLength length = ToastLength.Normal)
+	{
+		if (hud.Hud is not PanoramaHud panel || player.ToastsOff || !player.HasController)
+			return false;
+
+		panel.Toast(player, new Toast(kind, text, value, TypeVisual(type), color, length));
+		return true;
+	}
+
 	// ---------------------------------------------------------------- game events
 
-	public void OnPlayerDeath(DeathActor? victim, DeathActor? attacker)
+	/// <summary>Counts a kill when the killer and the victim are the two players of one duel and the kill fits its type.</summary>
+	public void OnPlayerDeath(DeathActor? victim, DeathActor? attacker, string? weapon, bool headshot, bool noscope)
 	{
-		if (running.Count == 0 || game.IsWarmup || attacker is not DeathActor killer)
+		if (running.Count == 0 || game.IsWarmup || attacker is not DeathActor killer || victim is not DeathActor killed)
 			return;
 
 		if (DeathRules.Classify(victim, attacker, null, config.Tracking.CountBots, config.Tracking.FreeForAll).AttackerPoint != AttackerPointAction.Kill)
 			return;
 
-		foreach (Duel duel in running)
+		if (FindRunning(killer.SteamId) is not Duel duel)
+			return;
+
+		bool challengerKilled = duel.Terms.Challenger == killer.SteamId && duel.Terms.Opponent == killed.SteamId;
+		bool opponentKilled = duel.Terms.Opponent == killer.SteamId && duel.Terms.Challenger == killed.SteamId;
+		if (!(challengerKilled || opponentKilled) || !DuelRules.Counts(duel.Terms.Type, weapon ?? string.Empty, headshot, noscope))
+			return;
+
+		if (challengerKilled)
+			duel.ChallengerKills++;
+		else
+			duel.OpponentKills++;
+
+		if (DuelRules.Decide(true, duel.ChallengerKills, true, duel.OpponentKills, duel.Target, over: false) is null)
+			ShowScore(duel);
+		else
+			Finish(duel, announce: true);
+
+		RefreshPanels();
+	}
+
+	/// <summary>"3 : 2" from each player's side, as a short toast or a chat line.</summary>
+	private void ShowScore(Duel duel)
+	{
+		Offer terms = duel.Terms;
+		ShowScore(Present(terms.Challenger), terms.OpponentName, duel.ChallengerKills, duel.OpponentKills, terms.Type);
+		ShowScore(Present(terms.Opponent), terms.ChallengerName, duel.OpponentKills, duel.ChallengerKills, terms.Type);
+	}
+
+	private void ShowScore(K4Player? player, string other, int mine, int theirs, DuelType type)
+	{
+		if (player is not { HasController: true })
+			return;
+
+		if (!ToastTo(player, chat.For(player.Controller, "toast.duel-score"), chat.For(player.Controller, "toast.duel-score-text", other), $"{mine} : {theirs}",
+			ToastColor.Purple, type, ToastLength.Short))
 		{
-			if (duel.Terms.Challenger == killer.SteamId)
-				duel.ChallengerKills++;
-			else if (duel.Terms.Opponent == killer.SteamId)
-				duel.OpponentKills++;
-			else
-				continue;
-			RefreshPanels(duel.Terms);
+			chat.Tell(player.Controller, "duel.score", other, mine, theirs);
 		}
 	}
 
@@ -200,11 +333,16 @@ internal sealed class DuelService(PluginConfig config, PlayerRegistry players, R
 		if (reason == PlayerService.MapChangeDisconnectReason || players.Get(controller) is not K4Player player)
 			return;
 
+		bool changed = false;
 		foreach (Offer challenge in pending.Where(challenge => challenge.Challenger == player.SteamId || challenge.Opponent == player.SteamId).ToArray())
 		{
 			pending.Remove(challenge);
 			TellBoth(challenge, "duel.cancelled-left", player.Controller.PlayerName);
+			changed = true;
 		}
+
+		if (changed)
+			RefreshPanels();
 	}
 
 	/// <summary>Pays every running duel and closes duels until the next map.</summary>
@@ -224,54 +362,97 @@ internal sealed class DuelService(PluginConfig config, PlayerRegistry players, R
 	{
 		running.Clear();
 		pending.Clear();
-		dueledThisMap.Clear();
 		lastChallengeUtc.Clear();
 		matchOver = false;
 	}
 
-	/// <summary>A player who has left the server loses; leavers are no longer in the player list.</summary>
-	private void Settle(bool announce)
+	// The accept timer is one-shot, so the time-limit check re-arms itself while duels run.
+	private void EnsureTicking()
 	{
-		foreach (Duel duel in running)
+		if (ticking)
+			return;
+
+		ticking = true;
+		addTimer(1f, () =>
 		{
-			Offer terms = duel.Terms;
-			K4Player? challenger = Present(terms.Challenger);
-			K4Player? opponent = Present(terms.Opponent);
-			int pot = PointMath.AddClamped(terms.Stake, terms.Stake);
-
-			switch (Showdowns.Winner(challenger is not null, duel.ChallengerKills, opponent is not null, duel.OpponentKills))
-			{
-				case 1:
-					Pay(challenger!, opponent is null, terms.ChallengerName, terms.OpponentName, pot, duel.ChallengerKills, duel.OpponentKills, announce);
-					break;
-				case -1:
-					Pay(opponent!, challenger is null, terms.OpponentName, terms.ChallengerName, pot, duel.OpponentKills, duel.ChallengerKills, announce);
-					break;
-				default:
-					if (challenger is null || opponent is null)
-						break;
-					ranks.CreditPoints(challenger, terms.Stake, refresh: announce);
-					ranks.CreditPoints(opponent, terms.Stake, refresh: announce);
-					if (announce)
-						chat.TellAll("duel.tie", terms.ChallengerName, terms.OpponentName, duel.ChallengerKills);
-					break;
-			}
-		}
-
-		running.Clear();
-		pending.Clear();
+			ticking = false;
+			DateTime now = DateTime.UtcNow;
+			Duel[] timeUp = [.. running.Where(duel => duel.EndsUtc <= now)];
+			foreach (Duel duel in timeUp)
+				Finish(duel, announce: true);
+			if (timeUp.Length > 0)
+				RefreshPanels();
+			if (running.Count > 0)
+				EnsureTicking();
+		});
 	}
 
-	private void Pay(K4Player winner, bool loserLeft, string winnerName, string loserName, int pot, int winnerKills, int loserKills, bool announce)
+	private void Settle(bool announce)
+	{
+		bool any = running.Count > 0 || pending.Count > 0;
+		foreach (Duel duel in running.ToArray())
+			Finish(duel, announce);
+
+		pending.Clear();
+		if (any && announce)
+			RefreshPanels();
+	}
+
+	/// <summary>Ends one duel and pays it out. A player who has left the server loses; leavers are no longer in the player list.</summary>
+	private void Finish(Duel duel, bool announce)
+	{
+		running.Remove(duel);
+		Offer terms = duel.Terms;
+		K4Player? challenger = Present(terms.Challenger);
+		K4Player? opponent = Present(terms.Opponent);
+		int pot = PointMath.AddClamped(terms.Stake, terms.Stake);
+
+		DateTime now = DateTime.UtcNow;
+		lastDuelEndUtc[terms.Challenger] = now;
+		lastDuelEndUtc[terms.Opponent] = now;
+
+		switch (DuelRules.Decide(challenger is not null, duel.ChallengerKills, opponent is not null, duel.OpponentKills, duel.Target, over: true))
+		{
+			case 1:
+				Pay(challenger!, opponent, terms.ChallengerName, terms.OpponentName, pot, terms.Stake, duel.ChallengerKills, duel.OpponentKills, terms.Type, announce);
+				break;
+			case -1:
+				Pay(opponent!, challenger, terms.OpponentName, terms.ChallengerName, pot, terms.Stake, duel.OpponentKills, duel.ChallengerKills, terms.Type, announce);
+				break;
+			default:
+				if (challenger is null || opponent is null)
+					break;
+				ranks.CreditPoints(challenger, terms.Stake, refresh: announce);
+				ranks.CreditPoints(opponent, terms.Stake, refresh: announce);
+				if (!announce)
+					break;
+				chat.TellAll("duel.tie", terms.ChallengerName, terms.OpponentName, duel.ChallengerKills);
+				ToastTo(challenger, chat.For(challenger.Controller, "toast.duel-tie"), chat.For(challenger.Controller, "toast.duel-result", terms.OpponentName, duel.ChallengerKills, duel.OpponentKills),
+					Number(terms.Stake), ToastColor.Purple, terms.Type);
+				ToastTo(opponent, chat.For(opponent.Controller, "toast.duel-tie"), chat.For(opponent.Controller, "toast.duel-result", terms.ChallengerName, duel.OpponentKills, duel.ChallengerKills),
+					Number(terms.Stake), ToastColor.Purple, terms.Type);
+				break;
+		}
+	}
+
+	private void Pay(K4Player winner, K4Player? loser, string winnerName, string loserName, int pot, int stake, int winnerKills, int loserKills, DuelType type, bool announce)
 	{
 		ranks.CreditPoints(winner, pot, refresh: announce);
 		if (!announce)
 			return;
 
-		if (loserLeft)
+		if (loser is null)
 			chat.TellAll("duel.forfeit", winnerName, loserName, pot);
 		else
 			chat.TellAll("duel.won", winnerName, loserName, winnerKills, loserKills, pot);
+
+		ToastTo(winner, chat.For(winner.Controller, "toast.duel-won"), chat.For(winner.Controller, "toast.duel-result", loserName, winnerKills, loserKills),
+			$"+{Number(pot)}", ToastColor.Gold, type);
+		if (loser is not null)
+		{
+			ToastTo(loser, chat.For(loser.Controller, "toast.duel-lost"), chat.For(loser.Controller, "toast.duel-result", winnerName, loserKills, winnerKills),
+				$"-{Number(stake)}", ToastColor.Red, type);
+		}
 	}
 
 	private K4Player? Present(ulong steamId)

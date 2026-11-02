@@ -42,6 +42,10 @@
 						<Panel class="k4-nav-icon ic-leader" />
 						<Label class="k4-nav-label stratum-medium-tf" text="{s:label}" />
 					</Button>
+					<Button id="k4-nav-duels" class="k4-nav">
+						<Panel class="k4-nav-icon ic-casual" />
+						<Label class="k4-nav-label stratum-medium-tf" text="{s:label}" />
+					</Button>
 					<Button id="k4-nav-ranks" class="k4-nav">
 						<Panel class="k4-nav-icon ic-trophy" />
 						<Label class="k4-nav-label stratum-medium-tf" text="{s:label}" />
@@ -978,6 +982,235 @@
 								<Panel id="k4-lb-me-icon" class="k4-lb-icon sg-0" />
 								<Label class="k4-lb-name stratum-bold-tf" text="{s:name}" />
 								<Label class="k4-lb-points stratum-bold-tf" text="{s:points}" />
+							</Panel>
+						</Panel>
+					</Panel>
+					<Panel id="k4-view-duels" class="k4-view k4-view-pad">
+						<Panel class="k4-d-cols">
+							<Panel class="k4-d-build">
+								<Panel class="k4-d-step k4-first">
+									<Label class="k4-cap k4-d-cap stratum-bold-tf" text="{s:pick}" />
+									<Panel class="k4-grow" />
+									<Panel class="k4-pager">
+										<Button id="k4-dp-prev" class="k4-arrow k4-arrow-left" />
+										<Label class="k4-page stratum-medium-tf" text="{s:page}" />
+										<Button id="k4-dp-next" class="k4-arrow k4-arrow-right" />
+									</Panel>
+								</Panel>
+								<Panel class="k4-d-grid">
+									<Panel class="k4-d-row k4-first">
+										<Button id="k4-dp0" class="k4-dp k4-first k4-gone">
+											<Panel id="k4-dp0-icon" class="k4-dp-icon sg-0" />
+											<Label class="k4-dp-name stratum-bold-tf" text="{s:name}" />
+											<Label class="k4-dp-points stratum-medium-tf" text="{s:points}" />
+										</Button>
+										<Button id="k4-dp1" class="k4-dp k4-gone">
+											<Panel id="k4-dp1-icon" class="k4-dp-icon sg-0" />
+											<Label class="k4-dp-name stratum-bold-tf" text="{s:name}" />
+											<Label class="k4-dp-points stratum-medium-tf" text="{s:points}" />
+										</Button>
+										<Button id="k4-dp2" class="k4-dp k4-gone">
+											<Panel id="k4-dp2-icon" class="k4-dp-icon sg-0" />
+											<Label class="k4-dp-name stratum-bold-tf" text="{s:name}" />
+											<Label class="k4-dp-points stratum-medium-tf" text="{s:points}" />
+										</Button>
+										<Button id="k4-dp3" class="k4-dp k4-gone">
+											<Panel id="k4-dp3-icon" class="k4-dp-icon sg-0" />
+											<Label class="k4-dp-name stratum-bold-tf" text="{s:name}" />
+											<Label class="k4-dp-points stratum-medium-tf" text="{s:points}" />
+										</Button>
+									</Panel>
+									<Panel class="k4-d-row">
+										<Button id="k4-dp4" class="k4-dp k4-first k4-gone">
+											<Panel id="k4-dp4-icon" class="k4-dp-icon sg-0" />
+											<Label class="k4-dp-name stratum-bold-tf" text="{s:name}" />
+											<Label class="k4-dp-points stratum-medium-tf" text="{s:points}" />
+										</Button>
+										<Button id="k4-dp5" class="k4-dp k4-gone">
+											<Panel id="k4-dp5-icon" class="k4-dp-icon sg-0" />
+											<Label class="k4-dp-name stratum-bold-tf" text="{s:name}" />
+											<Label class="k4-dp-points stratum-medium-tf" text="{s:points}" />
+										</Button>
+										<Button id="k4-dp6" class="k4-dp k4-gone">
+											<Panel id="k4-dp6-icon" class="k4-dp-icon sg-0" />
+											<Label class="k4-dp-name stratum-bold-tf" text="{s:name}" />
+											<Label class="k4-dp-points stratum-medium-tf" text="{s:points}" />
+										</Button>
+										<Button id="k4-dp7" class="k4-dp k4-gone">
+											<Panel id="k4-dp7-icon" class="k4-dp-icon sg-0" />
+											<Label class="k4-dp-name stratum-bold-tf" text="{s:name}" />
+											<Label class="k4-dp-points stratum-medium-tf" text="{s:points}" />
+										</Button>
+									</Panel>
+								</Panel>
+								<Panel class="k4-d-step">
+									<Label class="k4-cap k4-d-cap stratum-bold-tf" text="{s:types}" />
+								</Panel>
+								<Panel class="k4-d-grid">
+									<Panel class="k4-d-row k4-first">
+										<Button id="k4-dt0" class="k4-dt k4-has-tip k4-first k4-gone">
+											<Panel class="k4-dt-body">
+												<Panel id="k4-dt0-icon" class="k4-dt-icon" />
+												<Label class="k4-dt-name stratum-bold-tf" text="{s:name}" />
+											</Panel>
+											<Panel class="k4-tip" hittest="false">
+												<Label class="k4-tip-text stratum-medium-tf" hittest="false" text="{s:tip}" />
+											</Panel>
+										</Button>
+										<Button id="k4-dt1" class="k4-dt k4-has-tip k4-gone">
+											<Panel class="k4-dt-body">
+												<Panel id="k4-dt1-icon" class="k4-dt-icon" />
+												<Label class="k4-dt-name stratum-bold-tf" text="{s:name}" />
+											</Panel>
+											<Panel class="k4-tip" hittest="false">
+												<Label class="k4-tip-text stratum-medium-tf" hittest="false" text="{s:tip}" />
+											</Panel>
+										</Button>
+										<Button id="k4-dt2" class="k4-dt k4-has-tip k4-gone">
+											<Panel class="k4-dt-body">
+												<Panel id="k4-dt2-icon" class="k4-dt-icon" />
+												<Label class="k4-dt-name stratum-bold-tf" text="{s:name}" />
+											</Panel>
+											<Panel class="k4-tip" hittest="false">
+												<Label class="k4-tip-text stratum-medium-tf" hittest="false" text="{s:tip}" />
+											</Panel>
+										</Button>
+									</Panel>
+									<Panel class="k4-d-row">
+										<Button id="k4-dt3" class="k4-dt k4-has-tip k4-first k4-gone">
+											<Panel class="k4-dt-body">
+												<Panel id="k4-dt3-icon" class="k4-dt-icon" />
+												<Label class="k4-dt-name stratum-bold-tf" text="{s:name}" />
+											</Panel>
+											<Panel class="k4-tip" hittest="false">
+												<Label class="k4-tip-text stratum-medium-tf" hittest="false" text="{s:tip}" />
+											</Panel>
+										</Button>
+										<Button id="k4-dt4" class="k4-dt k4-has-tip k4-gone">
+											<Panel class="k4-dt-body">
+												<Panel id="k4-dt4-icon" class="k4-dt-icon" />
+												<Label class="k4-dt-name stratum-bold-tf" text="{s:name}" />
+											</Panel>
+											<Panel class="k4-tip" hittest="false">
+												<Label class="k4-tip-text stratum-medium-tf" hittest="false" text="{s:tip}" />
+											</Panel>
+										</Button>
+										<Button id="k4-dt5" class="k4-dt k4-has-tip k4-gone">
+											<Panel class="k4-dt-body">
+												<Panel id="k4-dt5-icon" class="k4-dt-icon" />
+												<Label class="k4-dt-name stratum-bold-tf" text="{s:name}" />
+											</Panel>
+											<Panel class="k4-tip" hittest="false">
+												<Label class="k4-tip-text stratum-medium-tf" hittest="false" text="{s:tip}" />
+											</Panel>
+										</Button>
+									</Panel>
+								</Panel>
+								<Panel class="k4-d-step">
+									<Label class="k4-cap k4-d-cap stratum-bold-tf" text="{s:stakes}" />
+								</Panel>
+								<Panel class="k4-d-stakes">
+									<Button id="k4-ds0" class="k4-ds k4-first k4-gone">
+										<Label class="k4-ds-label stratum-bold-tf" text="{s:label}" />
+									</Button>
+									<Button id="k4-ds1" class="k4-ds k4-gone">
+										<Label class="k4-ds-label stratum-bold-tf" text="{s:label}" />
+									</Button>
+									<Button id="k4-ds2" class="k4-ds k4-gone">
+										<Label class="k4-ds-label stratum-bold-tf" text="{s:label}" />
+									</Button>
+									<Button id="k4-ds3" class="k4-ds k4-gone">
+										<Label class="k4-ds-label stratum-bold-tf" text="{s:label}" />
+									</Button>
+									<Button id="k4-ds4" class="k4-ds k4-gone">
+										<Label class="k4-ds-label stratum-bold-tf" text="{s:label}" />
+									</Button>
+								</Panel>
+								<Panel class="k4-vgrow" />
+								<Panel class="k4-d-foot">
+									<Panel class="k4-d-foot-text">
+										<Label class="k4-d-summary stratum-bold-tf" text="{s:summary}" />
+										<Label class="k4-d-status stratum-medium-tf" text="{s:status}" />
+									</Panel>
+									<Button id="k4-d-send" class="k4-d-send">
+										<Panel class="k4-d-send-inner">
+											<Panel class="k4-d-send-icon ic-casual" />
+											<Label class="k4-d-send-label stratum-bold-tf" text="{s:label}" />
+										</Panel>
+									</Button>
+								</Panel>
+							</Panel>
+							<Panel class="k4-d-side">
+								<Panel class="k4-header-space" />
+								<Panel id="k4-d-in" class="k4-d-in k4-gone">
+									<Panel class="k4-d-in-top">
+										<Panel id="k4-d-in-icon" class="k4-d-in-icon" />
+										<Panel class="k4-d-in-text">
+											<Label class="k4-d-in-title stratum-bold-tf" text="{s:title}" />
+											<Label class="k4-d-in-msg stratum-medium-tf" text="{s:text}" />
+										</Panel>
+									</Panel>
+									<Panel class="k4-bar k4-bar-duel">
+										<Panel id="k4-d-in-bar" class="k4-bar-fill w0" />
+									</Panel>
+									<Panel class="k4-d-in-btns">
+										<Button id="k4-d-accept" class="k4-d-btn k4-d-accept k4-first">
+											<Label class="k4-d-btn-label stratum-bold-tf" text="{s:label}" />
+										</Button>
+										<Button id="k4-d-decline" class="k4-d-btn k4-d-decline">
+											<Label class="k4-d-btn-label stratum-bold-tf" text="{s:label}" />
+										</Button>
+									</Panel>
+								</Panel>
+								<Panel id="k4-d-mine" class="k4-d-mine k4-gone">
+									<Panel class="k4-d-mine-top">
+										<Panel id="k4-d-mine-icon" class="k4-d-mine-icon" />
+										<Panel class="k4-d-mine-text">
+											<Label class="k4-d-mine-title stratum-bold-tf" text="{s:title}" />
+											<Label class="k4-d-mine-msg stratum-medium-tf" text="{s:text}" />
+										</Panel>
+										<Label class="k4-d-mine-score stratum-bold-tf" text="{s:score}" />
+									</Panel>
+									<Panel class="k4-bar k4-bar-duel">
+										<Panel id="k4-d-mine-bar" class="k4-bar-fill w0" />
+									</Panel>
+								</Panel>
+								<Label class="k4-cap k4-d-live-cap stratum-bold-tf" text="{s:live}" />
+								<Panel class="k4-d-live">
+									<Panel id="k4-dl0" class="k4-dl k4-first k4-gone">
+										<Panel id="k4-dl0-icon" class="k4-dl-icon" />
+										<Panel class="k4-dl-text">
+											<Label class="k4-dl-names stratum-bold-tf" text="{s:names}" />
+											<Label class="k4-dl-info stratum-medium-tf" text="{s:info}" />
+										</Panel>
+										<Label class="k4-dl-score stratum-bold-tf" text="{s:score}" />
+									</Panel>
+									<Panel id="k4-dl1" class="k4-dl k4-gone">
+										<Panel id="k4-dl1-icon" class="k4-dl-icon" />
+										<Panel class="k4-dl-text">
+											<Label class="k4-dl-names stratum-bold-tf" text="{s:names}" />
+											<Label class="k4-dl-info stratum-medium-tf" text="{s:info}" />
+										</Panel>
+										<Label class="k4-dl-score stratum-bold-tf" text="{s:score}" />
+									</Panel>
+									<Panel id="k4-dl2" class="k4-dl k4-gone">
+										<Panel id="k4-dl2-icon" class="k4-dl-icon" />
+										<Panel class="k4-dl-text">
+											<Label class="k4-dl-names stratum-bold-tf" text="{s:names}" />
+											<Label class="k4-dl-info stratum-medium-tf" text="{s:info}" />
+										</Panel>
+										<Label class="k4-dl-score stratum-bold-tf" text="{s:score}" />
+									</Panel>
+									<Panel id="k4-dl3" class="k4-dl k4-gone">
+										<Panel id="k4-dl3-icon" class="k4-dl-icon" />
+										<Panel class="k4-dl-text">
+											<Label class="k4-dl-names stratum-bold-tf" text="{s:names}" />
+											<Label class="k4-dl-info stratum-medium-tf" text="{s:info}" />
+										</Panel>
+										<Label class="k4-dl-score stratum-bold-tf" text="{s:score}" />
+									</Panel>
+									<Label id="k4-dl-none" class="k4-dl-none k4-gone stratum-medium-tf" text="{s:none}" />
+								</Panel>
 							</Panel>
 						</Panel>
 					</Panel>

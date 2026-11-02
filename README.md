@@ -40,8 +40,8 @@ K4-System gives your Counter-Strike 2 server a rank ladder that players climb wi
 - **Monthly seasons.** Points start over on the 1st of each month, so new players can reach the top. Final results are kept, and the Top tab shows every past season.
 - **Profiles.** Rank, key stats, favorite weapon, three achievements to show off and past seasons. Click any name in the Top tab to see theirs.
 - **Points events.** Double points on weekend evenings, or whenever an admin starts one.
-- **Bounties and duels.** A long kill streak makes a player WANTED, with bonus points for whoever ends it. Players can bet points on who gets more kills this map with `!duel`. Both are rare, so they stay special.
-- **A clickable panel** in CS2's own style for their rank, missions, the top players, all ranks and their stats (optional, through a free Workshop addon).
+- **Bounties and duels.** A long kill streak makes a player WANTED, with bonus points for whoever ends it. Players can challenge each other to a duel for points with `!duel` or on the panel's Duels page: a kill race with a rule (any kill, no-scope, Zeus, knife, Scout or headshot), first to 5 kills or the leader after 10 minutes.
+- **A clickable panel** in CS2's own style for their rank, missions, the top players, duels, all ranks and their stats (optional, through a free Workshop addon).
 - **Their own stats and playtime**, and the server's top list.
 - **Their language.** K4-System speaks 36 languages, and each player can pick their own.
 

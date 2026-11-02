@@ -1,6 +1,7 @@
 namespace K4System.Config;
 
 using System.Text.Json.Serialization;
+using K4System.Domain;
 
 // K4-System 6.0 configuration, read from configs/plugins/K4-System/k4-system.jsonc.
 // The commented template in Config/default-config.jsonc must match these defaults; a test checks it.
@@ -385,7 +386,7 @@ public sealed class BountySettings
 	public int SurvivorReward { get; set; } = 50;
 }
 
-/// <summary>Point wagers between two players: most kills until the match ends wins.</summary>
+/// <summary>Point wagers between two players: first to a number of kills of one type wins, or the leader at the time limit.</summary>
 public sealed class DuelSettings
 {
 	[JsonPropertyName("enabled")]
@@ -403,6 +404,26 @@ public sealed class DuelSettings
 
 	[JsonPropertyName("block-same-ip")]
 	public bool BlockSameIp { get; set; } = true;
+
+	/// <summary>Counted kills that win a duel at once.</summary>
+	[JsonPropertyName("target-kills")]
+	public int TargetKills { get; set; } = 5;
+
+	/// <summary>Time limit: the leader wins then, a tie returns both stakes.</summary>
+	[JsonPropertyName("minutes")]
+	public int Minutes { get; set; } = 10;
+
+	/// <summary>Wait after a duel ends before either player can start or accept another.</summary>
+	[JsonPropertyName("cooldown-seconds")]
+	public int CooldownSeconds { get; set; } = 120;
+
+	/// <summary>Stake buttons in the panel, next to "max". At most four.</summary>
+	[JsonPropertyName("stakes")]
+	public List<int> Stakes { get; set; } = [100, 250, 500, 1000];
+
+	/// <summary>Duel types players can pick: any, noscope, zeus, knife, scout, headshot.</summary>
+	[JsonPropertyName("types")]
+	public List<string> Types { get; set; } = [.. DuelRules.TypeNames];
 }
 
 public sealed class ScoreboardRankModeJsonConverter : JsonStringEnumConverter<ScoreboardRankMode>

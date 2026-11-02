@@ -93,6 +93,28 @@ public partial class CompatibilityTests
 		}
 	}
 
+	// A key the code reads but en.json lacks shows its raw name in game, in every language.
+	[Fact]
+	public void EveryTextKeyInTheCodeIsInEnglish()
+	{
+		Dictionary<string, string> english = ReadLanguage(Path.Combine(AppContext.BaseDirectory, "lang", "en.json"));
+		string source = Path.Combine(TestData.RepositoryRoot(), "K4-System", "src");
+		string[] missing =
+		[
+			.. Directory.GetFiles(source, "*.cs", SearchOption.AllDirectories)
+				.Where(file => !file.Contains($"{Path.DirectorySeparatorChar}obj{Path.DirectorySeparatorChar}", StringComparison.Ordinal))
+				.SelectMany(file => TextKey().Matches(File.ReadAllText(file)).Select(match => match.Groups[1].Value))
+				.Where(key => !key.EndsWith(".json", StringComparison.Ordinal) && !key.EndsWith(".jsonc", StringComparison.Ordinal) && !english.ContainsKey(key))
+				.Distinct()
+				.Order()
+		];
+		Assert.True(missing.Length == 0, $"Keys missing from en.json: {string.Join(", ", missing)}");
+	}
+
+	// Whole literals only; interpolated prefixes such as $"duel.type.{name}" end in a dot and do not match.
+	[GeneratedRegex(@"(?<![\w$])""((?:hud|duel|toast|mission|achievement|season|profile|error|bounty|event|rank|stats|time|top)[a-z0-9]*\.[a-z0-9.\-]*[a-z0-9])""")]
+	private static partial Regex TextKey();
+
 	private static Dictionary<string, string> ReadLanguage(string path)
 	{
 		using JsonDocument document = JsonDocument.Parse(File.ReadAllText(path));

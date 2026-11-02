@@ -138,15 +138,23 @@
     "survivor-reward": 50 // Bonus points for a wanted player who is still alive and wanted when the match ends. 0 turns it off
   },
 
-  // Duels: "!duel <player> <points>" bets points on who gets more kills from now until the match ends.
-  // The other player accepts with "!duel accept". Both stakes are held, the winner gets both, and a tie returns them.
-  // A player who has left when the match ends loses. Each player can duel once per map. Needs "ranks".
+  // Duels: "!duel <player> <points> [type]" bets points on kills between two players. The other player accepts with "!duel accept".
+  // Only kills on each other that fit the type count. First to target-kills wins at once; at the time limit the leader wins.
+  // Both stakes are held, the winner gets both, and a tie returns them. A duel still running when the match or map ends
+  // is decided then, and a player who has left loses. Needs "ranks".
   "duels": {
     "enabled": true,
     "min-stake": 10, // Smallest stake
     "max-stake-percent": 10, // Largest stake, as a share of the poorer player's points
     "accept-seconds": 30, // How long a challenge waits for an answer
-    "block-same-ip": true // Players on the same connection cannot duel, so points cannot be moved between accounts
+    "block-same-ip": true, // Players on the same connection cannot duel, so points cannot be moved between accounts
+    "target-kills": 5, // Counted kills that win the duel at once (1 to 50)
+    "minutes": 10, // Time limit (1 to 60). The leader wins then; a tie returns both stakes
+    "cooldown-seconds": 120, // Wait after a duel before either player can start or accept another (0 to 3600)
+    "stakes": [100, 250, 500, 1000], // Stake buttons in the panel, next to "max". At most four
+    // Types players can pick. any: any kill. noscope: no-scope sniper kills. zeus: taser kills. knife: knife kills.
+    // scout: SSG 08 kills. headshot: headshot kills. Types the map cannot offer (no snipers, no taser) are hidden there
+    "types": ["any", "noscope", "zeus", "knife", "scout", "headshot"]
   },
 
   // A clickable K4 panel (!k4, !rank, !missions, !top, !ranks, !stats, !time) and toast pop-ups instead of chat.

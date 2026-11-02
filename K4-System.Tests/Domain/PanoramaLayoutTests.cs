@@ -25,7 +25,8 @@ public partial class PanoramaLayoutTests
 
 	private static IEnumerable<string> Range(string pattern, int count) => Enumerable.Range(0, count).Select(i => pattern.Replace("{i}", i.ToString()));
 
-	private static readonly string[] Pages = ["home", "profile", "missions", "achievements", "leaderboard", "ranks", "stats"];
+	// The server's own list, so a page added there without its layout fails here.
+	private static readonly string[] Pages = PanoramaHud.PageIds;
 
 	private static List<string> ContractIds()
 	{
@@ -50,6 +51,9 @@ public partial class PanoramaLayoutTests
 			"k4-pt", "k4-pt-t", "k4-pt-ct", "k4-pt-spec", "k4-pt-t-bar", "k4-pt-ct-bar", "k4-pt-spec-bar",
 			// Toasts
 			"k4-toasts", "k4-t-more", "k4-promo", "k4-promo-icon",
+			// Duels (7.2)
+			"k4-dp-prev", "k4-dp-next", "k4-d-send", "k4-d-in", "k4-d-in-icon", "k4-d-in-bar", "k4-d-accept", "k4-d-decline",
+			"k4-d-mine", "k4-d-mine-icon", "k4-d-mine-bar", "k4-dl-none",
 		];
 		ids.AddRange(Pages.Select(page => $"k4-nav-{page}"));
 		ids.AddRange(Pages.Select(page => $"k4-view-{page}"));
@@ -80,6 +84,13 @@ public partial class PanoramaLayoutTests
 			ids.AddRange(Range(pattern, 3));
 		foreach (string pattern in new[] { "k4-t{i}", "k4-t{i}-icon", "k4-t{i}-ring", "k4-t{i}-prog", "k4-t{i}-bar", "k4-t{i}-timer" })
 			ids.AddRange(Range(pattern, 3));
+		foreach (string pattern in new[] { "k4-dp{i}", "k4-dp{i}-icon" })
+			ids.AddRange(Range(pattern, 8));
+		foreach (string pattern in new[] { "k4-dt{i}", "k4-dt{i}-icon" })
+			ids.AddRange(Range(pattern, 6));
+		ids.AddRange(Range("k4-ds{i}", 5));
+		foreach (string pattern in new[] { "k4-dl{i}", "k4-dl{i}-icon" })
+			ids.AddRange(Range(pattern, 4));
 		return ids;
 	}
 
@@ -90,6 +101,7 @@ public partial class PanoramaLayoutTests
 			"k4-me", "k4-close", "k4-h-missions", "k4-h-ach", "k4-h-top", "k4-pf-back", "k4-pf-toasts", "k4-pf-chat",
 			"k4-af-all", "k4-af-progress", "k4-af-unlocked", "k4-af-shown", "k4-ach-prev", "k4-ach-next",
 			"k4-lb-newer", "k4-lb-older", "k4-lb-prev", "k4-lb-next", "k4-rk-prev", "k4-rk-next",
+			"k4-dp-prev", "k4-dp-next", "k4-d-send", "k4-d-accept", "k4-d-decline",
 		];
 		buttons.AddRange(Pages.Select(page => $"k4-nav-{page}"));
 		buttons.AddRange(Range("k4-h-q{i}", 5));
@@ -97,6 +109,9 @@ public partial class PanoramaLayoutTests
 		buttons.AddRange(Range("k4-a{i}", 15));
 		buttons.AddRange(Range("k4-lb-p{i}", 3));
 		buttons.AddRange(Range("k4-lb-{i}", 7));
+		buttons.AddRange(Range("k4-dp{i}", 8));
+		buttons.AddRange(Range("k4-dt{i}", 6));
+		buttons.AddRange(Range("k4-ds{i}", 5));
 		return buttons;
 	}
 
@@ -108,6 +123,7 @@ public partial class PanoramaLayoutTests
 		[
 			"k4-season", "k4-event", "k4-pf-sc-hint", "k4-pf-fav", "k4-pf-ss-none", "k4-pf-back", "k4-pf-toasts", "k4-pf-chat",
 			"k4-mw", "k4-lb-me", "k4-rk-prev", "k4-rk-next", "k4-pt", "k4-t-more", "k4-promo",
+			"k4-d-in", "k4-d-mine", "k4-dl-none",
 		];
 		gone.AddRange(Range("k4-h-m{i}", 4));
 		gone.AddRange(Range("k4-h-a{i}", 3));
@@ -126,6 +142,10 @@ public partial class PanoramaLayoutTests
 		gone.AddRange(Range("k4-st{i}", 8));
 		gone.AddRange(Range("k4-sw{i}", 3));
 		gone.AddRange(Range("k4-t{i}", 3));
+		gone.AddRange(Range("k4-dp{i}", 8));
+		gone.AddRange(Range("k4-dt{i}", 6));
+		gone.AddRange(Range("k4-ds{i}", 5));
+		gone.AddRange(Range("k4-dl{i}", 4));
 		return gone;
 	}
 
@@ -189,7 +209,7 @@ public partial class PanoramaLayoutTests
 		Dictionary<string, XElement> ids = ById;
 		List<(string Id, string Class)> expected = [];
 		expected.AddRange(Range("k4-h-p{i}-icon", 3).Concat(Range("k4-lb-p{i}-icon", 3)).Concat(Range("k4-lb-{i}-icon", 7))
-			.Concat(Range("k4-rk{i}-icon", 20)).Concat(Range("k4-pf-ss{i}-icon", 3)).Append("k4-lb-me-icon").Select(id => (id, "sg-0")));
+			.Concat(Range("k4-rk{i}-icon", 20)).Concat(Range("k4-pf-ss{i}-icon", 3)).Concat(Range("k4-dp{i}-icon", 8)).Append("k4-lb-me-icon").Select(id => (id, "sg-0")));
 		expected.AddRange(Range("k4-h-a{i}-ring", 3).Concat(Range("k4-pf-sc{i}-ring", 3)).Concat(Range("k4-a{i}-ring", 15))
 			.Concat(Range("k4-t{i}-ring", 3)).Select(id => (id, "t-locked")));
 		// Every bar in the contract is an id ending in -bar, and its fill starts empty.
@@ -258,6 +278,19 @@ public partial class PanoramaLayoutTests
 	[InlineData("k4-t0", "kind", "text", "value")]
 	[InlineData("k4-t-more", "more")]
 	[InlineData("k4-promo", "title", "rank")]
+	[InlineData("k4-view-duels", "pick", "types", "stakes", "summary", "status", "live", "page")]
+	[InlineData("k4-dp0", "name", "points")]
+	[InlineData("k4-dp7", "name", "points")]
+	[InlineData("k4-dt0", "name", "tip")]
+	[InlineData("k4-dt5", "name", "tip")]
+	[InlineData("k4-ds0", "label")]
+	[InlineData("k4-d-send", "label")]
+	[InlineData("k4-d-in", "title", "text")]
+	[InlineData("k4-d-accept", "label")]
+	[InlineData("k4-d-decline", "label")]
+	[InlineData("k4-d-mine", "title", "score", "text")]
+	[InlineData("k4-dl0", "names", "score", "info")]
+	[InlineData("k4-dl-none", "none")]
 	public void Dialog_variables_reach_a_label_inside_their_panel(string id, params string[] variables)
 	{
 		// A dialog variable set on a panel reaches every label inside it (and the label itself).
@@ -278,6 +311,30 @@ public partial class PanoramaLayoutTests
 		}
 	}
 
+	// The duel type cards explain themselves like every other picture card (7.1.1): a k4-has-tip card holding a
+	// k4-tip that never takes the mouse, with the {s:tip} label in it.
+	[Fact]
+	public void Duel_type_cards_carry_a_hover_explanation()
+	{
+		Assert.All(Range("k4-dt{i}", 6), id =>
+		{
+			XElement card = ById[id];
+			Assert.Contains("k4-has-tip", Classes(card));
+			XElement tip = Assert.Single(card.Elements(), element => Classes(element).Contains("k4-tip"));
+			Assert.Equal("false", (string?)tip.Attribute("hittest"));
+			Assert.Contains(tip.Descendants("Label"), label => (string?)label.Attribute("text") == "{s:tip}" && (string?)label.Attribute("hittest") == "false");
+		});
+	}
+
+	// The sidebar's eight items sit in this order; Duels comes between Leaderboard and Ranks.
+	[Fact]
+	public void The_sidebar_lists_the_pages_in_order()
+	{
+		List<string> nav = Layout.Descendants("Button").Select(button => (string?)button.Attribute("id")).OfType<string>()
+			.Where(id => id.StartsWith("k4-nav-", StringComparison.Ordinal)).ToList();
+		Assert.Equal(Pages.Select(page => $"k4-nav-{page}"), nav);
+	}
+
 	[Fact]
 	public void Medal_icons_and_bars_sit_inside_their_parts()
 	{
@@ -289,6 +346,12 @@ public partial class PanoramaLayoutTests
 		pairs.AddRange(Enumerable.Range(0, 20).Select(i => ($"k4-rk{i}-gift", $"k4-rk{i}")));
 		pairs.Add(("k4-season-bar", "k4-season"));
 		pairs.Add(("k4-me-icon", "k4-me"));
+		pairs.AddRange(Enumerable.Range(0, 8).Select(i => ($"k4-dp{i}-icon", $"k4-dp{i}")));
+		pairs.AddRange(Enumerable.Range(0, 6).Select(i => ($"k4-dt{i}-icon", $"k4-dt{i}")));
+		pairs.AddRange(Enumerable.Range(0, 4).Select(i => ($"k4-dl{i}-icon", $"k4-dl{i}")));
+		pairs.AddRange(new[] { "k4-d-in-icon", "k4-d-in-bar", "k4-d-accept", "k4-d-decline" }.Select(id => (id, "k4-d-in")));
+		pairs.AddRange(new[] { "k4-d-mine-icon", "k4-d-mine-bar" }.Select(id => (id, "k4-d-mine")));
+		pairs.AddRange(new[] { "k4-dp0", "k4-dt0", "k4-ds0", "k4-d-send", "k4-d-in", "k4-d-mine", "k4-dl0", "k4-dl-none" }.Select(id => (id, "k4-view-duels")));
 
 		List<string> wrong = pairs.Where(pair => !ids[pair.Inner].Ancestors().Contains(ids[pair.Outer])).Select(pair => $"{pair.Inner} not in {pair.Outer}").ToList();
 		Assert.True(wrong.Count == 0, string.Join(", ", wrong));
@@ -346,6 +409,8 @@ public partial class PanoramaLayoutTests
 			"ic-icon_star", "ic-gift", "dn-penetrate", "dn-noscope", "ic-kill", "ic-stat_headshots", "ic-stat_mvps", "ic-stat_assists",
 			"ic-clock", "ic-hot_trend", "ic-check", "ic-map_death", "ic-crosshair_circle", "ic-stats", "ic-trophy", "ic-leader",
 			"ic-winner_ribbon", "ic-quest", "ic-home", "ic-profile", "ic-refresh_skinny", "eq-ak47", "eq-awp", "eq-knife",
+			// Duel types (7.2) and the Duels nav icon
+			"ic-kill_headshot", "eq-taser", "eq-ssg08", "ic-casual",
 			// Maps CS2 has screenshots for
 			"map-de_dust2", "map-de_mirage", "map-de_inferno", "map-de_nuke", "map-de_ancient", "map-de_anubis", "map-de_overpass",
 			"map-de_train", "map-de_vertigo", "map-cs_office", "map-cs_italy",

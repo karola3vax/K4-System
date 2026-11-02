@@ -1,3 +1,11 @@
+-- 2026.11.02 - V7.2.0
+
+- feat: Duels are a kill race with a rule. Pick a type (any kill, no-scope, Zeus, knife, Scout or headshot); only kills between the two players that fit it count. The first to `duels.target-kills` (5) wins both stakes at once, otherwise the leader after `duels.minutes` (10); a tie gives both stakes back. Types the map cannot offer are left out there
+- feat: A Duels page on the panel (`!duel` alone opens it): pick a player, a type and a stake from the preset buttons or "max", then send. The challenged player answers on the same page, with the time left as a bar. Your own duel shows the score and the time left, and up to four other running duels are listed live
+- feat: Several duels can run at once instead of one per map. After a duel, both players wait `duels.cooldown-seconds` (120) before the next. Duel toasts show the start, every counted kill's score, and the result
+- feat: `!duel <player> <points|max> [type]` takes the type in chat too (docs/commands.md#duel-types)
+- setup: Needs the updated Workshop addon `3811667212` for the Duels page; with the old addon, `!duel` alone opens an empty page, and duels work in chat as before. New config keys `duels.target-kills`, `minutes`, `cooldown-seconds`, `stakes` and `types` get their defaults on the next start. New texts in all 36 languages
+
 -- 2026.11.01 - V7.1.1
 
 - feat: The panel is a centered 1240x760 window instead of covering the whole screen, so the game stays visible around it. Every page is fitted to it

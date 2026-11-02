@@ -28,4 +28,32 @@ public class PanelRulesTests
 	[InlineData("k4-lb-me", null)]
 	public void Leaderboard_clicks_map_to_their_player(string button, int? slot)
 		=> Assert.Equal(slot, PanoramaHud.LeaderboardSlot(button));
+
+	[Theory]
+	[InlineData("k4-dp0", "k4-dp", 0)]
+	[InlineData("k4-dp7", "k4-dp", 7)]
+	[InlineData("k4-dt5", "k4-dt", 5)]
+	[InlineData("k4-ds4", "k4-ds", 4)]
+	[InlineData("k4-dp-next", "k4-dp", null)]
+	[InlineData("k4-dp-prev", "k4-dp", null)]
+	[InlineData("k4-dp", "k4-dp", null)]
+	[InlineData("k4-dpx", "k4-dp", null)]
+	[InlineData("k4-dt0", "k4-dp", null)] // a type card is not a player
+	[InlineData("k4-d-send", "k4-ds", null)]
+	public void Duel_clicks_map_to_their_slot(string button, string prefix, int? slot)
+		=> Assert.Equal(slot, PanoramaHud.DuelSlot(button, prefix));
+
+	// The panel finds a page's ids by the tab's number, so the two lists must stay in the same order.
+	[Theory]
+	[InlineData(HudTab.Home, "home")]
+	[InlineData(HudTab.Leaderboard, "leaderboard")]
+	[InlineData(HudTab.Duels, "duels")]
+	[InlineData(HudTab.Ranks, "ranks")]
+	[InlineData(HudTab.Stats, "stats")]
+	public void Every_tab_has_its_page(HudTab tab, string page)
+		=> Assert.Equal(page, PanoramaHud.PageIds[(int)tab]);
+
+	[Fact]
+	public void There_is_one_page_per_tab()
+		=> Assert.Equal(Enum.GetValues<HudTab>().Distinct().Count(), PanoramaHud.PageIds.Length);
 }
