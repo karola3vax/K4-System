@@ -33,7 +33,7 @@ UI_ICONS = [
     "crosshair_circle", "clock", "bullet", "hostage_rescued", "play", "winner_ribbon", "check", "hot_trend",
     "cold_trend", "trade_up", "mission_star", "bomb_c4", "xp_rank", "quest", "leader", "gift", "refresh_skinny",
     "crosshair", "first_person", "multipleenemieshere", "icon_star_multi", "shield", "health",
-    "home", "profile", "watch", "icon_star", "cancel", "expand", "locked", "timer", "star",
+    "home", "profile", "watch", "icon_star", "cancel", "expand", "locked", "timer", "star", "casual",
 ]
 
 # panorama/images/hud/deathnotice/<name>.vsvg (the kill feed's kill markers), used as dn-<name>
@@ -84,15 +84,16 @@ PICTURES = [
     "k4-m-head-icon", "k4-m-icon", "k4-mw-icon", "k4-streak-icon", "k4-sd-icon", "k4-chip-icon", "k4-a-pin",
     "k4-lb-p-icon", "k4-lb-icon", "k4-rk-icon", "k4-rk-gift", "k4-rk-you-icon", "k4-st-icon", "k4-sw-icon",
     "k4-pt-head-icon", "k4-pt-icon", "k4-event-icon", "k4-close-icon", "k4-promo-icon", "k4-toast-icon",
-    "k4-bg", "k4-bg-map",
+    "k4-bg", "k4-bg-map", "k4-dp-icon", "k4-dt-icon", "k4-d-send-icon", "k4-d-in-icon", "k4-d-mine-icon", "k4-dl-icon",
 ]
 
 # Grid cells spaced by a left margin, and rows spaced by a top margin; k4-first cancels it (see gen_k4_ui.py).
 GAPS_LEFT = {
     "k4-h-card": 16, "k4-h-m": 10, "k4-h-a": 10, "k4-h-p": 10, "k4-h-q": 14, "k4-pf-sc": 12, "k4-pf-st": 12,
-    "k4-pf-ss": 12, "k4-m": 16, "k4-a": 10, "k4-rk": 10, "k4-st": 12, "k4-lb-p": 20,
+    "k4-pf-ss": 12, "k4-m": 16, "k4-a": 10, "k4-rk": 10, "k4-st": 12, "k4-lb-p": 20, "k4-dp": 10, "k4-dt": 10,
+    "k4-ds": 10, "k4-d-btn": 10,
 }
-GAPS_TOP = {"k4-grid-row": 10, "k4-st-row": 12, "k4-sw": 28}
+GAPS_TOP = {"k4-grid-row": 10, "k4-st-row": 12, "k4-sw": 28, "k4-d-step": 14, "k4-d-row": 10, "k4-dl": 6}
 
 # No text-transform: uppercase anywhere. The client uppercases with its own locale (a Turkish client writes
 # "MİSSİONS"), so K4 sends labels already capitalized in each reader's language.
@@ -2167,6 +2168,578 @@ Button.k4-lb-row:hover
 .k4-pt-ct .k4-bar-fill { background-color: k4-accent; }
 .k4-pt-spec .k4-pt-name { color: k4-dim; }
 .k4-pt-spec .k4-bar-fill { background-color: k4-dim; }
+
+/* ---------------------------------------------------------------- duels (7.2) */
+
+/* Two columns in the 962x710 page: the challenge builder (566px) and the incoming, own and running duels (372px).
+   Fixed heights, left: step 36 + 6 + players 194, 14 + 36 + 6 + types 178, 14 + 36 + 6 + stakes 36, 14 + foot 56 = 632.
+   Right: header space 52, incoming 172, own 12 + 98, caption 18 + 17, running 8 + 218 = 595. */
+.k4-d-cols
+{
+	width: 100%;
+	height: 100%;
+	flow-children: right;
+}
+
+.k4-d-build
+{
+	width: 566px;
+	height: 100%;
+	flow-children: down;
+}
+
+.k4-d-side
+{
+	width: fill-parent-flow( 1.0 );
+	height: 100%;
+	flow-children: down;
+	margin-left: 24px;
+}
+
+.k4-d-step
+{
+	width: 100%;
+	height: 36px;
+	flow-children: right;
+}
+
+.k4-d-cap
+{
+	vertical-align: center;
+	font-size: 13px;
+	color: k4-soft;
+}
+
+.k4-d-grid
+{
+	width: 100%;
+	flow-children: down;
+	margin-top: 6px;
+}
+
+.k4-d-row
+{
+	width: 100%;
+	flow-children: right;
+}
+
+/* Players: fixed widths, so a short last page keeps its cards the same size (4 x 134 + 3 x 10 = 566). */
+.k4-dp
+{
+	width: 134px;
+	height: 92px;
+	flow-children: down;
+	padding: 8px;
+	border-radius: 6px;
+	background-color: k4-tile;
+	border: 2px solid #FFFFFF14;
+	transition-property: background-color, border, opacity;
+	transition-duration: k4-dur;
+}
+
+.k4-dp:hover
+{
+	border: 2px solid #6BB6F599;
+	sound: "UIPanorama.inventory_item_rollover";
+}
+
+.k4-dp:active
+{
+	sound: "UIPanorama.inventory_item_select";
+}
+
+.k4-dp.k4-active
+{
+	background-color: #6BB6F52E;
+	border: 2px solid k4-accent;
+}
+
+.k4-dp.k4-disabled
+{
+	opacity: 0.35;
+}
+
+.k4-dp-icon
+{
+	width: 76px;
+	height: 31px;
+	margin-top: 2px;
+	horizontal-align: center;
+}
+
+.k4-dp-name
+{
+	width: 100%;
+	margin-top: 4px;
+	text-align: center;
+	font-size: 15px;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+}
+
+.k4-dp-points
+{
+	horizontal-align: center;
+	font-size: 12px;
+	color: k4-muted;
+}
+
+/* Duel types: 3 x 182 + 2 x 10 = 566; the explanation lies over the whole card. */
+.k4-dt
+{
+	width: 182px;
+	height: 84px;
+	border-radius: 6px;
+	background-color: k4-tile;
+	border: 2px solid #FFFFFF14;
+	transition-property: background-color, border;
+	transition-duration: k4-dur;
+}
+
+.k4-dt:hover
+{
+	border: 2px solid #B99BFF80;
+	sound: "UIPanorama.inventory_item_rollover";
+}
+
+.k4-dt:active
+{
+	sound: "UIPanorama.inventory_item_select";
+}
+
+.k4-dt.k4-active
+{
+	background-color: #B99BFF2E;
+	border: 2px solid k4-purple;
+	box-shadow: #B99BFF73 0px 0px 16px 0px;
+}
+
+.k4-dt-body
+{
+	width: 100%;
+	flow-children: down;
+	vertical-align: center;
+}
+
+.k4-dt-icon
+{
+	width: 96px;
+	height: 40px;
+	horizontal-align: center;
+}
+
+.k4-dt-name
+{
+	width: 100%;
+	margin-top: 6px;
+	text-align: center;
+	font-size: 15px;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+}
+
+.k4-dt.k4-active .k4-dt-name
+{
+	color: #CDB6FF;
+}
+
+/* Stakes: pills */
+.k4-d-stakes
+{
+	width: 100%;
+	height: 36px;
+	flow-children: right;
+	margin-top: 6px;
+}
+
+.k4-ds
+{
+	min-width: 80px;
+	height: 36px;
+	padding: 0px 18px;
+	border-radius: 18px;
+	border: 1px solid #FFFFFF33;
+	background-color: #00000040;
+	transition-property: background-color, border, opacity;
+	transition-duration: k4-dur;
+}
+
+.k4-ds-label
+{
+	horizontal-align: center;
+	vertical-align: center;
+	font-size: 16px;
+	color: k4-soft;
+}
+
+.k4-ds:hover
+{
+	border: 1px solid #E4AE39B3;
+	sound: "UIPanorama.generic_button_rollover";
+}
+
+.k4-ds:active
+{
+	sound: "UIPanorama.submenu_select";
+}
+
+.k4-ds.k4-active
+{
+	background-color: #E4AE3938;
+	border: 1px solid k4-gold;
+}
+
+.k4-ds.k4-active .k4-ds-label
+{
+	color: k4-gold-light;
+}
+
+.k4-ds.k4-disabled
+{
+	opacity: 0.3;
+}
+
+/* What the challenge will be, why it cannot be sent yet, and Send */
+.k4-d-foot
+{
+	width: 100%;
+	height: 56px;
+	flow-children: right;
+	margin-top: 14px;
+}
+
+.k4-d-foot-text
+{
+	width: fill-parent-flow( 1.0 );
+	flow-children: down;
+	margin-right: 16px;
+	vertical-align: center;
+}
+
+.k4-d-summary
+{
+	width: 100%;
+	font-size: 16px;
+	white-space: nowrap;
+	text-overflow: shrink;
+}
+
+.k4-d-status
+{
+	width: 100%;
+	margin-top: 2px;
+	font-size: 13px;
+	color: k4-red;
+	white-space: nowrap;
+	text-overflow: shrink;
+}
+
+.k4-d-send
+{
+	width: 220px;
+	height: 56px;
+	border-radius: 6px;
+	border: 1px solid #CDB6FF;
+	background-color: gradient( linear, 0% 0%, 0% 100%, from( #9F7BFF ), to( #6A44D1 ) );
+	box-shadow: #B99BFF59 0px 0px 18px 0px;
+	transition-property: background-color, border, opacity;
+	transition-duration: k4-dur;
+}
+
+.k4-d-send:hover
+{
+	background-color: gradient( linear, 0% 0%, 0% 100%, from( #B49AFF ), to( #7D58E6 ) );
+	sound: "UIPanorama.generic_button_rollover";
+}
+
+.k4-d-send:active
+{
+	sound: "UIPanorama.generic_button_press";
+}
+
+.k4-d-send.k4-disabled, .k4-d-send.k4-disabled:hover
+{
+	opacity: 0.4;
+	background-color: #FFFFFF14;
+	border: 1px solid #FFFFFF26;
+	box-shadow: #00000000 0px 0px 0px 0px;
+}
+
+.k4-d-send-inner
+{
+	flow-children: right;
+	horizontal-align: center;
+	vertical-align: center;
+}
+
+.k4-d-send-icon
+{
+	width: 24px;
+	height: 24px;
+	margin-right: 10px;
+	vertical-align: center;
+}
+
+.k4-d-send-label
+{
+	vertical-align: center;
+	font-size: 20px;
+	letter-spacing: 1px;
+}
+
+/* Incoming challenge: the most prominent card on the page */
+.k4-d-in
+{
+	width: 100%;
+	flow-children: down;
+	padding: 16px;
+	border-radius: 6px;
+	border: 2px solid k4-purple;
+	background-color: gradient( linear, 0% 0%, 100% 100%, from( #825ADC66 ), to( #0A0E14D9 ) );
+	box-shadow: #B99BFF4D 0px 0px 20px 0px;
+}
+
+.k4-d-in-top, .k4-d-mine-top
+{
+	width: 100%;
+	flow-children: right;
+}
+
+.k4-d-in-top
+{
+	height: 66px;
+}
+
+.k4-d-in-icon
+{
+	width: 72px;
+	height: 56px;
+	vertical-align: center;
+}
+
+.k4-d-in-text, .k4-d-mine-text
+{
+	width: fill-parent-flow( 1.0 );
+	flow-children: down;
+	margin-left: 14px;
+	vertical-align: center;
+}
+
+.k4-d-in-title, .k4-d-mine-title
+{
+	width: 100%;
+	font-size: 13px;
+	letter-spacing: 2px;
+	color: #CDB6FF;
+	white-space: nowrap;
+	text-overflow: shrink;
+}
+
+.k4-d-in-msg
+{
+	width: 100%;
+	max-height: 46px;
+	margin-top: 2px;
+	font-size: 17px;
+	text-overflow: ellipsis;
+}
+
+.k4-bar-duel
+{
+	height: 6px;
+	margin-top: 12px;
+}
+
+.k4-bar-duel .k4-bar-fill
+{
+	background-color: k4-purple;
+}
+
+.k4-d-in-btns
+{
+	width: 100%;
+	height: 40px;
+	flow-children: right;
+	margin-top: 12px;
+}
+
+.k4-d-btn
+{
+	width: fill-parent-flow( 1.0 );
+	height: 100%;
+	border-radius: 4px;
+	transition-property: background-color, border;
+	transition-duration: k4-dur;
+}
+
+.k4-d-btn-label
+{
+	horizontal-align: center;
+	vertical-align: center;
+	font-size: 16px;
+	letter-spacing: 1px;
+}
+
+.k4-d-accept
+{
+	background-color: #5CC97BD9;
+	border: 1px solid k4-green-light;
+}
+
+.k4-d-accept .k4-d-btn-label
+{
+	color: #0B1016;
+}
+
+.k4-d-accept:hover
+{
+	background-color: k4-green-light;
+	sound: "UIPanorama.generic_button_rollover";
+}
+
+.k4-d-decline
+{
+	background-color: #00000066;
+	border: 1px solid #FFFFFF4D;
+}
+
+.k4-d-decline:hover
+{
+	background-color: #EB5B4B40;
+	border: 1px solid k4-red;
+	sound: "UIPanorama.generic_button_rollover";
+}
+
+.k4-d-btn:active
+{
+	sound: "UIPanorama.generic_button_press";
+}
+
+/* The player's own running duel */
+.k4-d-mine
+{
+	width: 100%;
+	flow-children: down;
+	margin-top: 12px;
+	padding: 14px;
+	border-radius: 6px;
+	border: 1px solid #B99BFF66;
+	background-color: k4-tile;
+}
+
+.k4-d-mine-top
+{
+	height: 52px;
+}
+
+.k4-d-mine-icon
+{
+	width: 64px;
+	height: 44px;
+	vertical-align: center;
+}
+
+.k4-d-mine-text
+{
+	margin-left: 12px;
+}
+
+.k4-d-mine-msg
+{
+	width: 100%;
+	margin-top: 2px;
+	font-size: 15px;
+	color: k4-soft;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+}
+
+.k4-d-mine-score
+{
+	margin-left: 12px;
+	vertical-align: center;
+	font-size: 40px;
+	white-space: nowrap;
+}
+
+.k4-d-mine .k4-bar-duel
+{
+	margin-top: 10px;
+}
+
+/* Every running duel */
+.k4-d-live-cap
+{
+	margin-top: 18px;
+	font-size: 13px;
+	color: k4-soft;
+}
+
+.k4-d-live
+{
+	width: 100%;
+	flow-children: down;
+	margin-top: 8px;
+}
+
+.k4-dl
+{
+	width: 100%;
+	height: 50px;
+	flow-children: right;
+	padding: 0px 12px;
+	border-radius: 4px;
+	background-color: #FFFFFF0A;
+	border: 1px solid #FFFFFF12;
+}
+
+.k4-dl-icon
+{
+	width: 56px;
+	height: 28px;
+	vertical-align: center;
+}
+
+.k4-dl-text
+{
+	width: fill-parent-flow( 1.0 );
+	flow-children: down;
+	margin-left: 12px;
+	vertical-align: center;
+}
+
+.k4-dl-names
+{
+	width: 100%;
+	font-size: 15px;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+}
+
+.k4-dl-info
+{
+	width: 100%;
+	font-size: 12px;
+	color: k4-muted;
+	white-space: nowrap;
+	text-overflow: shrink;
+}
+
+.k4-dl-score
+{
+	margin-left: 10px;
+	vertical-align: center;
+	font-size: 20px;
+	color: #CDB6FF;
+	white-space: nowrap;
+}
+
+.k4-dl-none
+{
+	margin-top: 4px;
+	font-size: 14px;
+	color: k4-dim;
+}
 
 /* ---------------------------------------------------------------- toasts: under the kill feed, newest on top */
 

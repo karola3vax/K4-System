@@ -160,3 +160,23 @@ while the card is hovered. Cards that stack their content keep it in a body pane
 | `k4-sd0` … `k4-sd6` | that day of the streak; also `{s:day}` and `{s:bonus}` |
 
 Also: `k4-view-missions` `{s:streakhint}` explains the streak, and `k4-sw0` … `k4-sw2` show `{s:weapon}`.
+
+## Duels (7.2)
+
+A Duels page: pick an online player, a duel type and a stake, send the challenge; answer incoming challenges; follow every running duel. The sidebar gets an eighth item, `k4-nav-duels`, and the page is `k4-view-duels` (`k4-show` while open).
+
+| Id | Kind | Variables and classes |
+| --- | --- | --- |
+| `k4-view-duels` | Panel | `{s:pick}`, `{s:types}`, `{s:stakes}` (the three step captions), `{s:summary}` (what the challenge will be), `{s:status}` (why sending is not possible right now, empty otherwise), `{s:live}` (caption of the running list), `{s:page}` |
+| `k4-dp0` … `k4-dp7` | Button, start `k4-gone` | an online player: `{s:name}`, `{s:points}`; icon `k4-dp{i}-icon` (rank emblem group); `k4-active` when picked; `k4-disabled` when they cannot be challenged now |
+| `k4-dp-prev`, `k4-dp-next` | Button | `k4-disabled` |
+| `k4-dt0` … `k4-dt5` | Button, start `k4-gone` | a duel type: `{s:name}`, `{s:tip}` (hover explanation, `k4-has-tip` card); icon `k4-dt{i}-icon` (picture group); `k4-active` when picked |
+| `k4-ds0` … `k4-ds4` | Button, start `k4-gone` | a stake: `{s:label}`; `k4-active` when picked; `k4-disabled` over the allowed maximum |
+| `k4-d-send` | Button | `{s:label}`; `k4-disabled` until a player, type and stake are picked and the challenge is allowed |
+| `k4-d-in` | Panel, starts `k4-gone` | an incoming challenge: `{s:title}`, `{s:text}`; icon `k4-d-in-icon` (picture group); bar `k4-d-in-bar` (time left to answer) |
+| `k4-d-accept`, `k4-d-decline` | Button (inside `k4-d-in`) | `{s:label}` |
+| `k4-d-mine` | Panel, starts `k4-gone` | the player's own running duel: `{s:title}`, `{s:score}`, `{s:text}`; icon `k4-d-mine-icon`; bar `k4-d-mine-bar` (time left) |
+| `k4-dl0` … `k4-dl3` | Panel, start `k4-gone` | other running duels: `{s:names}`, `{s:score}`, `{s:info}`; icon `k4-dl{i}-icon` |
+| `k4-dl-none` | Label, starts `k4-gone` | `{s:none}` |
+
+Duel type pictures: Any `ic-kill`, No-scope `dn-noscope`, Zeus `eq-taser`, Knife `eq-knife`, Scout `eq-ssg08`, Headshot `ic-kill_headshot`.

@@ -278,7 +278,45 @@ internal static partial class ConfigValidator
 		duels.MinStake = Math.Max(1, duels.MinStake);
 		duels.MaxStakePercent = Math.Clamp(duels.MaxStakePercent, 0, 100);
 		duels.AcceptSeconds = Math.Clamp(duels.AcceptSeconds, 5, 300);
+		duels.TargetKills = Math.Clamp(duels.TargetKills, 1, 50);
+		duels.Minutes = Math.Clamp(duels.Minutes, 1, 60);
+		duels.CooldownSeconds = Math.Clamp(duels.CooldownSeconds, 0, 3600);
+		NormalizeDuelStakes(duels, warnings);
+		NormalizeDuelTypes(duels, warnings);
 
 		return warnings;
+	}
+
+	// The panel has four stake buttons next to "max".
+	private const int DuelStakeButtons = 4;
+
+	private static void NormalizeDuelStakes(DuelSettings duels, List<string> warnings)
+	{
+		List<int> stakes = [.. (duels.Stakes ?? []).Where(stake => stake > 0).Distinct().Order()];
+		if (duels.Stakes is null || stakes.Count != duels.Stakes.Count)
+			warnings.Add("duels.stakes must be positive and different. Invalid values were dropped.");
+		if (stakes.Count > DuelStakeButtons)
+		{
+			warnings.Add($"duels.stakes has more than {DuelStakeButtons} values. Using the first {DuelStakeButtons}.");
+			stakes = stakes[..DuelStakeButtons];
+		}
+
+		duels.Stakes = stakes.Count > 0 ? stakes : new DuelSettings().Stakes;
+	}
+
+	private static void NormalizeDuelTypes(DuelSettings duels, List<string> warnings)
+	{
+		List<string> types = [];
+		foreach (string? name in duels.Types ?? [.. DuelRules.TypeNames])
+		{
+			if (!DuelRules.TryParse(name, out DuelType type))
+				warnings.Add($"duels.types: '{name}' is not a duel type ({string.Join(", ", DuelRules.TypeNames)}). It was dropped.");
+			else if (!types.Contains(DuelRules.Name(type)))
+				types.Add(DuelRules.Name(type));
+		}
+
+		if (types.Count == 0)
+			warnings.Add("duels.types is empty, so no duel can be started.");
+		duels.Types = types;
 	}
 }

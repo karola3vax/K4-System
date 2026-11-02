@@ -17,7 +17,7 @@ All settings live in one commented file, `configs/plugins/K4-System/k4-system.js
 | `events` | Scheduled points events, such as 2× points on weekend evenings |
 | `missions` | Time zone, rewards per difficulty, streak bonus, rerolls per day, bots, and map rules |
 | `bounty` | The wanted kill streak, the bounty reward, and the survivor bonus |
-| `duels` | Duel stakes, how long a challenge waits, and the same-connection block |
+| `duels` | Duel stakes, types, kill target, time limit, cooldown, how long a challenge waits, and the same-connection block |
 | `panorama` | The clickable panel and its rank icons (competitive, wingman, or text) |
 | `scoreboard` | What the CS2 rank area shows, custom icons, points in the score column |
 | `tags` | Rank tags, top-placement tag, country tag, admin tags and `!admins` colors |
@@ -120,7 +120,7 @@ Both are on by default and need the ranks module. They are built to be rare, so 
 
 **Bounty.** A player who gets `kill-streak` kills on real players without dying becomes wanted. Everyone sees it in chat, and as a pop-up when the panel is on. The enemy who kills the wanted player gets `reward` points; the wanted player loses nothing extra. A suicide, a team kill, a bot kill, or leaving the server only ends the bounty. A wanted player who is still wanted when the match ends, or when the map changes, gets `survivor-reward`. Only one player is wanted at a time, and each player at most once per map. Bot kills do not count toward the streak.
 
-**Duel.** `!duel <player> <points>` challenges a player, who has `accept-seconds` to type `!duel accept` or `!duel decline`. On accept, both stakes are taken and held. Whoever gets more kills from then until the match ends wins both stakes; a tie returns them. A player who is not on the server when the match ends loses, so a losing duel cannot be dodged by leaving (reconnecting within the map is fine). On servers that change maps without a match end, the duel is decided when the map changes, without a chat message. Each player can duel once per map. The stake is between `min-stake` and `max-stake-percent` of the poorer player's points. With `block-same-ip`, two players on the same connection cannot duel, so points cannot be moved between accounts. Duels are off during warmup and below `tracking.minimum-players`.
+**Duel.** `!duel <player> <points> [type]` (or the panel's Duels page) challenges a player, who has `accept-seconds` to type `!duel accept` or `!duel decline`. On accept, both stakes are taken and held. Only kills between the two players that fit the duel type count ([duel types](commands.md#duel-types)). The first to `target-kills` counted kills wins both stakes at once. After `minutes` the leader wins; a tie returns both stakes. A duel still running when the match ends is decided then the same way, and on servers that change maps without a match end it is decided when the map changes, without a chat message. A player who is not on the server when the duel is decided loses, so a losing duel cannot be dodged by leaving (reconnecting within the map is fine). After a duel, both players wait `cooldown-seconds` before they can start or accept another. Several duels can run at the same time; each player is in at most one, with at most one open challenge. The stake is between `min-stake` and `max-stake-percent` of the poorer player's points; `stakes` are the panel's stake buttons (at most four, next to "max"). `types` lists the duel types players can pick (`any`, `noscope`, `zeus`, `knife`, `scout`, `headshot`); unknown names are dropped with a warning, and types the map cannot offer are left out on that map. With `block-same-ip`, two players on the same connection cannot duel, so points cannot be moved between accounts. Duels are off during warmup and below `tracking.minimum-players`.
 
 ```jsonc
 "bounty": {
@@ -134,7 +134,12 @@ Both are on by default and need the ranks module. They are built to be rare, so 
   "min-stake": 10,
   "max-stake-percent": 10,
   "accept-seconds": 30,
-  "block-same-ip": true
+  "block-same-ip": true,
+  "target-kills": 5,
+  "minutes": 10,
+  "cooldown-seconds": 120,
+  "stakes": [100, 250, 500, 1000],
+  "types": ["any", "noscope", "zeus", "knife", "scout", "headshot"]
 }
 ```
 

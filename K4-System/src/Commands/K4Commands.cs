@@ -247,10 +247,13 @@ internal sealed class K4Commands(
 
 	// ---------------------------------------------------------------- duels
 
-	/// <summary>!duel &lt;player&gt; &lt;points&gt;, !duel accept, and !duel decline (which also takes back your own challenge).</summary>
+	/// <summary>!duel &lt;player&gt; &lt;points|max&gt; [type], !duel accept, and !duel decline (which also takes back your own challenge).</summary>
 	private void OnDuel(CCSPlayerController? player, CommandInfo info)
 	{
-		const string Help = "<player> <points> | accept | decline";
+		const string Help = "<player> <points|max> [type] | accept | decline";
+		// A bare !duel opens the Duels page, where the challenge is built by clicking.
+		if (duels is not null && info.ArgCount <= 1 && TryOpenPanel(player, HudTab.Duels))
+			return;
 		if (duels is null || !guard.Check(player, info, CommandUsage.CLIENT_ONLY, 1, Help) || LoadedPlayer(player!, info) is not K4Player caller)
 			return;
 
@@ -263,9 +266,20 @@ internal sealed class K4Commands(
 			refusal = duels.Decline(caller);
 		else
 		{
-			if (info.ArgCount < 3 || !int.TryParse(info.ArgByIndex(2), out int stake) || stake < 0)
+			string stakeText = info.ArgByIndex(2);
+			bool maxStake = stakeText.Equals("max", StringComparison.OrdinalIgnoreCase);
+			int stake = 0;
+			if (info.ArgCount < 3 || (!maxStake && (!int.TryParse(stakeText, out stake) || stake < 0)))
 			{
 				info.ReplyToCommand(chat.Prefixed("usage", CommandGuard.CommandName(info), Help));
+				return;
+			}
+
+			IReadOnlyList<DuelType> types = duels.AvailableTypes;
+			DuelType type = types.Contains(DuelType.Any) || types.Count == 0 ? DuelType.Any : types[0];
+			if (info.ArgCount > 3 && !DuelRules.TryParse(info.ArgByIndex(3), out type))
+			{
+				info.ReplyToCommand(chat.Prefixed("duel.error.type-unknown", info.ArgByIndex(3), string.Join(", ", types.Select(DuelRules.Name))));
 				return;
 			}
 
@@ -281,9 +295,7 @@ internal sealed class K4Commands(
 				return;
 			}
 
-			refusal = duels.Challenge(caller, targets[0], stake);
-			if (refusal is null)
-				chat.Tell(targets[0].Controller, "duel.how-to", CommandGuard.CommandName(info), duels.AcceptSeconds);
+			refusal = duels.Challenge(caller, targets[0], maxStake ? duels.MaxStake(caller, targets[0]) : stake, type);
 		}
 
 		if (refusal is DuelService.Refusal reason)

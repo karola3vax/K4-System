@@ -27,7 +27,7 @@ public sealed class Plugin : BasePlugin
 
 	public override string ModuleAuthor => "K4ryuu; maintained by karola3vax";
 
-	public override string ModuleVersion => "7.1.1 " +
+	public override string ModuleVersion => "7.2.0 " +
 #if RELEASE
 		"(release)";
 #else
@@ -154,7 +154,7 @@ public sealed class Plugin : BasePlugin
 			: null;
 
 		BountyService? bounty = ranks is not null && Config.Bounty.Enabled ? new BountyService(Config, players, ranks, chat, hudBridge) : null;
-		duels = ranks is not null && Config.Duels.Enabled ? new DuelService(Config, players, ranks, game, chat, hudBridge, (seconds, action) => AddTimer(seconds, action)) : null;
+		duels = ranks is not null && Config.Duels.Enabled ? new DuelService(Config, players, ranks, game, chat, hudBridge, (seconds, action) => AddTimer(seconds, action), () => missions?.Map) : null;
 		AchievementService? achievements = ranks is not null && Config.Modules.Achievements && LoadAchievements() is { } list
 			? new AchievementService(list, players, ranks, chat, hudBridge, Logger)
 			: null;
@@ -179,7 +179,7 @@ public sealed class Plugin : BasePlugin
 
 		if (Config.Panorama.Enabled)
 		{
-			hud = new PanoramaHud(this, Config, players, ranks, missions, achievements, events, seasons, playtime, store, playerService, gameThread, background, chat, Logger);
+			hud = new PanoramaHud(this, Config, players, ranks, missions, duels, achievements, events, seasons, playtime, store, playerService, gameThread, background, chat, Logger);
 			hudBridge.Hud = hud;
 			RegisterHudListeners(hud, players);
 			hud.Warmup();

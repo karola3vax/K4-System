@@ -270,7 +270,7 @@ internal sealed class GameEvents(
 			ranks?.OnPlayerDeath(@event, victim, attacker, assister);
 			stats?.OnPlayerDeath(@event, victim, attacker, assister);
 			bounty?.OnPlayerDeath(@event, victim, attacker);
-			duels?.OnPlayerDeath(victim, attacker);
+			duels?.OnPlayerDeath(victim, attacker, @event.Weapon, @event.Headshot, @event.Noscope);
 
 			if (!game.IsWarmup
 				&& DeathRules.Classify(victim, attacker, assister, includeBots: true, config.Tracking.FreeForAll).AttackerPoint == AttackerPointAction.Kill

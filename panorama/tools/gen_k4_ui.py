@@ -14,7 +14,7 @@ OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "k4system",
 
 # Nav id -> CS2 icon (panorama/images/icons/ui/<name>.vsvg)
 NAV = [("home", "home"), ("profile", "profile"), ("missions", "quest"), ("achievements", "winner_ribbon"),
-       ("leaderboard", "leader"), ("ranks", "trophy"), ("stats", "stats")]
+       ("leaderboard", "leader"), ("duels", "casual"), ("ranks", "trophy"), ("stats", "stats")]
 
 HOME_MISSIONS = 4
 HOME_ACHIEVEMENTS = 3
@@ -30,6 +30,10 @@ RANK_COLUMNS, RANK_ROWS = 5, 4
 STAT_TILES = 8
 STAT_WEAPONS = 3
 TOASTS = 3
+DUEL_PLAYER_COLUMNS, DUEL_PLAYER_ROWS = 4, 2
+DUEL_TYPE_COLUMNS, DUEL_TYPE_ROWS = 3, 2
+DUEL_STAKES = 5
+DUEL_LIVE = 4
 
 REGULAR, MEDIUM, BOLD = "stratum-regular-tf", "stratum-medium-tf", "stratum-bold-tf"
 GONE = "k4-gone"
@@ -357,6 +361,83 @@ with box("root"):
                                 panel("k4-lb-icon sg-0", id="k4-lb-me-icon")
                                 label("{s:name}", "k4-lb-name", BOLD)
                                 label("{s:points}", "k4-lb-points", BOLD)
+
+                    # Duels (7.2): the challenge builder on the left, incoming, own and running duels on the right
+                    with box(id="k4-view-duels", cls="k4-view k4-view-pad"):
+                        with box(cls="k4-d-cols"):
+                            with box(cls="k4-d-build"):
+                                with box(cls="k4-d-step k4-first"):
+                                    label("{s:pick}", "k4-cap k4-d-cap", BOLD)
+                                    grow()
+                                    pager("k4-dp-prev", "k4-dp-next")
+                                with box(cls="k4-d-grid"):
+                                    for row in range(DUEL_PLAYER_ROWS):
+                                        with box(cls=f"k4-d-row{first(row)}"):
+                                            for column in range(DUEL_PLAYER_COLUMNS):
+                                                i = row * DUEL_PLAYER_COLUMNS + column
+                                                with box("Button", id=f"k4-dp{i}", cls=f"k4-dp{first(column)} {GONE}"):
+                                                    panel("k4-dp-icon sg-0", id=f"k4-dp{i}-icon")
+                                                    label("{s:name}", "k4-dp-name", BOLD)
+                                                    label("{s:points}", "k4-dp-points", MEDIUM)
+                                with box(cls="k4-d-step"):
+                                    label("{s:types}", "k4-cap k4-d-cap", BOLD)
+                                with box(cls="k4-d-grid"):
+                                    for row in range(DUEL_TYPE_ROWS):
+                                        with box(cls=f"k4-d-row{first(row)}"):
+                                            for column in range(DUEL_TYPE_COLUMNS):
+                                                i = row * DUEL_TYPE_COLUMNS + column
+                                                with box("Button", id=f"k4-dt{i}", cls=f"k4-dt k4-has-tip{first(column)} {GONE}"):
+                                                    with box(cls="k4-dt-body"):
+                                                        panel("k4-dt-icon", id=f"k4-dt{i}-icon")
+                                                        label("{s:name}", "k4-dt-name", BOLD)
+                                                    tip()
+                                with box(cls="k4-d-step"):
+                                    label("{s:stakes}", "k4-cap k4-d-cap", BOLD)
+                                with box(cls="k4-d-stakes"):
+                                    for i in range(DUEL_STAKES):
+                                        with box("Button", id=f"k4-ds{i}", cls=f"k4-ds{first(i)} {GONE}"):
+                                            label("{s:label}", "k4-ds-label", BOLD)
+                                vgrow()
+                                with box(cls="k4-d-foot"):
+                                    with box(cls="k4-d-foot-text"):
+                                        label("{s:summary}", "k4-d-summary", BOLD)
+                                        label("{s:status}", "k4-d-status", MEDIUM)
+                                    with box("Button", id="k4-d-send", cls="k4-d-send"):
+                                        with box(cls="k4-d-send-inner"):
+                                            panel("k4-d-send-icon ic-casual")
+                                            label("{s:label}", "k4-d-send-label", BOLD)
+                            with box(cls="k4-d-side"):
+                                header_space()
+                                with box(id="k4-d-in", cls=f"k4-d-in {GONE}"):
+                                    with box(cls="k4-d-in-top"):
+                                        panel("k4-d-in-icon", id="k4-d-in-icon")
+                                        with box(cls="k4-d-in-text"):
+                                            label("{s:title}", "k4-d-in-title", BOLD)
+                                            label("{s:text}", "k4-d-in-msg", MEDIUM)
+                                    bar("k4-d-in-bar", "k4-bar-duel")
+                                    with box(cls="k4-d-in-btns"):
+                                        with box("Button", id="k4-d-accept", cls="k4-d-btn k4-d-accept k4-first"):
+                                            label("{s:label}", "k4-d-btn-label", BOLD)
+                                        with box("Button", id="k4-d-decline", cls="k4-d-btn k4-d-decline"):
+                                            label("{s:label}", "k4-d-btn-label", BOLD)
+                                with box(id="k4-d-mine", cls=f"k4-d-mine {GONE}"):
+                                    with box(cls="k4-d-mine-top"):
+                                        panel("k4-d-mine-icon", id="k4-d-mine-icon")
+                                        with box(cls="k4-d-mine-text"):
+                                            label("{s:title}", "k4-d-mine-title", BOLD)
+                                            label("{s:text}", "k4-d-mine-msg", MEDIUM)
+                                        label("{s:score}", "k4-d-mine-score", BOLD)
+                                    bar("k4-d-mine-bar", "k4-bar-duel")
+                                label("{s:live}", "k4-cap k4-d-live-cap", BOLD)
+                                with box(cls="k4-d-live"):
+                                    for i in range(DUEL_LIVE):
+                                        with box(id=f"k4-dl{i}", cls=f"k4-dl{first(i)} {GONE}"):
+                                            panel("k4-dl-icon", id=f"k4-dl{i}-icon")
+                                            with box(cls="k4-dl-text"):
+                                                label("{s:names}", "k4-dl-names", BOLD)
+                                                label("{s:info}", "k4-dl-info", MEDIUM)
+                                            label("{s:score}", "k4-dl-score", BOLD)
+                                    label("{s:none}", f"k4-dl-none {GONE}", MEDIUM, id="k4-dl-none")
 
                     # Ranks
                     with box(id="k4-view-ranks", cls="k4-view k4-view-pad"):

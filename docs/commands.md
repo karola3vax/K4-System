@@ -17,7 +17,7 @@ Command names are set in `commands` in `k4-system.jsonc`. These are the defaults
 | Toggles | `!toggletag`, `!togglepointmsg` (fixed names, ranks module only; `!togglepointmsg` is remembered per player since 7.1) |
 | Panel pop-ups | `!toasts` (`commands.toasts`, panel only): turns your own toasts on or off; remembered per player |
 | Missions | `!missions`, `!mission`, `!daily`; `!missions reroll <1-3>` (daily missions only) |
-| Duels | `!duel <player> <points>`, `!duel accept`, `!duel decline` (`decline` also takes back your own challenge) |
+| Duels | `!duel` alone opens the panel's Duels page. `!duel <player> <points\|max> [type]`, `!duel accept`, `!duel decline` (`decline` also takes back your own challenge). Types: see [Duel types](#duel-types) |
 | Achievements | `!achievements`, `!achievement`, `!ach` |
 | Profile | `!profile`, `!profile <name>`, `!profile <steamid64>` ([profiles](profiles.md)) |
 | Season | `!season` ([seasons](seasons.md)) |
@@ -25,6 +25,21 @@ Command names are set in `commands` in `k4-system.jsonc`. These are the defaults
 Set `commands.rank-to-everyone` to `true` to make `!rank` work like LVL Ranks: everyone in chat then sees the player's leaderboard place, points, kills, deaths and KDR (each reader in their own language). Without the stats module the line shows the place and points only. `!rank` then only posts that one line, which the player sees too, and does not open the panel (`!k4` still does), and the usual `commands.cooldown-seconds` limits how often the line can be posted. The default is `false`.
 
 Personal `rank` and `all` resets clear that player's rank-reward claim history, so the same rewards can be earned again. Rewards already delivered by server commands are not removed. The persistent `ranks.reset-cooldown-hours` setting defaults to `24`; `stat` and `time` resets do not use this long cooldown or change reward claims. Every personal reset also uses the short `commands.cooldown-seconds` to stop chat and database spam.
+
+## Duel types
+
+`!duel <player> <points> [type]` picks what counts. Only kills between the two duel players count, and only when they fit the type. The type name is not case-sensitive; without one the duel is `any` (or the first possible type when `any` is switched off). `max` as the stake puts up the largest stake allowed.
+
+| Type | What counts | Map needs |
+| --- | --- | --- |
+| `any` | Every kill on each other | Nothing |
+| `noscope` | No-scope sniper kills | A sniper rifle |
+| `scout` | SSG 08 kills | The SSG 08 |
+| `zeus` | Zeus x27 kills | The Zeus |
+| `knife` | Knife kills (any knife) | Nothing |
+| `headshot` | Headshot kills with any weapon | Nothing |
+
+A type the current map cannot offer (an aim map without snipers, a mode without the Zeus) is refused there, the same way missions follow the map. `duels.types` switches types off server-wide ([configuration](configuration.md#bounties-and-duels)).
 
 ## Admin commands
 

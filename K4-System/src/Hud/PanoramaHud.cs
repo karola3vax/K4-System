@@ -24,6 +24,7 @@ public enum HudTab
 	Missions,
 	Achievements,
 	Leaderboard,
+	Duels,
 	Ranks,
 	Stats,
 
@@ -53,6 +54,7 @@ internal sealed class PanoramaHud(
 	PlayerRegistry players,
 	RankService? ranks,
 	MissionService? missions,
+	DuelService? duels,
 	Achievements.AchievementService? achievements,
 	EventService? events,
 	SeasonService? seasons,
@@ -105,7 +107,12 @@ internal sealed class PanoramaHud(
 	// Database-backed views are cached briefly, so spamming commands or page buttons cannot flood the database.
 	private static readonly TimeSpan CacheFor = TimeSpan.FromSeconds(15);
 
-	private static readonly string[] PageIds = ["home", "profile", "missions", "achievements", "leaderboard", "ranks", "stats"];
+	internal static readonly string[] PageIds = ["home", "profile", "missions", "achievements", "leaderboard", "duels", "ranks", "stats"];
+
+	// The Duels page: players per page, type cards and stake buttons (docs/panel-contract.md).
+	private const int DuelPlayers = 8;
+	private const int DuelTypeCards = 6;
+	private const int DuelStakeButtons = 5;
 
 	private static readonly HashSet<string> ColorNames =
 	[
@@ -159,6 +166,15 @@ internal sealed class PanoramaHud(
 
 		/// <summary>Whose profile the Profile page shows; 0 for the player's own.</summary>
 		public ulong ProfileOf { get; set; }
+
+		// The challenge being built on the Duels page: the picked player, type and stake.
+		public int DuelPage { get; set; }
+		public ulong DuelTarget { get; set; }
+		public DuelType? DuelType { get; set; }
+		public int? DuelStake { get; set; }
+		public ulong[] DuelPlayerIds { get; } = new ulong[DuelPlayers];
+		public DuelType?[] DuelTypeIds { get; } = new DuelType?[DuelTypeCards];
+		public int?[] DuelStakeValues { get; } = new int?[DuelStakeButtons];
 	}
 
 	// Versions come from one counter that never restarts, so a timer or database draw from an earlier
@@ -205,7 +221,23 @@ internal sealed class PanoramaHud(
 	// ---------------------------------------------------------------- layout entity
 
 	/// <summary>Creates the layout entity early, so clients have loaded it before the first !k4.</summary>
-	public void Warmup() => gameThread.Post(() => EnsureLayout());
+	public void Warmup()
+	{
+		gameThread.Post(() => EnsureLayout());
+
+		// The Duels page shows countdowns, so it is redrawn every second while a duel or a challenge is live.
+		if (duels is not null)
+			plugin.AddTimer(1f, () =>
+			{
+				if (!duels.Live)
+					return;
+				foreach ((int slot, HudState state) in open.ToArray())
+				{
+					if (state.Tab == HudTab.Duels && players.All.FirstOrDefault(player => player.Slot == slot) is K4Player player)
+						ShowLater(player, state, enableCapture: false);
+				}
+			}, TimerFlags.REPEAT);
+	}
 
 	/// <summary>Entities are destroyed on map change.</summary>
 	public void OnMapStart()
@@ -470,6 +502,9 @@ internal sealed class PanoramaHud(
 				return true;
 		}
 
+		if (duels is not null && HandleDuelClick(player, state, id) is bool duelChanged)
+			return duelChanged;
+
 		if (id.StartsWith("k4-nav-", StringComparison.Ordinal) && Array.IndexOf(PageIds, id["k4-nav-".Length..]) is int page and >= 0)
 			return Go(state, (HudTab)page);
 
@@ -556,6 +591,9 @@ internal sealed class PanoramaHud(
 			case HudTab.Leaderboard:
 				DrawLeaderboard(player, state);
 				break;
+			case HudTab.Duels:
+				DrawDuels(player, state);
+				break;
 			case HudTab.Ranks:
 				DrawRanks(player, state);
 				break;
@@ -589,6 +627,7 @@ internal sealed class PanoramaHud(
 	private bool IsPageAvailable(HudTab tab) => tab switch
 	{
 		HudTab.Leaderboard or HudTab.Ranks => ranks is not null,
+		HudTab.Duels => duels is not null,
 		HudTab.Missions => missions is not null,
 		HudTab.Achievements => achievements is not null,
 		HudTab.Profile => config.Modules.Profiles,
@@ -1482,6 +1521,216 @@ internal sealed class PanoramaHud(
 			topCache[needed] = new Cached<List<TopEntry>>(result.entries, DateTime.UtcNow);
 			placementCache[steamId] = new Cached<(int, int)>(result.Item2, DateTime.UtcNow);
 		}, result => DrawLive(result.entries, result.Item2), "Loading the leaderboard");
+	}
+
+	// ---------------------------------------------------------------- duels
+
+	/// <summary>A click on the Duels page, or null when the button is not one of its own.</summary>
+	private bool? HandleDuelClick(K4Player player, HudState state, string id)
+	{
+		switch (id)
+		{
+			case "k4-dp-prev":
+				state.DuelPage = Math.Max(0, state.DuelPage - 1);
+				return true;
+			case "k4-dp-next":
+				state.DuelPage++;
+				return true;
+			case "k4-d-accept":
+				TellRefusal(player, duels!.Accept(player));
+				return true;
+			case "k4-d-decline":
+				TellRefusal(player, duels!.Decline(player));
+				return true;
+			case "k4-d-send":
+				if (players.Get(state.DuelTarget) is not K4Player target || state.DuelType is not DuelType type || state.DuelStake is not int stake)
+					return false;
+				TellRefusal(player, duels!.Challenge(player, target, stake, type));
+				state.DuelStake = null;
+				return true;
+		}
+
+		if (DuelSlot(id, "k4-dp") is int row && state.DuelPlayerIds[row] is ulong picked and not 0)
+		{
+			state.DuelTarget = picked;
+			state.DuelStake = null;
+			return true;
+		}
+
+		if (DuelSlot(id, "k4-dt") is int card && state.DuelTypeIds[card] is DuelType chosen)
+		{
+			state.DuelType = chosen;
+			return true;
+		}
+
+		if (DuelSlot(id, "k4-ds") is int button && state.DuelStakeValues[button] is int value)
+		{
+			state.DuelStake = value;
+			return true;
+		}
+
+		return null;
+	}
+
+	/// <summary>The index in "k4-dp3", "k4-dt0" or "k4-ds4"; null for anything else, such as "k4-dp-next".</summary>
+	internal static int? DuelSlot(string id, string prefix)
+		=> id.Length == prefix.Length + 1 && id.StartsWith(prefix, StringComparison.Ordinal) && char.IsAsciiDigit(id[^1]) ? id[^1] - '0' : null;
+
+	private void TellRefusal(K4Player player, DuelService.Refusal? refusal)
+	{
+		if (refusal is DuelService.Refusal reason)
+			chat.Tell(player.Controller, reason.Key, reason.Args);
+	}
+
+	private string RefusalText(K4Player player, DuelService.Refusal refusal) => StripColors(Text(player, refusal.Key, refusal.Args));
+
+	private string DuelTypeName(K4Player player, DuelType type) => Text(player, $"duel.type.{DuelRules.Name(type)}");
+
+	private void DrawDuels(K4Player player, HudState state)
+	{
+		const string view = "k4-view-duels";
+		DuelService service = duels!;
+
+		SetVar(player, view, "pick", Upper(player, Text(player, "hud.duel.pick")));
+		SetVar(player, view, "types", Upper(player, Text(player, "hud.duel.types")));
+		SetVar(player, view, "stakes", Upper(player, Text(player, "hud.duel.stakes")));
+		SetVar(player, view, "live", Upper(player, Text(player, "hud.duel.live")));
+		SetVar(player, "k4-d-send", "label", Upper(player, Text(player, "hud.duel.send")));
+		SetVar(player, "k4-d-accept", "label", Upper(player, Text(player, "hud.sd-accept")));
+		SetVar(player, "k4-d-decline", "label", Upper(player, Text(player, "hud.sd-decline")));
+
+		// Step 1: every other player on the server, by name.
+		List<K4Player> others = [.. players.ValidHumans.Where(other => other.SteamId != player.SteamId).OrderBy(other => other.Name, StringComparer.CurrentCultureIgnoreCase)];
+		int pages = Math.Max(1, (others.Count + DuelPlayers - 1) / DuelPlayers);
+		state.DuelPage = Math.Clamp(state.DuelPage, 0, pages - 1);
+		if (others.All(other => other.SteamId != state.DuelTarget))
+			state.DuelTarget = 0;
+		K4Player? target = state.DuelTarget == 0 ? null : players.Get(state.DuelTarget);
+
+		List<K4Player> shown = [.. others.Skip(state.DuelPage * DuelPlayers).Take(DuelPlayers)];
+		for (int i = 0; i < DuelPlayers; i++)
+		{
+			string slot = $"k4-dp{i}";
+			bool has = i < shown.Count;
+			Gone(player, slot, !has);
+			state.DuelPlayerIds[i] = has ? shown[i].SteamId : 0;
+			if (!has)
+				continue;
+
+			K4Player other = shown[i];
+			SetVar(player, slot, "name", other.Name);
+			SetVar(player, slot, "points", other.Rank is RankState rank ? Text(player, "hud.points", Number(rank.Points)) : "");
+			if (other.Rank is RankState shownRank)
+				SetEmblem(player, $"{slot}-icon", shownRank.Rank);
+			SetClass(player, slot, "k4-active", other.SteamId == state.DuelTarget);
+			SetClass(player, slot, "k4-disabled", service.CanChallenge(player, other) is not null);
+		}
+		SetVar(player, view, "page", Text(player, "hud.page", state.DuelPage + 1, pages));
+		SetClass(player, "k4-dp-prev", "k4-disabled", state.DuelPage == 0);
+		SetClass(player, "k4-dp-next", "k4-disabled", state.DuelPage + 1 >= pages);
+
+		// Step 2: the types this map allows.
+		IReadOnlyList<DuelType> types = service.AvailableTypes;
+		if (state.DuelType is DuelType picked && !types.Contains(picked))
+			state.DuelType = null;
+		state.DuelType ??= types.Count > 0 ? types[0] : null;
+		for (int i = 0; i < DuelTypeCards; i++)
+		{
+			string card = $"k4-dt{i}";
+			bool has = i < types.Count;
+			Gone(player, card, !has);
+			state.DuelTypeIds[i] = has ? types[i] : null;
+			if (!has)
+				continue;
+
+			DuelType type = types[i];
+			SetVar(player, card, "name", DuelTypeName(player, type));
+			SetVar(player, card, "tip", Text(player, $"duel.type-tip.{DuelRules.Name(type)}"));
+			SetPicture(player, $"{card}-icon", DuelService.TypeVisual(type));
+			SetClass(player, card, "k4-active", type == state.DuelType);
+		}
+
+		// Step 3: the stake presets and the most both players can bet.
+		int max = target is null ? 0 : service.MaxStake(player, target);
+		List<(string Label, int Value)> stakes = [.. service.StakePresets.Select(value => (Number(value), value))];
+		if (max > 0)
+			stakes.Add((Text(player, "hud.duel.max", Number(max)), max));
+		if (state.DuelStake is int chosenStake && (target is null || chosenStake > max))
+			state.DuelStake = null;
+		for (int i = 0; i < DuelStakeButtons; i++)
+		{
+			string button = $"k4-ds{i}";
+			bool has = i < stakes.Count;
+			Gone(player, button, !has);
+			state.DuelStakeValues[i] = has && target is not null && stakes[i].Value <= max ? stakes[i].Value : null;
+			if (!has)
+				continue;
+
+			SetVar(player, button, "label", stakes[i].Label);
+			SetClass(player, button, "k4-disabled", state.DuelStakeValues[i] is null);
+			SetClass(player, button, "k4-active", state.DuelStake == stakes[i].Value && state.DuelStakeValues[i] is not null);
+		}
+
+		// The challenge so far, and why it cannot be sent yet.
+		DuelOffer? outgoing = service.OutgoingFor(player.SteamId);
+		DuelService.Refusal? refusal = target is null ? null : service.CanChallenge(player, target);
+		bool ready = target is not null && state.DuelType is not null && state.DuelStake is not null && refusal is null && outgoing is null;
+		SetVar(player, view, "summary", target is null || state.DuelType is not DuelType summaryType
+			? ""
+			: Text(player, "hud.duel.summary", target.Name, DuelTypeName(player, summaryType), state.DuelStake is int stake ? Number(stake) : "?"));
+		SetVar(player, view, "status", outgoing is not null
+			? Text(player, "hud.duel.waiting", outgoing.OpponentName, outgoing.SecondsLeft)
+			: refusal is DuelService.Refusal reason
+				? RefusalText(player, reason)
+				: target is null
+					? Text(player, others.Count == 0 ? "hud.duel.nobody" : "hud.duel.pick-player")
+					: state.DuelStake is null ? Text(player, "hud.duel.pick-stake") : "");
+		SetClass(player, "k4-d-send", "k4-disabled", !ready);
+
+		// An incoming challenge to answer.
+		DuelOffer? incoming = service.IncomingFor(player.SteamId);
+		Gone(player, "k4-d-in", incoming is null);
+		if (incoming is not null)
+		{
+			SetVar(player, "k4-d-in", "title", Upper(player, Text(player, "hud.duel.in-title")));
+			SetVar(player, "k4-d-in", "text", Text(player, "hud.duel.in-text", incoming.ChallengerName, DuelTypeName(player, incoming.Type), Number(incoming.Stake)));
+			SetPicture(player, "k4-d-in-icon", DuelService.TypeVisual(incoming.Type));
+			SetBar(player, "k4-d-in-bar", incoming.SecondsLeft, Math.Max(1, service.AcceptSeconds));
+		}
+
+		// The player's own running duel, from their side.
+		DuelView? mine = service.RunningFor(player.SteamId);
+		Gone(player, "k4-d-mine", mine is null);
+		if (mine is not null)
+		{
+			bool challenger = mine.Challenger == player.SteamId;
+			string opponent = challenger ? mine.OpponentName : mine.ChallengerName;
+			(int own, int theirs) = challenger ? (mine.ChallengerKills, mine.OpponentKills) : (mine.OpponentKills, mine.ChallengerKills);
+			SetVar(player, "k4-d-mine", "title", Upper(player, Text(player, "hud.duel.mine-title", opponent)));
+			SetVar(player, "k4-d-mine", "score", $"{own} : {theirs}");
+			SetVar(player, "k4-d-mine", "text", Text(player, "hud.duel.mine-text", DuelTypeName(player, mine.Type), mine.Target, Number(mine.Stake),
+				playtime.Format(mine.SecondsLeft, StatTimeUnits)));
+			SetPicture(player, "k4-d-mine-icon", DuelService.TypeVisual(mine.Type));
+			SetBar(player, "k4-d-mine-bar", mine.SecondsLeft, Math.Max(1, config.Duels.Minutes * 60));
+		}
+
+		// Everyone else's running duels.
+		List<DuelView> live = [.. service.Running.Where(duel => duel.Challenger != player.SteamId && duel.Opponent != player.SteamId).Take(4)];
+		for (int i = 0; i < 4; i++)
+		{
+			string row = $"k4-dl{i}";
+			Gone(player, row, i >= live.Count);
+			if (i >= live.Count)
+				continue;
+
+			DuelView duel = live[i];
+			SetVar(player, row, "names", $"{duel.ChallengerName}  vs  {duel.OpponentName}");
+			SetVar(player, row, "score", $"{duel.ChallengerKills} : {duel.OpponentKills}");
+			SetVar(player, row, "info", Text(player, "hud.duel.live-info", DuelTypeName(player, duel.Type), Number(duel.Stake), playtime.Format(duel.SecondsLeft, StatTimeUnits)));
+			SetPicture(player, $"{row}-icon", DuelService.TypeVisual(duel.Type));
+		}
+		SetVar(player, view, "none", Text(player, "hud.duel.none"));
+		Gone(player, "k4-dl-none", live.Count > 0);
 	}
 
 	// ---------------------------------------------------------------- ranks
