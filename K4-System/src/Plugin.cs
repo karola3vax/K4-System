@@ -27,7 +27,7 @@ public sealed class Plugin : BasePlugin
 
 	public override string ModuleAuthor => "K4ryuu; maintained by karola3vax";
 
-	public override string ModuleVersion => "7.2.1 " +
+	public override string ModuleVersion => "7.2.0 " +
 #if RELEASE
 		"(release)";
 #else
