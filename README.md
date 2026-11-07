@@ -31,7 +31,7 @@ K4-System adds a rank ladder to your Counter-Strike 2 server. Players earn point
 - **Achievements.** 21 long-term goals with one-time rewards.
 - **Seasons.** Points start over on the 1st of each month. Final results are kept.
 - **Duels.** A kill race for points with a rule: any kill, no-scope, Zeus, knife, Scout or headshot.
-- **Bounties and points events.** A long kill streak puts a bounty on a player, and events give double points on weekend evenings or when an admin starts one.
+- **Bounties and points events.** A long kill streak puts a bounty on a player, and points events can be scheduled, such as double points on weekend evenings, or started by an admin.
 - **A clickable panel** for all of this, plus profiles, stats and the leaderboard. It's optional and uses a free Workshop addon.
 - **Their language.** 36 languages, and each player can pick their own.
 
