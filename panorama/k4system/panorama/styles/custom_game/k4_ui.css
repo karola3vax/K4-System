@@ -1341,6 +1341,7 @@ Label
 	horizontal-align: center;
 	vertical-align: center;
 	background-image: url("s2r://panorama/images/custom_game/k4/icons/ui/hot_trend.vsvg");
+	saturation: 0;
 	opacity: 0.5;
 }
 
@@ -2497,8 +2498,10 @@ Button.k4-lb-row:hover
 	vertical-align: center;
 }
 
+/* Keeps the line off the score; it shrinks rather than cuts, because the time left is at its end. */
 .k4-d-mine-text
 {
+	width: fill-parent-flow( 1.0 );
 	margin-left: 12px;
 }
 
@@ -2509,7 +2512,7 @@ Button.k4-lb-row:hover
 	font-size: 15px;
 	color: k4-soft;
 	white-space: nowrap;
-	text-overflow: ellipsis;
+	text-overflow: shrink;
 }
 
 .k4-d-mine-score
