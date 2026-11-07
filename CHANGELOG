@@ -1,4 +1,4 @@
--- 2026.11.07 - V7.2.1
+-- Unreleased
 
 - feat: The panel and toasts have a new black and grey theme: white for active tabs, main buttons and progress bars, sharp corners, no glows, and the map behind the panel in dark grey. Muted green, red and gold now appear only where they mean something (finished, lost, medal tiers), and rank names use softer versions of their colors. Rank emblems keep their colors
 - setup: Only the look changed, so a server and its players can update in any order. Players see the new theme once the Workshop addon `3811667212` is updated

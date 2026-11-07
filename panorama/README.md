@@ -13,7 +13,7 @@ The clickable K4 panel (`!k4`, `!rank`, `!missions`, `!top`, `!ranks`, `!stats`,
 
 The plugin finds the layout at `panorama/layout/custom_game/k4_ui.xml`. Keep that path.
 
-## The theme (7.2.1)
+## The theme
 
 The panel is black and grey with sharp corners. White marks what is active: the open tab, selected cards, main buttons and progress bars. The map behind the panel is drawn in grey (`saturation: 0` on `k4-bg`). Muted color appears only where it means something: green for finished, red for lost, gold, silver and bronze for medals and the podium, and gold and steel for the T and CT teams. Rank emblems and the rank name colors a server owner picks stay in color, in softer versions for the names. `The_theme_stays_black_and_grey` in `PanoramaLayoutTests` fails on any other color or on a rounded corner; only the round medals keep a radius.
 
