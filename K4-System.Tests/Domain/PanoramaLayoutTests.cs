@@ -458,6 +458,10 @@ public partial class PanoramaLayoutTests
 			.ToList();
 		Assert.True(stray.Count == 0, $"Colors outside the theme: {string.Join(", ", stray)}");
 
+		// The flame file itself is orange, so every panel that draws it needs its color removed.
+		Assert.Matches(@"\.k4-sd-icon\s*\{[^}]*saturation: 0;", css);
+		Assert.Matches(@"\.ic-hot_trend[^{]*\{ saturation: 0; \}", css);
+
 		List<string> rounded = Regex.Matches(css, @"border-radius:\s*([^;]+);")
 			.Select(match => match.Groups[1].Value)
 			.Where(radius => radius != "50%")
