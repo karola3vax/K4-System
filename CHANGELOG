@@ -1,3 +1,8 @@
+-- 2026.11.07 - V7.2.1
+
+- feat: The panel and toasts have a new black and grey theme: white for active tabs, main buttons and progress bars, sharp corners, no glows, and the map behind the panel in dark grey. Muted green, red and gold now appear only where they mean something (finished, lost, medal tiers), and rank names use softer versions of their colors. Rank emblems keep their colors
+- setup: Only the look changed, so a server and its players can update in any order. Players see the new theme once the Workshop addon `3811667212` is updated
+
 -- 2026.11.02 - V7.2.0
 
 - feat: Duels are a kill race with a rule. Pick a type (any kill, no-scope, Zeus, knife, Scout or headshot); only kills between the two players that fit it count. The first to `duels.target-kills` (5) wins both stakes at once, otherwise the leader after `duels.minutes` (10); a tie gives both stakes back. Types the map cannot offer are left out there

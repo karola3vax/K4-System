@@ -437,6 +437,35 @@ public partial class PanoramaLayoutTests
 		Assert.True(missing.Count == 0, $"Not styled in k4_ui.css: {string.Join(", ", missing)}");
 	}
 
+	// The panel is black and grey with sharp corners. A color must mean something to be on this list: won or lost,
+	// a medal tier, a team. Rank names (col-*) are left out, because server owners pick those in the config.
+	[Fact]
+	public void The_theme_stays_black_and_grey()
+	{
+		HashSet<string> meaning =
+		[
+			"6FA886", "8FC4A4", "C4675C", // finished, lost
+			"C8A45C", "DCC48A", "F0DDB0", "6E5A2E", "8F7A45", // gold
+			"A97F5E", "5E4431", "C29A7C", "6E5240", "E6C8B0", "523B2A", // bronze
+			"8FA6BA", // CT
+		];
+		string css = Regex.Replace(Stylesheet, @"^\.col-.*$", "", RegexOptions.Multiline);
+
+		List<string> stray = Regex.Matches(css, @"#([0-9A-Fa-f]{6})(?:[0-9A-Fa-f]{2})?\b")
+			.Select(match => match.Groups[1].Value.ToUpperInvariant())
+			.Where(color => !(color[..2] == color[2..4] && color[2..4] == color[4..6]) && !meaning.Contains(color))
+			.Distinct()
+			.ToList();
+		Assert.True(stray.Count == 0, $"Colors outside the theme: {string.Join(", ", stray)}");
+
+		List<string> rounded = Regex.Matches(css, @"border-radius:\s*([^;]+);")
+			.Select(match => match.Groups[1].Value)
+			.Where(radius => radius != "50%")
+			.Distinct()
+			.ToList();
+		Assert.True(rounded.Count == 0, $"Only round medals keep a radius: {string.Join(", ", rounded)}");
+	}
+
 	[Fact]
 	public void Map_classes_point_at_that_maps_screenshot()
 	{

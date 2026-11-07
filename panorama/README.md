@@ -13,9 +13,13 @@ The clickable K4 panel (`!k4`, `!rank`, `!missions`, `!top`, `!ranks`, `!stats`,
 
 The plugin finds the layout at `panorama/layout/custom_game/k4_ui.xml`. Keep that path.
 
+## The theme (7.2.1)
+
+The panel is black and grey with sharp corners. White marks what is active: the open tab, selected cards, main buttons and progress bars. The map behind the panel is drawn in grey (`saturation: 0` on `k4-bg`). Muted color appears only where it means something: green for finished, red for lost, gold, silver and bronze for medals and the podium, and gold and steel for the T and CT teams. Rank emblems and the rank name colors a server owner picks stay in color, in softer versions for the names. `The_theme_stays_black_and_grey` in `PanoramaLayoutTests` fails on any other color or on a rounded corner; only the round medals keep a radius.
+
 ## The panel (7.1)
 
-The panel covers the whole screen in the style of CS2's main menu: a sidebar on the left (the player's rank and points, the eight pages, the season card, and the copyright line at the bottom) and the open page on the right, over a screenshot of the current map dimmed from left to right. The pages are Home, Profile, Missions, Achievements, Leaderboard, Duels (7.2), Ranks and Stats. Toasts stack at the right under the kill feed, newest on top, at most three at once, each with a timer bar that runs out over its length; a promotion shows as a large banner at the top centre. The panel captures the mouse while it is open; the toast stack and the banner never do.
+The panel covers the whole screen in the style of CS2's main menu: a sidebar on the left (the player's rank and points, the eight pages, the season card, and the copyright line at the bottom) and the open page on the right, over a grey screenshot of the current map dimmed from left to right. The pages are Home, Profile, Missions, Achievements, Leaderboard, Duels (7.2), Ranks and Stats. Toasts stack at the right under the kill feed, newest on top, at most three at once, each with a timer bar that runs out over its length; a promotion shows as a large banner at the top centre. The panel captures the mouse while it is open; the toast stack and the banner never do.
 
 Every id, dialog variable and class the server uses is listed in [`docs/panel-contract.md`](../docs/panel-contract.md). The layout and the server code follow that page, and `PanoramaLayoutTests` checks the layout and stylesheet against it. Change the contract first, then both sides.
 
@@ -101,6 +105,8 @@ With the panel on, the K4 commands open their tab instead of printing to chat. P
 ## Toasts
 
 Toasts stack under the kill feed, newest on top, at most three at once. Each player can turn them off with `!toasts` (`commands.toasts`) or the button on their profile; K4 remembers it. A player with toasts off gets the chat line instead wherever one exists (round summary, rank changes, finished missions, the daily streak).
+
+The colors below are the names the server sends. Green, red and gold are drawn muted, blue as light grey, and purple as grey.
 
 | Event | Color and length | What it shows |
 | --- | --- | --- |
