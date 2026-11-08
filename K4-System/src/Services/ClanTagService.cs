@@ -13,12 +13,13 @@ internal sealed class ClanTagService(PluginConfig config, CountryLookup countrie
 	{
 		TagSettings settings = config.Tags;
 		RankState? rank = player.Rank;
-		string tag = string.Empty;
+		string? tag = null;
+		string? top = null;
 		bool hasTagSource = false;
 
 		if (settings.RankTags && rank is not null)
 		{
-			tag = rank.Rank.Tag ?? $"[{rank.Rank.Name}]";
+			tag = rank.Rank.Tag ?? rank.Rank.Name;
 			hasTagSource = true;
 		}
 
@@ -37,16 +38,17 @@ internal sealed class ClanTagService(PluginConfig config, CountryLookup countrie
 
 		if (settings.TopPlacement.Enabled && rank is not null && rank.TopPlacement != 0 && rank.TopPlacement <= settings.TopPlacement.Max)
 		{
-			tag = $"{settings.TopPlacement.Format.Replace("{placement}", rank.TopPlacement.ToString())} {tag}".TrimEnd();
+			top = settings.TopPlacement.Format.Replace("{placement}", rank.TopPlacement.ToString());
 			hasTagSource = true;
 		}
 
+		string combined = Compose(top, tag);
 		int version = ++player.ClanTagVersion;
 
 		if (!settings.Country)
 		{
 			if (hasTagSource)
-				SetTag(player, tag, version);
+				SetTag(player, combined, version);
 			else
 				Release(player);
 			return;
@@ -56,9 +58,24 @@ internal sealed class ClanTagService(PluginConfig config, CountryLookup countrie
 		countries.GetCountryCodeAsync(ip).ContinueWith(lookup =>
 		{
 			string country = lookup.IsCompletedSuccessfully ? lookup.Result : CountryLookup.Unknown;
-			string complete = tag.Length > 0 ? $"{country} | {tag}" : country;
+			string complete = Compose(country, combined);
 			gameThread.PostWorldUpdate(() => SetTag(player, complete, version));
 		}, TaskScheduler.Default);
+	}
+
+	/// <summary>
+	/// CS2 draws its own brackets around a clan tag, so "[Owner]" from a config would show as "[[Owner]]".
+	/// Each part loses one pair of outer brackets, and the parts are joined with a dot: [TOP #2 · Owner].
+	/// </summary>
+	internal static string Compose(params string?[] parts)
+		=> string.Join(" · ", parts.Select(Unwrap).Where(part => part.Length > 0));
+
+	private static string Unwrap(string? part)
+	{
+		string text = part?.Trim() ?? string.Empty;
+		// Only a single wrapping pair: "[A] [B]" stays as it is.
+		bool wrapped = text.Length >= 2 && text[0] == '[' && text.IndexOf(']') == text.Length - 1 && text.LastIndexOf('[') == 0;
+		return wrapped ? text[1..^1].Trim() : text;
 	}
 
 	public void Release(K4Player player)

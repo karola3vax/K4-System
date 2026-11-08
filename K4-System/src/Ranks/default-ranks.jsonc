@@ -6,7 +6,7 @@
  	},
 	"Silver I": {
 		"Name": "Silver I",
-		"Tag": "[SI]", // Clan tag on the scoreboard. If left out, K4 shows [Name]
+		"Tag": "[SI]", // Clan tag on the scoreboard. If left out, K4 shows the rank name. CS2 adds the brackets itself
 		"Point": 500, // From this many points, the player is Silver I
 		"Color": "silver", // Color code for the rank. Find color names here: https://github.com/roflmuffin/CounterStrikeSharp/blob/main/managed/CounterStrikeSharp.API/Modules/Utils/ChatColors.cs
 		// "RequiredPermissions": ["@css/test"], // Optional. Player needs any one listed permission, group, or command override to receive this rank
