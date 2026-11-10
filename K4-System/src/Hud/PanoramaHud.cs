@@ -310,6 +310,9 @@ internal sealed class PanoramaHud(
 		sent.Forget();
 	}
 
+	/// <summary>A disconnect without a known player: any slot may have a new player now, so everything is sent again.</summary>
+	public void ForgetAllSent() => ForgetSent();
+
 	private void ForgetSent(int slot)
 	{
 		applied.Remove(slot);
@@ -686,7 +689,21 @@ internal sealed class PanoramaHud(
 	{
 		CCSPlayerController controller = player.Controller;
 		if (sent.Var(controller.Slot, panel, name, value))
-			layout!.SetDialogVariableStringForPlayer(controller, panel, name, value);
+			Write(controller, () => layout!.SetDialogVariableStringForPlayer(controller, panel, name, value));
+	}
+
+	// A write that failed must not count as sent, or the next draw would skip it.
+	private void Write(CCSPlayerController controller, Action write)
+	{
+		try
+		{
+			write();
+		}
+		catch
+		{
+			sent.Forget(controller.Slot);
+			throw;
+		}
 	}
 
 	private void SetClass(K4Player player, string panel, string name, bool on) => SendClass(player.Controller, panel, name, on);
@@ -694,7 +711,7 @@ internal sealed class PanoramaHud(
 	private void SendClass(CCSPlayerController controller, string panel, string name, bool on)
 	{
 		if (sent.Class(controller.Slot, panel, name, on))
-			layout!.SetHasClassForPlayer(controller, panel, name, on);
+			Write(controller, () => layout!.SetHasClassForPlayer(controller, panel, name, on));
 	}
 
 	private void Gone(K4Player player, string panel, bool gone) => SetClass(player, panel, "k4-gone", gone);

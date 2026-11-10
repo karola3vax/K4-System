@@ -221,6 +221,8 @@ public sealed class Plugin : BasePlugin
 		{
 			if (@event.Userid is { } controller)
 				panel.OnDisconnect(controller);
+			else
+				panel.ForgetAllSent();
 			return HookResult.Continue;
 		}, HookMode.Pre);
 
