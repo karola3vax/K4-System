@@ -62,6 +62,35 @@ public sealed class CustomLanguageTests : IDisposable
 		Assert.Equal("Hello Ana", In("en", () => language["hello", "Ana"]));
 	}
 
+	// Lines are remembered per language; one instance serves every reader, so a remembered line must not leak across languages.
+	[Fact]
+	public void RememberedLinesStayInTheirOwnLanguage()
+	{
+		CustomLanguage language = Language(("en.json", """{ "prefix": "[Mine]" }"""));
+		for (int i = 0; i < 2; i++)
+		{
+			Assert.Equal("Hello Ana", In("en", () => language["hello", "Ana"]));
+			Assert.Equal("Merhaba Ana", In("tr", () => language["hello", "Ana"]));
+			Assert.Equal("[Mine]", In("en", () => language["prefix"]));
+		}
+	}
+
+	// Without the server's own wording, K4 must show exactly what CounterStrikeSharp shows.
+	[Theory]
+	[InlineData("en")]
+	[InlineData("tr")]
+	[InlineData("pt-BR")]
+	public void ShippedLinesMatchCounterStrikeSharp(string culture)
+	{
+		JsonStringLocalizer original = new(shippedDirectory);
+		CustomLanguage language = Language();
+		foreach (string key in new[] { "hello", "prefix", "only-english", "no-such-line" })
+		{
+			Assert.Equal(In(culture, () => original[key]), In(culture, () => language[key]));
+			Assert.Equal(In(culture, () => original[key, "Ana"]), In(culture, () => language[key, "Ana"]));
+		}
+	}
+
 	[Fact]
 	public void PlaceholdersWorkInTheServersLines()
 	{

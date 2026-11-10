@@ -109,22 +109,25 @@ internal sealed class CustomLanguage : IStringLocalizer
 		}
 	}
 
-	public LocalizedString this[string name]
-	{
-		get
-		{
-			string? text = Custom(name);
-			return text is null ? shipped[name] : new LocalizedString(name, text);
-		}
-	}
+	// CounterStrikeSharp copies a whole language file into a new dictionary on every lookup, then scans every
+	// chat color name. A panel draw makes about a hundred lookups, which took up to 50 ms of a server frame, so
+	// each line is looked up once per language. The files do not change while K4 runs; a reload builds a new instance.
+	private readonly System.Collections.Concurrent.ConcurrentDictionary<(string Culture, string Fallback, string Name), (string Text, bool Custom)> lines = new();
+
+	/// <summary>The line's text before placeholders are filled in, and whether it is the server's own wording.</summary>
+	private (string Text, bool Custom) Template(string name)
+		=> lines.GetOrAdd((CultureInfo.CurrentUICulture.Name, CultureInfo.DefaultThreadCurrentUICulture?.Name ?? "", name),
+			_ => Custom(name) is string text ? (text, true) : (shipped[name].Value, false));
+
+	public LocalizedString this[string name] => new(name, Template(name).Text);
 
 	public LocalizedString this[string name, params object[] arguments]
 	{
 		get
 		{
-			string? text = Custom(name);
-			if (text is null)
-				return shipped[name, arguments];
+			(string text, bool own) = Template(name);
+			if (!own)
+				return new LocalizedString(name, string.Format(text, arguments));
 
 			try
 			{

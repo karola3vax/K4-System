@@ -324,6 +324,8 @@ internal sealed class PanoramaHud(
 	{
 		yield return $"Layout field: {(layout is null ? "none" : $"#{layout.Index} valid={layout.IsValid} path={(layout.IsValid ? layout.StrLayout : "?")}")}";
 		yield return $"Panel writes since load: {sent.Sent} sent, {sent.Skipped} skipped as unchanged";
+		foreach ((HudTab tab, (int draws, long ticks, long native, long max)) in drawTimes)
+			yield return FormattableString.Invariant($"Draw {tab}: {draws}x, average {Ms(ticks) / draws:0.00} ms (layout writes {Ms(native) / draws:0.00} ms), slowest {Ms(max):0.00} ms");
 		foreach (CCSCustomHudLayout entity in Utilities.FindAllEntitiesByDesignerName<CCSCustomHudLayout>("custom_hud_layout"))
 			yield return $"custom_hud_layout #{entity.Index} valid={entity.IsValid} path='{entity.StrLayout}' observable={entity.Observable} playerStates={entity.PlayerLayoutStates.Count}";
 		foreach (K4Player player in players.ValidHumans)
@@ -597,7 +599,32 @@ internal sealed class PanoramaHud(
 	{
 		logger.LogDebug("K4 panel: drawing {Tab} for {Player} (capture {Capture}).", state.Tab, player.Name, enableCapture);
 		CCSPlayerController controller = player.Controller;
+		long drawStarted = System.Diagnostics.Stopwatch.GetTimestamp();
+		long nativeBefore = nativeTicks;
+		try
+		{
+			DrawPage(player, state, controller, enableCapture);
+		}
+		finally
+		{
+			RecordDraw(state.Tab, System.Diagnostics.Stopwatch.GetTimestamp() - drawStarted, nativeTicks - nativeBefore);
+		}
+	}
 
+	// Draw timings for css_k4_hud: how long panel draws take on the game thread, and how much of that the layout writes are.
+	private long nativeTicks;
+	private readonly Dictionary<HudTab, (int Draws, long Ticks, long NativeTicks, long MaxTicks)> drawTimes = [];
+
+	private void RecordDraw(HudTab tab, long ticks, long native)
+	{
+		(int draws, long total, long nativeTotal, long max) = drawTimes.GetValueOrDefault(tab);
+		drawTimes[tab] = (draws + 1, total + ticks, nativeTotal + native, Math.Max(max, ticks));
+	}
+
+	private static double Ms(long ticks) => ticks * 1000.0 / System.Diagnostics.Stopwatch.Frequency;
+
+	private void DrawPage(K4Player player, HudState state, CCSPlayerController controller, bool enableCapture)
+	{
 		DrawFrame(player, state);
 
 		switch (state.Tab)
@@ -695,9 +722,11 @@ internal sealed class PanoramaHud(
 	// A write that failed must not count as sent, or the next draw would skip it.
 	private void Write(CCSPlayerController controller, Action write)
 	{
+		long started = System.Diagnostics.Stopwatch.GetTimestamp();
 		try
 		{
 			write();
+			nativeTicks += System.Diagnostics.Stopwatch.GetTimestamp() - started;
 		}
 		catch
 		{
