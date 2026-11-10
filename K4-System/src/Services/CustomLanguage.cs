@@ -42,14 +42,17 @@ internal sealed class CustomLanguage : IStringLocalizer
 	};
 
 	private readonly IStringLocalizer shipped;
-	private readonly JsonResourceManager shippedFiles;
+	private readonly string shippedDirectory;
+
+	// The shipped files by culture name ("" is the invariant culture), each read once.
+	private readonly System.Collections.Concurrent.ConcurrentDictionary<string, IReadOnlyDictionary<string, string>> shippedFiles = new();
 	private readonly IReadOnlyDictionary<string, IReadOnlyDictionary<string, string>> custom;
 
 	/// <param name="custom">The server's lines by language code, from <see cref="Load"/>.</param>
 	public CustomLanguage(IStringLocalizer shipped, string shippedDirectory, IReadOnlyDictionary<string, IReadOnlyDictionary<string, string>> custom)
 	{
 		this.shipped = shipped;
-		shippedFiles = new JsonResourceManager(shippedDirectory);
+		this.shippedDirectory = shippedDirectory;
 		this.custom = custom;
 	}
 
@@ -117,7 +120,53 @@ internal sealed class CustomLanguage : IStringLocalizer
 	/// <summary>The line's text before placeholders are filled in, and whether it is the server's own wording.</summary>
 	private (string Text, bool Custom) Template(string name)
 		=> lines.GetOrAdd((CultureInfo.CurrentUICulture.Name, CultureInfo.DefaultThreadCurrentUICulture?.Name ?? "", name),
-			_ => Custom(name) is string text ? (text, true) : (shipped[name].Value, false));
+			_ => Custom(name) is string text ? (text, true) : (ShippedText(name), false));
+
+	/// <summary>
+	/// The shipped line as CounterStrikeSharp's JsonStringLocalizer finds it (GetStringSafely), without its copy of
+	/// the whole file per lookup: the reader's language and its parents, English for the invariant culture, then the
+	/// server language; the key itself when no file has it. A test compares the two.
+	/// </summary>
+	private string ShippedText(string name)
+	{
+		CultureInfo culture = CultureInfo.CurrentUICulture;
+		string? text = Shipped(name, culture);
+
+		if (text is null && culture.Equals(CultureInfo.InvariantCulture))
+			text = ShippedFile("en").GetValueOrDefault(name);
+
+		if (text is null && CultureInfo.DefaultThreadCurrentUICulture is CultureInfo server && !culture.Equals(server))
+			text = Shipped(name, server);
+
+		return text?.ReplaceColorTags() ?? name;
+	}
+
+	/// <summary>The line in this culture's shipped file or a parent's, the most specific first.</summary>
+	private string? Shipped(string name, CultureInfo culture)
+	{
+		do
+		{
+			if (ShippedFile(culture.Name).TryGetValue(name, out string? text))
+				return text;
+			culture = culture.Parent;
+		}
+		while (!culture.Equals(CultureInfo.InvariantCulture));
+
+		return null;
+	}
+
+	private IReadOnlyDictionary<string, string> ShippedFile(string cultureName) => shippedFiles.GetOrAdd(cultureName, ReadShipped);
+
+	// Read like JsonResourceManager: every value as its JSON text; a missing file has no lines.
+	private IReadOnlyDictionary<string, string> ReadShipped(string cultureName)
+	{
+		string path = Path.Combine(shippedDirectory, cultureName + ".json");
+		if (!File.Exists(path))
+			return new Dictionary<string, string>();
+
+		using JsonDocument document = JsonDocument.Parse(File.ReadAllText(path), FileOptions);
+		return document.RootElement.EnumerateObject().ToDictionary(line => line.Name, line => line.Value.ToString());
+	}
 
 	public LocalizedString this[string name] => new(name, Template(name).Text);
 
@@ -158,7 +207,7 @@ internal sealed class CustomLanguage : IStringLocalizer
 		CultureInfo culture = CultureInfo.CurrentUICulture;
 		string? text = Lookup(name, culture);
 
-		if (text is null && shippedFiles.GetString(name, culture) is null)
+		if (text is null && Shipped(name, culture) is null)
 		{
 			CultureInfo fallback = culture.Equals(CultureInfo.InvariantCulture)
 				? English

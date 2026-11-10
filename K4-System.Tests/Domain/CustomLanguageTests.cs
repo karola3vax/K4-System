@@ -80,6 +80,7 @@ public sealed class CustomLanguageTests : IDisposable
 	[InlineData("en")]
 	[InlineData("tr")]
 	[InlineData("pt-BR")]
+	[InlineData("")]
 	public void ShippedLinesMatchCounterStrikeSharp(string culture)
 	{
 		JsonStringLocalizer original = new(shippedDirectory);
