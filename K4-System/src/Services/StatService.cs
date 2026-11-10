@@ -44,7 +44,8 @@ internal sealed class StatService(PluginConfig config, PlayerRegistry players, G
 			Count(players.Get(@event.Userid), StatField.Deaths);
 
 		K4Player? attacker = players.Get(@event.Attacker);
-		if (decision.CountAttacker && attacker is { IsValid: true, IsHuman: true })
+		// A team kill is not a kill: it would raise K/D and kill achievements, which pay points.
+		if (decision.AttackerPoint == AttackerPointAction.Kill && attacker is { IsValid: true, IsHuman: true })
 		{
 			Count(attacker, StatField.Kills);
 			attacker.Profile?.AddKill(ProfileWeapon(@event.Weapon));

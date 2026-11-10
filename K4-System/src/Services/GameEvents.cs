@@ -239,7 +239,10 @@ internal sealed class GameEvents(
 			ranks?.OnTeamChange(player, @event.Disconnect, @event.Team, @event.Oldteam);
 			playtime?.OnTeamChange(player, @event.Oldteam);
 			if (!@event.Disconnect)
+			{
 				missions?.OnTeamJoined(player, @event.Team);
+				bounty?.OnTeamChange(player, @event.Team);
+			}
 			return HookResult.Continue;
 		});
 
@@ -419,7 +422,7 @@ internal sealed class GameEvents(
 
 		plugin.RegisterEventHandler<EventBombPickup>((@event, _) =>
 		{
-			ranks.ModifyPoints(players.Get(@event.Userid), points.BombPickup, "reason.bomb-picked-up");
+			ranks.OnBombPickup(players.Get(@event.Userid));
 			return HookResult.Continue;
 		});
 

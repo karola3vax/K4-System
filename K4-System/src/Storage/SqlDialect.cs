@@ -52,6 +52,12 @@ internal abstract class SqlDialect
 	/// <summary>A database-clock time @Seconds seconds ago, comparable with columns filled by CURRENT_TIMESTAMP.</summary>
 	public abstract string SecondsAgo { get; }
 
+	/// <summary>
+	/// Ends a SELECT that must hold its row until the transaction ends. Empty in SQLite, whose write
+	/// lock already makes a transaction that read an older row fail instead of writing over newer data.
+	/// </summary>
+	public virtual string LockRow => "";
+
 	/// <summary>True when the exception says the column already exists (another server added it first).</summary>
 	public virtual bool IsDuplicateColumn(Exception ex) => false;
 
@@ -92,6 +98,8 @@ internal sealed class MySqlDialect(string connectionString, string databaseName)
 	public override string Greatest => "GREATEST";
 
 	public override string SecondsAgo => "CURRENT_TIMESTAMP - INTERVAL @Seconds SECOND";
+
+	public override string LockRow => " FOR UPDATE";
 
 	public override bool IsDuplicateColumn(Exception ex) => ex is MySqlConnector.MySqlException { Number: 1060 };
 

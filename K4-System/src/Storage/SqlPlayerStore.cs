@@ -77,6 +77,10 @@ internal sealed class SqlPlayerStore
 
 	private static string Id(ulong steamId) => steamId.ToString(System.Globalization.CultureInfo.InvariantCulture);
 
+	/// <summary>False for points captured in a season that has ended since.</summary>
+	private static bool IsCurrentSeason(PlayerSnapshot snapshot, string? storedSeason)
+		=> snapshot.Season is null || storedSeason is null || snapshot.Season == storedSeason;
+
 	// ---------------------------------------------------------------- schema
 
 	/// <summary>Creates missing tables, then applies schema migrations newer than the stored version.</summary>
@@ -296,18 +300,20 @@ internal sealed class SqlPlayerStore
 			return;
 
 		await using DbConnection connection = await OpenAsync();
+		string? storedSeason;
 
 		await using (DbTransaction transaction = await connection.BeginTransactionAsync())
 		{
 			// Read once per save: points captured before a season ended must not undo its reset.
-			string? storedSeason = snapshots.Any(snapshot => snapshot.Season is not null)
-				? await connection.ExecuteScalarAsync<string?>($"SELECT `season` FROM `{tables.SeasonState}` WHERE `id` = 1;", transaction: transaction)
+			// The row stays locked until commit, so a season ending meanwhile waits instead of being written over.
+			storedSeason = snapshots.Any(snapshot => snapshot.Season is not null)
+				? await connection.ExecuteScalarAsync<string?>($"SELECT `season` FROM `{tables.SeasonState}` WHERE `id` = 1{dialect.LockRow};", transaction: transaction)
 				: null;
 
 			foreach (PlayerSnapshot snapshot in snapshots)
 			{
 				string steamId = Id(snapshot.SteamId);
-				bool currentSeason = snapshot.Season is null || storedSeason is null || snapshot.Season == storedSeason;
+				bool currentSeason = IsCurrentSeason(snapshot, storedSeason);
 
 				if (snapshot.RankName is not null && currentSeason)
 				{
@@ -388,7 +394,8 @@ internal sealed class SqlPlayerStore
 		if (!levelRanks)
 			return;
 
-		foreach (PlayerSnapshot snapshot in snapshots)
+		// Old-season points would undo the mirror's season reset; the player's next save mirrors them again.
+		foreach (PlayerSnapshot snapshot in snapshots.Where(snapshot => IsCurrentSeason(snapshot, storedSeason)))
 		{
 			try
 			{

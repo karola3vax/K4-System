@@ -47,4 +47,14 @@ public class SeasonClockTests
 	[Fact]
 	public void Time_left_never_goes_below_zero()
 		=> Assert.Equal(TimeSpan.Zero, SeasonClock.Left("2026-01-01", new DateTime(2026, 5, 1, 0, 0, 0, DateTimeKind.Utc), TimeZoneInfo.Utc));
+
+	// Joining resets points only from an older season; a player already in a newer one (another server ended it first) keeps them.
+	[Theory]
+	[InlineData("2026-10-01", "2026-11-01", true)]
+	[InlineData("2026-12-01", "2026-11-01", false)]
+	[InlineData("2026-11-01", "2026-11-01", false)]
+	[InlineData("2026-11-01", "2026-11-11", true)] // css_k4_season end starts a season mid-month
+	[InlineData("2026-12-31", "2027-01-01", true)]
+	public void Only_an_older_season_counts_as_older(string season, string current, bool older)
+		=> Assert.Equal(older, SeasonService.IsOlder(season, current));
 }

@@ -3,6 +3,13 @@
 - feat: The panel and toasts have a new black and grey theme: white for active tabs, main buttons and progress bars, sharp corners, no glows, and the map behind the panel in dark grey. Muted green, red and gold now appear only where they mean something (finished, lost, medal tiers), and rank names use softer versions of their colors. Rank emblems keep their colors
 - setup: The theme is only a look change in the addon, so a server and its players can update in any order. Players see it once the Workshop addon `3811667212` is updated
 - fix: Clan tags showed double brackets, such as `[TOP #2 [Owner]]`, since CS2 started drawing the brackets itself. K4 now removes one pair of outer brackets from each tag part and joins the parts with a dot: `[TOP #2 · Owner]`. Existing configs need no change
+- fix: Seasons on several servers: a player who joined a server that had not yet seen the new season lost the points they had already earned in it. Their points are kept now
+- fix: Seasons on MySQL: a save running at the moment a season ended could write last season's points back. It now waits for the season change
+- fix: The LevelRanks table no longer gets last season's points back from a save made just before the season ended
+- fix: Bomb pickup points are given once per player per round. With a points event or VIP multiplier, dropping and picking up the bomb again and again earned points
+- fix: A wanted player who goes to spectators ends the bounty, like leaving, and gets no survivor reward
+- fix: Team kills no longer count as kills in stats, profiles and kill achievements
+- fix: Switching team or going to spectators before the round ends no longer avoids round-loss points
 
 -- 2026.11.02 - V7.2.0
 

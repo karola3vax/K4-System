@@ -143,11 +143,15 @@ internal sealed class SeasonService(
 
 	/// <summary>
 	/// Puts a loaded player into the current season. A player whose points were loaded in an earlier season (they
-	/// joined while it ended) starts the new one from the start points, like everyone else.
+	/// joined while it ended) starts the new one from the start points, like everyone else. A player already in a
+	/// newer season (another server ended this one first) keeps their points; this server adopts it on its next check.
 	/// </summary>
 	public void Join(K4Player player)
 	{
 		if (Current is not string current || !player.IsHuman || player.Rank is null || player.Season == current)
+			return;
+
+		if (player.Season is not null && !IsOlder(player.Season, current))
 			return;
 
 		bool reset = player.Season is not null;
@@ -161,6 +165,9 @@ internal sealed class SeasonService(
 		if (player.IsValid)
 			ranks.RefreshRank(player, announce: false, allowRewards: false);
 	}
+
+	/// <summary>True when season id <paramref name="season"/> started before <paramref name="current"/>. Ids are yyyy-MM-dd, so ordinal order is date order.</summary>
+	internal static bool IsOlder(string season, string current) => string.CompareOrdinal(season, current) < 0;
 
 	/// <summary>Reminds a joining player in the season's last days.</summary>
 	public void Greet(K4Player player)
