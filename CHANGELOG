@@ -12,7 +12,7 @@
 - fix: Switching team or going to spectators before the round ends no longer avoids round-loss points
 - perf: The panel sends only what changed. Opening a page, clicking, and the live Duels page used to send every text and style on the panel again, which slowed server frames. `css_k4_hud` shows how many updates were sent and how many were skipped
 - perf: One timer closes idle panels, instead of a new timer for every redraw
-- perf: Scoreboard ranks are checked 8 times less often, instead of every tick
+- perf: Each text is looked up once per language. CounterStrikeSharp read through a whole language file for every line, so opening the panel could take up to 50 ms of a server frame, and every K4 chat message paid for it too. `css_k4_hud` shows how long panel draws take
 
 -- 2026.11.02 - V7.2.0
 
