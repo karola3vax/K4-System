@@ -60,8 +60,16 @@ internal sealed class ScoreboardService(BasePlugin plugin, PluginConfig config, 
 	/// <summary>Updates start with the first round and stop when the match ends.</summary>
 	public void AllowUpdates(bool allowed) => updatesAllowed = allowed;
 
+	// Checking every player's three fields every tick cost more than it bought; a rank shows up to 8 ticks later.
+	private const int CheckEveryTicks = 8;
+	private int tick;
+
 	private void UpdateRanks()
 	{
+		if (++tick < CheckEveryTicks)
+			return;
+		tick = 0;
+
 		if (!updatesAllowed || !gameThread.IsActive || CoreConfig.FollowCS2ServerGuidelines)
 			return;
 

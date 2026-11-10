@@ -10,6 +10,9 @@
 - fix: A wanted player who goes to spectators ends the bounty, like leaving, and gets no survivor reward
 - fix: Team kills no longer count as kills in stats, profiles and kill achievements
 - fix: Switching team or going to spectators before the round ends no longer avoids round-loss points
+- perf: The panel sends only what changed. Opening a page, clicking, and the live Duels page used to send every text and style on the panel again, which slowed server frames. `css_k4_hud` shows how many updates were sent and how many were skipped
+- perf: One timer closes idle panels, instead of a new timer for every redraw
+- perf: Scoreboard ranks are checked 8 times less often, instead of every tick
 
 -- 2026.11.02 - V7.2.0
 

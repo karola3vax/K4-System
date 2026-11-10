@@ -148,6 +148,9 @@ internal sealed class PanoramaHud(
 		public HudTab Tab { get; set; }
 		public int Version { get; set; }
 
+		/// <summary>When the panel was last drawn; an undrawn panel waits for its first draw.</summary>
+		public DateTime DrawnUtc { get; set; } = DateTime.MaxValue;
+
 		public int LeaderboardPage { get; set; }
 		public int LeaderboardPageCount { get; set; } = 1;
 
@@ -204,6 +207,8 @@ internal sealed class PanoramaHud(
 	// The class currently applied per player, panel, and class group, so only changes are sent.
 	private readonly Dictionary<int, Dictionary<(string Panel, string Group), string>> applied = [];
 
+	private readonly HudWrites sent = new();
+
 	private readonly Dictionary<int, Cached<List<TopEntry>>> topCache = [];
 	private readonly Dictionary<ulong, Cached<(int Placement, int Total)>> placementCache = [];
 	private readonly Dictionary<ulong, Cached<ProfileRecord?>> profileCache = [];
@@ -224,6 +229,7 @@ internal sealed class PanoramaHud(
 	public void Warmup()
 	{
 		gameThread.Post(() => EnsureLayout());
+		plugin.AddTimer(1f, CloseIdlePanels, TimerFlags.REPEAT);
 
 		// The Duels page shows countdowns, so it is redrawn every second while a duel or a challenge is live.
 		if (duels is not null)
@@ -246,7 +252,7 @@ internal sealed class PanoramaHud(
 		open.Clear();
 		toasts.Clear();
 		promotions.Clear();
-		applied.Clear();
+		ForgetSent();
 		placementCache.Clear();
 		profileCache.Clear();
 		plugin.AddTimer(1.0f, () => gameThread.PostWorldUpdate(() => EnsureLayout()));
@@ -262,6 +268,8 @@ internal sealed class PanoramaHud(
 			// Reuse a leftover layout entity (for example after an unload that could not remove it) instead of adding another.
 			layout = Utilities.FindAllEntitiesByDesignerName<CCSCustomHudLayout>("custom_hud_layout")
 				.FirstOrDefault(entity => entity.IsValid && entity.StrLayout == LayoutPath);
+			// A different entity holds a different state, so nothing sent to the old one counts.
+			ForgetSent();
 			if (layout is not null)
 			{
 				logger.LogDebug("K4 panel: reusing custom_hud_layout #{Index} ({Layout}).", layout.Index, layout.StrLayout);
@@ -296,10 +304,23 @@ internal sealed class PanoramaHud(
 
 	private bool Usable(K4Player player) => player.IsValid && player.IsHuman && EnsureLayout();
 
+	private void ForgetSent()
+	{
+		applied.Clear();
+		sent.Forget();
+	}
+
+	private void ForgetSent(int slot)
+	{
+		applied.Remove(slot);
+		sent.Forget(slot);
+	}
+
 	/// <summary>Diagnostics for css_k4_hud: the layout entities and each player's panel state.</summary>
 	public IEnumerable<string> Describe()
 	{
 		yield return $"Layout field: {(layout is null ? "none" : $"#{layout.Index} valid={layout.IsValid} path={(layout.IsValid ? layout.StrLayout : "?")}")}";
+		yield return $"Panel writes since load: {sent.Sent} sent, {sent.Skipped} skipped as unchanged";
 		foreach (CCSCustomHudLayout entity in Utilities.FindAllEntitiesByDesignerName<CCSCustomHudLayout>("custom_hud_layout"))
 			yield return $"custom_hud_layout #{entity.Index} valid={entity.IsValid} path='{entity.StrLayout}' observable={entity.Observable} playerStates={entity.PlayerLayoutStates.Count}";
 		foreach (K4Player player in players.ValidHumans)
@@ -392,9 +413,8 @@ internal sealed class PanoramaHud(
 
 	private void Hide(CCSPlayerController controller)
 	{
-		CCSCustomHudLayout hud = layout!;
-		hud.SetHasClassForPlayer(controller, Panel, "k4-closed", true);
-		hud.SetInputCaptureEnabled(controller, false);
+		SendClass(controller, Panel, "k4-closed", true);
+		layout!.SetInputCaptureEnabled(controller, false);
 	}
 
 	/// <summary>
@@ -426,7 +446,7 @@ internal sealed class PanoramaHud(
 		open.Remove(controller.Slot);
 		toasts.Remove(controller.Slot);
 		promotions.Remove(controller.Slot);
-		applied.Remove(controller.Slot);
+		ForgetSent(controller.Slot);
 	}
 
 	/// <summary>The scoreboard key closes the panel, because the mouse is captured while it is open.</summary>
@@ -605,9 +625,8 @@ internal sealed class PanoramaHud(
 				break;
 		}
 
-		layout!.SetHasClassForPlayer(controller, Panel, "k4-closed", false);
+		SendClass(controller, Panel, "k4-closed", false);
 
-		int version = state.Version;
 		if (enableCapture)
 		{
 			plugin.AddTimer(CaptureDelaySeconds, () =>
@@ -617,11 +636,18 @@ internal sealed class PanoramaHud(
 			}, TimerFlags.STOP_ON_MAPCHANGE);
 		}
 
-		plugin.AddTimer(IdleCloseSeconds, () =>
+		// One repeating check closes idle panels (Warmup) instead of a new timer for every draw.
+		state.DrawnUtc = DateTime.UtcNow;
+	}
+
+	private void CloseIdlePanels()
+	{
+		DateTime now = DateTime.UtcNow;
+		foreach ((int slot, HudState state) in open.ToArray())
 		{
-			if (gameThread.IsActive && open.TryGetValue(player.Slot, out HudState? current) && current.Version == version)
+			if ((now - state.DrawnUtc).TotalSeconds >= IdleCloseSeconds && players.All.FirstOrDefault(player => player.Slot == slot) is K4Player player)
 				Close(player);
-		}, TimerFlags.STOP_ON_MAPCHANGE);
+		}
 	}
 
 	private bool IsPageAvailable(HudTab tab) => tab switch
@@ -657,10 +683,19 @@ internal sealed class PanoramaHud(
 	}
 
 	private void SetVar(K4Player player, string panel, string name, string value)
-		=> layout!.SetDialogVariableStringForPlayer(player.Controller, panel, name, value);
+	{
+		CCSPlayerController controller = player.Controller;
+		if (sent.Var(controller.Slot, panel, name, value))
+			layout!.SetDialogVariableStringForPlayer(controller, panel, name, value);
+	}
 
-	private void SetClass(K4Player player, string panel, string name, bool on)
-		=> layout!.SetHasClassForPlayer(player.Controller, panel, name, on);
+	private void SetClass(K4Player player, string panel, string name, bool on) => SendClass(player.Controller, panel, name, on);
+
+	private void SendClass(CCSPlayerController controller, string panel, string name, bool on)
+	{
+		if (sent.Class(controller.Slot, panel, name, on))
+			layout!.SetHasClassForPlayer(controller, panel, name, on);
+	}
 
 	private void Gone(K4Player player, string panel, bool gone) => SetClass(player, panel, "k4-gone", gone);
 
@@ -1931,8 +1966,9 @@ internal sealed class PanoramaHud(
 				CCSPlayerController controller = player.Controller;
 				Server.NextFrame(() =>
 				{
+					// Through the cache: the next restart must send the "off" again for the bar to start over.
 					if (layout is { IsValid: true } && controller.IsValid)
-						layout.SetHasClassForPlayer(controller, timer, "k4-run", true);
+						SendClass(controller, timer, "k4-run", true);
 				});
 			}
 		}
@@ -1960,13 +1996,13 @@ internal sealed class PanoramaHud(
 			if (!gameThread.IsActive || promotions.GetValueOrDefault(player.Slot) != version || layout is not { IsValid: true } || !player.HasController)
 				return;
 
-			layout.SetHasClassForPlayer(player.Controller, "k4-promo", "k4-out", true);
+			SendClass(player.Controller, "k4-promo", "k4-out", true);
 			plugin.AddTimer(LeaveSeconds, () =>
 			{
 				if (gameThread.IsActive && promotions.GetValueOrDefault(player.Slot) == version && layout is { IsValid: true } && player.HasController)
 				{
-					layout.SetHasClassForPlayer(player.Controller, "k4-promo", "k4-gone", true);
-					layout.SetHasClassForPlayer(player.Controller, "k4-promo", "k4-out", false);
+					SendClass(player.Controller, "k4-promo", "k4-gone", true);
+					SendClass(player.Controller, "k4-promo", "k4-out", false);
 				}
 			}, TimerFlags.STOP_ON_MAPCHANGE);
 		}, TimerFlags.STOP_ON_MAPCHANGE);
@@ -2004,7 +2040,7 @@ internal sealed class PanoramaHud(
 		layout = null;
 		open.Clear();
 		toasts.Clear();
-		applied.Clear();
+		ForgetSent();
 	}
 }
 
