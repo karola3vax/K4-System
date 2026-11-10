@@ -102,6 +102,17 @@ internal sealed class BountyService(PluginConfig config, PlayerRegistry players,
 		}
 	}
 
+	/// <summary>Going to spectators ends the bounty like leaving: nobody can hunt a spectator, so there is no survivor reward.</summary>
+	public void OnTeamChange(K4Player player, int team)
+	{
+		if (wanted != 0 && player.SteamId == wanted && team <= (int)CounterStrikeSharp.API.Modules.Utils.CsTeam.Spectator)
+		{
+			wanted = 0;
+			chat.TellAll("bounty.ended", wantedName);
+			RefreshPanels();
+		}
+	}
+
 	/// <summary>A wanted player who is still wanted when the match ends survived the bounty.</summary>
 	public void OnMatchEnd() => PaySurvivor(announce: true);
 

@@ -99,6 +99,22 @@ public sealed class SeasonStorageTests
 	}
 
 	[Theory, MemberData(nameof(SqlPlayerStoreTests.Databases), MemberType = typeof(SqlPlayerStoreTests))]
+	public async Task An_old_season_save_does_not_undo_the_LevelRanks_reset(string kind)
+	{
+		await using TestDatabase db = Create(kind);
+		SqlPlayerStore store = db.CreateStore(levelRanks: true);
+		await store.InitializeAsync();
+		await store.LoadOrCreateAsync(Alice, "Alice", "None", 0);
+		await store.EnsureSeasonAsync(November);
+		await store.SaveAsync([new PlayerSnapshot(Alice, "Alice", "Gold Nova", 4, 1600, null, null, null, Season: November)]);
+		await store.EndSeasonAsync(November, December, 0, "None");
+
+		await store.SaveAsync([new PlayerSnapshot(Alice, "Alice", "Gold Nova", 4, 1650, null, null, null, Season: November)]);
+
+		Assert.Equal(0, await db.ScalarAsync<int>($"SELECT `value` FROM `{db.Tables.LevelRanks}`;"));
+	}
+
+	[Theory, MemberData(nameof(SqlPlayerStoreTests.Databases), MemberType = typeof(SqlPlayerStoreTests))]
 	public async Task A_season_ends_only_once_when_two_servers_try(string kind)
 	{
 		await using TestDatabase db = Create(kind);

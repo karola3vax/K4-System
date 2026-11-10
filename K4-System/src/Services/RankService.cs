@@ -431,7 +431,11 @@ internal sealed class RankService(
 			return;
 
 		if (!disconnect && team != oldTeam)
+		{
+			if (player.Rank.PlayedRound && oldTeam > (int)CsTeam.Spectator)
+				player.Rank.LeftTeam = oldTeam;
 			player.Rank.PlayedRound = false;
+		}
 
 		RefreshRank(player, announce: false, allowRewards: true);
 	}
@@ -463,6 +467,16 @@ internal sealed class RankService(
 		}
 	}
 
+	// Multipliers raise the pickup gain but not the drop loss, so a repeated drop and pickup could earn points.
+	private readonly HashSet<ulong> bombPickupsThisRound = [];
+
+	/// <summary>Bomb pickup points, once per player per round.</summary>
+	public void OnBombPickup(K4Player? player)
+	{
+		if (player is not null && IsPointsAllowed() && bombPickupsThisRound.Add(player.SteamId))
+			ApplyPoints(player, Points.BombPickup, "reason.bomb-picked-up");
+	}
+
 	public void OnMvp(K4Player? player)
 	{
 		if (player is not null && IsPointsAllowed())
@@ -474,6 +488,7 @@ internal sealed class RankService(
 	public void OnRoundStart()
 	{
 		roundSummarized = false;
+		bombPickupsThisRound.Clear();
 		PruneKillHistories(DateTime.UtcNow);
 
 		foreach (K4Player player in players.ValidHumans.ToArray())
@@ -482,6 +497,7 @@ internal sealed class RankService(
 				continue;
 
 			player.Rank.PlayedRound = true;
+			player.Rank.LeftTeam = 0;
 			RefreshRank(player, announce: false, allowRewards: true);
 			rewards.RetryPending(player);
 		}
@@ -518,8 +534,18 @@ internal sealed class RankService(
 
 			if (!state.PlayedRound || player.Controller.TeamNum <= (int)CsTeam.Spectator)
 			{
-				state.RoundPoints = 0;
-				state.RoundReasons.Clear();
+				// Switching team or going to spectators before the round ends does not dodge the loss.
+				if (state.LeftTeam > (int)CsTeam.Spectator && winnerTeam > (int)CsTeam.Spectator && winnerTeam != state.LeftTeam)
+				{
+					ApplyPoints(player, Points.RoundLose, "reason.round-loss");
+					FinishRoundSummary(player, state, "toast.round-lost");
+				}
+				else
+				{
+					state.RoundPoints = 0;
+					state.RoundReasons.Clear();
+				}
+				state.LeftTeam = 0;
 				continue;
 			}
 

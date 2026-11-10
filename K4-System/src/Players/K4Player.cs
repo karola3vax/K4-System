@@ -21,6 +21,9 @@ public sealed class RankState
 	/// <summary>Set at round start; round win and loss points need a full round on one team.</summary>
 	public bool PlayedRound { get; set; }
 
+	/// <summary>The team a player left during this round after starting it there; its loss still counts.</summary>
+	public int LeftTeam { get; set; }
+
 	public int RoundPoints { get; set; }
 
 	/// <summary>This round's points by reason key, in the order they first happened, for the round summary.</summary>
