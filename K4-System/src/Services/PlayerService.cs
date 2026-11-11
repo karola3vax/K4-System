@@ -181,7 +181,8 @@ internal sealed class PlayerService(
 		player.LastPersonalRankResetUtc = record.LastPersonalRankResetUtc;
 		player.Profile = General.Modules.Profiles ? new PlayerProfile(record.WeaponKills, record.Showcase) : null;
 		player.Season = seasons is null ? null : record.Season;
-		player.ToastsOff = !record.Toasts;
+		// With panorama.toasts off everyone gets chat; the player's own choice stays saved for when it is on again.
+		player.ToastsOff = !record.Toasts || !General.Panorama.Toasts;
 		if (player.Rank is not null)
 			player.Rank.MuteMessages = !record.PointMessages;
 
@@ -320,7 +321,7 @@ internal sealed class PlayerService(
 	/// <summary>Turns the player's panel pop-ups on or off and saves it. Used by !toasts and the profile button.</summary>
 	public void SetToasts(K4Player player, bool on)
 	{
-		if (!player.IsHuman)
+		if (!player.IsHuman || !General.Panorama.Toasts)
 			return;
 
 		player.ToastsOff = !on;

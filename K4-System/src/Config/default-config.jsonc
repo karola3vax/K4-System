@@ -161,7 +161,8 @@
   // Needs the K4 workshop addon on players' clients through MultiAddonManager. Setup: github.com/karola3vax/K4-System/blob/main/panorama/README.md
   "panorama": {
     "enabled": false,
-    "rank-icons": "competitive" // CS2 rank icons in the panel: competitive, wingman, or text (shows the rank tag)
+    "rank-icons": "competitive", // CS2 rank icons in the panel: competitive, wingman, or text (shows the rank tag)
+    "toasts": true // false keeps the panel but sends every pop-up to chat for everyone, and hides the players' toasts button
   },
 
   // CS2's matchmaking rank area on the scoreboard.

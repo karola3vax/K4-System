@@ -450,6 +450,10 @@ public sealed class PanoramaSettings
 	/// <summary>"competitive" or "wingman" shows CS2's rank icons; "text" shows the rank tag instead.</summary>
 	[JsonPropertyName("rank-icons")]
 	public string RankIcons { get; set; } = "competitive";
+
+	/// <summary>False keeps the panel but sends every pop-up to chat for everyone, and hides the players' toasts button.</summary>
+	[JsonPropertyName("toasts")]
+	public bool Toasts { get; set; } = true;
 }
 
 public sealed class ScoreboardSettings

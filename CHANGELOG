@@ -1,3 +1,7 @@
+-- Unreleased
+
+- feat: `panorama.toasts` (default `true`). Set it to `false` to keep the panel but send every pop-up to chat for all players; the toasts button on the profile is hidden and `!toasts` stays off. Each player's own choice is kept for when it is turned on again. Existing configs need no change
+
 -- 2026.11.11 - V7.2.1
 
 - feat: The panel and toasts have a new black and grey theme: white for active tabs, main buttons and progress bars, sharp corners, no glows, and the map behind the panel in dark grey. Muted green, red and gold now appear only where they mean something (finished, lost, medal tiers), and rank names use softer versions of their colors. Rank emblems keep their colors
