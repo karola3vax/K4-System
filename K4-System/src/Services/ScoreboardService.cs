@@ -12,7 +12,7 @@ using Microsoft.Extensions.Logging;
 using Timer = CounterStrikeSharp.API.Modules.Timers.Timer;
 
 /// <summary>Writes K4 points or ranks into CS2's matchmaking rank fields and reveals them every few seconds.</summary>
-internal sealed class ScoreboardService(BasePlugin plugin, PluginConfig config, PlayerRegistry players, GameThread gameThread, ILogger logger)
+internal sealed class ScoreboardService(BasePlugin plugin, PluginConfig config, PlayerRegistry players, GameThread gameThread, ILogger logger, Timings timings)
 {
 	private Listeners.OnTick? tickListener;
 	private Timer? revealTimer;
@@ -34,7 +34,12 @@ internal sealed class ScoreboardService(BasePlugin plugin, PluginConfig config, 
 			return;
 		}
 
-		tickListener = UpdateRanks;
+		tickListener = () =>
+		{
+			long started = System.Diagnostics.Stopwatch.GetTimestamp();
+			UpdateRanks();
+			timings.Record("scoreboard ranks (every tick)", System.Diagnostics.Stopwatch.GetTimestamp() - started);
+		};
 		plugin.RegisterListener(tickListener);
 		revealTimer = plugin.AddTimer(ScoreboardRanks.RevealIntervalSeconds, Reveal, TimerFlags.REPEAT);
 

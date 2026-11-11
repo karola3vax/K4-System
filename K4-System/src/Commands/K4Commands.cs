@@ -38,7 +38,8 @@ internal sealed class K4Commands(
 	PointAudit? audit,
 	EventService? events,
 	Achievements.AchievementService? achievements,
-	Seasons.SeasonService? seasons)
+	Seasons.SeasonService? seasons,
+	Timings timings)
 {
 	private enum PointCommand
 	{
@@ -59,12 +60,14 @@ internal sealed class K4Commands(
 			if (player is not null)
 				return;
 			if (hud is null)
-			{
 				info.ReplyToCommand("K4 panel: panorama.enabled is false.");
-				return;
+			else
+			{
+				foreach (string line in hud.Describe())
+					info.ReplyToCommand("K4 panel: " + line);
 			}
-			foreach (string line in hud.Describe())
-				info.ReplyToCommand("K4 panel: " + line);
+			foreach (string line in timings.Describe())
+				info.ReplyToCommand("K4 time: " + line);
 		});
 
 		foreach (string alias in Aliases.Reset)

@@ -33,10 +33,31 @@ internal sealed class GameEvents(
 	GameThread gameThread,
 	BackgroundWork background,
 	Chat chat,
-	ILogger logger)
+	ILogger logger,
+	Timings timings)
 {
 	private const double DuplicateRoundStartSeconds = 3;
 	private DateTime lastSpawnMessageUtc = DateTime.MinValue;
+
+	/// <summary>Registers a game event handler whose time on the game thread shows in css_k4_hud.</summary>
+	private void On<T>(BasePlugin.GameEventHandler<T> handler, HookMode mode = HookMode.Post) where T : CounterStrikeSharp.API.Modules.Events.GameEvent
+	{
+		string name = typeof(T).Name;
+		plugin.RegisterEventHandler<T>((@event, info) =>
+		{
+			long started = System.Diagnostics.Stopwatch.GetTimestamp();
+			try
+			{
+				return handler(@event, info);
+			}
+			finally
+			{
+				timings.Record(name, System.Diagnostics.Stopwatch.GetTimestamp() - started);
+			}
+		}, mode);
+	}
+
+	private Action Timed(string name, Action work) => () => timings.Time(name, () => { work(); return 0; });
 
 	public void Register()
 	{
@@ -64,14 +85,14 @@ internal sealed class GameEvents(
 
 	private void RegisterLifecycle()
 	{
-		plugin.RegisterEventHandler<EventPlayerActivate>((@event, _) =>
+		On<EventPlayerActivate>((@event, _) =>
 		{
 			CCSPlayerController? controller = @event.Userid;
 			gameThread.PostWorldUpdate(() => playerService.TryLoad(controller));
 			return HookResult.Continue;
 		});
 
-		plugin.RegisterEventHandler<EventPlayerDisconnect>((@event, _) =>
+		On<EventPlayerDisconnect>((@event, _) =>
 		{
 			bounty?.OnDisconnect(@event.Userid, @event.Reason);
 			duels?.OnDisconnect(@event.Userid, @event.Reason);
@@ -97,7 +118,7 @@ internal sealed class GameEvents(
 			plugin.AddTimer(15.0f, () => gameThread.PostWorldUpdate(playerService.PruneDisconnected));
 		});
 
-		plugin.RegisterListener<Listeners.OnMapEnd>(() =>
+		plugin.RegisterListener<Listeners.OnMapEnd>(Timed("map end", () =>
 		{
 			playerService.SettleAllPlaytime();
 			// Paid before the save: a map change without a match end still settles bounties and duels.
@@ -112,7 +133,7 @@ internal sealed class GameEvents(
 				await saved;
 				await store.PurgeAsync(purgeDays);
 			}, "Purging inactive players");
-		});
+		}).Invoke);
 
 		if (ranks is not null)
 		{
@@ -128,7 +149,7 @@ internal sealed class GameEvents(
 
 	private void RegisterRoundFlow()
 	{
-		plugin.RegisterEventHandler<EventRoundStart>((_, _) =>
+		On<EventRoundStart>((_, _) =>
 		{
 			SendSpawnMessage();
 			stats?.OnRoundStart();
@@ -138,7 +159,7 @@ internal sealed class GameEvents(
 			return HookResult.Continue;
 		});
 
-		plugin.RegisterEventHandler<EventRoundEnd>((@event, _) =>
+		On<EventRoundEnd>((@event, _) =>
 		{
 			if (!game.HasRules)
 			{
@@ -158,21 +179,21 @@ internal sealed class GameEvents(
 
 		if (missions is not null)
 		{
-			plugin.RegisterEventHandler<EventRoundFreezeEnd>((_, _) =>
+			On<EventRoundFreezeEnd>((_, _) =>
 			{
 				missions.OnFreezeEnd();
 				return HookResult.Continue;
 			});
 		}
 
-		plugin.RegisterEventHandler<EventRoundPrestart>((_, _) =>
+		On<EventRoundPrestart>((_, _) =>
 		{
 			ranks?.BalanceTeams();
 			return HookResult.Continue;
 		});
 
 		// mp_restartgame and a new match start the free-for-all count again.
-		plugin.RegisterEventHandler<EventBeginNewMatch>((_, _) =>
+		On<EventBeginNewMatch>((_, _) =>
 		{
 			foreach (K4Player player in players.All)
 				player.MatchKills = 0;
@@ -181,7 +202,7 @@ internal sealed class GameEvents(
 			return HookResult.Continue;
 		});
 
-		plugin.RegisterEventHandler<EventCsWinPanelMatch>((_, _) =>
+		On<EventCsWinPanelMatch>((_, _) =>
 		{
 			scoreboard?.AllowUpdates(false);
 			stats?.OnMatchEnd();
@@ -193,7 +214,7 @@ internal sealed class GameEvents(
 			return HookResult.Continue;
 		});
 
-		plugin.RegisterEventHandler<EventRoundMvp>((@event, _) =>
+		On<EventRoundMvp>((@event, _) =>
 		{
 			CCSPlayerController? controller;
 			try
@@ -231,7 +252,7 @@ internal sealed class GameEvents(
 
 	private void RegisterPlayerState()
 	{
-		plugin.RegisterEventHandler<EventPlayerTeam>((@event, _) =>
+		On<EventPlayerTeam>((@event, _) =>
 		{
 			if (ValidHuman(@event.Userid) is not K4Player player)
 				return HookResult.Continue;
@@ -246,7 +267,7 @@ internal sealed class GameEvents(
 			return HookResult.Continue;
 		});
 
-		plugin.RegisterEventHandler<EventPlayerSpawn>((@event, _) =>
+		On<EventPlayerSpawn>((@event, _) =>
 		{
 			if (missions is not null && @event.Userid is { IsValid: true } spawned)
 				missions.OnSpawn(spawned.Slot);
@@ -264,7 +285,7 @@ internal sealed class GameEvents(
 
 	private void RegisterDeathAndDamage()
 	{
-		plugin.RegisterEventHandler<EventPlayerDeath>((@event, _) =>
+		On<EventPlayerDeath>((@event, _) =>
 		{
 			DeathActor? victim = Actor(@event.Userid);
 			DeathActor? attacker = Actor(@event.Attacker);
@@ -294,7 +315,7 @@ internal sealed class GameEvents(
 		if (stats is null && missions is null)
 			return;
 
-		plugin.RegisterEventHandler<EventPlayerHurt>((@event, _) =>
+		On<EventPlayerHurt>((@event, _) =>
 		{
 			DeathActor? victim = Actor(@event.Userid);
 			DeathActor? attacker = Actor(@event.Attacker);
@@ -316,7 +337,7 @@ internal sealed class GameEvents(
 			return HookResult.Continue;
 		});
 
-		plugin.RegisterEventHandler<EventGrenadeThrown>((@event, _) =>
+		On<EventGrenadeThrown>((@event, _) =>
 		{
 			stats?.OnPlayerEvent(@event.Userid, StatField.Grenades);
 			missions?.SawWeapon(@event.Weapon);
@@ -326,7 +347,7 @@ internal sealed class GameEvents(
 		if (stats is null)
 			return;
 
-		plugin.RegisterEventHandler<EventWeaponFire>((@event, _) =>
+		On<EventWeaponFire>((@event, _) =>
 		{
 			stats.OnWeaponFire(@event.Userid, @event.Weapon);
 			return HookResult.Continue;
@@ -374,7 +395,7 @@ internal sealed class GameEvents(
 	{
 		PointValues points = config.PointValues;
 
-		plugin.RegisterEventHandler<EventBombPlanted>((@event, _) =>
+		On<EventBombPlanted>((@event, _) =>
 		{
 			ranks?.ModifyPoints(players.Get(@event.Userid), points.BombPlant, "reason.bomb-planted");
 			stats?.OnPlayerEvent(@event.Userid, StatField.BombPlanted);
@@ -382,7 +403,7 @@ internal sealed class GameEvents(
 			return HookResult.Continue;
 		});
 
-		plugin.RegisterEventHandler<EventBombDefused>((@event, _) =>
+		On<EventBombDefused>((@event, _) =>
 		{
 			ranks?.OnBombDefused(players.Get(@event.Userid));
 			stats?.OnPlayerEvent(@event.Userid, StatField.BombDefused);
@@ -390,7 +411,7 @@ internal sealed class GameEvents(
 			return HookResult.Continue;
 		});
 
-		plugin.RegisterEventHandler<EventHostageRescued>((@event, _) =>
+		On<EventHostageRescued>((@event, _) =>
 		{
 			ranks?.ModifyPoints(players.Get(@event.Userid), points.HostageRescue, "reason.hostage-rescued");
 			stats?.OnPlayerEvent(@event.Userid, StatField.HostageRescued);
@@ -398,7 +419,7 @@ internal sealed class GameEvents(
 			return HookResult.Continue;
 		});
 
-		plugin.RegisterEventHandler<EventHostageKilled>((@event, _) =>
+		On<EventHostageKilled>((@event, _) =>
 		{
 			ranks?.ModifyPoints(players.Get(@event.Userid), points.HostageKill, "reason.hostage-killed");
 			stats?.OnPlayerEvent(@event.Userid, StatField.HostageKilled);
@@ -408,31 +429,31 @@ internal sealed class GameEvents(
 		if (ranks is null)
 			return;
 
-		plugin.RegisterEventHandler<EventHostageHurt>((@event, _) =>
+		On<EventHostageHurt>((@event, _) =>
 		{
 			ranks.ModifyPoints(players.Get(@event.Userid), points.HostageHurt, "reason.hostage-hurt");
 			return HookResult.Continue;
 		});
 
-		plugin.RegisterEventHandler<EventHostageRescuedAll>((_, _) =>
+		On<EventHostageRescuedAll>((_, _) =>
 		{
 			ranks.RewardTeam(CsTeam.CounterTerrorist, points.HostageRescueAll, "reason.all-hostages-rescued");
 			return HookResult.Continue;
 		});
 
-		plugin.RegisterEventHandler<EventBombPickup>((@event, _) =>
+		On<EventBombPickup>((@event, _) =>
 		{
 			ranks.OnBombPickup(players.Get(@event.Userid));
 			return HookResult.Continue;
 		});
 
-		plugin.RegisterEventHandler<EventBombDropped>((@event, _) =>
+		On<EventBombDropped>((@event, _) =>
 		{
 			ranks.ModifyPoints(players.Get(@event.Userid), points.BombDrop, "reason.bomb-dropped");
 			return HookResult.Continue;
 		});
 
-		plugin.RegisterEventHandler<EventBombExploded>((_, _) =>
+		On<EventBombExploded>((_, _) =>
 		{
 			ranks.RewardTeam(CsTeam.Terrorist, points.BombExploded, "reason.bomb-exploded");
 			return HookResult.Continue;
@@ -450,7 +471,7 @@ internal sealed class GameEvents(
 	private void RegisterTimers()
 	{
 		if (missions is not null)
-			plugin.AddTimer(60, missions.OnPlaytimeMinute, TimerFlags.REPEAT);
+			plugin.AddTimer(60, Timed("missions playtime timer", missions.OnPlaytimeMinute), TimerFlags.REPEAT);
 
 		if (ranks is null)
 			return;
@@ -459,11 +480,11 @@ internal sealed class GameEvents(
 		if (playtimeMinutes > 0)
 		{
 			float checkSeconds = (float)Math.Clamp(playtimeMinutes * 60d, 1d, 30d);
-			plugin.AddTimer(checkSeconds, ranks.AwardPlaytimePoints, TimerFlags.REPEAT);
+			plugin.AddTimer(checkSeconds, Timed("playtime points timer", ranks.AwardPlaytimePoints), TimerFlags.REPEAT);
 		}
 
 		if (config.Tags.TopPlacement.Enabled)
-			plugin.AddTimer(300, ranks.RefreshPlacements, TimerFlags.REPEAT);
+			plugin.AddTimer(300, Timed("top placement timer", ranks.RefreshPlacements), TimerFlags.REPEAT);
 
 		logger.LogDebug("K4-System timers registered.");
 	}
