@@ -264,14 +264,14 @@ internal sealed class DuelService(PluginConfig config, PlayerRegistry players, R
 		_ => "ic-kill"
 	};
 
-	/// <summary>Shows a duel toast; false when the player has no panel or turned toasts off, so the caller uses chat.</summary>
+	/// <summary>Shows a duel toast; false when the caller should also use chat: no panel, toasts off, or the player wants both.</summary>
 	private bool ToastTo(K4Player player, string kind, string text, string value, ToastColor color, DuelType type, ToastLength length = ToastLength.Normal)
 	{
 		if (hud.Hud is not PanoramaHud panel || player.ToastsOff || !player.HasController)
 			return false;
 
 		panel.Toast(player, new Toast(kind, text, value, TypeVisual(type), color, length));
-		return true;
+		return !player.WantsChat;
 	}
 
 	// ---------------------------------------------------------------- game events

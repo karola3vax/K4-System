@@ -494,8 +494,7 @@ internal sealed class PanoramaHud(
 				state.ProfileOf = 0;
 				return true;
 			case "k4-pf-toasts" when state.ProfileOf == 0:
-				settings.SetToasts(player, player.ToastsOff);
-				return true;
+				return settings.NextToastMode(player);
 			case "k4-pf-chat" when state.ProfileOf == 0 && player.Rank is RankState rank:
 				settings.SetPointMessages(player, rank.MuteMessages);
 				return true;
@@ -1148,11 +1147,12 @@ internal sealed class PanoramaHud(
 		SetVar(player, "k4-pf-back", "back", Upper(player, Text(player, "hud.pf-back")));
 
 		// The player's own settings, only on their own profile.
-		Gone(player, "k4-pf-toasts", !own || !config.Panorama.Toasts);
+		Gone(player, "k4-pf-toasts", !own || !config.Panorama.Toasts.PlayersCanChange);
 		Gone(player, "k4-pf-chat", !own || player.Rank is null);
 		if (own)
 		{
-			SetVar(player, "k4-pf-toasts", "label", Upper(player, Text(player, player.ToastsOff ? "hud.pf-toasts-off" : "hud.pf-toasts-on")));
+			string mode = Text(player, $"toast-mode.{player.ToastMode.ToString().ToLowerInvariant()}");
+			SetVar(player, "k4-pf-toasts", "label", Upper(player, Text(player, "hud.pf-toasts", mode)));
 			SetClass(player, "k4-pf-toasts", "k4-on", !player.ToastsOff);
 			bool chatOn = player.Rank is { MuteMessages: false };
 			SetVar(player, "k4-pf-chat", "label", Upper(player, Text(player, chatOn ? "hud.pf-chat-on" : "hud.pf-chat-off")));

@@ -10,7 +10,7 @@ public sealed class SettingsStorageTests
 
 	private static TestDatabase Create(string kind) => kind == "mysql" ? new MySqlTestDatabase() : new SqliteTestDatabase();
 
-	private static PlayerSnapshot Snap(ulong steamId, bool? toasts = null, bool? pointMessages = null)
+	private static PlayerSnapshot Snap(ulong steamId, int? toasts = null, bool? pointMessages = null)
 		=> new(steamId, steamId.ToString(), "None", -1, 0, null, null, null, Toasts: toasts, PointMessages: pointMessages);
 
 	private static async Task<SqlPlayerStore> ReadyAsync(TestDatabase db, params ulong[] players)
@@ -31,7 +31,7 @@ public sealed class SettingsStorageTests
 		PlayerRecord record = (await store.LoadOrCreateAsync(Alice, "Alice", "None", 0))!;
 		await store.SaveAsync([Snap(Alice)]);
 
-		Assert.True(record.Toasts);
+		Assert.Equal(1, record.Toasts);
 		Assert.True(record.PointMessages);
 		Assert.Equal(0, await db.ScalarAsync<int>($"SELECT COUNT(*) FROM `{db.Tables.Settings}`;"));
 	}
@@ -42,20 +42,20 @@ public sealed class SettingsStorageTests
 		await using TestDatabase db = Create(kind);
 		SqlPlayerStore store = await ReadyAsync(db, Alice, Bob);
 
-		await store.SaveAsync([Snap(Alice, toasts: false), Snap(Bob, pointMessages: false)]);
+		await store.SaveAsync([Snap(Alice, toasts: 0), Snap(Bob, pointMessages: false)]);
 		// Changing only the point messages must not turn toasts back on.
 		await store.SaveAsync([Snap(Alice, pointMessages: false)]);
 
 		PlayerRecord alice = (await store.LoadOrCreateAsync(Alice, "Alice", "None", 0))!;
 		PlayerRecord bob = (await store.LoadOrCreateAsync(Bob, "Bob", "None", 0))!;
-		Assert.False(alice.Toasts);
+		Assert.Equal(0, alice.Toasts);
 		Assert.False(alice.PointMessages);
-		Assert.True(bob.Toasts);
+		Assert.Equal(1, bob.Toasts);
 		Assert.False(bob.PointMessages);
 
-		await store.SaveAsync([Snap(Alice, toasts: true)]);
+		await store.SaveAsync([Snap(Alice, toasts: 2)]);
 		alice = (await store.LoadOrCreateAsync(Alice, "Alice", "None", 0))!;
-		Assert.True(alice.Toasts);
+		Assert.Equal(2, alice.Toasts);
 		Assert.False(alice.PointMessages);
 	}
 
@@ -64,26 +64,26 @@ public sealed class SettingsStorageTests
 	{
 		await using TestDatabase db = Create(kind);
 		SqlPlayerStore store = await ReadyAsync(db, Alice, Bob);
-		await store.SaveAsync([Snap(Alice, toasts: false), Snap(Bob, toasts: false)]);
+		await store.SaveAsync([Snap(Alice, toasts: 0), Snap(Bob, toasts: 0)]);
 		foreach (string table in new[] { db.Tables.Ranks, db.Tables.Stats, db.Tables.Times })
 			await db.AgeLastSeenAsync(table, Alice.ToString(), 60);
 
 		await store.PurgeAsync(30);
 
 		Assert.Equal(1, await db.ScalarAsync<int>($"SELECT COUNT(*) FROM `{db.Tables.Settings}`;"));
-		Assert.False((await store.LoadOrCreateAsync(Bob, "Bob", "None", 0))!.Toasts);
-		Assert.True((await store.LoadOrCreateAsync(Alice, "Alice", "None", 0))!.Toasts);
+		Assert.Equal(0, (await store.LoadOrCreateAsync(Bob, "Bob", "None", 0))!.Toasts);
+		Assert.Equal(1, (await store.LoadOrCreateAsync(Alice, "Alice", "None", 0))!.Toasts);
 	}
 
 	[Fact]
 	public void A_newer_snapshot_keeps_an_older_unsaved_setting()
 	{
-		PlayerSnapshot older = Snap(Alice, toasts: false, pointMessages: true);
+		PlayerSnapshot older = Snap(Alice, toasts: 0, pointMessages: true);
 		PlayerSnapshot newer = Snap(Alice, pointMessages: false);
 
 		PlayerSnapshot merged = newer.MergeOnto(older);
 
-		Assert.False(merged.Toasts);
+		Assert.Equal(0, merged.Toasts);
 		Assert.False(merged.PointMessages);
 	}
 }

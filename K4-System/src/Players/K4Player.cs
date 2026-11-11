@@ -88,11 +88,17 @@ public sealed class K4Player
 	/// <summary>Weapon kills and the achievement showcase. Null until loaded.</summary>
 	public PlayerProfile? Profile { get; set; }
 
-	/// <summary>The player turned panel pop-ups off (stored per player since 7.1).</summary>
-	public bool ToastsOff { get; set; }
+	/// <summary>How the player gets K4's messages while the panel is on: their own choice or the server's (panorama.toasts).</summary>
+	public Config.ToastMode ToastMode { get; set; }
 
-	/// <summary>Settings changed since the last save, handed to that save; null when unchanged.</summary>
-	internal bool? UnsavedToasts { get; set; }
+	/// <summary>No panel pop-ups: the player gets chat lines instead.</summary>
+	public bool ToastsOff => ToastMode == Config.ToastMode.Chat;
+
+	/// <summary>The player gets the chat line for a message, alone (chat) or with its pop-up (both).</summary>
+	public bool WantsChat => ToastMode != Config.ToastMode.Panel;
+
+	/// <summary>Settings changed since the last save, handed to that save; null when unchanged. Toasts is the stored mode number.</summary>
+	internal int? UnsavedToasts { get; set; }
 
 	internal bool? UnsavedPointMessages { get; set; }
 

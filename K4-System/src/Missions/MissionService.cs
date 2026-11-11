@@ -314,20 +314,26 @@ internal sealed class MissionService(
 		CCSPlayerController controller = player.Controller;
 		string description = Describe(controller, slot.Mission);
 
+		bool popUp = false;
 		if (hud.Hud is PanoramaHud panel)
 		{
 			panel.Refresh(player, HudTab.Missions);
 			if (!player.ToastsOff)
 			{
 				panel.Toast(player, new Toast(chat.For(controller, "toast.mission-complete"), description, $"+{reward}", PanoramaHud.MissionIcon(slot.Mission), ToastColor.Green));
-				return;
+				popUp = true;
 			}
 		}
 
+		if (popUp && !player.WantsChat)
+			return;
+
 		chat.Tell(controller, "mission.completed", description, reward);
-		controller.PrintToCenterHtml(
-			$"<font class='fontSize-l' color='#9AFF6E'>{Html(chat.For(controller, "mission.html-completed"))}</font><br>" +
-			$"<font color='#FFFFFF'>{Html(description)}</font><br><font color='#9AFF6E'>+{reward}</font>", 4);
+		// The centre banner only stands in for a missing pop-up.
+		if (!popUp)
+			controller.PrintToCenterHtml(
+				$"<font class='fontSize-l' color='#9AFF6E'>{Html(chat.For(controller, "mission.html-completed"))}</font><br>" +
+				$"<font color='#FFFFFF'>{Html(description)}</font><br><font color='#9AFF6E'>+{reward}</font>", 4);
 	}
 
 	private void CompleteDay(K4Player player, PlayerMissions missions)
@@ -345,10 +351,11 @@ internal sealed class MissionService(
 		int bonus = MissionRules.StreakBonus(missions.Streak, dayTotal, Settings.StreakBonusPercent, Settings.StreakMaxDays);
 		ranks.GrantPoints(player, bonus);
 
-		if (hud.Hud is PanoramaHud panel && !player.ToastsOff)
+		bool popUp = hud.Hud is PanoramaHud && !player.ToastsOff;
+		if (popUp && hud.Hud is PanoramaHud panel)
 			panel.Toast(player, new Toast(chat.For(player.Controller, "hud.toast.streak"), chat.For(player.Controller, "toast.streak-text", missions.Streak),
 				$"+{bonus}", "ic-hot_trend", ToastColor.Gold));
-		else
+		if (!popUp || player.WantsChat)
 			chat.Tell(player.Controller, "mission.all-completed", missions.Streak, bonus);
 	}
 

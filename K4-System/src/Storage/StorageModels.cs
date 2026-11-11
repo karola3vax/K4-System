@@ -30,7 +30,7 @@ internal sealed record PlayerSnapshot(
 	string? Season = null,
 	IReadOnlyDictionary<string, int>? WeaponKills = null,
 	string? Showcase = null,
-	bool? Toasts = null,
+	int? Toasts = null,
 	bool? PointMessages = null)
 {
 	/// <summary>A newer snapshot replaces an older one but must not lose a pending personal reset, new achievements,
@@ -68,7 +68,7 @@ internal sealed record PlayerSnapshot(
 /// <param name="Season">The season stored in the database when the player was loaded; null when seasons are off.</param>
 /// <param name="WeaponKills">Kills per weapon, by kill-event name such as "ak47".</param>
 /// <param name="Showcase">The achievements the player shows on their profile, in order.</param>
-/// <param name="Toasts">Panel pop-ups are on; true for players who never changed it.</param>
+/// <param name="Toasts">The stored pop-up mode (see Config.ToastModes): 0 chat, 1 no choice, 2 both, 3 panel.</param>
 /// <param name="PointMessages">Point chat messages are on; true for players who never changed it.</param>
 internal sealed record PlayerRecord(
 	int Points,
@@ -80,7 +80,7 @@ internal sealed record PlayerRecord(
 	string? Season = null,
 	IReadOnlyDictionary<string, int>? WeaponKills = null,
 	IReadOnlyList<string>? Showcase = null,
-	bool Toasts = true,
+	int Toasts = 1,
 	bool PointMessages = true);
 
 /// <param name="SteamId">0 when unknown; the panel then cannot open the player's profile.</param>

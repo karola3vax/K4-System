@@ -1,5 +1,6 @@
 namespace K4System.Config;
 
+using System.Text.Json;
 using System.Text.Json.Serialization;
 using K4System.Domain;
 
@@ -451,9 +452,111 @@ public sealed class PanoramaSettings
 	[JsonPropertyName("rank-icons")]
 	public string RankIcons { get; set; } = "competitive";
 
-	/// <summary>False keeps the panel but turns pop-ups off for everyone (messages with a chat line go to chat) and hides the toasts button.</summary>
+	/// <summary>How players get K4's messages while the panel is on, and whether they may choose it themselves.</summary>
 	[JsonPropertyName("toasts")]
-	public bool Toasts { get; set; } = true;
+	public ToastSettings Toasts { get; set; } = new();
+}
+
+public sealed class ToastModeJsonConverter : JsonStringEnumConverter<ToastMode>
+{
+	public ToastModeJsonConverter() : base(null, false) { }
+}
+
+/// <summary>Panel: a pop-up (chat only where no pop-up exists). Chat: the chat line. Both: the pop-up and the chat line.</summary>
+[JsonConverter(typeof(ToastModeJsonConverter))]
+public enum ToastMode
+{
+	Panel,
+	Chat,
+	Both
+}
+
+/// <summary>
+/// A player's mode as stored in the settings table's `toasts` column. Older K4 versions read 0 as "toasts off" and
+/// anything else as "on", so the extra values still mean something sensible after a downgrade.
+/// </summary>
+public static class ToastModes
+{
+	public const int StoredChat = 0;    // also 7.3 and older "toasts off"
+	public const int StoredDefault = 1; // no choice made: the older "on", and the column default for new rows
+	public const int StoredBoth = 2;
+	public const int StoredPanel = 3;
+
+	public static int ToStored(ToastMode mode) => mode switch
+	{
+		ToastMode.Chat => StoredChat,
+		ToastMode.Both => StoredBoth,
+		_ => StoredPanel
+	};
+
+	/// <summary>The mode a player gets: their own stored choice, or the server default when they have none or may not choose.</summary>
+	public static ToastMode Effective(long stored, ToastSettings settings) => !settings.PlayersCanChange ? settings.Default : stored switch
+	{
+		StoredChat => ToastMode.Chat,
+		StoredBoth => ToastMode.Both,
+		StoredPanel => ToastMode.Panel,
+		_ => settings.Default
+	};
+
+	/// <summary>!toasts and the profile button step Panel, Chat, Both, then back to Panel.</summary>
+	public static ToastMode Next(ToastMode mode) => mode switch
+	{
+		ToastMode.Panel => ToastMode.Chat,
+		ToastMode.Chat => ToastMode.Both,
+		_ => ToastMode.Panel
+	};
+}
+
+[JsonConverter(typeof(ToastSettingsJsonConverter))]
+public sealed class ToastSettings
+{
+	/// <summary>The mode every player starts with.</summary>
+	[JsonPropertyName("default")]
+	public ToastMode Default { get; set; } = ToastMode.Panel;
+
+	/// <summary>False keeps everyone on the default: the profile button is hidden and !toasts changes nothing.</summary>
+	[JsonPropertyName("players-can-change")]
+	public bool PlayersCanChange { get; set; } = true;
+}
+
+/// <summary>Reads the toasts block, or the 7.3.0 form "toasts": true / false (false was chat for everyone, locked).</summary>
+public sealed class ToastSettingsJsonConverter : JsonConverter<ToastSettings>
+{
+	public override ToastSettings Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+	{
+		switch (reader.TokenType)
+		{
+			case JsonTokenType.True:
+				return new ToastSettings();
+			case JsonTokenType.False:
+				return new ToastSettings { Default = ToastMode.Chat, PlayersCanChange = false };
+			case JsonTokenType.StartObject:
+				ToastSettings settings = new();
+				while (reader.Read() && reader.TokenType != JsonTokenType.EndObject)
+				{
+					string name = reader.GetString() ?? string.Empty;
+					reader.Read();
+					if (name.Equals("default", StringComparison.OrdinalIgnoreCase))
+						settings.Default = JsonSerializer.Deserialize<ToastMode>(ref reader, options);
+					else if (name.Equals("players-can-change", StringComparison.OrdinalIgnoreCase))
+						settings.PlayersCanChange = reader.GetBoolean();
+					else
+						throw new JsonException($"panorama.toasts has no setting '{name}'. Use \"default\" and \"players-can-change\".");
+				}
+				return settings;
+			default:
+				throw new JsonException("panorama.toasts must be true, false, or { \"default\": ..., \"players-can-change\": ... }.");
+		}
+	}
+
+	public override void Write(Utf8JsonWriter writer, ToastSettings value, JsonSerializerOptions options)
+	{
+		writer.WriteStartObject();
+		writer.WritePropertyName("default");
+		JsonSerializer.Serialize(writer, value.Default, options);
+		writer.WriteBoolean("players-can-change", value.PlayersCanChange);
+		writer.WriteEndObject();
+	}
 }
 
 public sealed class ScoreboardSettings

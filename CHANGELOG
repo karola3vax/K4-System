@@ -1,3 +1,8 @@
+-- Unreleased
+
+- feat: Players choose how they get K4's messages with `!toasts` or the Messages button on their profile: pop-ups, chat, or both (the pop-up and the chat line). The server sets the mode new players start with and whether players may change it, under `panorama.toasts`: `"default"` (`panel`, `chat` or `both`) and `"players-can-change"`. With it locked, the button is hidden and `!toasts` only says which mode the server uses
+- setup: Existing configs keep working: `"toasts": true` is pop-ups that players may change, and `"toasts": false` (7.3.0) is chat for everyone. Players who turned pop-ups off before keep chat. No Workshop addon update is needed. New texts in all 36 languages
+
 -- 2026.11.11 - V7.3.0
 
 - feat: `panorama.toasts` (default `true`). Set it to `false` to keep the panel but turn pop-ups off for all players: messages that have a chat line (rank changes, round summary, finished missions, the streak) go to chat, and progress pop-ups without one are not shown; the toasts button on the profile is hidden and `!toasts` stays off. Each player's own choice is kept for when it is turned on again. Existing configs need no change

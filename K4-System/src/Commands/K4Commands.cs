@@ -654,8 +654,9 @@ internal sealed class K4Commands(
 		if (!guard.Check(player, info, CommandUsage.CLIENT_ONLY) || LoadedPlayer(player!, info) is not K4Player k4player)
 			return;
 
-		playerService.SetToasts(k4player, k4player.ToastsOff);
-		info.ReplyToCommand(chat.PrefixedFor(player, "toggle.toasts", chat.For(player, k4player.ToastsOff ? "state.off" : "state.on")));
+		bool changed = playerService.NextToastMode(k4player);
+		string mode = chat.For(player, $"toast-mode.{k4player.ToastMode.ToString().ToLowerInvariant()}");
+		info.ReplyToCommand(chat.PrefixedFor(player, changed ? "toggle.toasts" : "toggle.toasts-locked", mode));
 	}
 
 	private void OnRank(CCSPlayerController? player, CommandInfo info)

@@ -18,7 +18,7 @@ All settings live in one commented file, `configs/plugins/K4-System/k4-system.js
 | `missions` | Time zone, rewards per difficulty, streak bonus, rerolls per day, bots, and map rules |
 | `bounty` | The wanted kill streak, the bounty reward, and the survivor bonus |
 | `duels` | Duel stakes, types, kill target, time limit, cooldown, how long a challenge waits, and the same-connection block |
-| `panorama` | The clickable panel, its rank icons (competitive, wingman, or text), and whether toasts are used at all |
+| `panorama` | The clickable panel, its rank icons (competitive, wingman, or text), and how players get messages: pop-ups, chat or both, and whether they may choose |
 | `scoreboard` | What the CS2 rank area shows, custom icons, points in the score column |
 | `tags` | Rank tags, top-placement tag, country tag, admin tags and `!admins` colors |
 | `messages` | Join hint, connect and disconnect announcements |

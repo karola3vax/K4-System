@@ -104,9 +104,9 @@ With the panel on, the K4 commands open their tab instead of printing to chat. P
 
 ## Toasts
 
-Toasts stack under the kill feed, newest on top, at most three at once. Each player can turn them off with `!toasts` (`commands.toasts`) or the button on their profile; K4 remembers it. A player with toasts off gets the chat line instead wherever one exists (round summary, rank changes, finished missions, the daily streak).
+Toasts stack under the kill feed, newest on top, at most three at once. Each player picks how they get K4's messages with `!toasts` (`commands.toasts`) or the Messages button on their profile, and K4 remembers it. The button and the command step through three modes: **Pop-ups** (the toast; chat only for messages that have no toast), **Chat** (the chat line instead of the toast, wherever one exists: round summary, rank changes, finished missions, the daily streak, duels) and **Pop-ups + chat** (both).
 
-To keep the panel but use chat for everyone, set `"toasts": false` under `panorama` in `k4-system.jsonc`. Every player then gets the chat line wherever one exists, as with toasts turned off; progress pop-ups without a chat line (almost-done missions and achievements, leaderboard climbs, the rank-at-risk warning) are not shown. The toasts button is hidden, and `!toasts` stays off. Each player's own choice is kept for when toasts are turned on again.
+The server sets the mode new players start with, and whether players may change it, under `panorama.toasts` in `k4-system.jsonc`: `"default"` is `panel`, `chat` or `both`, and `"players-can-change": false` keeps everyone on the default (the Messages button is hidden and `!toasts` only says what the server uses). Pop-ups that only show progress (almost-done missions and achievements, leaderboard climbs, the rank-at-risk warning) have no chat line, so the chat mode leaves them out. A player's own choice is kept while the server locks the mode. The 7.3.0 form still works: `"toasts": true` is panel and changeable, `"toasts": false` is chat for everyone.
 
 The colors below are the names the server sends. Green, red and gold are drawn muted, blue as light grey, and purple as grey.
 

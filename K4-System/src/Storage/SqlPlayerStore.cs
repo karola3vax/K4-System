@@ -260,7 +260,7 @@ internal sealed class SqlPlayerStore
 			WeaponKills = weapons.ToDictionary(row => row.Weapon, row => (int)Math.Clamp(row.Kills, 0, int.MaxValue), StringComparer.Ordinal),
 			Showcase = ParseShowcase(showcase),
 			Season = season,
-			Toasts = settings is not { Toasts: 0 },
+			Toasts = settings is { } row ? (int)Math.Clamp(row.Toasts, 0, 3) : 1,
 			PointMessages = settings is not { PointMessages: 0 }
 		};
 	}
@@ -354,7 +354,7 @@ internal sealed class SqlPlayerStore
 					await connection.ExecuteAsync($@"INSERT INTO `{tables.Settings}` (`steam_id`, `toasts`, `point_messages`)
 						VALUES (@SteamId, COALESCE(@Toasts, 1), COALESCE(@PointMessages, 1))
 						{dialect.UpsertClause("`steam_id`")} `toasts` = COALESCE(@Toasts, `toasts`), `point_messages` = COALESCE(@PointMessages, `point_messages`);",
-						new { SteamId = steamId, Toasts = Flag(snapshot.Toasts), PointMessages = Flag(snapshot.PointMessages) }, transaction);
+						new { SteamId = steamId, snapshot.Toasts, PointMessages = Flag(snapshot.PointMessages) }, transaction);
 				}
 
 				if (snapshot.Stats is not null)

@@ -181,8 +181,8 @@ internal sealed class PlayerService(
 		player.LastPersonalRankResetUtc = record.LastPersonalRankResetUtc;
 		player.Profile = General.Modules.Profiles ? new PlayerProfile(record.WeaponKills, record.Showcase) : null;
 		player.Season = seasons is null ? null : record.Season;
-		// With panorama.toasts off everyone gets chat; the player's own choice stays saved for when it is on again.
-		player.ToastsOff = !record.Toasts || !General.Panorama.Toasts;
+		// A locked server mode wins; the player's own choice stays saved for when players may choose again.
+		player.ToastMode = ToastModes.Effective(record.Toasts, General.Panorama.Toasts);
 		if (player.Rank is not null)
 			player.Rank.MuteMessages = !record.PointMessages;
 
@@ -318,15 +318,19 @@ internal sealed class PlayerService(
 
 	// ---------------------------------------------------------------- settings
 
-	/// <summary>Turns the player's panel pop-ups on or off and saves it. Used by !toasts and the profile button.</summary>
-	public void SetToasts(K4Player player, bool on)
+	/// <summary>
+	/// Moves the player to the next pop-up mode (panel, chat, both) and saves it. Used by !toasts and the profile button.
+	/// False when the server does not let players choose (panorama.toasts players-can-change).
+	/// </summary>
+	public bool NextToastMode(K4Player player)
 	{
-		if (!player.IsHuman || !General.Panorama.Toasts)
-			return;
+		if (!player.IsHuman || !General.Panorama.Toasts.PlayersCanChange)
+			return false;
 
-		player.ToastsOff = !on;
-		player.UnsavedToasts = on;
+		player.ToastMode = ToastModes.Next(player.ToastMode);
+		player.UnsavedToasts = ToastModes.ToStored(player.ToastMode);
 		Save(player);
+		return true;
 	}
 
 	/// <summary>Turns the player's point chat messages on or off and saves it. Used by !togglepointmsg and the profile button.</summary>

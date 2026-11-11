@@ -220,14 +220,15 @@ internal sealed class RankService(
 			if (announce)
 			{
 				bool demoted = oldRank.Point > newRank.Point;
-				if (hud.Hud is PanoramaHud panel && !player.ToastsOff)
+				bool popUp = hud.Hud is PanoramaHud && !player.ToastsOff;
+				if (popUp && hud.Hud is PanoramaHud panel)
 				{
 					if (demoted)
 						panel.Toast(player, new Toast(chat.For(player.Controller, "hud.toast.demoted"), newRank.Name, "", panel.RankIcon(newRank) ?? "ic-cold_trend", ToastColor.Red));
 					else
 						panel.Promote(player, newRank);
 				}
-				else
+				if (!popUp || player.WantsChat)
 					chat.Tell(player.Controller, demoted ? "rank.demoted" : "rank.promoted", newRank.Color, newRank.Name);
 			}
 
@@ -579,7 +580,8 @@ internal sealed class RankService(
 	/// </summary>
 	private void FinishRoundSummary(K4Player player, RankState state, string resultKey)
 	{
-		if (!state.MuteMessages && Settings.RoundSummary && state.RoundPoints != 0 && hud.Hud is PanoramaHud panel && !player.ToastsOff)
+		bool popUp = !state.MuteMessages && Settings.RoundSummary && state.RoundPoints != 0 && hud.Hud is PanoramaHud && !player.ToastsOff;
+		if (popUp && hud.Hud is PanoramaHud panel)
 		{
 			CCSPlayerController controller = player.Controller;
 			string reasons = ToastRules.RoundSummary(state.RoundReasons
@@ -589,7 +591,7 @@ internal sealed class RankService(
 			panel.Toast(player, new Toast(chat.For(controller, resultKey), reasons, ToastRules.Signed(state.RoundPoints), team,
 				state.RoundPoints > 0 ? ToastColor.Green : ToastColor.Red));
 		}
-		else if (!state.MuteMessages && Settings.RoundSummary)
+		if ((!popUp || player.WantsChat) && !state.MuteMessages && Settings.RoundSummary)
 		{
 			if (state.RoundPoints > 0)
 				chat.Tell(player.Controller, "points.gain", state.Points, state.RoundPoints, chat.For(player.Controller, "reason.round-summary"));
