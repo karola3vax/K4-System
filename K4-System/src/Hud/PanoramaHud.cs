@@ -1148,7 +1148,7 @@ internal sealed class PanoramaHud(
 		SetVar(player, "k4-pf-back", "back", Upper(player, Text(player, "hud.pf-back")));
 
 		// The player's own settings, only on their own profile.
-		Gone(player, "k4-pf-toasts", !own);
+		Gone(player, "k4-pf-toasts", !own || !config.Panorama.Toasts);
 		Gone(player, "k4-pf-chat", !own || player.Rank is null);
 		if (own)
 		{

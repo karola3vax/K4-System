@@ -106,6 +106,8 @@ With the panel on, the K4 commands open their tab instead of printing to chat. P
 
 Toasts stack under the kill feed, newest on top, at most three at once. Each player can turn them off with `!toasts` (`commands.toasts`) or the button on their profile; K4 remembers it. A player with toasts off gets the chat line instead wherever one exists (round summary, rank changes, finished missions, the daily streak).
 
+To keep the panel but use chat for everyone, set `"toasts": false` under `panorama` in `k4-system.jsonc`. Every player then gets the chat lines, the toasts button is hidden, and `!toasts` stays off. Each player's own choice is kept for when toasts are turned on again.
+
 The colors below are the names the server sends. Green, red and gold are drawn muted, blue as light grey, and purple as grey.
 
 | Event | Color and length | What it shows |

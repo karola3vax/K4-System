@@ -15,7 +15,7 @@ Command names are set in `commands` in `k4-system.jsonc`. These are the defaults
 | Admin list | `!admins`, `!listadmins` |
 | Personal reset | `!resetmydata <all\|time\|stat\|rank>` |
 | Toggles | `!toggletag`, `!togglepointmsg` (fixed names, ranks module only; `!togglepointmsg` is remembered per player since 7.1) |
-| Panel pop-ups | `!toasts` (`commands.toasts`, panel only): turns your own toasts on or off; remembered per player |
+| Panel pop-ups | `!toasts` (`commands.toasts`, panel only): turns your own toasts on or off; remembered per player. Stays off when the server sets `panorama.toasts` to false |
 | Missions | `!missions`, `!mission`, `!daily`; `!missions reroll <1-3>` (daily missions only) |
 | Duels | `!duel` alone opens the panel's Duels page. `!duel <player> <points\|max> [type]`, `!duel accept`, `!duel decline` (`decline` also takes back your own challenge). Types: see [Duel types](#duel-types) |
 | Achievements | `!achievements`, `!achievement`, `!ach` |
