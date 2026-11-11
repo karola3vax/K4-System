@@ -451,7 +451,7 @@ public sealed class PanoramaSettings
 	[JsonPropertyName("rank-icons")]
 	public string RankIcons { get; set; } = "competitive";
 
-	/// <summary>False keeps the panel but sends every pop-up to chat for everyone, and hides the players' toasts button.</summary>
+	/// <summary>False keeps the panel but turns pop-ups off for everyone (messages with a chat line go to chat) and hides the toasts button.</summary>
 	[JsonPropertyName("toasts")]
 	public bool Toasts { get; set; } = true;
 }
