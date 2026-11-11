@@ -56,6 +56,47 @@ public sealed class Plugin : BasePlugin
 	private PanoramaHud? hud;
 	private SharedPlayerApi.Source? apiSource;
 	private DuelService? duels;
+	private Timings? timings;
+
+	/// <summary>
+	/// .NET compiles each method the first time it runs, which made the first panel draw of each page take up to
+	/// 34 ms of a server frame. Compiling K4's own methods on a background thread at load keeps that off the game thread.
+	/// </summary>
+	private static void Precompile(ILogger logger)
+	{
+		Task.Run(() =>
+		{
+			long started = System.Diagnostics.Stopwatch.GetTimestamp();
+			int compiled = 0;
+			const System.Reflection.BindingFlags all = System.Reflection.BindingFlags.DeclaredOnly | System.Reflection.BindingFlags.Instance
+				| System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic;
+
+			foreach (Type type in typeof(Plugin).Assembly.GetTypes())
+			{
+				if (type.ContainsGenericParameters)
+					continue;
+
+				foreach (System.Reflection.MethodBase method in type.GetMethods(all).Cast<System.Reflection.MethodBase>().Concat(type.GetConstructors(all)))
+				{
+					if (method.IsAbstract || method.ContainsGenericParameters || method.GetMethodBody() is null)
+						continue;
+
+					try
+					{
+						System.Runtime.CompilerServices.RuntimeHelpers.PrepareMethod(method.MethodHandle);
+						compiled++;
+					}
+					catch (Exception)
+					{
+						// A method that cannot be compiled ahead is compiled on first use as before.
+					}
+				}
+			}
+
+			logger.LogDebug("Compiled {Count} K4 methods ahead in {Milliseconds} ms.", compiled,
+				(long)System.Diagnostics.Stopwatch.GetElapsedTime(started).TotalMilliseconds);
+		});
+	}
 
 	// An earlier instance's saves that were still running when this one loaded. Handed on again if this
 	// instance unloads first, so two quick reloads in a row cannot skip the wait.
@@ -126,6 +167,8 @@ public sealed class Plugin : BasePlugin
 		players = new PlayerRegistry();
 		background = new BackgroundWork(Logger);
 		countries = new CountryLookup(ModuleDirectory, Logger);
+		Timings timings = this.timings = new();
+		Precompile(Logger);
 
 		SqlDialect dialect = CreateDialect();
 		TableNames tables = new(Config.Storage.TablePrefix, Config.Storage.LevelRanks.Table);
@@ -144,7 +187,7 @@ public sealed class Plugin : BasePlugin
 			ClanTagService clanTags = new(Config, countries, gameThread);
 			rewards = new RewardService(ladder, players, store, gameThread, background, Logger);
 			ranks = new RankService(Config, ladder, players, game, rewards, clanTags, store, gameThread, background, chat, hudBridge, events, Logger);
-			scoreboard = new ScoreboardService(this, Config, players, gameThread, Logger);
+			scoreboard = new ScoreboardService(this, Config, players, gameThread, Logger, timings);
 		}
 
 		playtime = new PlaytimeService(chat);
@@ -185,8 +228,8 @@ public sealed class Plugin : BasePlugin
 			hud.Warmup();
 		}
 
-		new GameEvents(this, Config, players, playerService, ranks, stats, Config.Modules.Playtime ? playtime : null, scoreboard, missions, bounty, duels, achievements, store, game, gameThread, background, chat, Logger).Register();
-		new K4Commands(this, Config, players, playerService, ranks, rewards, missions, duels, playtime, store, gameThread, background, chat, new CommandGuard(chat), hud, audit, events, achievements, seasons).Register();
+		new GameEvents(this, Config, players, playerService, ranks, stats, Config.Modules.Playtime ? playtime : null, scoreboard, missions, bounty, duels, achievements, store, game, gameThread, background, chat, Logger, timings).Register();
+		new K4Commands(this, Config, players, playerService, ranks, rewards, missions, duels, playtime, store, gameThread, background, chat, new CommandGuard(chat), hud, audit, events, achievements, seasons, timings).Register();
 
 		if (events is not null)
 			AddTimer(15.0f, events.Tick, CounterStrikeSharp.API.Modules.Timers.TimerFlags.REPEAT);
@@ -210,7 +253,12 @@ public sealed class Plugin : BasePlugin
 
 	private void RegisterHudListeners(PanoramaHud panel, PlayerRegistry registry)
 	{
-		RegisterListener<Listeners.OnCustomHudClicked>(panel.OnClick);
+		RegisterListener<Listeners.OnCustomHudClicked>((controller, clicked, button) =>
+		{
+			long started = System.Diagnostics.Stopwatch.GetTimestamp();
+			panel.OnClick(controller, clicked, button);
+			timings?.Record("panel click", System.Diagnostics.Stopwatch.GetTimestamp() - started);
+		});
 		RegisterListener<Listeners.OnMapStart>(_ => panel.OnMapStart());
 		RegisterListener<Listeners.OnPlayerButtonsChanged>((controller, pressed, _) =>
 		{
