@@ -1,4 +1,4 @@
--- Unreleased
+-- 2026.11.11 - V7.2.1
 
 - feat: The panel and toasts have a new black and grey theme: white for active tabs, main buttons and progress bars, sharp corners, no glows, and the map behind the panel in dark grey. Muted green, red and gold now appear only where they mean something (finished, lost, medal tiers), and rank names use softer versions of their colors. Rank emblems keep their colors
 - setup: The theme is only a look change in the addon, so a server and its players can update in any order. Players see it once the Workshop addon `3811667212` is updated
@@ -13,6 +13,7 @@
 - perf: The panel sends only what changed. Opening a page, clicking, and the live Duels page used to send every text and style on the panel again, which slowed server frames. `css_k4_hud` shows how many updates were sent and how many were skipped
 - perf: One timer closes idle panels, instead of a new timer for every redraw
 - perf: Each text is looked up once per language. CounterStrikeSharp read through a whole language file for every line, so opening the panel could take up to 50 ms of a server frame, and every K4 chat message paid for it too. `css_k4_hud` shows how long panel draws take
+- perf: K4 compiles its code in the background when it loads, so the first panel page of a map opens without a long frame. `css_k4_hud` also lists how long each K4 event and timer takes on the server, to tell whether a slow frame is K4's
 
 -- 2026.11.02 - V7.2.0
 
