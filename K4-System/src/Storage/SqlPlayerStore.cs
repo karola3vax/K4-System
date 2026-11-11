@@ -395,16 +395,33 @@ internal sealed class SqlPlayerStore
 			return;
 
 		// Old-season points would undo the mirror's season reset; the player's next save mirrors them again.
-		foreach (PlayerSnapshot snapshot in snapshots.Where(snapshot => IsCurrentSeason(snapshot, storedSeason)))
+		// The season is read again under its lock: a season that ended after the save's commit must not get
+		// old points back, and one ending now waits until the mirror is written, then resets it.
+		// The player data is already committed, so nothing here may fail the save.
+		try
 		{
-			try
+			await using DbTransaction mirror = await connection.BeginTransactionAsync();
+			string? mirrorSeason = snapshots.Any(snapshot => snapshot.Season is not null)
+				? await connection.ExecuteScalarAsync<string?>($"SELECT `season` FROM `{tables.SeasonState}` WHERE `id` = 1{dialect.LockRow};", transaction: mirror)
+				: null;
+
+			foreach (PlayerSnapshot snapshot in snapshots.Where(snapshot => IsCurrentSeason(snapshot, mirrorSeason)))
 			{
-				await MirrorToLevelRanksAsync(connection, snapshot);
+				try
+				{
+					await MirrorToLevelRanksAsync(connection, mirror, snapshot);
+				}
+				catch (Exception ex)
+				{
+					logger.LogError("K4 player data was saved, but the optional LevelRanks mirror failed for {SteamId}: {ErrorMessage}", snapshot.SteamId, ex.Message);
+				}
 			}
-			catch (Exception ex)
-			{
-				logger.LogError("K4 player data was saved, but the optional LevelRanks mirror failed for {SteamId}: {ErrorMessage}", snapshot.SteamId, ex.Message);
-			}
+
+			await mirror.CommitAsync();
+		}
+		catch (Exception ex)
+		{
+			logger.LogError("K4 player data was saved, but the optional LevelRanks mirror failed: {ErrorMessage}", ex.Message);
 		}
 	}
 
@@ -481,7 +498,7 @@ internal sealed class SqlPlayerStore
 		return parameters;
 	}
 
-	private async Task MirrorToLevelRanksAsync(DbConnection connection, PlayerSnapshot snapshot)
+	private async Task MirrorToLevelRanksAsync(DbConnection connection, DbTransaction transaction, PlayerSnapshot snapshot)
 	{
 		int Stat(StatField field) => snapshot.Stats?[(int)field] ?? 0;
 
@@ -518,7 +535,7 @@ internal sealed class SqlPlayerStore
 				snapshot.Points,
 				Rank = snapshot.RankId,
 				Playtime = snapshot.Playtime?[(int)PlaytimeField.All] ?? 0
-			});
+			}, transaction);
 	}
 
 	/// <summary>Deletes players not seen for the given number of days, plus their reward and reset rows.</summary>
