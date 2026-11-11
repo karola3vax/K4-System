@@ -162,7 +162,7 @@
   "panorama": {
     "enabled": false,
     "rank-icons": "competitive", // CS2 rank icons in the panel: competitive, wingman, or text (shows the rank tag)
-    "toasts": true // false keeps the panel but sends every pop-up to chat for everyone, and hides the players' toasts button
+    "toasts": true // false keeps the panel but turns pop-ups off for everyone: messages that have a chat line go to chat, and the players' toasts button is hidden
   },
 
   // CS2's matchmaking rank area on the scoreboard.
