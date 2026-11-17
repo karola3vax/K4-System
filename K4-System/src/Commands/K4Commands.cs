@@ -139,7 +139,7 @@ internal sealed class K4Commands(
 		if (hud is not null)
 		{
 			foreach (string alias in Aliases.Toasts)
-				plugin.AddCommand($"css_{alias}", "Turns your panel pop-ups on or off", OnToggleToasts);
+				plugin.AddCommand($"css_{alias}", "Switches how you get messages: pop-ups, chat or both", OnToggleToasts);
 		}
 
 		if (seasons is not null)
