@@ -6,7 +6,7 @@ The 8.0 menu is a centered 1240x760 window with tabs along the top: Home, Missio
 
 ## Contract version
 
-`PanoramaHud.ContractVersion` is `8`. The server sets the class `k4-c8` on `k4-panel` every time it draws the frame. The layout's `k4-outdated` bar is visible by default and the stylesheet hides it only under `.k4-c8`. So a player whose addon is older or newer than the server sees one line saying their K4 files are out of date, and everyone else never sees it.
+`PanoramaHud.ContractVersion` is `8`. The server sets the class `k4-c8` on `k4-panel` every time it draws the frame. The layout's `k4-outdated` bar is visible by default and the stylesheet hides it only under `.k4-c8`. So a player with an 8.0 or later addon whose contract does not match the server sees one line saying their K4 files are out of date, and everyone else never sees it. A 7.x addon has no `k4-outdated` bar, and the server cannot tell which addon a player has, so a player who still has a 7.x addon gets no warning: the 8.0 server writes ids their layout does not have, and their menu stays mostly empty until the Workshop update reaches them.
 
 - Adding a part inside a version keeps the `k4-gone` rule: the part starts `k4-gone` and an older server never shows it.
 - A change that renames or removes ids bumps the number, in `ContractVersion`, in the stylesheet and on this page.
