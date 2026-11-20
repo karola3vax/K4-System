@@ -20,9 +20,9 @@
 K4-System adds a rank ladder to your Counter-Strike 2 server. Players earn points for kills, objectives and round wins, see their rank on the scoreboard, and get new missions every day. It runs on [CounterStrikeSharp](https://github.com/roflmuffin/CounterStrikeSharp) and uses SQLite with no setup, or MySQL for several servers.
 
 <p align="center">
-  <img src="docs/images/panel-home.png" alt="The K4 panel's Home page: rank, points, missions, achievements and the top players">
+  <img src="docs/images/panel-home.png" alt="The K4 menu's Home tab: your rank and points, the top 5, today's missions and what to do next">
 </p>
-<p align="center"><sub>The optional in-game panel. Images on this page are browser previews with sample data, not in-game captures.</sub></p>
+<p align="center"><sub>The optional in-game menu, opened with <code>!k4</code>. Images on this page are browser previews with sample data, not in-game captures.</sub></p>
 
 ## What players get
 
@@ -32,7 +32,7 @@ K4-System adds a rank ladder to your Counter-Strike 2 server. Players earn point
 - **Seasons.** Points start over on the 1st of each month. Final results are kept.
 - **Duels.** A kill race for points with a rule: any kill, no-scope, Zeus, knife, Scout or headshot.
 - **Bounties and points events.** A long kill streak puts a bounty on a player, and points events can be scheduled, such as double points on weekend evenings, or started by an admin.
-- **A clickable panel** for all of this, plus profiles, stats and the leaderboard. It's optional and uses a free Workshop addon.
+- **A clickable in-game menu** for all of this, with tabs for Home, Missions, Achievements, Leaderboard, Duels and Profile. It's optional and uses a free Workshop addon.
 - **Their language.** 36 languages, and each player can pick their own.
 
 ## What server owners get
@@ -44,16 +44,20 @@ K4-System adds a rank ladder to your Counter-Strike 2 server. Players earn point
 - **Admin tools.** `css_k4_history` shows every manual point change, and `css_k4_reload` applies config changes without a restart.
 - **Other server setups.** Rank-only or permission-only ladders, free-for-all servers, LVL Ranks-style `!lvl` and public `!rank` lines, and a LevelRanks table for older web panels.
 
-## The panel
+## The menu
 
 <table>
   <tr>
-    <td width="50%" valign="top"><img src="docs/images/panel-missions.png" alt="The Missions page: daily missions, the weekly mission and the streak"><br><sub><strong>Missions:</strong> daily and weekly missions, and the streak</sub></td>
-    <td width="50%" valign="top"><img src="docs/images/panel-duels.png" alt="The Duels page: pick a player, a rule and a stake"><br><sub><strong>Duels:</strong> pick a player, a rule and a stake</sub></td>
+    <td width="50%" valign="top"><img src="docs/images/panel-missions.png" alt="The Missions tab: three daily missions, the weekly mission and the streak days"><br><sub><strong>Missions:</strong> daily and weekly missions, a swap for one you don't like, and the streak</sub></td>
+    <td width="50%" valign="top"><img src="docs/images/panel-duels.png" alt="The Duels tab: an incoming challenge, the online players, the rules, the stakes and the duels running now"><br><sub><strong>Duels:</strong> pick a player, a rule and a stake. A challenge can be answered from any tab</sub></td>
   </tr>
   <tr>
-    <td valign="top"><img src="docs/images/panel-achievements.png" alt="The Achievements page: medals with progress bars"><br><sub><strong>Achievements:</strong> medals, progress and what's on your profile</sub></td>
-    <td valign="top"><img src="docs/images/panel-leaderboard.png" alt="The Leaderboard page: the podium and the player list"><br><sub><strong>Leaderboard:</strong> the top players, your place and past seasons</sub></td>
+    <td valign="top"><img src="docs/images/panel-achievements.png" alt="The Achievements tab: filters, the three shown on your profile, and medals with progress bars"><br><sub><strong>Achievements:</strong> medals, progress and the three you show on your profile</sub></td>
+    <td valign="top"><img src="docs/images/panel-leaderboard.png" alt="The Leaderboard tab: the season's players with gold, silver and bronze marks for the top three, and your own row pinned at the bottom"><br><sub><strong>Leaderboard:</strong> the season's players with medal marks for the top three and your own row, and a Players / Rank list switch for every rank and its reward</sub></td>
+  </tr>
+  <tr>
+    <td valign="top"><img src="docs/images/panel-profile.png" alt="The Profile tab: rank, showcased achievements, stats, favorite weapons, playtime per side and past seasons"><br><sub><strong>Profile:</strong> rank, stats, favorite weapons, playtime per side and past seasons, for you or any player on the leaderboard</sub></td>
+    <td valign="top"><sub><strong>Settings:</strong> the gear in the top bar picks how messages arrive (pop-ups, chat or both) and turns point messages and your rank tag on or off.<br><br><strong>Home:</strong> your rank and the points to the next one, the top 5, today's missions and the streak, and the next things to do.<br><br>Tab closes the menu.</sub></td>
   </tr>
 </table>
 
@@ -67,7 +71,7 @@ You need a Counter-Strike 2 dedicated server with [CounterStrikeSharp](https://g
 4. Open `addons/counterstrikesharp/configs/plugins/K4-System/k4-system.jsonc` and adjust what you like. Every setting has a comment.
 5. Restart the server.
 
-Players type `!k4` to see what they can do. For the clickable panel, add Workshop addon `3811667212` with [MultiAddonManager](https://github.com/Source2ZE/MultiAddonManager), as described in the [panel guide](panorama/README.md#turn-it-on-for-a-server).
+Players type `!k4` to see what they can do. For the clickable menu, add Workshop addon `3811667212` with [MultiAddonManager](https://github.com/Source2ZE/MultiAddonManager), as described in the [panel guide](panorama/README.md#turn-it-on-for-a-server).
 
 ## Documentation
 
@@ -80,7 +84,7 @@ Players type `!k4` to see what they can do. For the clickable panel, add Worksho
 | [Achievements](docs/achievements.md) | Long-term goals with one-time rewards, the achievement list, your own achievements |
 | [Seasons](docs/seasons.md) | Monthly point resets, past season results, ending a season early, undoing a reset |
 | [Profiles](docs/profiles.md) | Player profiles, favorite weapon, choosing achievements to show |
-| [Panel guide](panorama/README.md) | Setting up the clickable in-game panel and the Workshop addon |
+| [Panel guide](panorama/README.md) | Setting up the clickable in-game menu and the Workshop addon |
 | [Common problems](docs/troubleshooting.md) | What to check when something does not work |
 | [For developers](docs/developers.md) | How it works, the shared API, building from source |
 | [Changelog](CHANGELOG) | Every change, version by version |
