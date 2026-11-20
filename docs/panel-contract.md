@@ -21,7 +21,7 @@ The 8.0 menu is a centered 1240x760 window with tabs along the top: Home, Missio
 - A dialog variable set on a panel reaches every label inside it, so `{s:name}` below means "a Label with `text="{s:name}"` somewhere inside that panel". Labels shared by every row of a list (button captions) are set once on the list panel.
 - Parts a newer server fills start with `k4-gone`, so an older server never shows them empty. Every pooled row starts `k4-gone`.
 - Bar widths are the classes `w0` to `w20` (5% steps) on the bar's fill panel.
-- The root `k4-root`, the toast stack and the promotion banner are `hittest="false"`, so they never take the mouse from the game or other plugins. Every scroll box (`k4-*-list`) is `hittest="true"` with the class `k4-scroll`, which is what lets the mouse wheel scroll it.
+- The root panel (class `k4-root`), the toast stack and the promotion banner are `hittest="false"`, so they never take the mouse from the game or other plugins. Every scroll box (`k4-*-list`) is `hittest="true"` with the class `k4-scroll`, which is what lets the mouse wheel scroll it.
 - The server never sees scrolling or hover. Anything the player must reach without scrolling (their own row) sits outside the scroll box.
 
 ## Pools
@@ -52,13 +52,13 @@ A list longer than its pool ends with its `-more` label (`{s:more}`, for example
 | Toast color | `k4-tc-green`, `k4-tc-gold`, `k4-tc-red`, `k4-tc-blue`, `k4-tc-purple` | `k4-tc-green` |
 | Toast length | `k4-len-short` (2.5 s), `k4-len-normal` (3.5 s), `k4-len-long` (5 s): the timer bar's shrink time | `k4-len-normal` |
 | Next card kind | `k4-n-duel`, `k4-n-swap`, `k4-n-showcase`, `k4-n-ach`, `k4-n-season` | none |
-| State | `k4-closed`, `k4-show`, `k4-gone`, `k4-active`, `k4-done`, `k4-disabled`, `k4-current`, `k4-pinned`, `k4-locked`, `k4-on`, `k4-today`, `k4-easy`, `k4-medium`, `k4-hard`, `k4-run`, `k4-out`, `k4-me`, `k4-ok`, `k4-bad`, `k4-empty`, `k4-open` | |
+| State | `k4-closed`, `k4-show`, `k4-gone`, `k4-active`, `k4-done`, `k4-disabled`, `k4-current`, `k4-pinned`, `k4-locked`, `k4-on`, `k4-today`, `k4-easy`, `k4-medium`, `k4-hard`, `k4-run`, `k4-out`, `k4-me`, `k4-ok`, `k4-bad`, `k4-empty`, `k4-open`, `k4-lb-ranklist` | |
 
 ## Frame
 
 | Id | Kind | Variables and classes |
 | --- | --- | --- |
-| `k4-root` | Panel, full screen, `hittest="false"` | holds the window, the toasts and the promotion banner |
+| class `k4-root` | the root Panel, full screen, `hittest="false"`, no id (CS2's resource compiler rejects an id on the root panel) | holds the window, the toasts and the promotion banner |
 | `k4-panel` | Panel, the centered 1240x760 window | `k4-closed` while closed; `k4-c8` from the server |
 | `k4-outdated` | Panel | fixed English text in the layout; hidden by the stylesheet under `.k4-c8` |
 | `k4-nav-home`, `k4-nav-missions`, `k4-nav-achievements`, `k4-nav-leaderboard`, `k4-nav-duels`, `k4-nav-profile` | Button, a top tab | `{s:label}`; `k4-active` on the open tab; `k4-gone` when the module is off |
@@ -82,7 +82,7 @@ The copyright line "© 2026 karola3vax" is fixed text in the footer, always visi
 | Id | Kind | Variables and classes |
 | --- | --- | --- |
 | `k4-h-rank` | Button, opens Leaderboard on the rank list | `{s:rank}` (label `k4-h-rank-name`, rank color group), `{s:points}`, `{s:place}` (for example "#12 of 340"), `{s:next}` (next rank, empty at the top), `{s:togo}`; icon `k4-h-rank-icon` (rank emblem group); bar `k4-h-bar` |
-| `k4-h-top` | Button, opens Leaderboard | `{s:title}`; rows `k4-h-p0` … `k4-h-p2` (start `k4-gone`): `{s:pos}`, `{s:name}`; icon `k4-h-p{i}-icon`; row `k4-h-me` (starts `k4-gone`): `{s:pos}`, `{s:points}` |
+| `k4-h-top` | Button, opens Leaderboard | `{s:title}`; rows `k4-h-p0` … `k4-h-p4`, the top 5 (start `k4-gone`): `{s:pos}`, `{s:name}`, `{s:points}`; icon `k4-h-p{i}-icon`; row `k4-h-me` (starts `k4-gone`): `{s:pos}`, `{s:points}` |
 | `k4-h-today` | Panel | `{s:title}`, `{s:reset}` |
 | `k4-h-m0` … `k4-h-m3` | Button, opens Missions, start `k4-gone` | `k4-h-m3` is the weekly mission. `{s:desc}`, `{s:progress}`, `{s:reward}`; icon `k4-h-m{i}-icon`; bar `k4-h-m{i}-bar`; `k4-done` |
 | `k4-h-sd0` … `k4-h-sd6` | Panel | `{s:day}`; `k4-on` for a finished day, `k4-today` for today |
@@ -93,7 +93,7 @@ The copyright line "© 2026 karola3vax" is fixed text in the footer, always visi
 
 | Id | Kind | Variables and classes |
 | --- | --- | --- |
-| `k4-view-missions` | Panel | `{s:title}`, `{s:reset}`, `{s:swaps}` (for example "1 swap left today"), `{s:streak}`, `{s:bonus}`, `{s:streakhint}` |
+| `k4-view-missions` | Panel | `{s:title}`, `{s:reset}`, `{s:swaps}` (for example "1 swap left today"), `{s:streak}`, `{s:streakhint}` (shown as one line: "0 days in a row · ...") |
 | `k4-m0` … `k4-m2` | Panel, start `k4-gone` | `{s:diff}`, `{s:reward}`, `{s:desc}`, `{s:progress}`, `{s:paid}`; icon `k4-m{i}-icon`; bar `k4-m{i}-bar`; difficulty `k4-easy` / `k4-medium` / `k4-hard`; `k4-done` |
 | `k4-reroll-0` … `k4-reroll-2` | Button, start `k4-gone` | `{s:label}`; asks first (below) |
 | `k4-m0-ask` … `k4-m2-ask` | Panel, start `k4-gone` | the swap question inside the card: `{s:ask}` |
@@ -117,7 +117,7 @@ The copyright line "© 2026 karola3vax" is fixed text in the footer, always visi
 
 | Id | Kind | Variables and classes |
 | --- | --- | --- |
-| `k4-view-leaderboard` | Panel | `{s:season}`, `{s:status}` (Live or Final), `{s:count}` (for example "of 340 players") |
+| `k4-view-leaderboard` | Panel | `{s:season}`, `{s:status}` (Live or Final), `{s:count}` (for example "of 340 players"); `k4-lb-ranklist` while the rank list shows (hides the season switch and the count) |
 | `k4-lb-tab-players`, `k4-lb-tab-ranks` | Button, the Players / Rank list switch | `{s:label}`, `k4-active` |
 | `k4-lb-newer`, `k4-lb-older` | Button | `k4-disabled`; the season switch (players only) |
 | `k4-lb-players` | Panel | `k4-gone` while the rank list shows |

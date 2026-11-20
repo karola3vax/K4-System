@@ -1293,6 +1293,15 @@ Label
 	text-overflow: ellipsis;
 }
 
+.k4-h-p-points
+{
+	margin-left: 12px;
+	vertical-align: center;
+	font-size: 15px;
+	color: tx2;
+	white-space: nowrap;
+}
+
 .k4-h-me
 {
 	margin-top: 8px;
@@ -1456,9 +1465,10 @@ Label
 	color: ok;
 }
 
+/* Today is "where you are", not a pick: a dashed grey edge, so a streak of 0 never looks like day 1 was chosen. */
 .k4-h-sd.k4-today, .k4-sd.k4-today
 {
-	border: 1px solid line-sel;
+	border: 1px dashed line-hi;
 }
 
 .k4-today .k4-h-sd-day, .k4-today .k4-sd-day
@@ -1751,21 +1761,13 @@ css += r"""
 	white-space: nowrap;
 }
 
-.k4-streak-bonus
-{
-	margin-left: 8px;
-	font-size: 13px;
-	color: tx2;
-	white-space: nowrap;
-}
-
 .k4-streak-hint
 {
-	max-width: 220px;
-	font-size: 12px;
-	color: tx3;
-	white-space: nowrap;
-	text-overflow: shrink;
+	width: fill-parent-flow( 1 );
+	margin-left: 6px;
+	font-size: 13px;
+	color: tx2;
+	text-overflow: ellipsis;
 }
 
 .k4-streak-days
@@ -1993,6 +1995,12 @@ css += r"""
 	flow-children: right;
 }
 
+/* The rank list has no seasons and no player count: the season switch and the count belong to the players list. */
+.k4-lb-ranklist .k4-lb-switch, .k4-lb-ranklist .k4-lb-count
+{
+	visibility: collapse;
+}
+
 .k4-lb-season
 {
 	margin: 0px 12px;
@@ -2168,16 +2176,15 @@ css += r"""
 	text-overflow: shrink;
 }
 
+/* The white "you" mark. wash-color tints the whole panel, its background included, so a white badge with a dark
+   icon on it came out as a black box: the icon alone is tinted white instead. */
 .k4-rk-you
 {
-	width: 28px;
-	height: 22px;
-	margin-left: 8px;
+	width: 18px;
+	height: 18px;
+	margin-left: 10px;
 	vertical-align: center;
-	border-radius: 2px;
-	background-color: acc;
-	background-size: 14px 14px;
-	wash-color: ink;
+	wash-color: acc;
 }
 
 .k4-rk-gift
@@ -2305,10 +2312,13 @@ css += r"""
 	wash-color: tx2;
 }
 
+/* Centered like its icon: the label shrinks to its text and the label itself is centered (a 100% wide label kept
+   its text on the left in game). */
 .k4-dt-name
 {
-	width: 100%;
+	max-width: 100%;
 	margin-top: 8px;
+	horizontal-align: center;
 	text-align: center;
 	font-size: 13px;
 	font-weight: bold;
@@ -2604,23 +2614,26 @@ css += r"""
 
 .k4-pf-sc-name
 {
-	width: 100%;
+	max-width: 100%;
 	margin-top: 8px;
+	horizontal-align: center;
 	text-align: center;
 	font-size: 13px;
 	font-weight: bold;
 	white-space: nowrap;
-	text-overflow: shrink;
+	text-overflow: ellipsis;
 }
 
+/* Two lines at most at one size; long goals wrap instead of shrinking to an unreadable size. */
 .k4-pf-sc-desc
 {
-	width: 100%;
+	max-width: 100%;
+	max-height: 34px;
+	horizontal-align: center;
 	text-align: center;
 	font-size: 12px;
 	color: tx3;
-	white-space: nowrap;
-	text-overflow: shrink;
+	text-overflow: ellipsis;
 }
 
 .k4-pf-sc-hint
@@ -2760,15 +2773,16 @@ css += r"""
 	vertical-align: center;
 }
 
+/* Wide enough for the longest side name at full size ("Terörle Mücadele", "Antiterroristes"). */
 .k4-pf-line-name
 {
-	width: 96px;
+	width: 150px;
 	margin-left: 12px;
 	vertical-align: center;
 	font-size: 14px;
 	font-weight: bold;
 	white-space: nowrap;
-	text-overflow: shrink;
+	text-overflow: ellipsis;
 }
 
 .k4-pf-line-bar

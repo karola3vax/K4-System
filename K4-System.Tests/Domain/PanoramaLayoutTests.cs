@@ -59,7 +59,7 @@ public partial class PanoramaLayoutTests(ITestOutputHelper output)
 		const string P = "Panel", L = "Label", B = "Button";
 
 		// Frame
-		Add(P, ["k4-root", "k4-panel", "k4-outdated", "k4-event", "k4-crumbs", "k4-season", "k4-season-bar", "k4-duel-bar",
+		Add(P, ["k4-panel", "k4-outdated", "k4-event", "k4-crumbs", "k4-season", "k4-season-bar", "k4-duel-bar",
 			"k4-duel-bar-icon", "k4-duel-bar-timer", "k4-status", "k4-keys"], Views.Select(view => $"k4-view-{view}"));
 		Add(B, Tabs.Select(tab => $"k4-nav-{tab}"), ["k4-nav-settings", "k4-close", "k4-back", "k4-duel-bar-accept", "k4-duel-bar-decline"]);
 		Add(L, ["k4-nav-duels-badge"]);
@@ -67,7 +67,7 @@ public partial class PanoramaLayoutTests(ITestOutputHelper output)
 		// Home
 		Add(B, ["k4-h-rank", "k4-h-top"], Range("k4-h-m{i}", 4), Range("k4-h-n{i}", 3));
 		Add(L, ["k4-h-rank-name"]);
-		Add(P, ["k4-h-rank-icon", "k4-h-bar", "k4-h-me", "k4-h-today", "k4-h-next"], Range("k4-h-p{i}", 3), Range("k4-h-p{i}-icon", 3),
+		Add(P, ["k4-h-rank-icon", "k4-h-bar", "k4-h-me", "k4-h-today", "k4-h-next"], Range("k4-h-p{i}", 5), Range("k4-h-p{i}-icon", 5),
 			Range("k4-h-m{i}-icon", 4), Range("k4-h-m{i}-bar", 4), Range("k4-h-sd{i}", 7), Range("k4-h-n{i}-icon", 3));
 
 		// Missions
@@ -125,7 +125,7 @@ public partial class PanoramaLayoutTests(ITestOutputHelper output)
 			"k4-pf-challenge", "k4-pf-sc-hint", "k4-pf-pt", "k4-pf-ss-none", "k4-set-mode-lock", "k4-set-points", "k4-set-tag",
 			"k4-t-more", "k4-promo",
 		];
-		gone.AddRange(Range("k4-h-p{i}", 3).Concat(Range("k4-h-m{i}", 4)).Concat(Range("k4-h-n{i}", 3)));
+		gone.AddRange(Range("k4-h-p{i}", 5).Concat(Range("k4-h-m{i}", 4)).Concat(Range("k4-h-n{i}", 3)));
 		gone.AddRange(Range("k4-m{i}", 3).Concat(Range("k4-reroll-{i}", 3)).Concat(Range("k4-m{i}-ask", 3)));
 		gone.AddRange(Range("k4-a{i}", 64));
 		gone.AddRange(Range("k4-lb-r{i}", 100).Concat(Range("k4-lb-r{i}-duel", 100)));
@@ -247,7 +247,7 @@ public partial class PanoramaLayoutTests(ITestOutputHelper output)
 	{
 		Dictionary<string, XElement> ids = ById;
 		List<(string Id, string Class)> expected = [];
-		expected.AddRange(Range("k4-h-p{i}-icon", 3).Concat(Range("k4-lb-r{i}-icon", 100)).Concat(Range("k4-rk{i}-icon", 40))
+		expected.AddRange(Range("k4-h-p{i}-icon", 5).Concat(Range("k4-lb-r{i}-icon", 100)).Concat(Range("k4-rk{i}-icon", 40))
 			.Concat(Range("k4-pf-ss{i}-icon", 24)).Concat(Range("k4-dp{i}-icon", 64)).Select(id => (id, "sg-0")));
 		expected.AddRange(Range("k4-a-sc{i}-ring", 3).Concat(Range("k4-pf-sc{i}-ring", 3)).Concat(Range("k4-a{i}-ring", 64))
 			.Concat(Range("k4-t{i}-ring", 3)).Select(id => (id, "t-locked")));
@@ -277,14 +277,14 @@ public partial class PanoramaLayoutTests(ITestOutputHelper output)
 	[InlineData("k4-h-rank", "rank", "points", "place", "next", "togo")]
 	[InlineData("k4-h-rank-name", "rank")]
 	[InlineData("k4-h-top", "title")]
-	[InlineData("k4-h-p0", "pos", "name")]
+	[InlineData("k4-h-p0", "pos", "name", "points")]
 	[InlineData("k4-h-me", "pos", "points")]
 	[InlineData("k4-h-today", "title", "reset")]
 	[InlineData("k4-h-m3", "desc", "progress", "reward")]
 	[InlineData("k4-h-sd6", "day")]
 	[InlineData("k4-h-next", "title")]
 	[InlineData("k4-h-n2", "title", "text")]
-	[InlineData("k4-view-missions", "title", "reset", "swaps", "streak", "bonus", "streakhint")]
+	[InlineData("k4-view-missions", "title", "reset", "swaps", "streak", "streakhint")]
 	[InlineData("k4-m0", "diff", "reward", "desc", "progress", "paid")]
 	[InlineData("k4-reroll-2", "label")]
 	[InlineData("k4-m1-ask", "ask")]
@@ -441,7 +441,9 @@ public partial class PanoramaLayoutTests(ITestOutputHelper output)
 	public void Only_the_window_takes_the_mouse()
 	{
 		XElement root = Layout.Root!.Elements("Panel").Single();
-		Assert.Equal("k4-root", (string?)root.Attribute("id"));
+		// CS2's resource compiler rejects an id on the root panel ("Found root panel with 'id' attribute").
+		Assert.Null(root.Attribute("id"));
+		Assert.Contains("k4-root", Classes(root));
 		Assert.Equal("false", (string?)root.Attribute("hittest"));
 		foreach (string id in new[] { "k4-toasts", "k4-promo" })
 		{
@@ -786,6 +788,17 @@ public partial class PanoramaLayoutTests(ITestOutputHelper output)
 
 	[GeneratedRegex(@"/\*.*?\*/", RegexOptions.Singleline)]
 	private static partial Regex CommentPattern();
+
+	// wash-color tints the whole panel, its background too: a white badge with a dark icon showed as a black box in
+	// game (the rank list's "you" mark, 2026-11-20). A tinted icon must sit on a panel without its own background.
+	[Fact]
+	public void No_rule_tints_a_panel_that_has_its_own_background()
+	{
+		List<string> both = [.. Regex.Matches(Stylesheet, @"([^{}]+)\{([^}]*)\}")
+			.Where(rule => rule.Groups[2].Value.Contains("wash-color", StringComparison.Ordinal) && rule.Groups[2].Value.Contains("background-color", StringComparison.Ordinal))
+			.Select(rule => rule.Groups[1].Value.Trim())];
+		Assert.Empty(both);
+	}
 
 	[GeneratedRegex(@"s2r://(panorama/(?!styles/)[^""]+)")]
 	private static partial Regex ImagePattern();

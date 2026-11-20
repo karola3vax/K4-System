@@ -33,7 +33,7 @@ SEASON_ROWS = 24
 LIVE_DUEL_ROWS = 4
 
 HOME_MISSIONS = 4
-HOME_TOP = 3
+HOME_TOP = 5
 HOME_NEXT = 3
 STREAK_DAYS = 7
 MISSIONS = 3
@@ -141,7 +141,7 @@ with box("root"):
             lines.append("\t" * depth + f'<include src="{src}" />')
     # The screen-wide root, the toast stack and the banner let the mouse through (hittest="false"): the root
     # sits above every other HUD, and without it it took the hover from other plugins' mouse menus.
-    with box(id="k4-root", cls="k4-root", hittest="false"):
+    with box(cls="k4-root", hittest="false"):
 
         # ------------------------------------------------------------ the window
         with box(id="k4-panel", cls="k4-panel k4-closed"):
@@ -214,10 +214,11 @@ with box("root"):
                         with box("Button", id="k4-h-top", cls="k4-card k4-click k4-h-top"):
                             label("{s:title}", "k4-cap")
                             for i in range(HOME_TOP):
-                                with box(id=f"k4-h-p{i}", cls=f"k4-h-p k4-h-p-{i + 1} {GONE}"):
+                                with box(id=f"k4-h-p{i}", cls=f"k4-h-p{f' k4-h-p-{i + 1}' if i < 3 else ''} {GONE}"):  # medal edge for places 1 to 3
                                     label("{s:pos}", "k4-h-p-pos", True)
                                     pic("k4-em-s sg-0", id=f"k4-h-p{i}-icon")
                                     label("{s:name}", "k4-h-p-name")
+                                    label("{s:points}", "k4-h-p-points", True)
                             with box(id="k4-h-me", cls=f"k4-h-p k4-h-me {GONE}"):
                                 label("{s:pos}", "k4-h-p-pos", True)
                                 grow()
@@ -300,8 +301,6 @@ with box("root"):
                         with box(cls="k4-card k4-streak"):
                             with box(cls="k4-row"):
                                 label("{s:streak}", "k4-streak-count")
-                                label("{s:bonus}", "k4-streak-bonus")
-                                grow()
                                 label("{s:streakhint}", "k4-streak-hint")
                             with box(cls="k4-row k4-streak-days"):
                                 for i in range(STREAK_DAYS):
@@ -360,7 +359,7 @@ with box("root"):
                             with box("Button", id="k4-lb-older", cls="k4-arrow k4-arrow-right"):
                                 pic("k4-arrow-icon ic-expand")
                         grow()
-                        label("{s:count}", "k4-title-fact")
+                        label("{s:count}", "k4-title-fact k4-lb-count")
                     with box(id="k4-lb-players", cls="k4-lb-players"):
                         with scroll("k4-lb-list", "k4-card k4-lb-list"):
                             for i in range(LEADERBOARD_ROWS):
@@ -432,7 +431,6 @@ with box("root"):
                             for i in range(DUEL_STAKES):
                                 with box("Button", id=f"k4-ds{i}", cls=f"k4-seg-item{first(i)} {GONE}"):
                                     label("{s:label}", "k4-seg-label", True)
-                        vgrow()
                         with box(cls="k4-card k4-d-sum"):
                             with box(cls="k4-d-sum-text"):
                                 label("{s:summary}", "k4-d-summary")

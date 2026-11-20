@@ -84,12 +84,10 @@ internal sealed class PanoramaHud
 	internal const int WeaponBars = 3;
 	internal const int StreakDays = 7;
 	internal const int NextCards = 3;
-	internal const int HomeTop = 3;
+	internal const int HomeTop = 5;
 	private const int DuelTypeCards = 6;
 	private const int DuelStakeButtons = 5;
 
-	/// <summary>An unfinished achievement this far along is offered as a "do this next" card.</summary>
-	internal const int NearAchievementPercent = 75;
 
 	// "2d, 23h, 59m, 48s" does not fit a tile; two units do.
 	private const int StatTimeUnits = 2;
@@ -1242,10 +1240,10 @@ internal sealed class PanoramaHud
 				LoadPlacement(player, state, DrawPlace, "Loading the home rank");
 		}
 
-		// Top 3 of the current season, shared with the Leaderboard's cache.
+		// Top 5 of the current season, shared with the Leaderboard's cache.
 		if (ranks is not null)
 		{
-			pen.Var("k4-h-top", "title", Text(player, "hud.h-top"));
+			pen.Var("k4-h-top", "title", Text(player, "hud.h-top", HomeTop));
 			void Top(List<TopEntry> top)
 			{
 				for (int i = 0; i < HomeTop; i++)
@@ -1256,6 +1254,7 @@ internal sealed class PanoramaHud
 						continue;
 					pen.Var(row, "pos", Number(i + 1));
 					pen.Var(row, "name", top[i].Name);
+					pen.Var(row, "points", Number(top[i].Points));
 					SetEmblem(pen, $"{row}-icon", ResolveRank(top[i]));
 				}
 			}
@@ -1264,7 +1263,7 @@ internal sealed class PanoramaHud
 				Top(cached.Value);
 			else
 				Later(player, state, () => store.GetTopAsync(LeaderboardRows),
-					result => topCache[LeaderboardRows] = new Cached<List<TopEntry>>(result, DateTime.UtcNow), Top, "Loading the home top 3");
+					result => topCache[LeaderboardRows] = new Cached<List<TopEntry>>(result, DateTime.UtcNow), Top, "Loading the home top 5");
 		}
 
 		// Today: three daily missions and the weekly one, with their text, and the streak week.
@@ -1323,7 +1322,9 @@ internal sealed class PanoramaHud
 		int shown = ShowcaseOf(player).Count;
 		bool showcase = achievements is not null && player.Profile is not null && unlocked > shown && shown < PlayerProfile.ShowcaseSize;
 		(Achievements.AchievementDefinition Achievement, int Progress, bool Done)? near = AchievementOrder(player)
-			.Where(item => !item.Done && ToastRules.Reached(item.Progress, item.Achievement.Goal, NearAchievementPercent))
+			// The closest unfinished one the player has started (the order is closest first), so the card is never empty
+			// while there is something to work toward.
+			.Where(item => !item.Done && item.Progress > 0)
 			.Select(item => ((Achievements.AchievementDefinition, int, bool)?)item).FirstOrDefault();
 		bool seasonEnding = seasons?.Current is string season && SeasonClock.EndsSoon(season, DateTime.UtcNow, seasons.Zone);
 
@@ -1445,24 +1446,21 @@ internal sealed class PanoramaHud
 		pen.Var(view, "reset", missions.Footer(player));
 		pen.Var(view, "swaps", Text(player, "hud.m-swaps", swapsLeft));
 		pen.Var(view, "streakhint", Text(player, "hud.streak-hint"));
-		pen.Var(view, "bonus", $"+{Number(DrawStreakDays(player, pen, today, "k4-sd", tips: true))}");
+		DrawStreakDays(player, pen, today, "k4-sd", tips: true);
 	}
 
-	/// <summary>The streak's current week: finished days lit, today marked, each with its bonus. Returns today's bonus.</summary>
-	private int DrawStreakDays(K4Player player, HudPen pen, PlayerMissions today, string prefix, bool tips)
+	/// <summary>The streak's current week: finished days lit, today marked, each with its bonus.</summary>
+	private void DrawStreakDays(K4Player player, HudPen pen, PlayerMissions today, string prefix, bool tips)
 	{
 		int streak = MissionRules.CurrentStreak(today.Streak, today.LastCompletedDay, today.Day);
 		bool doneToday = today.LastCompletedDay == today.Day;
 		(int firstDay, int lit, int todayIndex) = StreakWindow(streak, doneToday);
 		int dayTotal = (int)Math.Min(int.MaxValue, today.Slots.Sum(slot => (long)missions!.RewardOf(slot.Mission)));
-		int todayBonus = 0;
 
 		for (int i = 0; i < StreakDays; i++)
 		{
 			int day = firstDay + i;
 			int bonus = MissionRules.StreakBonus(day, dayTotal, config.Missions.StreakBonusPercent, config.Missions.StreakMaxDays);
-			if (i == todayIndex)
-				todayBonus = bonus;
 			string slot = $"{prefix}{i}";
 			pen.Flag(slot, "k4-on", i < lit);
 			pen.Flag(slot, "k4-today", i == todayIndex);
@@ -1472,7 +1470,6 @@ internal sealed class PanoramaHud
 			pen.Var(slot, "bonus", $"+{Number(bonus)}");
 			pen.Var(slot, "tip", Text(player, i < lit ? "hud.tip.streak-done" : i == todayIndex ? "hud.tip.streak-today" : "hud.tip.streak-next", day, Number(bonus)));
 		}
-		return todayBonus;
 	}
 
 	/// <summary>
@@ -1664,6 +1661,7 @@ internal sealed class PanoramaHud
 		pen.Flag("k4-lb-tab-players", "k4-active", !state.RankList);
 		pen.Flag("k4-lb-tab-ranks", "k4-active", state.RankList);
 		pen.Set("k4-lb-players", "k4-gone", state.RankList);
+		pen.Flag("k4-view-leaderboard", "k4-lb-ranklist", state.RankList);
 		pen.Set("k4-lb-ranks", "k4-gone", !state.RankList);
 
 		if (state.RankList)
@@ -2033,7 +2031,7 @@ internal sealed class PanoramaHud
 			: refusal is DuelService.Refusal reason
 				? StripColors(Text(player, reason.Key, reason.Args))
 				: target is null
-					? Text(player, others.Count == 0 ? "hud.duel.nobody" : "hud.duel.pick-player")
+					? others.Count == 0 ? "" : Text(player, "hud.duel.pick-player") // the empty player list already says nobody is here
 					: state.DuelStake is null ? Text(player, "hud.duel.pick-stake") : "");
 		pen.Flag("k4-d-send", "k4-disabled", !ready);
 
@@ -2259,10 +2257,10 @@ internal sealed class PanoramaHud
 			SetPicture(pen, $"{tile}-icon", tiles[i].Icon);
 		}
 
-		// Favorite weapon and the top three, bars relative to the first.
+		// The top three weapons under a plain caption: the first row already names the favorite and its kills.
 		(string Weapon, int Kills)? favorite = profile.Stats is null ? null : PlayerProfile.Favorite(profile.WeaponKills);
-		pen.Var(view, "fav", favorite is (string weapon, _) ? WeaponCatalog.DisplayName(weapon) : "");
-		pen.Var(view, "favkills", favorite is (_, int weaponKills) ? Number(weaponKills) : "");
+		pen.Var(view, "fav", favorite is null ? "" : Text(player, "hud.pf-favorite"));
+		pen.Var(view, "favkills", "");
 		List<KeyValuePair<string, int>> weapons = profile.Stats is null ? [] : [.. profile.WeaponKills
 			.Where(pair => pair.Value > 0)
 			.OrderByDescending(pair => pair.Value)

@@ -392,7 +392,7 @@
   "hud.yes": "Yes",
   "hud.no": "No",
   "hud.challenge": "Challenge",
-  "hud.h-top": "Top 3",
+  "hud.h-top": "Top {0}",
   "hud.h-today": "Today",
   "hud.h-next": "Next to do",
   "hud.next.duel": "Answer the duel",

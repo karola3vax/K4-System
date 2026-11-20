@@ -3,7 +3,7 @@
 		<include src="s2r://panorama/styles/csgostyles.vcss_c" />
 		<include src="s2r://panorama/styles/custom_game/k4_ui.vcss_c" />
 	</styles>
-	<Panel id="k4-root" class="k4-root" hittest="false">
+	<Panel class="k4-root" hittest="false">
 		<Panel id="k4-panel" class="k4-panel k4-closed">
 			<Panel class="k4-top">
 				<Panel class="k4-brand">
@@ -130,16 +130,31 @@
 								<Label class="k4-h-p-pos stratum-bold-tf" text="{s:pos}" />
 								<Panel id="k4-h-p0-icon" class="k4-pic k4-em-s sg-0" />
 								<Label class="k4-h-p-name" text="{s:name}" />
+								<Label class="k4-h-p-points stratum-bold-tf" text="{s:points}" />
 							</Panel>
 							<Panel id="k4-h-p1" class="k4-h-p k4-h-p-2 k4-gone">
 								<Label class="k4-h-p-pos stratum-bold-tf" text="{s:pos}" />
 								<Panel id="k4-h-p1-icon" class="k4-pic k4-em-s sg-0" />
 								<Label class="k4-h-p-name" text="{s:name}" />
+								<Label class="k4-h-p-points stratum-bold-tf" text="{s:points}" />
 							</Panel>
 							<Panel id="k4-h-p2" class="k4-h-p k4-h-p-3 k4-gone">
 								<Label class="k4-h-p-pos stratum-bold-tf" text="{s:pos}" />
 								<Panel id="k4-h-p2-icon" class="k4-pic k4-em-s sg-0" />
 								<Label class="k4-h-p-name" text="{s:name}" />
+								<Label class="k4-h-p-points stratum-bold-tf" text="{s:points}" />
+							</Panel>
+							<Panel id="k4-h-p3" class="k4-h-p k4-gone">
+								<Label class="k4-h-p-pos stratum-bold-tf" text="{s:pos}" />
+								<Panel id="k4-h-p3-icon" class="k4-pic k4-em-s sg-0" />
+								<Label class="k4-h-p-name" text="{s:name}" />
+								<Label class="k4-h-p-points stratum-bold-tf" text="{s:points}" />
+							</Panel>
+							<Panel id="k4-h-p4" class="k4-h-p k4-gone">
+								<Label class="k4-h-p-pos stratum-bold-tf" text="{s:pos}" />
+								<Panel id="k4-h-p4-icon" class="k4-pic k4-em-s sg-0" />
+								<Label class="k4-h-p-name" text="{s:name}" />
+								<Label class="k4-h-p-points stratum-bold-tf" text="{s:points}" />
 							</Panel>
 							<Panel id="k4-h-me" class="k4-h-p k4-h-me k4-gone">
 								<Label class="k4-h-p-pos stratum-bold-tf" text="{s:pos}" />
@@ -409,8 +424,6 @@
 						<Panel class="k4-card k4-streak">
 							<Panel class="k4-row">
 								<Label class="k4-streak-count" text="{s:streak}" />
-								<Label class="k4-streak-bonus" text="{s:bonus}" />
-								<Panel class="k4-grow" />
 								<Label class="k4-streak-hint" text="{s:streakhint}" />
 							</Panel>
 							<Panel class="k4-row k4-streak-days">
@@ -1928,7 +1941,7 @@
 							</Button>
 						</Panel>
 						<Panel class="k4-grow" />
-						<Label class="k4-title-fact" text="{s:count}" />
+						<Label class="k4-title-fact k4-lb-count" text="{s:count}" />
 					</Panel>
 					<Panel id="k4-lb-players" class="k4-lb-players">
 						<Panel id="k4-lb-list" class="k4-scroll k4-card k4-lb-list" hittest="true">
@@ -4701,7 +4714,6 @@
 								<Label class="k4-seg-label stratum-bold-tf" text="{s:label}" />
 							</Button>
 						</Panel>
-						<Panel class="k4-vgrow" />
 						<Panel class="k4-card k4-d-sum">
 							<Panel class="k4-d-sum-text">
 								<Label class="k4-d-summary" text="{s:summary}" />
