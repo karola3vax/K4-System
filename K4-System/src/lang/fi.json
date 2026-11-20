@@ -433,6 +433,7 @@
   "hud.st.taken-back": "Haaste peruttu",
   "hud.st.declined": "Haaste hylätty",
   "hud.st.left": "Pelaaja poistui palvelimelta",
+  "hud.outdated-hint": "{silver}Näyttääkö valikko tyhjältä? K4-tiedostosi ovat vanhentuneet, käynnistä CS2 uudelleen.",
 
   "bounty.wanted": "{lightred}ETSITÄÄN: {lime}{0} {silver}on {lime}{1} {silver}tapon putkessa. Tappo tuo {green}+{2} {silver}pistettä!",
   "bounty.claimed": "{lime}{0} {silver}kaatoi etsityn pelaajan {lime}{1} {silver}ja saa palkkion: {green}+{2}",

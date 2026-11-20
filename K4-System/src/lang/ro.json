@@ -433,6 +433,7 @@
   "hud.st.taken-back": "Provocare retrasă",
   "hud.st.declined": "Provocare refuzată",
   "hud.st.left": "Jucătorul a ieșit de pe server",
+  "hud.outdated-hint": "{silver}Meniul pare gol? Fișierele tale K4 sunt învechite, repornește CS2.",
 
   "bounty.wanted": "{lightred}CĂUTAT: {lime}{0} {silver}are o serie de {lime}{1} {silver}kill-uri. Elimină-l pentru {green}+{2} {silver}puncte!",
   "bounty.claimed": "{lime}{0} {silver}l-a doborât pe căutatul {lime}{1} {silver}și ia recompensa: {green}+{2}",

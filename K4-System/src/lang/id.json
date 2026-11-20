@@ -433,6 +433,7 @@
   "hud.st.taken-back": "Tantangan ditarik",
   "hud.st.declined": "Tantangan ditolak",
   "hud.st.left": "Pemain itu keluar dari server",
+  "hud.outdated-hint": "{silver}Menu terlihat kosong? File K4 kamu sudah usang, mulai ulang CS2.",
 
   "bounty.wanted": "{lightred}BURONAN: {lime}{0} {silver}sedang streak {lime}{1} {silver}kill. Bunuh dia untuk {green}+{2} {silver}poin!",
   "bounty.claimed": "{lime}{0} {silver}menjatuhkan buronan {lime}{1} {silver}dan mengklaim hadiahnya: {green}+{2}",

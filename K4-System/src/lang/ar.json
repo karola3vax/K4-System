@@ -433,6 +433,7 @@
   "hud.st.taken-back": "سُحب التحدي",
   "hud.st.declined": "رُفض التحدي",
   "hud.st.left": "غادر اللاعب الخادم",
+  "hud.outdated-hint": "{silver}هل تبدو القائمة فارغة؟ ملفات K4 لديك قديمة، أعد تشغيل CS2.",
 
   "bounty.wanted": "{lightred}مطلوب: {lime}{0} {silver}حقق {lime}{1} {silver}قتل متتالي. اقتله واحصل على {green}+{2} {silver}نقطة!",
   "bounty.claimed": "{lime}{0} {silver}أسقط المطلوب {lime}{1} {silver}ونال المكافأة: {green}+{2}",

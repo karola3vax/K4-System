@@ -433,6 +433,7 @@
   "hud.st.taken-back": "Đã rút lại thách đấu",
   "hud.st.declined": "Thách đấu bị từ chối",
   "hud.st.left": "Người chơi đó đã rời server",
+  "hud.outdated-hint": "{silver}Menu trông trống trơn? Tệp K4 của bạn đã cũ, hãy khởi động lại CS2.",
 
   "bounty.wanted": "{lightred}TRUY NÃ: {lime}{0} {silver}đang có chuỗi {lime}{1} {silver}kill. Hạ gục người này để nhận {green}+{2} {silver}điểm!",
   "bounty.claimed": "{lime}{0} {silver}đã hạ kẻ bị truy nã {lime}{1} {silver}và nhận tiền thưởng: {green}+{2}",

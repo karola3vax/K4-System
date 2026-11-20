@@ -433,6 +433,7 @@
   "hud.st.taken-back": "Шақыру кері алынды",
   "hud.st.declined": "Шақырудан бас тартылды",
   "hud.st.left": "Ойыншы серверден шықты",
+  "hud.outdated-hint": "{silver}Мәзір бос па? K4 файлдарың ескірген, CS2-ні қайта іске қос.",
 
   "bounty.wanted": "{lightred}ІЗДЕУДЕ: {lime}{0} {silver}қатарынан {lime}{1} {silver}өлтіру сериясында. Оны өлтірген {green}+{2} {silver}ұпай алады!",
   "bounty.claimed": "{lime}{0} {silver}іздеудегі {lime}{1} {silver}ойыншысын құлатып, сыйақыны алды: {green}+{2}",

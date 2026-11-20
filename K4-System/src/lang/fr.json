@@ -433,6 +433,7 @@
   "hud.st.taken-back": "Défi annulé",
   "hud.st.declined": "Défi refusé",
   "hud.st.left": "Ce joueur a quitté le serveur",
+  "hud.outdated-hint": "{silver}Le menu semble vide ? Tes fichiers K4 ne sont pas à jour, redémarre CS2.",
 
   "bounty.wanted": "{lightred}RECHERCHÉ : {lime}{0} {silver}enchaîne {lime}{1} {silver}kills. Une élimination rapporte {green}+{2} {silver}points !",
   "bounty.claimed": "{lime}{0} {silver}a éliminé le recherché {lime}{1} {silver}et empoche la prime : {green}+{2}",

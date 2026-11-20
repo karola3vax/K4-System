@@ -433,6 +433,7 @@
   "hud.st.taken-back": "Düello teklifi geri çekildi",
   "hud.st.declined": "Düello teklifi reddedildi",
   "hud.st.left": "Oyuncu sunucudan çıktı",
+  "hud.outdated-hint": "{silver}Menü boş mu görünüyor? K4 dosyaların güncel değil, CS2'yi yeniden başlat.",
 
   "bounty.wanted": "{lightred}ARANIYOR: {lime}{0} {silver}art arda {lime}{1} {silver}öldürme serisinde. Onu öldürene {green}+{2} {silver}puan!",
   "bounty.claimed": "{lime}{0} {silver}aranan {lime}{1} {silver}oyuncusunu indirdi ve ödülü aldı: {green}+{2}",

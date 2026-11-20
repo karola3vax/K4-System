@@ -433,6 +433,7 @@
   "hud.st.taken-back": "Виклик відкликано",
   "hud.st.declined": "Виклик відхилено",
   "hud.st.left": "Цей гравець покинув сервер",
+  "hud.outdated-hint": "{silver}Меню виглядає порожнім? Твої файли K4 застаріли, перезапусти CS2.",
 
   "bounty.wanted": "{lightred}РОЗШУКУЄТЬСЯ: {lime}{0} {silver}має серію з {lime}{1} {silver}вбивств. Вбий його й отримай {green}+{2} {silver}очок!",
   "bounty.claimed": "{lime}{0} {silver}вбив розшукуваного {lime}{1} {silver}і забирає нагороду: {green}+{2}",

@@ -433,6 +433,7 @@
   "hud.st.taken-back": "Kihívás visszavonva",
   "hud.st.declined": "Kihívás elutasítva",
   "hud.st.left": "A játékos elhagyta a szervert",
+  "hud.outdated-hint": "{silver}Üresnek tűnik a menü? A K4 fájljaid elavultak, indítsd újra a CS2-t.",
 
   "bounty.wanted": "{lightred}KÖRÖZÖTT: {lime}{0} {silver}sorozata már {lime}{1} {silver}ölés. Egy ölés {green}+{2} {silver}pontot ér!",
   "bounty.claimed": "{lime}{0} {silver}leszedte a körözött {lime}{1} {silver}játékost, és megkapja a vérdíjat: {green}+{2}",

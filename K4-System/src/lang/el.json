@@ -433,6 +433,7 @@
   "hud.st.taken-back": "Η πρόκληση ανακλήθηκε",
   "hud.st.declined": "Η πρόκληση απορρίφθηκε",
   "hud.st.left": "Ο παίκτης έφυγε από τον server",
+  "hud.outdated-hint": "{silver}Το μενού φαίνεται άδειο; Τα αρχεία K4 σου είναι παλιά, επανεκκίνησε το CS2.",
 
   "bounty.wanted": "{lightred}ΚΑΤΑΖΗΤΕΙΤΑΙ: {lime}{0} {silver}έχει σερί {lime}{1} {silver}φόνων. Όποιος τον σκοτώσει παίρνει {green}+{2} {silver}πόντους!",
   "bounty.claimed": "{lime}{0} {silver}έριξε τον καταζητούμενο {lime}{1} {silver}και παίρνει την αμοιβή: {green}+{2}",

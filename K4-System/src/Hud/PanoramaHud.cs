@@ -227,6 +227,11 @@ internal sealed class PanoramaHud
 	private readonly ILogger logger;
 
 	private readonly Dictionary<int, HudState> open = [];
+
+	// Players told once per connection how to fix a menu that looks empty (a 7.x addon on an 8.0 server: the server
+	// cannot see which addon a player has, and a 7.x layout has no out-of-date bar to show).
+	private readonly HashSet<ulong> hinted = [];
+
 	private readonly Dictionary<int, List<ToastEntry>> toasts = [];
 	private readonly Dictionary<int, int> promotions = [];
 
@@ -488,12 +493,22 @@ internal sealed class PanoramaHud
 			if (!gameThread.IsActive || !open.TryGetValue(player.Slot, out HudState? current) || current.Version != version)
 				return;
 			if (Usable(player))
+			{
 				Show(player, current, enableCapture);
+				HintOutdatedOnce(player);
+			}
 			else
 				// No window came up, so it must not count as open: toasts would wait under an invisible window and
 				// click results would never reach chat.
 				open.Remove(player.Slot);
 		}, TimerFlags.STOP_ON_MAPCHANGE);
+	}
+
+	/// <summary>The first time a player's menu opens on this connection, one chat line on what to do if it looks empty.</summary>
+	private void HintOutdatedOnce(K4Player player)
+	{
+		if (hinted.Add(player.SteamId))
+			chat.Tell(player.Controller, "hud.outdated-hint");
 	}
 
 	public void Close(K4Player player)
@@ -531,6 +546,8 @@ internal sealed class PanoramaHud
 		open.Remove(controller.Slot);
 		toasts.Remove(controller.Slot);
 		promotions.Remove(controller.Slot);
+		if (controller.IsValid)
+			hinted.Remove(controller.SteamID);
 	}
 
 	/// <summary>The scoreboard key closes the panel, because the mouse is captured while it is open.</summary>

@@ -433,6 +433,7 @@
   "hud.st.taken-back": "挑战已撤回",
   "hud.st.declined": "挑战被拒绝",
   "hud.st.left": "该玩家已离开服务器",
+  "hud.outdated-hint": "{silver}菜单看起来是空的？你的 K4 文件已过期，请重启 CS2。",
 
   "bounty.wanted": "{lightred}通缉：{lime}{0} {silver}正在 {lime}{1} {silver}连杀。击杀他可得 {green}+{2} {silver}积分！",
   "bounty.claimed": "{lime}{0} {silver}击倒了通缉犯 {lime}{1}{silver}，领取赏金：{green}+{2}",

@@ -433,6 +433,7 @@
   "hud.st.taken-back": "Sfida ritirata",
   "hud.st.declined": "Sfida rifiutata",
   "hud.st.left": "Quel giocatore ha lasciato il server",
+  "hud.outdated-hint": "{silver}Il menu sembra vuoto? I tuoi file K4 non sono aggiornati, riavvia CS2.",
 
   "bounty.wanted": "{lightred}RICERCATO: {lime}{0} {silver}è a una serie di {lime}{1} {silver}uccisioni. Fallo fuori per {green}+{2} {silver}punti!",
   "bounty.claimed": "{lime}{0} {silver}ha fatto fuori il ricercato {lime}{1} {silver}e incassa la taglia: {green}+{2}",

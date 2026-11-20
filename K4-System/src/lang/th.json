@@ -433,6 +433,7 @@
   "hud.st.taken-back": "ถอนคำท้าแล้ว",
   "hud.st.declined": "คำท้าถูกปฏิเสธ",
   "hud.st.left": "ผู้เล่นคนนั้นออกจากเซิร์ฟเวอร์แล้ว",
+  "hud.outdated-hint": "{silver}เมนูดูว่างเปล่าใช่ไหม? ไฟล์ K4 ของคุณล้าสมัย ให้รีสตาร์ท CS2",
 
   "bounty.wanted": "{lightred}ประกาศจับ: {lime}{0} {silver}คิลต่อเนื่อง {lime}{1} {silver}ครั้งแล้ว ใครเก็บได้รับ {green}+{2} {silver}แต้ม!",
   "bounty.claimed": "{lime}{0} {silver}เก็บ {lime}{1} {silver}ที่ถูกประกาศจับได้ และรับค่าหัว: {green}+{2}",

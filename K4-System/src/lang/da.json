@@ -433,6 +433,7 @@
   "hud.st.taken-back": "Udfordring trukket tilbage",
   "hud.st.declined": "Udfordring afvist",
   "hud.st.left": "Spilleren forlod serveren",
+  "hud.outdated-hint": "{silver}Ser menuen tom ud? Dine K4-filer er forældede, genstart CS2.",
 
   "bounty.wanted": "{lightred}EFTERSØGT: {lime}{0} {silver}har en streak på {lime}{1} {silver}kills. Et drab giver {green}+{2} {silver}point!",
   "bounty.claimed": "{lime}{0} {silver}nedlagde den eftersøgte {lime}{1} {silver}og tager dusøren: {green}+{2}",

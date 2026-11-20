@@ -433,6 +433,7 @@
   "hud.st.taken-back": "결투 신청 취소됨",
   "hud.st.declined": "결투 신청 거절됨",
   "hud.st.left": "그 플레이어가 서버를 나갔습니다",
+  "hud.outdated-hint": "{silver}메뉴가 비어 보이나요? K4 파일이 오래되었습니다. CS2를 다시 시작하세요.",
 
   "bounty.wanted": "{lightred}현상수배: {lime}{0}{silver}님이 {lime}{1}{silver}연속 킬 중이에요. 처치하면 {green}+{2} {silver}포인트!",
   "bounty.claimed": "{lime}{0}{silver}님이 현상수배된 {lime}{1}{silver}님을 처치하고 현상금을 받았어요: {green}+{2}",

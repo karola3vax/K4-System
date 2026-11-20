@@ -433,6 +433,7 @@
   "hud.st.taken-back": "Kvietimas atšauktas",
   "hud.st.declined": "Kvietimas atmestas",
   "hud.st.left": "Žaidėjas paliko serverį",
+  "hud.outdated-hint": "{silver}Meniu atrodo tuščias? Tavo K4 failai pasenę, paleisk CS2 iš naujo.",
 
   "bounty.wanted": "{lightred}IEŠKOMAS: {lime}{0} {silver}turi {lime}{1} {silver}nužudymų seriją. Nužudyk jį ir gauk {green}+{2} {silver}taškų!",
   "bounty.claimed": "{lime}{0} {silver}nukovė ieškomą {lime}{1} {silver}ir pasiima atlygį: {green}+{2}",

@@ -433,6 +433,7 @@
   "hud.st.taken-back": "Challenge taken back",
   "hud.st.declined": "Challenge declined",
   "hud.st.left": "That player left the server",
+  "hud.outdated-hint": "{silver}Menu looks empty? Your K4 files are out of date, restart CS2.",
 
   "bounty.wanted": "{lightred}WANTED: {lime}{0} {silver}is on a {lime}{1}{silver}-kill streak. Kill them for {green}+{2} {silver}points!",
   "bounty.claimed": "{lime}{0} {silver}took down wanted {lime}{1} {silver}and claims the bounty: {green}+{2}",

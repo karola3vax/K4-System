@@ -433,6 +433,7 @@
   "hud.st.taken-back": "Izazov povučen",
   "hud.st.declined": "Izazov odbijen",
   "hud.st.left": "Taj igrač je napustio server",
+  "hud.outdated-hint": "{silver}Мени изгледа празно? Твоји K4 фајлови су застарели, поново покрени CS2.",
 
   "bounty.wanted": "{lightred}TRAŽI SE: {lime}{0} {silver}ima niz od {lime}{1} {silver}killova. Ubij ga za {green}+{2} {silver}poena!",
   "bounty.claimed": "{lime}{0} {silver}je skinuo traženog {lime}{1} {silver}i uzima ucenu: {green}+{2}",

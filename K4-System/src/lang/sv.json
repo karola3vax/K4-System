@@ -433,6 +433,7 @@
   "hud.st.taken-back": "Utmaning tillbakatagen",
   "hud.st.declined": "Utmaning nekad",
   "hud.st.left": "Spelaren lämnade servern",
+  "hud.outdated-hint": "{silver}Ser menyn tom ut? Dina K4-filer är inaktuella, starta om CS2.",
 
   "bounty.wanted": "{lightred}EFTERLYST: {lime}{0} {silver}har en svit på {lime}{1} {silver}kills. En kill ger {green}+{2} {silver}poäng!",
   "bounty.claimed": "{lime}{0} {silver}tog ner efterlysta {lime}{1} {silver}och tar belöningen: {green}+{2}",

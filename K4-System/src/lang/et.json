@@ -433,6 +433,7 @@
   "hud.st.taken-back": "Kutse võeti tagasi",
   "hud.st.declined": "Kutse lükati tagasi",
   "hud.st.left": "Mängija lahkus serverist",
+  "hud.outdated-hint": "{silver}Menüü tundub tühi? Sinu K4 failid on aegunud, taaskäivita CS2.",
 
   "bounty.wanted": "{lightred}TAGAOTSITAV: {lime}{0} {silver}on {lime}{1} {silver}tapmise seerias. Tapmine annab {green}+{2} {silver}punkti!",
   "bounty.claimed": "{lime}{0} {silver}tappis tagaotsitava {lime}{1} {silver}ja saab pearaha: {green}+{2}",

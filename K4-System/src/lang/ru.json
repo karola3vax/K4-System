@@ -433,6 +433,7 @@
   "hud.st.taken-back": "Вызов отозван",
   "hud.st.declined": "Вызов отклонён",
   "hud.st.left": "Этот игрок покинул сервер",
+  "hud.outdated-hint": "{silver}Меню выглядит пустым? Твои файлы K4 устарели, перезапусти CS2.",
 
   "bounty.wanted": "{lightred}РАЗЫСКИВАЕТСЯ: {lime}{0} {silver}на серии из {lime}{1} {silver}убийств. Убей его и получи {green}+{2} {silver}очков!",
   "bounty.claimed": "{lime}{0} {silver}убил разыскиваемого {lime}{1} {silver}и забирает награду: {green}+{2}",

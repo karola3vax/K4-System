@@ -433,6 +433,7 @@
   "hud.st.taken-back": "Wyzwanie cofnięte",
   "hud.st.declined": "Wyzwanie odrzucone",
   "hud.st.left": "Ten gracz opuścił serwer",
+  "hud.outdated-hint": "{silver}Menu wygląda na puste? Twoje pliki K4 są nieaktualne, uruchom ponownie CS2.",
 
   "bounty.wanted": "{lightred}POSZUKIWANY: {lime}{0} {silver}ma serię {lime}{1} {silver}zabójstw. Zabij go za {green}+{2} {silver}punktów!",
   "bounty.claimed": "{lime}{0} {silver}zdjął poszukiwanego {lime}{1} {silver}i odbiera nagrodę: {green}+{2}",

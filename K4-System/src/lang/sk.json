@@ -433,6 +433,7 @@
   "hud.st.taken-back": "Výzva vzatá späť",
   "hud.st.declined": "Výzva odmietnutá",
   "hud.st.left": "Hráč opustil server",
+  "hud.outdated-hint": "{silver}Vyzerá menu prázdne? Tvoje súbory K4 sú zastarané, reštartuj CS2.",
 
   "bounty.wanted": "{lightred}HĽADANÝ: {lime}{0} {silver}má sériu {lime}{1} {silver}killov. Za jeho zabitie je {green}+{2} {silver}bodov!",
   "bounty.claimed": "{lime}{0} {silver}zložil hľadaného hráča {lime}{1} {silver}a berie odmenu: {green}+{2}",

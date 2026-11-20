@@ -433,6 +433,7 @@
   "hud.st.taken-back": "Uitdaging ingetrokken",
   "hud.st.declined": "Uitdaging geweigerd",
   "hud.st.left": "Die speler heeft de server verlaten",
+  "hud.outdated-hint": "{silver}Ziet het menu er leeg uit? Je K4-bestanden zijn verouderd, start CS2 opnieuw.",
 
   "bounty.wanted": "{lightred}GEZOCHT: {lime}{0} {silver}zit op een reeks van {lime}{1} {silver}kills. Een kill levert {green}+{2} {silver}punten op!",
   "bounty.claimed": "{lime}{0} {silver}heeft de gezochte {lime}{1} {silver}uitgeschakeld en pakt de premie: {green}+{2}",

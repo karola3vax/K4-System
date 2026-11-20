@@ -433,6 +433,7 @@
   "hud.st.taken-back": "Duel təklifi geri götürüldü",
   "hud.st.declined": "Duel təklifi rədd edildi",
   "hud.st.left": "Oyunçu serverdən çıxdı",
+  "hud.outdated-hint": "{silver}Menyu boş görünür? K4 faylların köhnədir, CS2-ni yenidən başlat.",
 
   "bounty.wanted": "{lightred}AXTARILIR: {lime}{0} {silver}ardıcıl {lime}{1} {silver}öldürmə seriyasındadır. Onu öldürənə {green}+{2} {silver}xal!",
   "bounty.claimed": "{lime}{0} {silver}axtarılan {lime}{1} {silver}oyunçusunu yıxdı və mükafatı aldı: {green}+{2}",

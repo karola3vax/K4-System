@@ -433,6 +433,7 @@
   "hud.st.taken-back": "Reto retirado",
   "hud.st.declined": "Reto rechazado",
   "hud.st.left": "Ese jugador salió del servidor",
+  "hud.outdated-hint": "{silver}¿El menú se ve vacío? Tus archivos de K4 están desactualizados, reinicia CS2.",
 
   "bounty.wanted": "{lightred}SE BUSCA: {lime}{0} {silver}lleva una racha de {lime}{1} {silver}bajas. ¡Elimínalo por {green}+{2} {silver}puntos!",
   "bounty.claimed": "{lime}{0} {silver}abatió al buscado {lime}{1} {silver}y cobra la recompensa: {green}+{2}",

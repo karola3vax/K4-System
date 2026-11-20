@@ -433,6 +433,7 @@
   "hud.st.taken-back": "申し込みを取り消しました",
   "hud.st.declined": "申し込みが断られました",
   "hud.st.left": "そのプレイヤーはサーバーを退出しました",
+  "hud.outdated-hint": "{silver}メニューが空に見えますか？K4のファイルが古いので、CS2を再起動してください。",
 
   "bounty.wanted": "{lightred}指名手配：{lime}{0} {silver}が {lime}{1} {silver}キル連続中。倒すと {green}+{2} {silver}ポイント！",
   "bounty.claimed": "{lime}{0} {silver}が指名手配の {lime}{1} {silver}を倒し、賞金を獲得：{green}+{2}",

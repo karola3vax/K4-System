@@ -433,6 +433,7 @@
   "hud.st.taken-back": "Forderung zurückgezogen",
   "hud.st.declined": "Forderung abgelehnt",
   "hud.st.left": "Spieler hat den Server verlassen",
+  "hud.outdated-hint": "{silver}Menü sieht leer aus? Deine K4-Dateien sind veraltet, starte CS2 neu.",
 
   "bounty.wanted": "{lightred}GESUCHT: {lime}{0} {silver}hat eine {lime}{1}{silver}-Kill-Serie. Ein Kill bringt {green}+{2} {silver}Punkte!",
   "bounty.claimed": "{lime}{0} {silver}hat den gesuchten {lime}{1} {silver}erledigt und kassiert das Kopfgeld: {green}+{2}",

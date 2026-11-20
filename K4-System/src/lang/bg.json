@@ -433,6 +433,7 @@
   "hud.st.taken-back": "Поканата е оттеглена",
   "hud.st.declined": "Поканата е отказана",
   "hud.st.left": "Играчът напусна сървъра",
+  "hud.outdated-hint": "{silver}Менюто изглежда празно? Файловете ти на K4 са остарели, рестартирай CS2.",
 
   "bounty.wanted": "{lightred}ИЗДИРВАН: {lime}{0} {silver}има серия от {lime}{1} {silver}убийства. Убий го за {green}+{2} {silver}точки!",
   "bounty.claimed": "{lime}{0} {silver}свали издирвания {lime}{1} {silver}и прибира наградата: {green}+{2}",

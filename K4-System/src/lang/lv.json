@@ -433,6 +433,7 @@
   "hud.st.taken-back": "Izaicinājums atsaukts",
   "hud.st.declined": "Izaicinājums noraidīts",
   "hud.st.left": "Spēlētājs pameta serveri",
+  "hud.outdated-hint": "{silver}Izvēlne izskatās tukša? Tavi K4 faili ir novecojuši, restartē CS2.",
 
   "bounty.wanted": "{lightred}MEKLĒTS: {lime}{0} {silver}ir {lime}{1} {silver}nogalinājumu sērijā. Nogalini viņu un saņem {green}+{2} {silver}punktus!",
   "bounty.claimed": "{lime}{0} {silver}nogāza meklēto {lime}{1} {silver}un saņem atlīdzību: {green}+{2}",
