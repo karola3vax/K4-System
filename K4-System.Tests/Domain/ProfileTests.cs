@@ -96,7 +96,7 @@ public class ProfileTests
 	public void Profile_layout_sizes_match_the_server()
 	{
 		Assert.Equal(3, PlayerProfile.ShowcaseSize);
-		Assert.Equal(6, PanoramaHud.ProfileTiles);
-		Assert.Equal(3, PanoramaHud.ProfileSeasons);
+		Assert.Equal(8, PanoramaHud.ProfileTiles);
+		Assert.Equal(24, PanoramaHud.SeasonRows);
 	}
 }

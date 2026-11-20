@@ -45,3 +45,18 @@ public sealed record Toast(
 		_ => 3.5f
 	};
 }
+
+/// <summary>A toast on screen or waiting for a free slot. Game thread only.</summary>
+internal sealed class ToastEntry(Toast toast)
+{
+	public Toast Toast { get; } = toast;
+
+	/// <summary>On screen with its timer running; false while it waits.</summary>
+	public bool Showing { get; set; }
+
+	/// <summary>Sliding out: still drawn in its slot until the slide-out ends.</summary>
+	public bool Leaving { get; set; }
+
+	/// <summary>Counts each start, so the timer of an earlier showing does nothing after the toast was put back to wait.</summary>
+	public int Run { get; set; }
+}

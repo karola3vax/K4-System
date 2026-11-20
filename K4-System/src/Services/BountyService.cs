@@ -70,7 +70,7 @@ internal sealed class BountyService(PluginConfig config, PlayerRegistry players,
 		if (hud.Hud is PanoramaHud panel)
 		{
 			foreach (K4Player viewer in players.ValidHumans.ToArray())
-				panel.Refresh(viewer, HudTab.Rank);
+				panel.Refresh(viewer, HudTab.Home);
 		}
 	}
 

@@ -107,4 +107,100 @@ public class ToastRulesTests
 	[Fact]
 	public void The_shipped_achievements_use_all_three_tiers()
 		=> Assert.Equal(["bronze", "gold", "silver"], AchievementFile.Parse(AchievementFile.DefaultContent).Select(AchievementRules.Tier).Distinct().Order());
+
+	private static ToastEntry Entry(string kind) => new(new Toast(kind, "", "", "ic-check", ToastColor.Green));
+
+	// The stack is newest first, as PanoramaHud keeps it.
+	private static void Add(List<ToastEntry> stack, ToastEntry entry) => stack.Insert(0, entry);
+
+	[Fact]
+	public void With_the_window_closed_up_to_three_show_newest_first()
+	{
+		List<ToastEntry> stack = [];
+		ToastEntry a = Entry("a"), b = Entry("b"), c = Entry("c"), d = Entry("d");
+		foreach (ToastEntry entry in new[] { a, b, c, d })
+			Add(stack, entry);
+
+		(List<ToastEntry> visible, List<ToastEntry> started) = ToastRules.Arrange(stack, ToastRules.ClosedSlots);
+		Assert.Equal([d, c, b], visible);
+		Assert.Equal([d, c, b], started);
+		Assert.False(a.Showing);
+	}
+
+	[Fact]
+	public void With_the_window_open_one_shows_and_the_rest_wait_their_turn()
+	{
+		List<ToastEntry> stack = [];
+		ToastEntry first = Entry("first");
+		Add(stack, first);
+		Assert.Equal([first], ToastRules.Arrange(stack, ToastRules.OpenSlots).Visible);
+
+		// A newer toast waits: the one on screen keeps its slot until its time is up.
+		ToastEntry second = Entry("second"), third = Entry("third");
+		Add(stack, second);
+		Add(stack, third);
+		(List<ToastEntry> visible, List<ToastEntry> started) = ToastRules.Arrange(stack, ToastRules.OpenSlots);
+		Assert.Equal([first], visible);
+		Assert.Empty(started);
+
+		// It leaves: the newest waiting one is next.
+		stack.Remove(first);
+		Assert.Equal([third], ToastRules.Arrange(stack, ToastRules.OpenSlots).Started);
+		stack.Remove(third);
+		Assert.Equal([second], ToastRules.Arrange(stack, ToastRules.OpenSlots).Started);
+	}
+
+	[Fact]
+	public void Opening_the_window_drops_the_extra_toasts_already_seen_and_never_replays_them()
+	{
+		List<ToastEntry> stack = [];
+		ToastEntry a = Entry("a"), b = Entry("b"), c = Entry("c");
+		foreach (ToastEntry entry in new[] { a, b, c })
+			Add(stack, entry);
+		ToastRules.Arrange(stack, ToastRules.ClosedSlots);
+		int runOfA = a.Run;
+		b.Leaving = true;
+
+		(List<ToastEntry> visible, List<ToastEntry> started) = ToastRules.Arrange(stack, ToastRules.OpenSlots);
+		Assert.Equal([c], visible);
+		Assert.Empty(started);
+		Assert.Equal([c], stack);
+		Assert.False(a.Showing);
+		Assert.NotEqual(runOfA, a.Run); // its running timer no longer matches
+
+		// Once c leaves, nothing that was already on screen comes back.
+		stack.Remove(c);
+		Assert.Empty(ToastRules.Arrange(stack, ToastRules.OpenSlots).Started);
+	}
+
+	// The window closes while toasts wait: they show again, up to three.
+	[Fact]
+	public void Closing_the_window_shows_the_waiting_toasts()
+	{
+		List<ToastEntry> stack = [];
+		ToastEntry a = Entry("a"), b = Entry("b"), c = Entry("c");
+		foreach (ToastEntry entry in new[] { a, b, c })
+			Add(stack, entry);
+		ToastRules.Arrange(stack, ToastRules.OpenSlots);
+		Assert.Single(stack, entry => entry.Showing);
+
+		(List<ToastEntry> visible, List<ToastEntry> started) = ToastRules.Arrange(stack, ToastRules.ClosedSlots);
+		Assert.Equal(3, visible.Count);
+		Assert.Equal(2, started.Count);
+	}
+
+	[Fact]
+	public void Old_waiting_toasts_are_dropped_past_the_limit()
+	{
+		List<ToastEntry> stack = [];
+		ToastEntry oldest = Entry("oldest");
+		Add(stack, oldest);
+		for (int i = 0; i < ToastRules.MaxWaiting + 3; i++)
+			Add(stack, Entry($"t{i}"));
+
+		ToastRules.Arrange(stack, ToastRules.OpenSlots);
+		Assert.Equal(ToastRules.MaxWaiting, stack.Count(entry => !entry.Showing));
+		Assert.Contains(stack, entry => entry.Showing);
+		Assert.DoesNotContain(oldest, stack.Where(entry => !entry.Showing));
+	}
 }

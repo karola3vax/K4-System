@@ -34,11 +34,26 @@ internal static class SeasonClock
 		if (!TryParse(id, out DateTime start))
 			throw new FormatException($"'{id}' is not a season id");
 
-		DateTime end = new DateTime(start.Year, start.Month, 1).AddMonths(1);
-		// Midnight can fall in a daylight-saving gap in a few zones; the first valid minute after it is used then.
-		while (zone.IsInvalidTime(end))
-			end = end.AddMinutes(1);
-		return TimeZoneInfo.ConvertTimeToUtc(DateTime.SpecifyKind(end, DateTimeKind.Unspecified), zone);
+		return LocalMidnightUtc(new DateTime(start.Year, start.Month, 1).AddMonths(1), zone);
+	}
+
+	/// <summary>When the season started: midnight on its first day, local time.</summary>
+	public static DateTime StartsUtc(string id, TimeZoneInfo zone)
+	{
+		if (!TryParse(id, out DateTime start))
+			throw new FormatException($"'{id}' is not a season id");
+
+		return LocalMidnightUtc(start, zone);
+	}
+
+	// Midnight can fall in a daylight-saving gap in a few zones (Santiago, Beirut, Havana); the first valid minute after
+	// it is used then, because converting a time that does not exist throws.
+	private static DateTime LocalMidnightUtc(DateTime local, TimeZoneInfo zone)
+	{
+		local = DateTime.SpecifyKind(local, DateTimeKind.Unspecified);
+		while (zone.IsInvalidTime(local))
+			local = local.AddMinutes(1);
+		return TimeZoneInfo.ConvertTimeToUtc(local, zone);
 	}
 
 	public static bool IsOver(string id, DateTime utc, TimeZoneInfo zone) => Utc(utc) >= EndsUtc(id, zone);

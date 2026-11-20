@@ -319,16 +319,20 @@ internal sealed class PlayerService(
 	// ---------------------------------------------------------------- settings
 
 	/// <summary>
-	/// Moves the player to the next pop-up mode (panel, chat, both) and saves it. Used by !toasts and the profile button.
+	/// Moves the player to the next pop-up mode (panel, chat, both) and saves it. Used by !toasts.
 	/// False when the server does not let players choose (panorama.toasts players-can-change).
 	/// </summary>
 	public bool NextToastMode(K4Player player)
+		=> SetToastMode(player, ToastModes.Next(player.ToastMode));
+
+	/// <summary>Sets the player's pop-up mode and saves it. Used by the Settings screen. False when the server does not let players choose.</summary>
+	public bool SetToastMode(K4Player player, ToastMode mode)
 	{
 		if (!player.IsHuman || !General.Panorama.Toasts.PlayersCanChange)
 			return false;
 
-		player.ToastMode = ToastModes.Next(player.ToastMode);
-		player.UnsavedToasts = ToastModes.ToStored(player.ToastMode);
+		player.ToastMode = mode;
+		player.UnsavedToasts = ToastModes.ToStored(mode);
 		Save(player);
 		return true;
 	}

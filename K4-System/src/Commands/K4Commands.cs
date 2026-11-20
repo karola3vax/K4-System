@@ -189,7 +189,7 @@ internal sealed class K4Commands(
 
 	private void OnHelp(CCSPlayerController? player, CommandInfo info)
 	{
-		if (!CommandGuard.IsInGamePlayer(player) || TryOpenPanel(player, ranks is not null ? HudTab.Rank : HudTab.Stats))
+		if (!CommandGuard.IsInGamePlayer(player) || TryOpenPanel(player, HudTab.Home))
 			return;
 
 		info.ReplyToCommand(chat.Prefixed("help.title"));
@@ -663,7 +663,7 @@ internal sealed class K4Commands(
 	{
 		// With "rank-to-everyone", !rank only posts to chat, like LVL Ranks; !k4 still opens the panel.
 		bool everyone = General.Commands.RankToEveryone;
-		if (!everyone && TryOpenPanel(player, HudTab.Rank))
+		if (!everyone && TryOpenPanel(player, HudTab.Home))
 			return;
 
 		if (!guard.Check(player, info, CommandUsage.CLIENT_ONLY) || LoadedPlayer(player!, info) is not K4Player k4player || !TryStartExpensiveCommand(k4player, info))
@@ -796,7 +796,7 @@ internal sealed class K4Commands(
 
 	private void OnTop(CCSPlayerController? player, CommandInfo info)
 	{
-		if (TryOpenPanel(player, HudTab.Top))
+		if (TryOpenPanel(player, HudTab.Leaderboard))
 			return;
 
 		if (!guard.Check(player, info, CommandUsage.CLIENT_ONLY) || LoadedPlayer(player!, info) is not K4Player k4player || !TryStartExpensiveCommand(k4player, info))
@@ -851,7 +851,7 @@ internal sealed class K4Commands(
 
 	private void OnStats(CCSPlayerController? player, CommandInfo info)
 	{
-		if (TryOpenPanel(player, HudTab.Stats))
+		if (TryOpenPanel(player, HudTab.Profile))
 			return;
 
 		if (!guard.Check(player, info, CommandUsage.CLIENT_ONLY) || LoadedPlayer(player!, info) is not K4Player k4player || k4player.Stats is not StatCounters stats)
@@ -884,7 +884,7 @@ internal sealed class K4Commands(
 
 	private void OnTime(CCSPlayerController? player, CommandInfo info)
 	{
-		if (TryOpenPanel(player, HudTab.Stats))
+		if (TryOpenPanel(player, HudTab.Profile))
 			return;
 
 		if (!guard.Check(player, info, CommandUsage.CLIENT_ONLY) || LoadedPlayer(player!, info) is not K4Player k4player || k4player.Playtime is null)

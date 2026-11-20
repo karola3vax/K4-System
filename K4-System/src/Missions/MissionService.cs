@@ -642,41 +642,39 @@ internal sealed class MissionService(
 
 	public void Reroll(K4Player player, string? slotArgument)
 	{
-		CCSPlayerController controller = player.Controller;
+		(ChatText result, _) = Swap(player, slotArgument);
+		chat.Tell(player.Controller, result.Key, result.Args);
+	}
 
+	/// <summary>Swaps an unstarted daily mission. Returns the line that says what happened and whether it swapped; the panel shows it in its footer.</summary>
+	internal (ChatText Result, bool Swapped) Swap(K4Player player, string? slotArgument)
+	{
 		if (player.Missions is not PlayerMissions missions)
-		{
-			chat.Tell(controller, "error.loading");
-			return;
-		}
+			return (new ChatText("error.loading", []), false);
 
 		EnsureToday(player);
 
 		if (missions.RerollsUsed >= Settings.RerollsPerDay)
-		{
-			chat.Tell(controller, "mission.reroll-used");
-			return;
-		}
+			return (new ChatText("mission.reroll-used", []), false);
 
 		if (!int.TryParse(slotArgument, out int number) || number < 1 || number > missions.Slots.Count
 			|| missions.Slots[number - 1] is not { Completed: false, Progress: 0 } slot)
 		{
-			chat.Tell(controller, "mission.reroll-invalid");
-			return;
+			return (new ChatText("mission.reroll-invalid", []), false);
 		}
 
 		MissionDefinition? replacement = MissionRules.Reroll(pool, player.SteamId, missions.Day, slot.Mission, missions.All.Select(current => current.Mission.Id), Map);
 		if (replacement is null)
-		{
-			chat.Tell(controller, "mission.reroll-none");
-			return;
-		}
+			return (new ChatText("mission.reroll-none", []), false);
 
 		missions.Slots[number - 1] = new MissionProgress(replacement);
 		missions.RerollsUsed++;
-		chat.Tell(controller, "mission.rerolled", number, Describe(controller, replacement));
 		(hud.Hud as PanoramaHud)?.Refresh(player, HudTab.Missions);
+		return (new ChatText("mission.rerolled", [number, Describe(player.Controller, replacement)]), true);
 	}
+
+	/// <summary>"3d 04h" until the weekly mission changes.</summary>
+	internal string WeekLeft() => MissionRules.FormatDuration(MissionRules.UntilWeeklyReset(DateTime.UtcNow, zone));
 
 	// ---------------------------------------------------------------- text
 

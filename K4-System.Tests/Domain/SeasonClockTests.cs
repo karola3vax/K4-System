@@ -57,4 +57,18 @@ public class SeasonClockTests
 	[InlineData("2026-12-31", "2027-01-01", true)]
 	public void Only_an_older_season_counts_as_older(string season, string current, bool older)
 		=> Assert.Equal(older, SeasonService.IsOlder(season, current));
+
+	// css_k4_season end on the day daylight saving starts at midnight (as in Santiago): that midnight does not exist.
+	[Fact]
+	public void A_season_starting_in_a_daylight_saving_gap_has_a_start()
+	{
+		TimeZoneInfo.TransitionTime dstStart = TimeZoneInfo.TransitionTime.CreateFixedDateRule(new DateTime(1, 1, 1, 0, 0, 0), 9, 6);
+		TimeZoneInfo.TransitionTime dstEnd = TimeZoneInfo.TransitionTime.CreateFixedDateRule(new DateTime(1, 1, 1, 0, 0, 0), 4, 5);
+		TimeZoneInfo.AdjustmentRule rule = TimeZoneInfo.AdjustmentRule.CreateAdjustmentRule(DateTime.MinValue.Date, DateTime.MaxValue.Date, TimeSpan.FromHours(1), dstStart, dstEnd);
+		TimeZoneInfo zone = TimeZoneInfo.CreateCustomTimeZone("Test/Gap", TimeSpan.FromHours(-4), "Gap", "Gap", "Gap summer", [rule]);
+		Assert.True(zone.IsInvalidTime(new DateTime(2026, 9, 6)));
+
+		Assert.Equal(new DateTime(2026, 9, 6, 4, 0, 0, DateTimeKind.Utc), SeasonClock.StartsUtc("2026-09-06", zone));
+		Assert.Equal(SeasonClock.EndsUtc("2026-08-01", zone), SeasonClock.StartsUtc("2026-09-01", zone));
+	}
 }

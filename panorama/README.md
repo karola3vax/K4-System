@@ -6,54 +6,68 @@ The clickable K4 panel (`!k4`, `!rank`, `!missions`, `!top`, `!ranks`, `!stats`,
 | --- | --- |
 | `k4system/panorama/layout/custom_game/k4_ui.xml` | The panel and toast layout |
 | `k4system/panorama/styles/custom_game/k4_ui.css` | Colors, sizes, and the hidden or shown states |
-| `k4system/panorama/images/custom_game/k4/ranks/` | Sharp copies of CS2's rank emblems (see below) |
+| `k4system/panorama/images/custom_game/k4/ranks/`, `.../k4/icons/` | Sharp copies of CS2's rank emblems and icons (see below) |
 | `tools/gen_k4_ui.py`, `tools/gen_k4_css.py` | Generate the layout and stylesheet. Edit these, then run them |
-| `tools/gen_k4_ranks.py` | Writes the rank emblem copies straight from the installed game |
-| `tools/check_game_images.py` | Checks every game image the addon uses against the installed CS2, and that the emblem copies match the current game. Run it before publishing |
+| `tools/gen_k4_ranks.py`, `tools/gen_k4_icons.py` | Write the emblem and icon copies straight from the installed game |
+| `tools/check_game_images.py` | Checks every game image the addon uses against the installed CS2, and that the emblem and icon copies match the current game. Run it before publishing |
 
 The plugin finds the layout at `panorama/layout/custom_game/k4_ui.xml`. Keep that path.
 
-## The theme
+## The panel (8.0)
 
-The panel is black and grey with sharp corners. White marks what is active: the open tab, selected cards, main buttons and progress bars. The map behind the panel is drawn in grey (`saturation: 0` on `k4-bg`). Muted color appears only where it means something: green for finished, red for lost, gold, silver and bronze for medals and the podium, and gold and steel for the T and CT teams. Rank emblems and the rank name colors a server owner picks stay in color, in softer versions for the names. `The_theme_stays_black_and_grey` in `PanoramaLayoutTests` fails on any other color or on a rounded corner; only the round medals keep a radius.
+The panel is a solid graphite window, 1240x760, centered over the game. The game stays visible around it; there is no map picture and no dim. From top to bottom:
 
-## The panel (7.1)
+| Part | Height | What is in it |
+| --- | --- | --- |
+| Top bar | 56 | "K4 System", the tabs Home, Missions, Achievements, Leaderboard, Duels (with a count of waiting challenges) and Profile, the points event tag, the gear (settings) and close |
+| Crumbs | 40 | Back (when you came from another screen, for example a player's profile from the leaderboard), where you are, and the season clock |
+| Duel bar | 68 | only while a challenge waits for you: who, what, the time left, Accept and Decline. It shows on every screen |
+| Screen | 590 | the open screen (522 while the duel bar shows) |
+| Footer | 32 | the result of your last click (green or red), the out-of-date bar, the key hint ("Tab closes") and "© 2026 karola3vax", always visible |
 
-The panel covers the whole screen in the style of CS2's main menu: a sidebar on the left (the player's rank and points, the eight pages, the season card, and the copyright line at the bottom) and the open page on the right, over a grey screenshot of the current map dimmed from left to right. The pages are Home, Profile, Missions, Achievements, Leaderboard, Duels (7.2), Ranks and Stats. Toasts stack at the right under the kill feed, newest on top, at most three at once, each with a timer bar that runs out over its length; a promotion shows as a large banner at the top centre. The panel captures the mouse while it is open; the toast stack and the banner never do.
+The screens: **Home** (your rank with your place, Top 3 and you, today's missions with their text and the 7-day streak, and up to three "do this next" cards), **Missions** (three daily cards, the weekly one and the streak; swapping a mission asks Yes or No inside the card), **Achievements** (your three showcase slots, the filters, and a scroll grid of every achievement), **Leaderboard** (a Players or Rank list switch: the top 100 in a scroll list with Profile and Challenge on each row and your own row pinned under the list, or every rank with its reward and a pinned "you" card), **Duels** (pick an online player, a duel type and a stake, then Send; your waiting challenge with Take back, your running duel and the others on the right), **Profile** (your own or another player's: rank, showcase, stats, top weapons, time per side and past seasons) and **Settings** (pop-ups, chat or both; point messages; rank tag). Stats live in Profile and the rank list in Leaderboard.
 
-Every id, dialog variable and class the server uses is listed in [`docs/panel-contract.md`](../docs/panel-contract.md). The layout and the server code follow that page, and `PanoramaLayoutTests` checks the layout and stylesheet against it. Change the contract first, then both sides.
+Every id, dialog variable and class the server uses is listed in [`docs/panel-contract.md`](../docs/panel-contract.md). The layout and the server code follow that page, and `PanoramaLayoutTests` checks the layout and stylesheet against it: every id and its element, the pool sizes, the scroll boxes, the out-of-date bar, the theme and the size budgets. Change the contract first, then both sides.
 
-Panorama scales the HUD by screen height, so the panel is a fixed 1240x760 window centered over the game at every aspect ratio: the sidebar is 220px wide and every page fits the rest (962x710 inside its padding) without scrolling.
+Panorama scales the HUD by screen height (1080 is 1:1), so the window is a fixed 1240x760 at every aspect ratio and ends at y 920. Every screen is sized to fit its 1190x590 without clipped text; long lists scroll instead.
 
-The Duels page (7.2) has two columns. On the left a player builds a challenge in three steps: pick an online player (8 per page, with a pager), a duel type (6 cards, each explaining itself on hover) and a stake, then press Send; a line above Send says what the challenge will be, or why it cannot be sent yet. On the right are an incoming challenge with Accept, Decline and a timer bar, the player's own running duel with its score, and up to four other running duels. The ids are in the "Duels (7.2)" section of the contract.
+### Scroll lists
 
-The map background is two panels: `k4-bg` always draws CS2's season background, and `k4-bg-map` on top of it gets `map-<name>` from the server. The stylesheet defines `map-<name>` for every map that has a base 1080p screenshot in CS2 (`panorama/images/map_icons/screenshots/1080p/<map>_png`); any other map draws nothing there and the season background shows through. The list lives in `MAPS` in `gen_k4_css.py`, so the generator runs without the game. After a CS2 update that adds maps, print the current list and update `MAPS`:
+The leaderboard (100 rows), the rank list (40), the achievements (64), the online players on Duels (64) and the past seasons on Profile (24) scroll with the mouse wheel on the player's own PC. Each list is one `k4-*-list` box with `hittest="true"` (without it the wheel does not reach the box) and the class `k4-scroll` (`overflow: squish scroll` and a 6px scrollbar in the window's greys). The rows are built in the layout and start `k4-gone`; the server fills the ones it needs, and the hidden rows shorten the scroll. The server never sees the scroll position, so anything the player must reach without scrolling (their own leaderboard row, the "you" card on the rank list) sits outside the box, and a list longer than its rows ends with a "12 more not shown" line.
 
-```bash
-cd panorama/tools
-python -c "import re, sys; from vpk import Vpk; print(sorted(m[1] for k in Vpk(sys.argv[1]).entries if (m := re.fullmatch(r'panorama/images/map_icons/screenshots/1080p/(.+)_png\.vtex_c', k)) and not re.search(r'_\d+$', m[1])))" "<CS2>/game/csgo/pak01_dir.vpk"
-```
+### The look
 
-Leave out `random` and `lobby_mapveto`; they are not maps. `check_game_images.py` fails when an update removes a screenshot the stylesheet uses.
+One grey ramp (`s0` window, `s1` card, `s2` hover, `s3` picked, `s4` bar track; three line greys; three text greys), all solid. White is the accent for exactly three things: the open tab's underline, the one main button of a card (Send challenge, Accept), and your own "you" mark. A picked choice is a lighter grey with a grey outline, never white. Other colour appears only where the game gives it meaning: rank emblems and the rank name colours a server owner picks, gold, silver and bronze for medals and leaderboard places 1 to 3, green for done (a green check tag and a green bar, never a green border), red for lost, and the T and CT colours for time per side. Sentence case and no letter spacing; the game's Stratum font for titles and numbers and its Noto for text. Corners: window 6px, cards and buttons 4px, tags and bars 2px; medal rings are round. The tokens are at the top of `gen_k4_css.py`, and `The_theme_follows_the_tokens` in `PanoramaLayoutTests` fails on any other colour or corner.
 
-CS2 checks this layout before showing it: K4 uses only `Panel`, `Label`, and `Button` elements. `Panel` may have `id`, `class`, and `hittest`; `Label` also `text`; `Button` only `id` and `class`. Any other element or attribute (for example `hittest` on a `Button`) makes every player's game reject the whole panel without a visible error; the client console then says *Layout xml did not pass CustomHud validation*. The layout tests enforce this.
+Controls make CS2's own menu sounds: tabs the side menu sounds, buttons the generic button sounds, choices the inventory select sound. Each toast colour plays its CS2 sound when the toast appears.
 
-The panel reuses CS2's own stylesheet, icons (`panorama/images/icons/...`), and UI sounds. If a Valve update renames one of those files, that icon goes blank; the rest of the panel keeps working.
+### What CS2 allows
 
-The rank emblems are the one exception. CS2 draws an SVG at the size written in the file, and the game's rank emblems are only 32×13 pixels, so they looked blurry at the panel's size. The panel cannot use the `Image` element that CS2's own menus use to draw them larger. The addon therefore carries copies of Valve's emblems with only that size raised ten times (320×130). They must stay under `panorama/images/custom_game/`: it is the only image folder the Workshop Manager packs, and images anywhere else are silently left out of the upload. Both tools read the game's own `pak01_dir.vpk` and need only Python:
+CS2 checks this layout before showing it. Allowed are `Panel` (`id`, `class`, `hittest`), `Label` (also `text`), `Image` (`id`, `class`, `hittest`, `src`) and `Button` (only `id` and `class`). An `Image` `src` is fixed in the layout and must start with `s2r://panorama/images/` (a game image, or the addon's own under `panorama/images/custom_game/`); the server cannot change it, so every picture the server picks (rank emblems, icons, medal tiers) is a CSS class instead. Any other element or attribute (for example `hittest` on a `Button`) makes every player's game reject the whole panel without a visible error; the client console then says *Layout xml did not pass CustomHud validation*. The full-screen root, the toast stack and the promotion banner are `hittest="false"`, so they never take the mouse from the game or from other plugins' menus. No scripts, game fonts only. The layout tests enforce all of this.
+
+The panel reuses CS2's own stylesheet and UI sounds. If a Valve update renames a sound or a game image, that one part goes quiet or blank; the rest of the panel keeps working.
+
+The rank emblems and the icons are copies. CS2 draws an SVG at the size written in the file, and the game's emblems are only 32x13 pixels and its icons about 32x32, so they looked blurry at the panel's size. The addon carries copies of Valve's emblems and icons with only that size raised (emblems 320x130, icons 256 on the longer side). They must stay under `panorama/images/custom_game/`: it is the only image folder the Workshop Manager packs, and images anywhere else are silently left out of the upload. The tools read the game's own `pak01_dir.vpk` and need only Python:
 
 ```bash
 python panorama/tools/check_game_images.py "<CS2>/game/csgo/pak01_dir.vpk"
 python panorama/tools/gen_k4_ranks.py "<CS2>/game/csgo/pak01_dir.vpk"
+python panorama/tools/gen_k4_icons.py "<CS2>/game/csgo/pak01_dir.vpk"
 ```
 
-`check_game_images.py` exits with an error and names the file when a game image the panel uses is gone or an emblem no longer matches the game; `gen_k4_ranks.py` then rewrites all 38 emblems from the current game files. (It also still accepts a folder of SVGs unpacked with Source2Viewer-CLI.)
+`check_game_images.py` exits with an error and names the file when a game image the panel uses is gone or a copy no longer matches the game; `gen_k4_ranks.py` then rewrites all 38 emblems, and `gen_k4_icons.py` every icon the stylesheet references (run `gen_k4_css.py` first when you add an icon).
+
+### Toasts while the window is open
+
+Toasts sit under the kill feed at the right, 420x80 each, newest on top, at most three. While the window is open they would cover it, so the stack moves under the window (the server sets `k4-open` on `k4-toasts`): the window ends at y 920 and one toast fits below it. Only one shows then; the rest wait and show one after another.
 
 ### Server and addon versions
 
-Players and servers update at different times, so every part a newer server fills starts hidden in the layout (`k4-gone`). A server older than the addon simply never shows those parts; a server newer than a player's addon writes to parts the player does not have, which does nothing. The contract marks each of them "starts `k4-gone`", and the layout tests check that each of them does.
+Players and servers update at different times. Every part a newer server fills starts hidden in the layout (`k4-gone`), so a server older than the addon never shows it, and a server newer than a player's addon writes to parts the player does not have, which does nothing.
 
-The 7.1 layout renamed almost every id of the 7.0 one (the tabs became the sidebar's pages and every view was rebuilt), so a 7.0 server cannot fill a 7.1 addon, or the other way round. Update the server and the addon together.
+8.0 adds an out-of-date bar. The server sets the class `k4-c8` on the window (contract version 8). The footer's `k4-outdated` bar ("K4 files do not match this server") is visible by default, and only the 8.0 stylesheet hides it, under `.k4-c8`. A player whose addon does not match the server's contract sees that one line; everyone else never sees it. A contract change that renames or removes ids bumps the number on both sides.
+
+**8.0 is a one-time break.** It renamed or removed most 7.x ids (the sidebar, the Stats and Ranks pages and the map background are gone). A 7.x server cannot fill an 8.0 addon, and an 8.0 server cannot fill a 7.x addon. Publish the Workshop addon and update the server on the same day. A 7.x server with the 8.0 addon opens an empty window that shows the out-of-date bar, because `k4-panel` and its default `k4-closed` keep their names.
 
 ## The official addon
 
@@ -88,10 +102,10 @@ To update the panel later, repeat steps 3 to 5 and choose the existing item in t
 2. **Add the addon.** In `game/csgo/cfg/multiaddonmanager/multiaddonmanager.cfg`, add the ID to the list:
 
    ```cfg
-   mm_extra_addons "3811667212"
+   mm_client_extra_addons "3811667212"
    ```
 
-   If other addons are already listed, separate the IDs with commas. If you published your own copy, use its ID instead.
+   `mm_client_extra_addons` sends the addon to players only; the server itself does not need the panel files (`mm_extra_addons` would also mount it on the server). If other addons are already listed, separate the IDs with commas. If you published your own copy, use its ID instead.
 3. **Enable the panel in K4.** In `configs/plugins/K4-System/k4-system.jsonc` set:
 
    ```jsonc
@@ -100,13 +114,13 @@ To update the panel later, repeat steps 3 to 5 and choose the existing item in t
 
 4. **Restart the server**, join, and type `!k4`.
 
-With the panel on, the K4 commands open their tab instead of printing to chat. Promotions, demotions, finished missions, unlocked achievements, the round summary, and more show as a small pop-up (a toast) at the right side of the screen, below the kill feed, instead of a chat line; see [Toasts](#toasts). Single point messages after the round summary stay in chat. Click **✕** (top right) to close the panel. While it is open the mouse controls the panel, not your aim, so K4 also closes it when freeze time ends and after 45 seconds without a click.
+With the panel on, the K4 commands open their tab instead of printing to chat. Promotions, demotions, finished missions, unlocked achievements, the round summary, and more show as a small pop-up (a toast) at the right side of the screen, below the kill feed, instead of a chat line; see [Toasts](#toasts). Single point messages after the round summary stay in chat. Click **✕** (top right) or press Tab to close the panel. While it is open the mouse controls the panel, not your aim, so K4 also closes it when freeze time ends and after two minutes without a click (the server cannot see scrolling, so it waits longer than 7.x did).
 
 ## Toasts
 
-Toasts stack under the kill feed, newest on top, at most three at once. Each player picks how they get K4's messages with `!toasts` (`commands.toasts`) or the Messages button on their profile, and K4 remembers it. The button and the command step through three modes: **Pop-ups** (the toast; chat only for messages that have no toast), **Chat** (the chat line instead of the toast, wherever one exists: round summary, rank changes, finished missions, the daily streak, duels) and **Pop-ups + chat** (both).
+Toasts stack under the kill feed, newest on top, at most three at once. Each player can turn them off with `!toasts` (`commands.toasts`) or on the settings screen (the gear: Pop-ups, Chat or Both); K4 remembers it. A player with toasts off gets the chat line instead wherever one exists (round summary, rank changes, finished missions, the daily streak).
 
-The server sets the mode new players start with, and whether players may change it, under `panorama.toasts` in `k4-system.jsonc`: `"default"` is `panel`, `chat` or `both`, and `"players-can-change": false` keeps everyone on the default (the Messages button is hidden and `!toasts` only says what the server uses). Pop-ups that only show progress (almost-done missions and achievements, leaderboard climbs, the rank-at-risk warning) have no chat line, so the chat mode leaves them out. A player's own choice is kept while the server locks the mode. The 7.3.0 form still works: `"toasts": true` is panel and changeable, `"toasts": false` is chat for everyone.
+To keep the panel but use chat for everyone, set `"toasts": false` under `panorama` in `k4-system.jsonc`. Every player then gets the chat line wherever one exists, as with toasts turned off; progress pop-ups without a chat line (almost-done missions and achievements, leaderboard climbs, the rank-at-risk warning) are not shown. The toasts button is hidden, and `!toasts` stays off. Each player's own choice is kept for when toasts are turned on again.
 
 The colors below are the names the server sends. Green, red and gold are drawn muted, blue as light grey, and purple as grey.
 
@@ -134,7 +148,7 @@ Promotions use `PanoramaHud.Promote`; everything else goes through `PanoramaHud.
 
 | What you see | Likely cause |
 | --- | --- |
-| `!k4` shows nothing at all | Start CS2 with the launch option `-condebug`, join, type `!k4`, and open `game/csgo/console.log`. *Layout xml did not pass CustomHud validation* means the layout uses something CS2 does not allow (see above). *Failed to load layout* means the addon is not on your client: check `mm_extra_addons`, the ID, and that the item is Public and approved, then rejoin |
+| `!k4` shows nothing at all | Start CS2 with the launch option `-condebug`, join, type `!k4`, and open `game/csgo/console.log`. *Layout xml did not pass CustomHud validation* means the layout uses something CS2 does not allow (see above). *Failed to load layout* means the addon is not on your client: check `mm_client_extra_addons`, the ID, and that the item is Public and approved, then rejoin |
 | The server console says *Addon download ... failed to start* right after a restart | MultiAddonManager tried before the server logged on to Steam. Run `changelevel <current map>` once; after that the addon stays on disk |
 | You are not sure the server side works | Run `css_k4_hud` in the server console. It lists the panel entity and, for each player, whether the panel is open and the mouse is captured |
 | The rank picture is missing | Set `"rank-icons": "text"` to show the rank tag instead, and report it |

@@ -65,4 +65,56 @@ internal static class ToastRules
 
 	/// <summary>0 to 100 for a progress bar.</summary>
 	public static int Percent(long progress, long target) => target <= 0 ? 0 : (int)Math.Clamp(progress * 100 / target, 0, 100);
+
+	/// <summary>Toasts on screen while the window is closed: the stack under the kill feed.</summary>
+	public const int ClosedSlots = Toast.Slots;
+
+	/// <summary>Toasts on screen while the window is open: one under it, the rest wait their turn.</summary>
+	public const int OpenSlots = 1;
+
+	/// <summary>Toasts that may wait; older waiting ones are dropped, so a long look at the window does not end in a minute of stale pop-ups.</summary>
+	public const int MaxWaiting = 6;
+
+	/// <summary>
+	/// Decides which toasts are on screen. <paramref name="stack"/> is newest first. Toasts already showing keep their
+	/// slot, up to <paramref name="slots"/>; a showing toast past the limit (the window just opened) is dropped, because
+	/// the player already saw it and heard its sound. Free slots go to the newest waiting toasts, which start now. Waiting toasts past
+	/// <see cref="MaxWaiting"/> are dropped, oldest first. Returns the toasts on screen, newest first, and the ones that started.
+	/// </summary>
+	public static (List<ToastEntry> Visible, List<ToastEntry> Started) Arrange(List<ToastEntry> stack, int slots)
+	{
+		List<ToastEntry> visible = [];
+		foreach (ToastEntry entry in stack.ToArray())
+		{
+			if (!entry.Showing)
+				continue;
+			if (visible.Count < slots)
+				visible.Add(entry);
+			else
+			{
+				stack.Remove(entry);
+				entry.Showing = false;
+				entry.Run++; // its running timer no longer matches
+			}
+		}
+
+		List<ToastEntry> started = [];
+		foreach (ToastEntry entry in stack)
+		{
+			if (visible.Count >= slots)
+				break;
+			if (entry.Showing)
+				continue;
+			entry.Showing = true;
+			entry.Run++;
+			started.Add(entry);
+			visible.Add(entry);
+		}
+
+		int waiting = 0;
+		stack.RemoveAll(entry => !entry.Showing && ++waiting > MaxWaiting);
+
+		visible.Sort((a, b) => stack.IndexOf(a).CompareTo(stack.IndexOf(b)));
+		return (visible, started);
+	}
 }

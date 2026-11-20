@@ -1,7 +1,10 @@
--- Unreleased
+-- 2026.11.20 - V8.0.0
 
-- feat: Players choose how they get K4's messages with `!toasts` or the Messages button on their profile: pop-ups, chat, or both (the pop-up and the chat line). The server sets the mode new players start with and whether players may change it, under `panorama.toasts`: `"default"` (`panel`, `chat` or `both`) and `"players-can-change"`. With it locked, the button is hidden and `!toasts` only says which mode the server uses
-- setup: Existing configs keep working: `"toasts": true` is pop-ups that players may change, and `"toasts": false` (7.3.0) is chat for everyone. Players who turned pop-ups off before keep chat. Players who had pop-ups on count as having made no choice and follow the server's default mode. No Workshop addon update is needed. New texts in all 36 languages
+- feat: The 8.0 menu: a centered window with tabs for Home, Missions, Achievements, Leaderboard, Duels and Profile, and a gear for Settings. Stats are in Profile, the rank list is in Leaderboard. Long lists scroll. A challenge to you shows on every tab. Click results show in the footer instead of chat. While the window is open, pop-ups show one at a time under it
+- setup: Update the server and the Workshop addon on the same day: a 7.x addon cannot show the 8.0 menu, and an older addon shows a line saying its files are out of date
+
+- feat: Players choose how they get K4's messages with `!toasts` or the Pop-ups, Chat and Both buttons in the menu's Settings: pop-ups, chat, or both (the pop-up and the chat line). The server sets the mode new players start with and whether players may change it, under `panorama.toasts`: `"default"` (`panel`, `chat` or `both`) and `"players-can-change"`. With it locked, the buttons show "Set by the server" and `!toasts` only says which mode the server uses
+- setup: Existing configs keep working: `"toasts": true` is pop-ups that players may change, and `"toasts": false` (7.3.0) is chat for everyone. Players who turned pop-ups off before keep chat. Players who had pop-ups on count as having made no choice and follow the server's default mode. New texts in all 36 languages
 
 -- 2026.11.11 - V7.3.0
 
