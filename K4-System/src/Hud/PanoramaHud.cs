@@ -2513,6 +2513,7 @@ internal sealed class PanoramaHud
 			pen.Swap(slot, "length", $"k4-len-{toast.Length.ToString().ToLowerInvariant()}");
 			SetPicture(pen, $"{slot}-icon", toast.Visual);
 			pen.Set($"{slot}-ring", "k4-gone", toast.Tier is null);
+			pen.Flag(slot, "k4-wide", toast.Tier is null);
 			if (toast.Tier is string tier)
 				pen.Swap($"{slot}-ring", "tier", $"t-{tier}");
 			pen.Set($"{slot}-prog", "k4-gone", toast.BarPercent is null);

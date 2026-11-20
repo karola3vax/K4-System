@@ -52,7 +52,7 @@ A list longer than its pool ends with its `-more` label (`{s:more}`, for example
 | Toast color | `k4-tc-green`, `k4-tc-gold`, `k4-tc-red`, `k4-tc-blue`, `k4-tc-purple` | `k4-tc-green` |
 | Toast length | `k4-len-short` (2.5 s), `k4-len-normal` (3.5 s), `k4-len-long` (5 s): the timer bar's shrink time | `k4-len-normal` |
 | Next card kind | `k4-n-duel`, `k4-n-swap`, `k4-n-showcase`, `k4-n-ach`, `k4-n-season` | none |
-| State | `k4-closed`, `k4-show`, `k4-gone`, `k4-active`, `k4-done`, `k4-disabled`, `k4-current`, `k4-pinned`, `k4-locked`, `k4-on`, `k4-today`, `k4-easy`, `k4-medium`, `k4-hard`, `k4-run`, `k4-out`, `k4-me`, `k4-ok`, `k4-bad`, `k4-empty`, `k4-open`, `k4-lb-ranklist` | |
+| State | `k4-closed`, `k4-show`, `k4-gone`, `k4-active`, `k4-done`, `k4-disabled`, `k4-current`, `k4-pinned`, `k4-locked`, `k4-on`, `k4-today`, `k4-easy`, `k4-medium`, `k4-hard`, `k4-run`, `k4-out`, `k4-me`, `k4-ok`, `k4-bad`, `k4-empty`, `k4-open`, `k4-lb-ranklist`, `k4-wide` | |
 
 ## Frame
 
@@ -195,7 +195,7 @@ Toasts sit under the kill feed at the right, newest on top, at most three at onc
 | Id | Variables and classes |
 | --- | --- |
 | `k4-toasts` | Panel, `hittest="false"`, holds the stack and `k4-t-more`; `k4-open` while the window is open |
-| `k4-t0` … `k4-t2` (start `k4-gone`) | `{s:kind}`, `{s:text}`, `{s:value}`; toast color group; toast length group; icon `k4-t{i}-icon` (any picture group: icon, emblem, team patch); medal ring `k4-t{i}-ring` (tier, `k4-gone` when the toast has no medal); progress `k4-t{i}-prog` (`k4-gone` without progress) with bar `k4-t{i}-bar`; timer `k4-t{i}-timer`, which shrinks from full to empty over the toast length while it has `k4-run` |
+| `k4-t0` … `k4-t2` (start `k4-gone`) | `{s:kind}`, `{s:text}`, `{s:value}`; toast color group; toast length group; icon `k4-t{i}-icon` (any picture group: icon, emblem, team patch); medal ring `k4-t{i}-ring` (tier, `k4-gone` when the toast has no medal); `k4-wide` on the toast when it has no medal, so its picture gets the full width; progress `k4-t{i}-prog` (`k4-gone` without progress) with bar `k4-t{i}-bar`; timer `k4-t{i}-timer`, which shrinks from full to empty over the toast length while it has `k4-run` |
 | `k4-t-more` (starts `k4-gone`) | `{s:more}` |
 | `k4-promo` (starts `k4-gone`, `hittest="false"`) | the promotion banner: `{s:title}`, `{s:rank}`; icon `k4-promo-icon` (rank emblem group) |
 

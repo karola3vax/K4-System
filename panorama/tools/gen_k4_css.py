@@ -3008,12 +3008,20 @@ css += r"""
 	vertical-align: center;
 }
 
+/* 40px wide fits inside the medal ring; square icons stay 32px tall, a weapon gets the extra width. */
 .k4-toast-icon
 {
-	width: 32px;
+	width: 40px;
 	height: 32px;
 	horizontal-align: center;
 	vertical-align: center;
+}
+
+/* No medal ring: the picture gets the whole 56px, so wide ones (weapons, rank emblems) are not drawn tiny. */
+.k4-wide .k4-toast-icon
+{
+	width: 56px;
+	height: 40px;
 }
 
 .k4-toast-body
