@@ -1,3 +1,7 @@
+-- 2026.11.21 - V8.1.1
+
+- fix: The "Halftime is disabled" warning showed at startup even when `mp_halftime` was on, because K4 checked it before `server.cfg` and the game mode configs had run. It is now checked at the first round of each match
+
 -- 2026.11.21 - V8.1.0
 
 - feat: The menu looks much more like 7.x again, since most players preferred it: fewer words, big icons and numbers, the rank front and center, and the season art behind the window. Full sentences (mission texts, achievement descriptions, duel rules, stat names) show on hover
