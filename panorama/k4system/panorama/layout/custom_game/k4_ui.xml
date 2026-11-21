@@ -5,6 +5,9 @@
 	</styles>
 	<Panel class="k4-root" hittest="false">
 		<Panel id="k4-panel" class="k4-panel k4-closed">
+			<Panel class="k4-bg" />
+			<Panel class="k4-shade" />
+			<Panel class="k4-frame">
 			<Panel class="k4-top">
 				<Panel class="k4-brand">
 					<Label class="k4-brand-name stratum-bold-tf" text="K4" />
@@ -5205,6 +5208,7 @@
 					<Label class="k4-keys-text" text="{s:keys}" />
 				</Panel>
 				<Label class="k4-copyright" text="© 2026 karola3vax" />
+			</Panel>
 			</Panel>
 		</Panel>
 		<Panel id="k4-promo" class="k4-promo k4-gone" hittest="false">

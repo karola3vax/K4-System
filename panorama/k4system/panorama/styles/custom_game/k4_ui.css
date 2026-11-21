@@ -80,7 +80,6 @@ Label
 	height: 760px;
 	horizontal-align: center;
 	vertical-align: middle;
-	flow-children: down;
 	background-color: s0;
 	border: 1px solid line;
 	border-radius: 6px;
@@ -90,6 +89,37 @@ Label
 	transition-property: opacity, transform;
 	transition-duration: 0.12s;
 	transition-timing-function: ease-out;
+}
+
+/* Behind the menu (owner 2026-11-21, from 7.x): CS2's season art in grey, dimmed from 90% on the left to 60% on the
+   right. The frame on top holds the menu itself, top to bottom. */
+.k4-bg, .k4-shade, .k4-frame
+{
+	width: 100%;
+	height: 100%;
+}
+
+.k4-bg, .k4-shade
+{
+	border-radius: 6px;
+}
+
+.k4-bg
+{
+	background-image: url("s2r://panorama/images/backgrounds/season_stats_background_png.vtex");
+	background-size: cover;
+	background-position: 50% 50%;
+	saturation: 0;
+}
+
+.k4-shade
+{
+	background-color: gradient( linear, 0% 0%, 100% 0%, from( #0B0B0CE6 ), to( #0B0B0C99 ) );
+}
+
+.k4-frame
+{
+	flow-children: down;
 }
 
 .k4-panel.k4-closed

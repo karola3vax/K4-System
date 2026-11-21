@@ -368,7 +368,7 @@ public partial class PanoramaLayoutTests(ITestOutputHelper output)
 	public void The_frame_is_tabs_crumbs_duel_bar_screens_footer()
 	{
 		Dictionary<string, XElement> ids = ById;
-		List<XElement> frame = ids["k4-panel"].Elements().ToList();
+		List<XElement> frame = ids["k4-panel"].Elements().Single(element => Classes(element).Contains("k4-frame")).Elements().ToList();
 		int Index(string id) => frame.FindIndex(element => element == ids[id] || ids[id].Ancestors().Contains(element));
 		Assert.True(Index("k4-nav-home") < Index("k4-crumbs"));
 		Assert.True(Index("k4-crumbs") < Index("k4-duel-bar"));
@@ -579,7 +579,7 @@ public partial class PanoramaLayoutTests(ITestOutputHelper output)
 		List<string> radii = Regex.Matches(css, @"border-radius:\s*([^;]+);").Select(match => match.Groups[1].Value.Trim()).Distinct().ToList();
 		Assert.True(radii.All(radius => radius is "6px" or "4px" or "2px" or "50%"), $"Corners outside 6/4/2 px: {string.Join(", ", radii)}");
 		List<string> windows = Regex.Matches(css, @"(?m)^([^{}\n]+)\s*\{[^}]*border-radius: 6px;").Select(match => match.Groups[1].Value.Trim()).ToList();
-		Assert.Equal([".k4-panel", ".k4-promo"], windows.Order());
+		Assert.Equal([".k4-bg, .k4-shade", ".k4-panel", ".k4-promo"], windows.Order());
 		Assert.Contains("border-radius: 50%;", Rule("k4-ring"), StringComparison.Ordinal);
 
 		// Sentence case and no letter spacing.
