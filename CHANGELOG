@@ -1,3 +1,11 @@
+-- 2026.11.21 - V8.1.0
+
+- feat: The menu looks much more like 7.x again, since most players preferred it: fewer words, big icons and numbers, the rank front and center, and the season art behind the window. Full sentences (mission texts, achievement descriptions, duel rules, stat names) show on hover
+- feat: Home: a big rank badge and name, missions as tiles, the top 3 on a podium, achievements to go for as medals, and a row of big numbers (K/D, headshots, accuracy, playtime, kills)
+- feat: Missions, Achievements, Leaderboard, Duels and Profile use the same simpler look. Positions show as `#12`. On the Leaderboard, clicking a row opens the player's profile
+- fix: Streak day tabs no longer cut off or overflow in longer languages: they show the day number and bonus, the rest is on hover
+- setup: Update the server and the Workshop addon on the same day. With only the addon updated, Home's number row and the duel summary stay hidden; with only the server updated, some texts look short in the old layout
+
 -- 2026.11.20 - V8.0.0
 
 - feat: The 8.0 menu: a centered window with tabs for Home, Missions, Achievements, Leaderboard, Duels and Profile, and a gear for Settings. Stats are in Profile, the rank list is in Leaderboard. Long lists scroll. A challenge to you shows on every tab. Click results show in the footer instead of chat. While the window is open, pop-ups show one at a time under it
