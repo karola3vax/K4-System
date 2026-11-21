@@ -17,6 +17,7 @@ internal sealed class ScoreboardService(BasePlugin plugin, PluginConfig config, 
 	private Listeners.OnTick? tickListener;
 	private Timer? revealTimer;
 	private bool updatesAllowed;
+	private bool halftimeChecked;
 
 
 	public void Start(bool hotReload)
@@ -43,9 +44,6 @@ internal sealed class ScoreboardService(BasePlugin plugin, PluginConfig config, 
 		plugin.RegisterListener(tickListener);
 		revealTimer = plugin.AddTimer(ScoreboardRanks.RevealIntervalSeconds, Reveal, TimerFlags.REPEAT);
 
-		if (ConVar.Find("mp_halftime")?.GetPrimitiveValue<bool>() == false)
-			logger.LogWarning("Halftime is disabled, which may cause scoreboard rank rendering problems.");
-
 		logger.LogInformation("Built-in scoreboard ranks enabled in {ScoreboardRankMode} mode.", mode);
 	}
 
@@ -60,10 +58,24 @@ internal sealed class ScoreboardService(BasePlugin plugin, PluginConfig config, 
 		revealTimer?.Kill();
 		revealTimer = null;
 		updatesAllowed = false;
+		halftimeChecked = false;
 	}
 
 	/// <summary>Updates start with the first round and stop when the match ends.</summary>
-	public void AllowUpdates(bool allowed) => updatesAllowed = allowed;
+	public void AllowUpdates(bool allowed)
+	{
+		updatesAllowed = allowed;
+
+		// Checked at the first round, not at plugin load: server.cfg and the game mode cfgs run after K4 loads (issue #4).
+		if (allowed && !halftimeChecked && tickListener is not null)
+		{
+			halftimeChecked = true;
+			if (ConVar.Find("mp_halftime")?.GetPrimitiveValue<bool>() == false)
+				logger.LogWarning("Halftime is disabled, which may cause scoreboard rank rendering problems.");
+		}
+		else if (!allowed)
+			halftimeChecked = false;
+	}
 
 	// Every tick: the game resets these fields itself, and checking less often made the emblems flicker (2026-11-11).
 	private void UpdateRanks()
