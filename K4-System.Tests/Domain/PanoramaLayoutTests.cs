@@ -89,7 +89,7 @@ public partial class PanoramaLayoutTests(ITestOutputHelper output)
 		Add(L, ["k4-lb-more", "k4-rk-more"], Range("k4-rk{i}-name", 40));
 
 		// Duels
-		Add(P, ["k4-dp-list", "k4-d-wait", "k4-d-wait-bar", "k4-d-mine", "k4-d-mine-icon", "k4-d-mine-bar"],
+		Add(P, ["k4-dp-list", "k4-d-pick", "k4-d-pick-icon", "k4-d-pick-type", "k4-d-wait", "k4-d-wait-bar", "k4-d-mine", "k4-d-mine-icon", "k4-d-mine-bar"],
 			Range("k4-dp{i}-icon", 64), Range("k4-dt{i}-icon", 6), Range("k4-dl{i}", 4), Range("k4-dl{i}-icon", 4));
 		Add(B, ["k4-d-send", "k4-d-takeback"], Range("k4-dp{i}", 64), Range("k4-dt{i}", 6), Range("k4-ds{i}", 5));
 		Add(L, ["k4-dp-more", "k4-dp-none", "k4-dl-none"]);
@@ -121,7 +121,7 @@ public partial class PanoramaLayoutTests(ITestOutputHelper output)
 		List<string> gone =
 		[
 			"k4-nav-duels-badge", "k4-event", "k4-back", "k4-season", "k4-duel-bar", "k4-status", "k4-h-me", "k4-mw", "k4-a-more", "k4-a-empty",
-			"k4-lb-more", "k4-lb-me", "k4-lb-ranks", "k4-rk-more", "k4-dp-more", "k4-dp-none", "k4-d-wait", "k4-d-mine", "k4-dl-none",
+			"k4-lb-more", "k4-lb-me", "k4-lb-ranks", "k4-rk-more", "k4-dp-more", "k4-dp-none", "k4-d-pick", "k4-d-wait", "k4-d-mine", "k4-dl-none",
 			"k4-pf-challenge", "k4-pf-sc-hint", "k4-pf-pt", "k4-pf-ss-none", "k4-set-mode-lock", "k4-set-points", "k4-set-tag",
 			"k4-t-more", "k4-promo",
 		];
@@ -234,6 +234,7 @@ public partial class PanoramaLayoutTests(ITestOutputHelper output)
 	[InlineData("k4-pf-icon", "sg-0")]
 	[InlineData("k4-promo-icon", "sg-0")]
 	[InlineData("k4-lb-me-icon", "sg-0")]
+	[InlineData("k4-d-pick-icon", "sg-0")]
 	[InlineData("k4-h-bar", "w0")]
 	[InlineData("k4-season-bar", "w0")]
 	[InlineData("k4-duel-bar-timer", "w0")]
@@ -290,7 +291,7 @@ public partial class PanoramaLayoutTests(ITestOutputHelper output)
 	[InlineData("k4-m1-ask", "ask")]
 	[InlineData("k4-m1-yes", "label")]
 	[InlineData("k4-m1-no", "label")]
-	[InlineData("k4-mw", "left", "desc", "progress", "reward")]
+	[InlineData("k4-mw", "title", "left", "desc", "progress", "reward")]
 	[InlineData("k4-sd0", "day", "bonus", "tip")]
 	[InlineData("k4-view-achievements", "count", "showcase")]
 	[InlineData("k4-a-sc0", "name", "empty")]
@@ -310,7 +311,8 @@ public partial class PanoramaLayoutTests(ITestOutputHelper output)
 	[InlineData("k4-rk39", "name", "points", "reward", "tip")]
 	[InlineData("k4-rk0-name", "name")]
 	[InlineData("k4-rk-more", "more")]
-	[InlineData("k4-view-duels", "pick", "types", "stakes", "online", "summary", "status", "live")]
+	[InlineData("k4-view-duels", "pick", "types", "stakes", "online", "status", "live")]
+	[InlineData("k4-d-pick", "target", "stake")]
 	[InlineData("k4-dp63", "name", "points", "state")]
 	[InlineData("k4-dp-more", "more")]
 	[InlineData("k4-dp-none", "none")]
@@ -398,6 +400,26 @@ public partial class PanoramaLayoutTests(ITestOutputHelper output)
 		});
 	}
 
+	// The simple look moves a card's sentence the server already sends into its hover explanation (contract "Explanations").
+	[Theory]
+	[InlineData("k4-h-m{i}", 4, "desc")]
+	[InlineData("k4-h-n{i}", 3, "text")]
+	[InlineData("k4-h-s{i}", 5, "label")]
+	[InlineData("k4-m{i}", 3, "desc")]
+	[InlineData("k4-mw", 1, "desc")]
+	[InlineData("k4-dt{i}", 6, "name")]
+	[InlineData("k4-dl{i}", 4, "info")]
+	public void Sentences_move_into_the_hover_explanation(string pattern, int count, string variable)
+		=> Assert.All(Range(pattern, count), id =>
+		{
+			XElement card = ById[id];
+			Assert.Contains("k4-has-tip", Classes(card));
+			XElement tip = Assert.Single(card.Elements(), element => Classes(element).Contains("k4-tip"));
+			Assert.Equal("false", (string?)tip.Attribute("hittest"));
+			Assert.Contains(tip.Descendants("Label"), label => (string?)label.Attribute("text") == $"{{s:{variable}}}");
+			Assert.All(tip.Descendants(), element => Assert.Equal("false", (string?)element.Attribute("hittest")));
+		});
+
 	[Fact]
 	public void Medal_icons_and_bars_sit_inside_their_parts()
 	{
@@ -415,6 +437,7 @@ public partial class PanoramaLayoutTests(ITestOutputHelper output)
 		pairs.AddRange(Enumerable.Range(0, 40).SelectMany(i => new[] { ($"k4-rk{i}-icon", $"k4-rk{i}"), ($"k4-rk{i}-name", $"k4-rk{i}"), ($"k4-rk{i}-gift", $"k4-rk{i}"), ($"k4-rk{i}-you", $"k4-rk{i}") }));
 		pairs.AddRange(Enumerable.Range(0, 64).Select(i => ($"k4-dp{i}-icon", $"k4-dp{i}")));
 		pairs.AddRange(Enumerable.Range(0, 6).Select(i => ($"k4-dt{i}-icon", $"k4-dt{i}")));
+		pairs.AddRange(Enumerable.Range(0, 100).Select(i => ($"k4-lb-r{i}-icon", $"k4-lb-r{i}-profile"))); // the whole row opens the profile
 		pairs.AddRange(Enumerable.Range(0, 8).Select(i => ($"k4-pf-st{i}-icon", $"k4-pf-st{i}")));
 		pairs.AddRange(Enumerable.Range(0, 24).Select(i => ($"k4-pf-ss{i}-icon", $"k4-pf-ss{i}")));
 		pairs.AddRange(new[] { "t", "ct", "spec" }.SelectMany(side => new[] { ($"k4-pf-pt-{side}-bar", $"k4-pf-pt-{side}"), ($"k4-pf-pt-{side}", "k4-pf-pt") }));
@@ -422,7 +445,7 @@ public partial class PanoramaLayoutTests(ITestOutputHelper output)
 		{
 			("k4-h-rank-icon", "k4-h-rank"), ("k4-h-rank-name", "k4-h-rank"), ("k4-h-bar", "k4-h-rank"), ("k4-h-me", "k4-h-top"),
 			("k4-mw-icon", "k4-mw"), ("k4-mw-bar", "k4-mw"), ("k4-lb-me-icon", "k4-lb-me"), ("k4-a-show-unlocked", "k4-a-empty"),
-			("k4-d-wait-bar", "k4-d-wait"), ("k4-d-takeback", "k4-d-wait"), ("k4-d-mine-icon", "k4-d-mine"), ("k4-d-mine-bar", "k4-d-mine"),
+			("k4-d-pick-icon", "k4-d-pick"), ("k4-d-pick-type", "k4-d-pick"), ("k4-d-wait-bar", "k4-d-wait"), ("k4-d-takeback", "k4-d-wait"), ("k4-d-mine-icon", "k4-d-mine"), ("k4-d-mine-bar", "k4-d-mine"),
 			("k4-season-bar", "k4-season"), ("k4-set-mode-lock", "k4-view-settings"),
 			("k4-set-points-on", "k4-set-points"), ("k4-set-points-off", "k4-set-points"), ("k4-set-tag-on", "k4-set-tag"), ("k4-set-tag-off", "k4-set-tag"),
 			("k4-h-sd0", "k4-view-home"), ("k4-sd0", "k4-view-missions"), ("k4-a-sc0", "k4-view-achievements"),

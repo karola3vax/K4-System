@@ -111,19 +111,14 @@ public partial class PanelRulesTests
 			Assert.Contains($"`{PanoramaHud.NextClass(kind)}`", contract, StringComparison.Ordinal);
 	}
 
+	// The simple look shows the place short, as "#12": the leaderboard count says out of how many.
 	[Theory]
-	[InlineData(12, 340, "12", "340")]
-	[InlineData(1234, 5000, "1,234", "5,000")]
-	[InlineData(5, 3, "5", "5")] // a stale total below the placement shows the placement
-	public void The_place_reads_hash_of_total(int placement, int total, string place, string of)
-		=> Assert.Equal((place, of), PanoramaHud.Place(placement, total));
-
-	[Fact]
-	public void An_unknown_place_is_empty()
-	{
-		Assert.Null(PanoramaHud.Place(0, 340));
-		Assert.Null(PanoramaHud.Place(-1, 0));
-	}
+	[InlineData(12, "#12")]
+	[InlineData(1234, "#1,234")]
+	[InlineData(0, "")]
+	[InlineData(-1, "")]
+	public void The_place_reads_hash_number(int placement, string expected)
+		=> Assert.Equal(expected, PanoramaHud.Place(placement));
 
 	// 0 players on the leaderboard, 150 achievements against a pool of 64.
 	[Theory]

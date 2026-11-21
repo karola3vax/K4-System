@@ -69,8 +69,8 @@ A list longer than its pool ends with its `-more` label (`{s:more}`, for example
 | `k4-crumbs` | Panel, the row under the tabs | `{s:crumb}` (where you are, for example "Leaderboard / zabullet") |
 | `k4-back` | Button inside `k4-crumbs`, starts `k4-gone` | `{s:label}`; goes back to the screen you came from |
 | `k4-season` | Panel inside `k4-crumbs`, starts `k4-gone` | `{s:title}`, `{s:left}`; bar `k4-season-bar` |
-| `k4-duel-bar` | Panel under `k4-crumbs`, starts `k4-gone` | a challenge waiting for this player, on every screen: `{s:title}`, `{s:text}`, `{s:left}`; icon `k4-duel-bar-icon` (picture group); bar `k4-duel-bar-timer` (time left to answer) |
-| `k4-duel-bar-accept`, `k4-duel-bar-decline` | Button inside `k4-duel-bar` | `{s:label}` |
+| `k4-duel-bar` | Panel under `k4-crumbs`, starts `k4-gone` | a challenge waiting for this player, on every screen, in one line: `{s:title}` (who), `{s:text}` (the rule and stake, for example "No-scope · 500"), `{s:left}`; icon `k4-duel-bar-icon` (picture group); bar `k4-duel-bar-timer` (time left to answer) |
+| `k4-duel-bar-accept`, `k4-duel-bar-decline` | Button inside `k4-duel-bar` | `{s:label}` (the buttons show a check and a cross; the caption is not shown) |
 | `k4-view-home`, `k4-view-missions`, `k4-view-achievements`, `k4-view-leaderboard`, `k4-view-duels`, `k4-view-profile`, `k4-view-settings` | Panel | `k4-show` on the open screen |
 | `k4-status` | Panel in the footer, starts `k4-gone` | `{s:status}`: the result of the player's last click; `k4-ok` or `k4-bad`. While the window is closed the same message goes to chat |
 | `k4-keys` | Panel in the footer | `{s:keys}` (for example "Tab closes") |
@@ -81,37 +81,37 @@ The copyright line "© 2026 karola3vax" is fixed text in the footer, always visi
 
 | Id | Kind | Variables and classes |
 | --- | --- | --- |
-| `k4-h-rank` | Button, opens Leaderboard on the rank list | `{s:rank}` (label `k4-h-rank-name`, rank color group), `{s:points}`, `{s:place}` (for example "#12 of 340"), `{s:next}` (next rank, empty at the top), `{s:togo}`; icon `k4-h-rank-icon` (rank emblem group); bar `k4-h-bar` |
-| `k4-h-top` | Button, opens Leaderboard | `{s:title}`; rows `k4-h-p0` … `k4-h-p2`, the top 3 as a podium, laid out 2-1-3 (start `k4-gone`): `{s:pos}`, `{s:name}`, `{s:points}`; icon `k4-h-p{i}-icon`; row `k4-h-me` (starts `k4-gone`): `{s:pos}`, `{s:points}` |
-| `k4-h-today` | Panel | `{s:title}`, `{s:reset}` |
-| `k4-h-m0` … `k4-h-m3` | Button, opens Missions, start `k4-gone` | `k4-h-m3` is the weekly mission. `{s:desc}`, `{s:progress}`, `{s:reward}`; icon `k4-h-m{i}-icon`; bar `k4-h-m{i}-bar`; `k4-done` |
-| `k4-h-sd0` … `k4-h-sd6` | Panel | `{s:day}`; `k4-on` for a finished day, `k4-today` for today |
+| `k4-h-rank` | Button, opens Leaderboard on the rank list | `{s:rank}` (label `k4-h-rank-name`, rank color group), `{s:points}`, `{s:place}` (for example "#12"), `{s:next}` (next rank, empty at the top), `{s:togo}` (both not shown in the simple look); icon `k4-h-rank-icon` (rank emblem group); bar `k4-h-bar` |
+| `k4-h-top` | Button, opens Leaderboard | `{s:title}`; rows `k4-h-p0` … `k4-h-p2`, the top 3 as a podium, laid out 2-1-3 (start `k4-gone`): `{s:pos}`, `{s:name}`, `{s:points}`; icon `k4-h-p{i}-icon`; row `k4-h-me` (starts `k4-gone`): `{s:pos}` (for example "#12"), `{s:points}` |
+| `k4-h-today` | Panel | `{s:title}`, `{s:reset}` (the caption is a picture; these are not shown) |
+| `k4-h-m0` … `k4-h-m3` | Button, opens Missions, start `k4-gone` | `k4-h-m3` is the weekly mission. A tile: picture, `{s:progress}` and bar; `{s:desc}` and `{s:reward}` on hover; icon `k4-h-m{i}-icon`; bar `k4-h-m{i}-bar`; `k4-done` |
+| `k4-h-sd0` … `k4-h-sd6` | Panel | `{s:day}`; `k4-on` for a finished day, `k4-today` for today. Not shown in the simple look (the week is on Missions) |
 | `k4-h-next` | Panel | `{s:title}` |
 | `k4-h-stats` | Panel, the row of big numbers under Home, starts `k4-gone` (a server without the big numbers never fills it) | none |
-| `k4-h-s0` … `k4-h-s4` | Panel, start `k4-gone` | one big number of the player's own stats: `{s:value}`, `{s:label}`; icon `k4-h-s{i}-icon` (picture group) |
-| `k4-h-n0` … `k4-h-n2` | Button, start `k4-gone` | a "do this next" card, only real items: `{s:title}`, `{s:text}`; icon `k4-h-n{i}-icon` (picture group); next card kind group. The server keeps what each card opens |
+| `k4-h-s0` … `k4-h-s4` | Panel, start `k4-gone` | one big number of the player's own stats: `{s:value}`, `{s:label}` (on hover); icon `k4-h-s{i}-icon` (picture group) |
+| `k4-h-n0` … `k4-h-n2` | Button, start `k4-gone` | a "do this next" medal, only real items: `{s:title}`, `{s:text}` (on hover); icon `k4-h-n{i}-icon` (picture group); next card kind group. The server keeps what each card opens |
 
 ## Missions
 
 | Id | Kind | Variables and classes |
 | --- | --- | --- |
-| `k4-view-missions` | Panel | `{s:title}`, `{s:reset}`, `{s:swaps}` (for example "1 swap left today"), `{s:streak}`, `{s:streakhint}` (shown as one line: "0 days in a row · ...") |
-| `k4-m0` … `k4-m2` | Panel, start `k4-gone` | `{s:diff}`, `{s:reward}`, `{s:desc}`, `{s:progress}`, `{s:paid}`; icon `k4-m{i}-icon`; bar `k4-m{i}-bar`; difficulty `k4-easy` / `k4-medium` / `k4-hard`; `k4-done` |
-| `k4-reroll-0` … `k4-reroll-2` | Button, start `k4-gone` | `{s:label}`; asks first (below) |
+| `k4-view-missions` | Panel | `{s:title}` ("Today"), `{s:reset}` (time to the next missions, for example "6h 12m"), `{s:swaps}` (swaps left, a number), `{s:streak}`, `{s:streakhint}` (not shown in the simple look) |
+| `k4-m0` … `k4-m2` | Panel, start `k4-gone` | `{s:reward}`, `{s:progress}`; `{s:diff}`, `{s:desc}`, `{s:paid}` on hover; icon `k4-m{i}-icon`; bar `k4-m{i}-bar`; difficulty `k4-easy` / `k4-medium` / `k4-hard`; `k4-done` |
+| `k4-reroll-0` … `k4-reroll-2` | Button, start `k4-gone` | `{s:label}` (the button shows the swap picture; the caption is not shown); asks first (below) |
 | `k4-m0-ask` … `k4-m2-ask` | Panel, start `k4-gone` | the swap question inside the card: `{s:ask}` |
 | `k4-m{i}-yes`, `k4-m{i}-no` | Button inside `k4-m{i}-ask` | `{s:label}` |
-| `k4-mw` | Panel, starts `k4-gone` | `{s:left}`, `{s:desc}`, `{s:progress}`, `{s:reward}`; icon `k4-mw-icon`; bar `k4-mw-bar`; `k4-done` |
-| `k4-sd0` … `k4-sd6` | Panel | `k4-on` for a finished day, `k4-today` for today; `{s:day}`, `{s:bonus}`, `{s:tip}` |
+| `k4-mw` | Panel, starts `k4-gone` | `{s:title}` ("Weekly"), `{s:left}`, `{s:progress}`, `{s:reward}`; `{s:desc}` on hover; icon `k4-mw-icon`; bar `k4-mw-bar`; `k4-done` |
+| `k4-sd0` … `k4-sd6` | Panel | `k4-on` for a finished day, `k4-today` for today; `{s:day}` (the day's number only, never a sentence), `{s:bonus}`, `{s:tip}` |
 
 ## Achievements
 
 | Id | Kind | Variables and classes |
 | --- | --- | --- |
-| `k4-view-achievements` | Panel | `{s:count}`, `{s:showcase}` (the strip caption, for example "On your profile 2/3") |
+| `k4-view-achievements` | Panel | `{s:count}` (for example "10 / 21"), `{s:showcase}` (the strip caption, for example "On your profile 2/3") |
 | `k4-a-sc0` … `k4-a-sc2` | Button, the showcase slots | `{s:name}`, `{s:empty}`; ring `k4-a-sc{i}-ring` (tier); icon `k4-a-sc{i}-icon`; `k4-empty` for a free slot. A click on a filled slot takes it off the profile |
 | `k4-af-all`, `k4-af-progress`, `k4-af-unlocked`, `k4-af-shown` | Button | `{s:label}`, `k4-active` |
 | `k4-a-list` | Panel, scroll box | |
-| `k4-a0` … `k4-a63` | Button, start `k4-gone` | `{s:name}`, `{s:goal}`, `{s:desc}`, `{s:tip}`; ring `k4-a{i}-ring` (tier, `t-locked` while locked); icon `k4-a{i}-icon`; bar `k4-a{i}-bar`; `k4-done` when unlocked; `k4-pinned` when on the profile. A click on an unlocked card pins or unpins it |
+| `k4-a0` … `k4-a63` | Button, start `k4-gone` | `{s:name}`, `{s:tip}`; `{s:goal}` and `{s:desc}` are not shown (the tip has them); ring `k4-a{i}-ring` (tier, `t-locked` while locked); icon `k4-a{i}-icon`; bar `k4-a{i}-bar`; `k4-done` when unlocked; `k4-pinned` when on the profile. A click on an unlocked card pins or unpins it |
 | `k4-a-more` | Label, starts `k4-gone` | `{s:more}` |
 | `k4-a-empty` | Panel, starts `k4-gone` | `{s:none}`; button `k4-a-show-unlocked` (`{s:label}`) switches the filter to Unlocked |
 
@@ -123,9 +123,9 @@ The copyright line "© 2026 karola3vax" is fixed text in the footer, always visi
 | `k4-lb-tab-players`, `k4-lb-tab-ranks` | Button, the Players / Rank list switch | `{s:label}`, `k4-active` |
 | `k4-lb-newer`, `k4-lb-older` | Button | `k4-disabled`; the season switch (players only) |
 | `k4-lb-players` | Panel | `k4-gone` while the rank list shows |
-| `k4-lb-list` | Panel, scroll box | `{s:profile}`, `{s:duel}`: the row button captions |
-| `k4-lb-r0` … `k4-lb-r99` | Panel, start `k4-gone` | `{s:pos}`, `{s:name}`, `{s:rank}`, `{s:points}`; icon `k4-lb-r{i}-icon` (rank emblem group); place medal group; `k4-me` on the player's own row |
-| `k4-lb-r{i}-profile` | Button inside the row | opens that player's profile |
+| `k4-lb-list` | Panel, scroll box | `{s:profile}`, `{s:duel}`: the row button captions (not shown: the row itself and a picture button) |
+| `k4-lb-r0` … `k4-lb-r99` | Panel, start `k4-gone` | `{s:pos}`, `{s:name}`, `{s:rank}` (not shown), `{s:points}`; icon `k4-lb-r{i}-icon` (rank emblem group); place medal group; `k4-me` on the player's own row |
+| `k4-lb-r{i}-profile` | Button inside the row | opens that player's profile; it holds the row's place, emblem, name and points, so a click anywhere on the row but Challenge opens it |
 | `k4-lb-r{i}-duel` | Button inside the row, starts `k4-gone` | opens Duels with that player picked; shown only for a player who is online now and can be challenged (live season, Duels on) |
 | `k4-lb-more` | Label, starts `k4-gone` | `{s:more}` |
 | `k4-lb-me` | Panel outside the scroll box, starts `k4-gone` | the player's own row, always visible: `{s:pos}`, `{s:name}`, `{s:rank}`, `{s:points}`; icon `k4-lb-me-icon` |
@@ -139,18 +139,19 @@ The copyright line "© 2026 karola3vax" is fixed text in the footer, always visi
 
 | Id | Kind | Variables and classes |
 | --- | --- | --- |
-| `k4-view-duels` | Panel | `{s:pick}`, `{s:types}`, `{s:stakes}` (captions), `{s:online}`, `{s:summary}` (what the challenge will be), `{s:status}` (why sending is not possible now, empty otherwise), `{s:live}` |
+| `k4-view-duels` | Panel | `{s:pick}`, `{s:types}`, `{s:stakes}`, `{s:online}`, `{s:live}` (captions, not shown in the simple look), `{s:status}` (why sending is not possible now, empty otherwise) |
 | `k4-dp-list` | Panel, scroll box | |
-| `k4-dp0` … `k4-dp63` | Button, start `k4-gone` | an online player: `{s:name}`, `{s:points}`, `{s:state}` (for example "In a duel"); icon `k4-dp{i}-icon` (rank emblem group); `k4-active` when picked; `k4-disabled` when they cannot be challenged now |
+| `k4-dp0` … `k4-dp63` | Button, start `k4-gone` | an online player: emblem and `{s:name}`; `{s:points}` and `{s:state}` (for example "In a duel") are not shown; icon `k4-dp{i}-icon` (rank emblem group); `k4-active` when picked; `k4-disabled` when they cannot be challenged now |
 | `k4-dp-more` | Label, starts `k4-gone` | `{s:more}` |
 | `k4-dp-none` | Label, starts `k4-gone` | `{s:none}` |
-| `k4-dt0` … `k4-dt5` | Button, start `k4-gone` | a duel type: `{s:name}`, `{s:tip}` (`k4-has-tip` card); icon `k4-dt{i}-icon` (picture group); `k4-active` when picked |
+| `k4-dt0` … `k4-dt5` | Button, start `k4-gone` | a duel type, its picture only: `{s:name}` and `{s:tip}` on hover; icon `k4-dt{i}-icon` (picture group); `k4-active` when picked |
 | `k4-ds0` … `k4-ds4` | Button, start `k4-gone` | a stake: `{s:label}`; `k4-active` when picked; `k4-disabled` over the allowed maximum |
+| `k4-d-pick` | Panel, starts `k4-gone` | the challenge so far, once a player and a type are picked: `{s:target}` (the player's name), `{s:stake}`; emblem `k4-d-pick-icon` (rank emblem group, `k4-gone` without a rank); picture `k4-d-pick-type` (the type's picture) |
 | `k4-d-send` | Button | `{s:label}`; `k4-disabled` until a player, type and stake are picked and the challenge is allowed |
 | `k4-d-wait` | Panel, starts `k4-gone` | the player's own challenge waiting for an answer: `{s:text}`; bar `k4-d-wait-bar` (time left) |
 | `k4-d-takeback` | Button inside `k4-d-wait` | `{s:label}` |
 | `k4-d-mine` | Panel, starts `k4-gone` | the player's own running duel: `{s:title}`, `{s:score}`, `{s:text}`; icon `k4-d-mine-icon`; bar `k4-d-mine-bar` (time left) |
-| `k4-dl0` … `k4-dl3` | Panel, start `k4-gone` | other running duels: `{s:names}`, `{s:score}`, `{s:info}`; icon `k4-dl{i}-icon` |
+| `k4-dl0` … `k4-dl3` | Panel, start `k4-gone` | other running duels: `{s:names}`, `{s:score}`; `{s:info}` on hover; icon `k4-dl{i}-icon` |
 | `k4-dl-none` | Label, starts `k4-gone` | `{s:none}` |
 
 An incoming challenge is answered on `k4-duel-bar` (frame), on every screen.
@@ -163,19 +164,19 @@ The player's own profile, or another player's (opened from the leaderboard; `k4-
 
 | Id | Kind | Variables and classes |
 | --- | --- | --- |
-| `k4-view-profile` | Panel | `{s:name}`, `{s:points}`, `{s:place}`, `{s:next}`, `{s:fav}`, `{s:favkills}`, `{s:none}`, `{s:hint}`, `{s:total}` (playtime total) |
+| `k4-view-profile` | Panel | `{s:name}`, `{s:points}`, `{s:place}` (for example "#12"), `{s:next}` (not shown), `{s:fav}`, `{s:favkills}`, `{s:none}`, `{s:hint}`, `{s:total}` (playtime total) |
 | `k4-pf-icon` / `k4-pf-badge` | Panel | rank emblem group / text badge `{s:tag}` (one of the two is `k4-gone`) |
 | `k4-pf-rank` | Label | `{s:rank}`, rank color group |
 | `k4-pf-bar` | Panel | bar to the next rank |
 | `k4-pf-challenge` | Button, starts `k4-gone` | `{s:label}`; on another player's profile when they can be challenged now |
 | `k4-pf-sc0` … `k4-pf-sc2` | Button, start `k4-gone` | `{s:name}`, `{s:desc}`, `{s:tip}`; ring `k4-pf-sc{i}-ring` (tier); icon `k4-pf-sc{i}-icon`. A click on your own opens Achievements |
 | `k4-pf-sc-hint` | Panel, starts `k4-gone` | the `{s:hint}` label |
-| `k4-pf-st0` … `k4-pf-st7` | Panel, start `k4-gone` | `{s:value}`, `{s:label}`, `{s:tip}`; icon `k4-pf-st{i}-icon` |
-| `k4-pf-sw0` … `k4-pf-sw2` | Panel, start `k4-gone` | top weapons: `{s:weapon}`, `{s:kills}`; icon `k4-pf-sw{i}-icon` (weapon); bar `k4-pf-sw{i}-bar` |
+| `k4-pf-st0` … `k4-pf-st7` | Panel, start `k4-gone` | `{s:value}`, `{s:tip}`; `{s:label}` is not shown; icon `k4-pf-st{i}-icon` |
+| `k4-pf-sw0` … `k4-pf-sw2` | Panel, start `k4-gone` | top weapons, as pictures: `{s:kills}`; `{s:weapon}` is not shown; icon `k4-pf-sw{i}-icon` (weapon); bar `k4-pf-sw{i}-bar` |
 | `k4-pf-pt` | Panel, starts `k4-gone` | time per side |
 | `k4-pf-pt-t`, `k4-pf-pt-ct`, `k4-pf-pt-spec` | Panel | `{s:name}`, `{s:time}`; bar `k4-pf-pt-t-bar`, `k4-pf-pt-ct-bar`, `k4-pf-pt-spec-bar` |
 | `k4-pf-ss-list` | Panel, scroll box | |
-| `k4-pf-ss0` … `k4-pf-ss23` | Panel, start `k4-gone` | `{s:season}`, `{s:pos}`; icon `k4-pf-ss{i}-icon` |
+| `k4-pf-ss0` … `k4-pf-ss23` | Panel, start `k4-gone` | `{s:season}`, `{s:pos}` (for example "#9"); icon `k4-pf-ss{i}-icon` |
 | `k4-pf-ss-none` | Panel, starts `k4-gone` | the `{s:none}` label |
 
 ## Settings
@@ -217,6 +218,8 @@ hud.Hud?.Promote(player, rank);   // the large promotion banner
 ## Explanations
 
 A card that shows a picture or number without words explains itself on hover. A card with the class `k4-has-tip` holds a `k4-tip` panel (`hittest="false"`) with a `{s:tip}` label, laid over the card and shown while the card is hovered. Cards with tips: `k4-a{i}`, `k4-rk{i}`, `k4-sd{i}`, `k4-pf-sc{i}`, `k4-pf-st{i}`, `k4-dt{i}`.
+
+The simple look (owner 2026-11-21) puts pictures and numbers in front and the sentences on hover. Where the server already sends the sentence as a variable, the card's `k4-tip` holds that variable's label instead of `{s:tip}`, so no new text is needed: `k4-h-m{i}` (`{s:desc}`, `{s:reward}`), `k4-h-n{i}` (`{s:title}`, `{s:text}`), `k4-h-s{i}` (`{s:label}`), `k4-m{i}` (`{s:diff}`, `{s:desc}`, `{s:paid}`), `k4-mw` (`{s:desc}`), `k4-dt{i}` (`{s:name}`, `{s:tip}`), `k4-dl{i}` (`{s:info}`).
 
 ## Commands
 

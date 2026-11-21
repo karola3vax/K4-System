@@ -33,7 +33,7 @@ SEASON_ROWS = 24
 LIVE_DUEL_ROWS = 4
 
 HOME_MISSIONS = 4
-HOME_TOP = 5
+HOME_STATS = 5
 HOME_NEXT = 3
 STREAK_DAYS = 7
 MISSIONS = 3
@@ -104,10 +104,19 @@ def medal(ring_id, icon_id, size, **attrs):
             pic("k4-medal-icon", id=icon_id, **attrs)
 
 
-def tip():
-    """A hover explanation laid over its card: hidden until the card is hovered, never takes the mouse."""
+def tip(*texts):
+    """A hover explanation laid over its card: hidden until the card is hovered, never takes the mouse.
+
+    By default it shows {s:tip}. A card whose sentence the server already sends (a mission's text, a stat's name)
+    moves that label into its tip instead, so the card shows only its picture and numbers."""
+    texts = texts or ("{s:tip}",)
     with box(cls="k4-tip", hittest="false"):
-        label("{s:tip}", "k4-tip-text", hittest="false")
+        if len(texts) == 1:
+            label(texts[0], "k4-tip-text", hittest="false")
+            return
+        with box(cls="k4-tip-body", hittest="false"):
+            for text in texts:
+                label(text, "k4-tip-line", hittest="false")
 
 
 def first(i):
@@ -145,6 +154,10 @@ with box("root"):
 
         # ------------------------------------------------------------ the window
         with box(id="k4-panel", cls="k4-panel k4-closed"):
+          # CS2's season art in grey behind the menu, dimmed; the frame on top holds the menu, top to bottom.
+          panel("k4-bg")
+          panel("k4-shade")
+          with box(cls="k4-frame"):
 
             # Top bar: brand, tabs, event, gear, close
             with box(cls="k4-top"):
@@ -182,151 +195,162 @@ with box("root"):
 
             # A challenge waiting for this player, on every screen
             with box(id="k4-duel-bar", cls=f"k4-duel-bar {GONE}"):
+                # One line: the rule's picture, who, the rule and stake, the time left, then accept or decline.
                 with box(cls="k4-card k4-duel-bar-card"):
                     pic("k4-duel-bar-icon", id="k4-duel-bar-icon")
-                    with box(cls="k4-duel-bar-text"):
-                        label("{s:title}", "k4-duel-bar-title")
-                        label("{s:text}", "k4-duel-bar-msg")
-                    with box(cls="k4-duel-bar-clock"):
-                        label("{s:left}", "k4-duel-bar-left", True)
-                        bar("k4-duel-bar-timer", "k4-bar-thin k4-bar-clock")
-                    button("k4-duel-bar-accept", cls="k4-btn k4-btn-main")
-                    button("k4-duel-bar-decline", cls="k4-btn k4-btn-ghost k4-gap")
+                    label("{s:title}", "k4-duel-bar-title")
+                    label("{s:text}", "k4-duel-bar-msg")
+                    grow()
+                    bar("k4-duel-bar-timer", "k4-bar-thin k4-bar-clock k4-duel-bar-track")
+                    label("{s:left}", "k4-duel-bar-left", True)
+                    button("k4-duel-bar-accept", cls="k4-btn k4-btn-main k4-btn-icon-only", icon="ic-check")
+                    button("k4-duel-bar-decline", cls="k4-btn k4-btn-ghost k4-btn-icon-only k4-gap", icon="ic-cancel")
 
             with box(cls="k4-body"):
 
-                # ------------------------------------------------ Home: your rank, today, what to do next
+                # ------------------------------------------------ Home: your rank, today, the top 3, what to do next, your numbers
+                # The simple look (owner 2026-11-21): pictures and numbers in front, the sentences on hover.
                 with box(id="k4-view-home", cls="k4-view k4-home"):
-                    with box(cls="k4-h-left"):
-                        with box("Button", id="k4-h-rank", cls="k4-card k4-click k4-h-rank"):
-                            with box(cls="k4-h-rank-top"):
-                                pic("k4-em-l sg-0", id="k4-h-rank-icon")
-                                with box(cls="k4-h-rank-text"):
-                                    label("{s:rank}", "k4-h-rank-name", True, id="k4-h-rank-name")
-                                    with box(cls="k4-row"):
-                                        label("{s:points}", "k4-h-points", True)
-                                        label("{s:place}", "k4-h-place")
+                    with box("Button", id="k4-h-rank", cls="k4-click k4-h-rank"):
+                        pic("k4-em-hero sg-0", id="k4-h-rank-icon")
+                        with box(cls="k4-h-rank-text"):
+                            label("{s:rank}", "k4-h-rank-name", True, id="k4-h-rank-name")
+                            with box(cls="k4-row"):
+                                label("{s:points}", "k4-h-points", True)
+                                label("{s:place}", "k4-h-place", True)
                             bar("k4-h-bar", "k4-h-bar-track")
+                            # The way to the next rank: still filled by the server, left out of the simple look.
                             with box(cls="k4-row k4-h-next-row"):
                                 label("{s:next}", "k4-h-nextrank")
-                                grow()
                                 label("{s:togo}", "k4-h-togo")
+                    with box(cls="k4-h-mid"):
+                        with box(id="k4-h-today", cls="k4-card k4-h-today"):
+                            with box(cls="k4-row k4-head"):
+                                pic("k4-cap-icon ic-quest")
+                                label("{s:title}", "k4-cap-text")
+                                label("{s:reset}", "k4-cap-text")
+                            with box(cls="k4-h-tiles"):
+                                for i in range(HOME_MISSIONS):
+                                    with box("Button", id=f"k4-h-m{i}", cls=f"k4-h-m k4-has-tip{first(i)} {GONE}"):
+                                        with box(cls="k4-h-m-body"):
+                                            pic("k4-h-m-icon", id=f"k4-h-m{i}-icon")
+                                            label("{s:progress}", "k4-h-m-progress", True)
+                                            bar(f"k4-h-m{i}-bar", "k4-bar-thin k4-h-m-bar")
+                                        tip("{s:desc}", "{s:reward}")
+                            # The streak week lives on Missions; Home keeps the parts for the server, hidden.
+                            with box(cls="k4-h-streak"):
+                                for i in range(STREAK_DAYS):
+                                    with box(id=f"k4-h-sd{i}", cls=f"k4-h-sd{first(i)}"):
+                                        pic("k4-sd-check ic-check")
+                                        label("{s:day}", "k4-h-sd-day", True)
                         with box("Button", id="k4-h-top", cls="k4-card k4-click k4-h-top"):
-                            label("{s:title}", "k4-cap")
-                            for i in range(HOME_TOP):
-                                with box(id=f"k4-h-p{i}", cls=f"k4-h-p{f' k4-h-p-{i + 1}' if i < 3 else ''} {GONE}"):  # medal edge for places 1 to 3
-                                    label("{s:pos}", "k4-h-p-pos", True)
-                                    pic("k4-em-s sg-0", id=f"k4-h-p{i}-icon")
-                                    label("{s:name}", "k4-h-p-name")
-                                    label("{s:points}", "k4-h-p-points", True)
-                            with box(id="k4-h-me", cls=f"k4-h-p k4-h-me {GONE}"):
-                                label("{s:pos}", "k4-h-p-pos", True)
+                            with box(cls="k4-row k4-head"):
+                                pic("k4-cap-icon ic-leader")
+                                label("{s:title}", "k4-cap-text")
+                            # The podium, laid out 2-1-3.
+                            with box(cls="k4-h-podium"):
+                                for i in (1, 0, 2):
+                                    with box(id=f"k4-h-p{i}", cls=f"k4-h-p k4-h-p-{i + 1} {GONE}"):
+                                        pic("k4-em-m sg-0", id=f"k4-h-p{i}-icon")
+                                        label("{s:name}", "k4-h-p-name")
+                                        label("{s:points}", "k4-h-p-points")
+                                        with box(cls="k4-h-step"):
+                                            label("{s:pos}", "k4-h-p-pos", True)
+                            with box(id="k4-h-me", cls=f"k4-h-me {GONE}"):
+                                label("{s:pos}", "k4-h-me-pos", True)
                                 grow()
                                 label("{s:points}", "k4-h-me-points", True)
-                    with box(id="k4-h-today", cls="k4-card k4-h-today"):
-                        with box(cls="k4-row k4-head"):
-                            label("{s:title}", "k4-head-title", True)
-                            grow()
-                            label("{s:reset}", "k4-head-fact")
-                        for i in range(HOME_MISSIONS):
-                            with box("Button", id=f"k4-h-m{i}", cls=f"k4-h-m {GONE}"):
-                                pic("k4-h-m-icon", id=f"k4-h-m{i}-icon")
-                                with box(cls="k4-h-m-text"):
-                                    label("{s:desc}", "k4-h-m-desc")
-                                    with box(cls="k4-row k4-h-m-line"):
-                                        bar(f"k4-h-m{i}-bar", "k4-bar-thin k4-h-m-bar")
-                                        label("{s:progress}", "k4-h-m-progress", True)
-                                label("{s:reward}", "k4-h-m-reward", True)
-                        vgrow()
-                        with box(cls="k4-h-streak"):
-                            for i in range(STREAK_DAYS):
-                                with box(id=f"k4-h-sd{i}", cls=f"k4-h-sd{first(i)}"):
-                                    pic("k4-sd-check ic-check")
-                                    label("{s:day}", "k4-h-sd-day", True)
-                    with box(id="k4-h-next", cls="k4-h-next"):
-                        label("{s:title}", "k4-cap k4-h-next-cap")
-                        for i in range(HOME_NEXT):
-                            with box("Button", id=f"k4-h-n{i}", cls=f"k4-card k4-click k4-h-n {GONE}"):
-                                pic("k4-h-n-icon", id=f"k4-h-n{i}-icon")
-                                with box(cls="k4-h-n-text"):
-                                    label("{s:title}", "k4-h-n-title")
-                                    label("{s:text}", "k4-h-n-msg")
+                        with box(id="k4-h-next", cls="k4-card k4-h-next"):
+                            with box(cls="k4-row k4-head"):
+                                pic("k4-cap-icon ic-winner_ribbon")
+                                label("{s:title}", "k4-cap-text")
+                            with box(cls="k4-h-medals"):
+                                for i in range(HOME_NEXT):
+                                    with box("Button", id=f"k4-h-n{i}", cls=f"k4-click k4-h-n k4-has-tip {GONE}"):
+                                        with box(cls="k4-h-n-body"):
+                                            with box(cls="k4-h-n-ring"):
+                                                pic("k4-h-n-icon", id=f"k4-h-n{i}-icon")
+                                            label("{s:title}", "k4-h-n-title")
+                                        tip("{s:title}", "{s:text}")
+                    with box(id="k4-h-stats", cls=f"k4-h-stats {GONE}"):
+                        for i in range(HOME_STATS):
+                            with box(id=f"k4-h-s{i}", cls=f"k4-h-s k4-has-tip{first(i)} {GONE}"):
+                                with box(cls="k4-h-s-body"):
+                                    pic("k4-h-s-icon", id=f"k4-h-s{i}-icon")
+                                    label("{s:value}", "k4-h-s-value", True)
+                                tip("{s:label}")
 
                 # ------------------------------------------------ Missions
                 with box(id="k4-view-missions", cls="k4-view k4-missions"):
                     with box(cls="k4-toolbar"):
                         label("{s:title}", "k4-title", True)
-                        label("{s:reset}", "k4-title-fact")
+                        pic("k4-title-icon ic-clock")
+                        label("{s:reset}", "k4-title-fact k4-m-reset")
                         grow()
-                        with box(cls="k4-tag k4-tag-big"):
+                        with box(cls="k4-tag k4-tag-big k4-m-swaps"):
                             pic("k4-tag-icon ic-refresh_skinny")
-                            label("{s:swaps}", "k4-tag-label")
+                            label("{s:swaps}", "k4-tag-label", True)
                     with box(cls="k4-m-cards"):
                         for i in range(MISSIONS):
-                            with box(id=f"k4-m{i}", cls=f"k4-card k4-m{first(i)} {GONE}"):
-                                with box(cls="k4-row"):
-                                    with box(cls="k4-tag k4-m-diff"):
-                                        pic("k4-tag-icon k4-m-check ic-check")
-                                        label("{s:diff}", "k4-tag-label")
-                                    grow()
-                                    label("{s:reward}", "k4-m-reward", True)
-                                pic("k4-m-icon", id=f"k4-m{i}-icon")
-                                label("{s:desc}", "k4-m-desc")
-                                vgrow()
-                                with box(cls="k4-row k4-m-progress-row"):
+                            # Stacked, not flowed (k4-has-tip): the strip, the picture and number, the tip, and on
+                            # top of the tip the swap button and reward, then the swap question.
+                            with box(id=f"k4-m{i}", cls=f"k4-card k4-m k4-has-tip{first(i)} {GONE}"):
+                                panel("k4-m-strip")
+                                with box(cls="k4-m-body"):
+                                    pic("k4-m-icon", id=f"k4-m{i}-icon")
                                     label("{s:progress}", "k4-m-progress", True)
                                     bar(f"k4-m{i}-bar", "k4-m-bar")
-                                # The swap question lies over the button row, inside the card.
-                                with box(cls="k4-m-foot"):
-                                    with box(cls="k4-row k4-m-foot-row"):
-                                        button(f"k4-reroll-{i}", cls="k4-btn k4-btn-ghost", icon="ic-refresh_skinny", gone=True)
-                                        label("{s:paid}", "k4-m-paid")
-                                    with box(id=f"k4-m{i}-ask", cls=f"k4-m-ask {GONE}"):
-                                        label("{s:ask}", "k4-m-ask-text")
+                                tip("{s:diff}", "{s:desc}", "{s:paid}")
+                                with box(cls="k4-m-top"):
+                                    button(f"k4-reroll-{i}", cls="k4-btn k4-btn-sm k4-btn-ghost k4-btn-icon-only", icon="ic-refresh_skinny", gone=True)
+                                    grow()
+                                    label("{s:reward}", "k4-m-reward", True)
+                                with box(id=f"k4-m{i}-ask", cls=f"k4-m-ask {GONE}"):
+                                    label("{s:ask}", "k4-m-ask-text")
+                                    with box(cls="k4-row k4-m-ask-row"):
                                         button(f"k4-m{i}-yes", cls="k4-btn k4-btn-main")
                                         button(f"k4-m{i}-no", cls="k4-btn k4-btn-ghost k4-gap")
                     with box(cls="k4-m-bottom"):
-                        with box(id="k4-mw", cls=f"k4-card k4-mw {GONE}"):
-                            pic("k4-mw-icon", id="k4-mw-icon")
-                            with box(cls="k4-mw-text"):
-                                with box(cls="k4-row"):
-                                    with box(cls="k4-tag k4-m-diff"):
-                                        pic("k4-tag-icon k4-m-check ic-check")
-                                        label("{s:left}", "k4-tag-label")
-                                label("{s:desc}", "k4-mw-desc")
-                                bar("k4-mw-bar", "k4-m-bar")
-                            with box(cls="k4-mw-side"):
-                                label("{s:progress}", "k4-mw-progress", True)
-                                label("{s:reward}", "k4-mw-reward")
+                        with box(id="k4-mw", cls=f"k4-card k4-mw k4-has-tip {GONE}"):
+                            with box(cls="k4-mw-body"):
+                                pic("k4-mw-icon", id="k4-mw-icon")
+                                with box(cls="k4-mw-text"):
+                                    with box(cls="k4-row"):
+                                        label("{s:title}", "k4-mw-title", True)
+                                        label("{s:left}", "k4-mw-left")
+                                    bar("k4-mw-bar", "k4-bar-thin k4-mw-track")
+                                with box(cls="k4-mw-side"):
+                                    label("{s:progress}", "k4-mw-progress", True)
+                                    label("{s:reward}", "k4-mw-reward", True)
+                            tip("{s:desc}")
                         with box(cls="k4-card k4-streak"):
-                            with box(cls="k4-row"):
+                            # The streak count and its sentence stay with the server; the days say it with numbers.
+                            with box(cls="k4-streak-head"):
                                 label("{s:streak}", "k4-streak-count")
                                 label("{s:streakhint}", "k4-streak-hint")
-                            with box(cls="k4-row k4-streak-days"):
-                                for i in range(STREAK_DAYS):
-                                    with box(id=f"k4-sd{i}", cls=f"k4-sd k4-has-tip{first(i)}"):
-                                        with box(cls="k4-sd-body"):
-                                            with box(cls="k4-sd-top"):
-                                                pic("k4-sd-check ic-check")
-                                                label("{s:day}", "k4-sd-day", True)
-                                            label("{s:bonus}", "k4-sd-bonus")
-                                        tip()
+                            for i in range(STREAK_DAYS):
+                                with box(id=f"k4-sd{i}", cls=f"k4-sd k4-has-tip{first(i)}"):
+                                    with box(cls="k4-sd-body"):
+                                        pic("k4-sd-check ic-check")
+                                        label("{s:day}", "k4-sd-day", True)
+                                        label("{s:bonus}", "k4-sd-bonus", True)
+                                    tip()
 
                 # ------------------------------------------------ Achievements
                 with box(id="k4-view-achievements", cls="k4-view k4-achievements"):
                     with box(cls="k4-toolbar"):
-                        with box(cls="k4-seg"):
-                            for i, name in enumerate(("all", "progress", "unlocked", "shown")):
-                                button(f"k4-af-{name}", "k4-seg-label", f"k4-seg-item{first(i)}")
+                        for i, name in enumerate(("all", "progress", "unlocked", "shown")):
+                            button(f"k4-af-{name}", "k4-chip-label", f"k4-chip{first(i)}")
                         grow()
-                        label("{s:count}", "k4-title-fact")
-                    with box(cls="k4-card k4-a-showcase"):
-                        label("{s:showcase}", "k4-a-sc-cap")
-                        for i in range(SHOWCASE):
-                            with box("Button", id=f"k4-a-sc{i}", cls=f"k4-a-sc k4-click{first(i)}"):
-                                medal(f"k4-a-sc{i}-ring", f"k4-a-sc{i}-icon", 48)
-                                label("{s:name}", "k4-a-sc-name")
-                                label("{s:empty}", "k4-a-sc-empty")
+                        # The showcase: the three medals on the player's profile, small, before the count.
+                        with box(cls="k4-a-showcase"):
+                            label("{s:showcase}", "k4-a-sc-cap")
+                            for i in range(SHOWCASE):
+                                with box("Button", id=f"k4-a-sc{i}", cls=f"k4-a-sc k4-click"):
+                                    medal(f"k4-a-sc{i}-ring", f"k4-a-sc{i}-icon", 32)
+                                    label("{s:name}", "k4-a-sc-name")
+                                    label("{s:empty}", "k4-a-sc-empty")
+                        label("{s:count}", "k4-a-count", True)
                     with scroll("k4-a-list", "k4-a-list"):
                         with box(id="k4-a-empty", cls=f"k4-a-empty {GONE}"):
                             label("{s:none}", "k4-empty-text")
@@ -335,11 +359,12 @@ with box("root"):
                             with box("Button", id=f"k4-a{i}", cls=f"k4-card k4-click k4-a k4-has-tip {GONE}"):
                                 with box(cls="k4-a-body"):
                                     medal(f"k4-a{i}-ring", f"k4-a{i}-icon", 64)
-                                    with box(cls="k4-a-text"):
-                                        label("{s:name}", "k4-a-name")
-                                        label("{s:goal}", "k4-a-goal", True)
-                                        label("{s:desc}", "k4-a-desc")
-                                        bar(f"k4-a{i}-bar", "k4-bar-thin k4-a-bar")
+                                    label("{s:name}", "k4-a-name")
+                                    bar(f"k4-a{i}-bar", "k4-bar-thin k4-a-bar")
+                                    pic("k4-a-check ic-check")
+                                    # The goal and the text are in the tip; the server still fills them.
+                                    label("{s:goal}", "k4-a-goal", True)
+                                    label("{s:desc}", "k4-a-desc")
                                 pic("k4-a-pin ic-icon_star")
                                 tip()
                         label("{s:more}", f"k4-more {GONE}", id="k4-a-more")
@@ -347,9 +372,8 @@ with box("root"):
                 # ------------------------------------------------ Leaderboard: players, or the rank list
                 with box(id="k4-view-leaderboard", cls="k4-view k4-leaderboard"):
                     with box(cls="k4-toolbar"):
-                        with box(cls="k4-seg"):
-                            button("k4-lb-tab-players", "k4-seg-label", "k4-seg-item k4-first")
-                            button("k4-lb-tab-ranks", "k4-seg-label", "k4-seg-item")
+                        button("k4-lb-tab-players", "k4-chip-label", "k4-chip k4-first")
+                        button("k4-lb-tab-ranks", "k4-chip-label", "k4-chip")
                         with box(cls="k4-lb-switch"):
                             with box("Button", id="k4-lb-newer", cls="k4-arrow k4-arrow-left"):
                                 pic("k4-arrow-icon ic-expand")
@@ -364,24 +388,27 @@ with box("root"):
                         with scroll("k4-lb-list", "k4-card k4-lb-list"):
                             for i in range(LEADERBOARD_ROWS):
                                 with box(id=f"k4-lb-r{i}", cls=f"k4-lb-row {GONE}"):
-                                    label("{s:pos}", "k4-lb-pos", True)
-                                    pic("k4-em-m sg-0", id=f"k4-lb-r{i}-icon")
-                                    label("{s:name}", "k4-lb-name")
-                                    label("{s:rank}", "k4-lb-rank")
-                                    label("{s:points}", "k4-lb-points", True)
-                                    # A fixed-width box, so the columns line up with the pinned row when Challenge is hidden.
+                                    # The whole row opens the player's profile: its content sits inside that button.
+                                    with box("Button", id=f"k4-lb-r{i}-profile", cls="k4-lb-open"):
+                                        label("{s:pos}", "k4-lb-pos", True)
+                                        pic("k4-em-m sg-0", id=f"k4-lb-r{i}-icon")
+                                        label("{s:name}", "k4-lb-name")
+                                        label("{s:rank}", "k4-lb-rank")
+                                        label("{s:points}", "k4-lb-points", True)
+                                        label("{s:profile}", "k4-lb-caption")
+                                    # A fixed-width box, so the points line up with the pinned row when Challenge is hidden.
                                     with box(cls="k4-lb-btns"):
-                                        with box("Button", id=f"k4-lb-r{i}-profile", cls="k4-btn k4-btn-sm k4-btn-ghost"):
-                                            label("{s:profile}", "k4-btn-label")
-                                        with box("Button", id=f"k4-lb-r{i}-duel", cls=f"k4-btn k4-btn-sm k4-gap {GONE}"):
+                                        with box("Button", id=f"k4-lb-r{i}-duel", cls=f"k4-btn k4-btn-sm k4-btn-ghost k4-btn-icon-only k4-lb-duel {GONE}"):
+                                            pic("k4-btn-icon ic-casual")
                                             label("{s:duel}", "k4-btn-label")
                             label("{s:more}", f"k4-more {GONE}", id="k4-lb-more")
                         with box(id="k4-lb-me", cls=f"k4-lb-row k4-lb-me k4-me {GONE}"):
-                            label("{s:pos}", "k4-lb-pos", True)
-                            pic("k4-em-m sg-0", id="k4-lb-me-icon")
-                            label("{s:name}", "k4-lb-name")
-                            label("{s:rank}", "k4-lb-rank")
-                            label("{s:points}", "k4-lb-points", True)
+                            with box(cls="k4-lb-open"):
+                                label("{s:pos}", "k4-lb-pos", True)
+                                pic("k4-em-m sg-0", id="k4-lb-me-icon")
+                                label("{s:name}", "k4-lb-name")
+                                label("{s:rank}", "k4-lb-rank")
+                                label("{s:points}", "k4-lb-points", True)
                             panel("k4-lb-btns")
                     with box(id="k4-lb-ranks", cls=f"k4-lb-ranks {GONE}"):
                         with box(id="k4-lb-you", cls="k4-lb-you k4-me"):
@@ -399,21 +426,21 @@ with box("root"):
                                     tip()
                             label("{s:more}", f"k4-more {GONE}", id="k4-rk-more")
 
-                # ------------------------------------------------ Duels: pick a player, a type and a stake; the duels on the right
+                # ------------------------------------------------ Duels: pick a player, a rule and a stake; the duels on the right
                 with box(id="k4-view-duels", cls="k4-view k4-duels"):
                     with box(cls="k4-d-build"):
+                        # The step captions stay with the server; the simple look shows the choices alone.
                         with box(cls="k4-row k4-sub"):
                             label("{s:pick}", "k4-sub-title")
                             label("{s:online}", "k4-sub-fact")
                         with scroll("k4-dp-list", "k4-dp-list"):
                             for i in range(DUEL_PLAYER_ROWS):
                                 with box("Button", id=f"k4-dp{i}", cls=f"k4-card k4-click k4-pick k4-dp {GONE}"):
-                                    pic("k4-em-s sg-0", id=f"k4-dp{i}-icon")
-                                    with box(cls="k4-dp-text"):
-                                        label("{s:name}", "k4-dp-name")
-                                        with box(cls="k4-row"):
-                                            label("{s:points}", "k4-dp-points")
-                                            label("{s:state}", "k4-dp-state")
+                                    pic("k4-em-dp sg-0", id=f"k4-dp{i}-icon")
+                                    label("{s:name}", "k4-dp-name")
+                                    with box(cls="k4-dp-extra"):
+                                        label("{s:points}", "k4-dp-points")
+                                        label("{s:state}", "k4-dp-state")
                             label("{s:more}", f"k4-more {GONE}", id="k4-dp-more")
                             label("{s:none}", f"k4-empty-text {GONE}", id="k4-dp-none")
                         with box(cls="k4-row k4-sub"):
@@ -424,18 +451,23 @@ with box("root"):
                                     with box(cls="k4-dt-body"):
                                         pic("k4-dt-icon", id=f"k4-dt{i}-icon")
                                         label("{s:name}", "k4-dt-name")
-                                    tip()
+                                    tip("{s:name}", "{s:tip}")
                         with box(cls="k4-row k4-sub"):
                             label("{s:stakes}", "k4-sub-title")
-                        with box(cls="k4-seg k4-d-stakes"):
+                        with box(cls="k4-d-stakes"):
                             for i in range(DUEL_STAKES):
-                                with box("Button", id=f"k4-ds{i}", cls=f"k4-seg-item{first(i)} {GONE}"):
-                                    label("{s:label}", "k4-seg-label", True)
+                                with box("Button", id=f"k4-ds{i}", cls=f"k4-chip{first(i)} {GONE}"):
+                                    label("{s:label}", "k4-chip-label", True)
                         with box(cls="k4-card k4-d-sum"):
-                            with box(cls="k4-d-sum-text"):
-                                label("{s:summary}", "k4-d-summary")
-                                label("{s:status}", "k4-d-status")
-                            button("k4-d-send", cls="k4-btn k4-btn-main k4-btn-big", icon="ic-casual")
+                            # Who, the rule and the stake, as pictures and numbers; why it cannot be sent yet.
+                            with box(id="k4-d-pick", cls=f"k4-d-pick {GONE}"):
+                                pic("k4-em-s sg-0", id="k4-d-pick-icon")
+                                label("{s:target}", "k4-d-pick-name")
+                                pic("k4-d-pick-type", id="k4-d-pick-type")
+                                label("{s:stake}", "k4-d-pick-stake", True)
+                            label("{s:status}", "k4-d-status")
+                            grow()
+                            button("k4-d-send", cls="k4-btn k4-btn-main k4-btn-big")
                     with box(cls="k4-d-side"):
                         with box(id="k4-d-wait", cls=f"k4-card k4-d-wait {GONE}"):
                             label("{s:text}", "k4-d-wait-text")
@@ -450,31 +482,33 @@ with box("root"):
                             label("{s:text}", "k4-d-mine-text")
                             bar("k4-d-mine-bar", "k4-bar-thin k4-bar-clock")
                         with box(cls="k4-card k4-d-live"):
-                            label("{s:live}", "k4-cap")
+                            with box(cls="k4-row k4-head"):
+                                pic("k4-cap-icon ic-casual")
+                                label("{s:live}", "k4-cap-text")
                             for i in range(LIVE_DUEL_ROWS):
-                                with box(id=f"k4-dl{i}", cls=f"k4-dl {GONE}"):
-                                    pic("k4-dl-icon", id=f"k4-dl{i}-icon")
-                                    with box(cls="k4-dl-text"):
+                                with box(id=f"k4-dl{i}", cls=f"k4-dl k4-has-tip {GONE}"):
+                                    with box(cls="k4-dl-body"):
+                                        pic("k4-dl-icon", id=f"k4-dl{i}-icon")
                                         label("{s:names}", "k4-dl-names")
-                                        label("{s:info}", "k4-dl-info")
-                                    label("{s:score}", "k4-dl-score", True)
+                                        label("{s:score}", "k4-dl-score", True)
+                                    tip("{s:info}")
                             label("{s:none}", f"k4-empty-text {GONE}", id="k4-dl-none")
 
                 # ------------------------------------------------ Profile: your own, or another player's
                 with box(id="k4-view-profile", cls="k4-view k4-profile"):
                     with box(cls="k4-card k4-pf-left"):
-                        with box(cls="k4-row"):
+                        with box(cls="k4-pf-head"):
                             label("{s:name}", "k4-pf-name", True)
-                            label("{s:place}", "k4-pf-place")
-                        pic("k4-em-xl sg-0", id="k4-pf-icon")
+                            label("{s:place}", "k4-pf-place", True)
+                        pic("k4-em-pf sg-0", id="k4-pf-icon")
                         with box(id="k4-pf-badge", cls=f"k4-pf-badge {GONE}"):
                             label("{s:tag}", "k4-pf-badge-text", True)
                         label("{s:rank}", "k4-pf-rank", True, id="k4-pf-rank")
-                        label("{s:points}", "k4-pf-points")
+                        label("{s:points}", "k4-pf-points", True)
                         bar("k4-pf-bar", "k4-pf-bar-track")
                         label("{s:next}", "k4-pf-next")
                         button("k4-pf-challenge", cls="k4-btn k4-btn-main k4-pf-challenge", icon="ic-casual", gone=True)
-                        panel("k4-rule")
+                        vgrow()
                         with box(cls="k4-pf-showcase"):
                             for i in range(SHOWCASE):
                                 with box("Button", id=f"k4-pf-sc{i}", cls=f"k4-pf-sc k4-click k4-has-tip{first(i)} {GONE}"):
@@ -492,41 +526,40 @@ with box("root"):
                                     i = row * (PROFILE_STATS // 2) + column
                                     with box(id=f"k4-pf-st{i}", cls=f"k4-card k4-pf-st k4-has-tip{first(column)} {GONE}"):
                                         with box(cls="k4-pf-st-body"):
-                                            with box(cls="k4-row"):
-                                                pic("k4-pf-st-icon", id=f"k4-pf-st{i}-icon")
-                                                label("{s:label}", "k4-pf-st-label")
+                                            pic("k4-pf-st-icon", id=f"k4-pf-st{i}-icon")
                                             label("{s:value}", "k4-tile-value", True)
+                                            label("{s:label}", "k4-pf-st-label")
                                         tip()
                         with box(cls="k4-pf-pair"):
-                            with box(cls="k4-card k4-pf-weapons k4-first"):
-                                with box(cls="k4-row k4-pf-card-head"):
-                                    label("{s:fav}", "k4-pf-card-title")
-                                    grow()
-                                    label("{s:favkills}", "k4-pf-card-fact")
-                                for i in range(PROFILE_WEAPONS):
-                                    with box(id=f"k4-pf-sw{i}", cls=f"k4-pf-line {GONE}"):
-                                        pic("k4-pf-sw-icon", id=f"k4-pf-sw{i}-icon")
-                                        label("{s:weapon}", "k4-pf-line-name")
-                                        bar(f"k4-pf-sw{i}-bar", "k4-pf-line-bar")
-                                        label("{s:kills}", "k4-pf-line-value", True)
-                            with box(id="k4-pf-pt", cls=f"k4-card k4-pf-pt {GONE}"):
-                                with box(cls="k4-row k4-pf-card-head"):
-                                    pic("k4-pf-card-icon ic-clock")
-                                    label("{s:total}", "k4-pf-card-title")
-                                for side, picture in (("t", "tp-t"), ("ct", "tp-ct"), ("spec", "ic-watch")):
-                                    with box(id=f"k4-pf-pt-{side}", cls=f"k4-pf-line k4-side-{side}"):
-                                        pic(f"k4-pf-side-icon {picture}")
-                                        label("{s:name}", "k4-pf-line-name")
-                                        bar(f"k4-pf-pt-{side}-bar", "k4-pf-line-bar")
-                                        label("{s:time}", "k4-pf-line-value", True)
-                        with scroll("k4-pf-ss-list", "k4-card k4-pf-ss-list"):
-                            for i in range(SEASON_ROWS):
-                                with box(id=f"k4-pf-ss{i}", cls=f"k4-pf-ss {GONE}"):
-                                    label("{s:season}", "k4-pf-ss-season")
-                                    pic("k4-em-s sg-0", id=f"k4-pf-ss{i}-icon")
-                                    label("{s:pos}", "k4-pf-ss-pos", True)
-                            with box(id="k4-pf-ss-none", cls=f"k4-pf-ss-none {GONE}"):
-                                label("{s:none}", "k4-empty-text")
+                            with box(cls="k4-pf-col"):
+                                with box(cls="k4-card k4-pf-weapons"):
+                                    with box(cls="k4-row k4-pf-card-head"):
+                                        label("{s:fav}", "k4-pf-card-title")
+                                        label("{s:favkills}", "k4-pf-card-fact")
+                                    for i in range(PROFILE_WEAPONS):
+                                        with box(id=f"k4-pf-sw{i}", cls=f"k4-pf-line {GONE}"):
+                                            pic("k4-pf-sw-icon", id=f"k4-pf-sw{i}-icon")
+                                            label("{s:weapon}", "k4-pf-line-name")
+                                            bar(f"k4-pf-sw{i}-bar", "k4-pf-line-bar")
+                                            label("{s:kills}", "k4-pf-line-value", True)
+                                with box(id="k4-pf-pt", cls=f"k4-card k4-pf-pt {GONE}"):
+                                    with box(cls="k4-row k4-pf-card-head"):
+                                        pic("k4-pf-card-icon ic-clock")
+                                        label("{s:total}", "k4-pf-card-title", True)
+                                    for side, picture in (("t", "tp-t"), ("ct", "tp-ct"), ("spec", "ic-watch")):
+                                        with box(id=f"k4-pf-pt-{side}", cls=f"k4-pf-line k4-side-{side}"):
+                                            pic(f"k4-pf-side-icon {picture}")
+                                            label("{s:name}", "k4-pf-line-name")
+                                            bar(f"k4-pf-pt-{side}-bar", "k4-pf-line-bar")
+                                            label("{s:time}", "k4-pf-line-value", True)
+                            with scroll("k4-pf-ss-list", "k4-card k4-pf-ss-list"):
+                                for i in range(SEASON_ROWS):
+                                    with box(id=f"k4-pf-ss{i}", cls=f"k4-pf-ss {GONE}"):
+                                        pic("k4-em-ss sg-0", id=f"k4-pf-ss{i}-icon")
+                                        label("{s:season}", "k4-pf-ss-season")
+                                        label("{s:pos}", "k4-pf-ss-pos", True)
+                                with box(id="k4-pf-ss-none", cls=f"k4-pf-ss-none {GONE}"):
+                                    label("{s:none}", "k4-empty-text")
 
                 # ------------------------------------------------ Settings (the gear)
                 with box(id="k4-view-settings", cls="k4-view k4-settings"):

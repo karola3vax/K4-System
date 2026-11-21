@@ -673,6 +673,9 @@ internal sealed class MissionService(
 		return (new ChatText("mission.rerolled", [number, Describe(player.Controller, replacement)]), true);
 	}
 
+	/// <summary>"5h 07m" until the daily missions change.</summary>
+	internal string ResetIn() => MissionRules.FormatDuration(MissionRules.UntilReset(DateTime.UtcNow, zone));
+
 	/// <summary>"3d 04h" until the weekly mission changes.</summary>
 	internal string WeekLeft() => MissionRules.FormatDuration(MissionRules.UntilWeeklyReset(DateTime.UtcNow, zone));
 

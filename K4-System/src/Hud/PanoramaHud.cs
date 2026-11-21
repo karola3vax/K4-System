@@ -1019,12 +1019,8 @@ internal sealed class PanoramaHud
 	/// <summary>Reward descriptions and chat lines may contain chat color codes; the panel shows plain text.</summary>
 	private static string StripColors(string text) => new(text.Where(character => character >= ' ').ToArray());
 
-	/// <summary>The numbers of "#12 of 340", or null while the position is unknown. A total below the placement (a stale count) shows the placement.</summary>
-	internal static (string Placement, string Total)? Place(int placement, int total)
-		=> placement <= 0 ? null : (Number(placement), Number(Math.Max(placement, total)));
-
-	private string PlaceText(K4Player player, int placement, int total)
-		=> Place(placement, total) is (string place, string of) ? Text(player, "hud.position", place, of) : "";
+	/// <summary>The short place, "#12", or empty while the position is unknown.</summary>
+	internal static string Place(int placement) => placement <= 0 ? "" : $"#{Number(placement)}";
 
 	/// <summary>The "12 more not shown" line of a list longer than its pool, or empty.</summary>
 	internal static int NotShown(int count, int pool) => Math.Max(0, count - pool);
@@ -1115,8 +1111,8 @@ internal sealed class PanoramaHud
 		if (duels?.IncomingFor(player.SteamId) is not DuelOffer incoming)
 			return null;
 		return new DuelBarView(
-			Text(player, "hud.duel.in-title"),
-			Text(player, "hud.duel.in-text", incoming.ChallengerName, DuelTypeName(player, incoming.Type), Number(incoming.Stake)),
+			incoming.ChallengerName,
+			$"{DuelTypeName(player, incoming.Type)} · {Number(incoming.Stake)}",
 			Text(player, "hud.duel.seconds", incoming.SecondsLeft),
 			DuelService.TypeVisual(incoming.Type),
 			incoming.SecondsLeft,
@@ -1251,7 +1247,7 @@ internal sealed class PanoramaHud
 
 			void DrawPlace((int Placement, int Total) placed)
 			{
-				pen.Var("k4-h-rank", "place", PlaceText(player, placed.Placement, placed.Total));
+				pen.Var("k4-h-rank", "place", Place(placed.Placement));
 				DrawHomeMe(player, pen, placed);
 			}
 			if (CachedPlacement(player.SteamId) is { } known)
@@ -1351,7 +1347,7 @@ internal sealed class PanoramaHud
 		pen.Show("k4-h-me", show);
 		if (!show)
 			return;
-		pen.Var("k4-h-me", "pos", Number(placed.Placement));
+		pen.Var("k4-h-me", "pos", Place(placed.Placement));
 		pen.Var("k4-h-me", "points", Text(player, "hud.points", Number(player.Rank!.Points)));
 	}
 
@@ -1441,7 +1437,7 @@ internal sealed class PanoramaHud
 	{
 		const string view = "k4-view-missions";
 		HudPen pen = Pen(player);
-		pen.Var(view, "title", Text(player, "hud.page.missions"));
+		pen.Var(view, "title", Text(player, "hud.h-today"));
 		if (missions is null || player.Missions is null)
 		{
 			for (int i = 0; i < MissionCards; i++)
@@ -1491,13 +1487,14 @@ internal sealed class PanoramaHud
 		if (today.Weekly is MissionProgress weekly)
 		{
 			DrawMissionCard(pen, "k4-mw", player, weekly);
+			pen.Var("k4-mw", "title", Text(player, "mission.weekly"));
 			pen.Var("k4-mw", "left", missions.WeekLeft());
 		}
 
 		int streak = MissionRules.CurrentStreak(today.Streak, today.LastCompletedDay, today.Day);
 		pen.Var(view, "streak", Number(streak));
-		pen.Var(view, "reset", missions.Footer(player));
-		pen.Var(view, "swaps", Text(player, "hud.m-swaps", swapsLeft));
+		pen.Var(view, "reset", missions.ResetIn());
+		pen.Var(view, "swaps", Number(swapsLeft));
 		pen.Var(view, "streakhint", Text(player, "hud.streak-hint"));
 		DrawStreakDays(player, pen, today, "k4-sd", tips: true);
 	}
@@ -1517,7 +1514,7 @@ internal sealed class PanoramaHud
 			string slot = $"{prefix}{i}";
 			pen.Flag(slot, "k4-on", i < lit);
 			pen.Flag(slot, "k4-today", i == todayIndex);
-			pen.Var(slot, "day", Text(player, "hud.streak-day", day));
+			pen.Var(slot, "day", Number(day));
 			if (!tips)
 				continue;
 			pen.Var(slot, "bonus", $"+{Number(bonus)}");
@@ -1627,7 +1624,7 @@ internal sealed class PanoramaHud
 		IReadOnlyList<string> showcase = player.Profile?.Showcase ?? [];
 		int unlocked = UnlockedCount(player);
 
-		pen.Var(view, "count", Text(player, "hud.ach-summary", Number(unlocked), Number(achievements?.All.Count ?? 0)));
+		pen.Var(view, "count", $"{Number(unlocked)} / {Number(achievements?.All.Count ?? 0)}");
 
 		// The showcase strip: the three slots on the player's profile.
 		List<Achievements.AchievementDefinition> shown = ShowcaseOf(player);
@@ -2076,9 +2073,18 @@ internal sealed class PanoramaHud
 		DuelOffer? outgoing = service.OutgoingFor(player.SteamId);
 		DuelService.Refusal? refusal = target is null ? null : service.CanChallenge(player, target);
 		bool ready = target is not null && state.DuelType is not null && state.DuelStake is not null && refusal is null && outgoing is null;
-		pen.Var(view, "summary", target is null || state.DuelType is not DuelType summaryType
-			? ""
-			: Text(player, "hud.duel.summary", target.Name, DuelTypeName(player, summaryType), state.DuelStake is int stake ? Number(stake) : "?"));
+		// The challenge so far as pictures and numbers: the player's emblem and name, the rule's picture, the stake.
+		bool hasPick = target is not null && state.DuelType is not null;
+		pen.Show("k4-d-pick", hasPick);
+		if (hasPick)
+		{
+			if (target!.Rank is RankState targetRank)
+				SetEmblem(pen, "k4-d-pick-icon", targetRank.Rank);
+			pen.Gone("k4-d-pick-icon", target.Rank is null);
+			pen.Var("k4-d-pick", "target", target.Name);
+			pen.Var("k4-d-pick", "stake", state.DuelStake is int stake ? Number(stake) : "?");
+			SetPicture(pen, "k4-d-pick-type", DuelService.TypeVisual(state.DuelType!.Value));
+		}
 		pen.Var(view, "status", outgoing is not null
 			? ""
 			: refusal is DuelService.Refusal reason
@@ -2256,7 +2262,7 @@ internal sealed class PanoramaHud
 		pen.Set("k4-pf-badge", "k4-gone", !textBadge || profile.Rank is null);
 
 		pen.Var(view, "points", ranks is null ? "" : Text(player, "hud.points", Number(profile.Points)));
-		pen.Var(view, "place", PlaceText(player, profile.Placement, profile.Total));
+		pen.Var(view, "place", Place(profile.Placement));
 
 		// Showcase: up to three chosen achievements, as medals.
 		List<Achievements.AchievementDefinition> shown = achievements is null ? [] : [.. profile.Showcase
@@ -2363,7 +2369,7 @@ internal sealed class PanoramaHud
 			RankDefinition final = ranks!.Ladder.FindByName(result.Rank) ?? ranks.Ladder.ResolveIgnoringPermissions(result.Points);
 			SetEmblem(pen, $"{slot}-icon", final);
 			pen.Var(slot, "season", SeasonClock.Name(result.Season, language));
-			pen.Var(slot, "pos", PlaceText(player, result.Placement, result.Players));
+			pen.Var(slot, "pos", Place(result.Placement));
 		}
 	}
 

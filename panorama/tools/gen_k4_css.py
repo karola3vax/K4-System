@@ -96,8 +96,8 @@ TIERS = {
 
 # Cells spaced by a left (or top) margin; k4-first cancels it (gen_k4_ui.py first()).
 GAPS_LEFT = {
-    "k4-tab": 0, "k4-h-sd": 6, "k4-m": 20, "k4-sd": 6, "k4-a-sc": 16, "k4-dt": 10, "k4-pf-sc": 12, "k4-pf-st": 12,
-    "k4-seg-item": 1, "k4-pf-pt": 16,
+    "k4-tab": 0, "k4-h-sd": 6, "k4-h-m": 10, "k4-h-s": 16, "k4-m": 14, "k4-sd": 8, "k4-dt": 10, "k4-pf-sc": 8,
+    "k4-pf-st": 12, "k4-seg-item": 1, "k4-chip": 10,
 }
 GAPS_TOP = {"k4-pf-tiles": 12}
 
@@ -170,7 +170,6 @@ Label
 	height: 760px;
 	horizontal-align: center;
 	vertical-align: middle;
-	flow-children: down;
 	background-color: s0;
 	border: 1px solid line;
 	border-radius: 6px;
@@ -187,6 +186,37 @@ Label
 	opacity: 0;
 	transform: scale3d( 0.98, 0.98, 1 );
 	visibility: collapse;
+}
+
+/* Behind the menu (owner 2026-11-21, from 7.x): CS2's season art in grey, dimmed as in 7.x: 97% on the left, 92% at 45%, 76% on the
+   right. The frame on top holds the menu itself, top to bottom. */
+.k4-bg, .k4-shade, .k4-frame
+{
+	width: 100%;
+	height: 100%;
+}
+
+.k4-bg, .k4-shade
+{
+	border-radius: 6px;
+}
+
+.k4-bg
+{
+	background-image: url("s2r://panorama/images/backgrounds/season_stats_background_png.vtex");
+	background-size: cover;
+	background-position: 50% 50%;
+	saturation: 0;
+}
+
+.k4-shade
+{
+	background-color: gradient( linear, 0% 0%, 100% 0%, from( #0B0B0CF7 ), color-stop( 0.45, #0B0B0CEB ), to( #0B0B0CC2 ) );
+}
+
+.k4-frame
+{
+	flow-children: down;
 }
 
 /* Top bar: brand, tabs, event, gear, close */
@@ -484,51 +514,46 @@ Label
 
 .k4-duel-bar-icon
 {
-	width: 32px;
-	height: 32px;
+	width: 26px;
+	height: 26px;
 	vertical-align: center;
-}
-
-.k4-duel-bar-text
-{
-	width: fill-parent-flow( 1.0 );
-	margin-left: 14px;
-	vertical-align: center;
-	flow-children: down;
+	wash-color: tx;
 }
 
 .k4-duel-bar-title
 {
-	font-size: 15px;
+	margin-left: 14px;
+	vertical-align: center;
+	font-size: 16px;
 	font-weight: bold;
 	white-space: nowrap;
-	text-overflow: ellipsis;
-	width: 100%;
+	text-overflow: shrink;
+	max-width: 240px;
 }
 
 .k4-duel-bar-msg
 {
-	font-size: 13px;
-	color: tx2;
+	margin-left: 14px;
+	vertical-align: center;
+	font-size: 15px;
+	color: tx3;
 	white-space: nowrap;
-	text-overflow: ellipsis;
-	width: 100%;
+	text-overflow: shrink;
+	max-width: 420px;
 }
 
-.k4-duel-bar-clock
+.k4-bar.k4-duel-bar-track
 {
 	width: 140px;
-	margin: 0px 16px;
 	vertical-align: center;
-	flow-children: down;
 }
 
 .k4-duel-bar-left
 {
-	horizontal-align: right;
+	margin: 0px 16px 0px 12px;
+	vertical-align: center;
 	font-size: 15px;
-	color: tx2;
-	margin-bottom: 4px;
+	white-space: nowrap;
 }
 
 /* The screens */
@@ -688,15 +713,24 @@ Label
 	sound: "UIPanorama.inventory_item_select";
 }
 
-.k4-cap
+.k4-head
 {
 	width: 100%;
 	height: 22px;
-	font-size: 13px;
-	font-weight: bold;
-	color: tx2;
-	white-space: nowrap;
-	text-overflow: shrink;
+}
+
+/* A card's caption is a small picture; its words stay with the server but are not shown. */
+.k4-cap-icon
+{
+	width: 16px;
+	height: 16px;
+	vertical-align: center;
+	wash-color: tx2;
+}
+
+.k4-cap-text
+{
+	visibility: collapse;
 }
 
 .k4-toolbar
@@ -719,26 +753,6 @@ Label
 	margin-left: 12px;
 	vertical-align: center;
 	font-size: 14px;
-	color: tx2;
-	white-space: nowrap;
-}
-
-.k4-head
-{
-	height: 32px;
-}
-
-.k4-head-title
-{
-	vertical-align: center;
-	font-size: 20px;
-	white-space: nowrap;
-}
-
-.k4-head-fact
-{
-	vertical-align: center;
-	font-size: 13px;
 	color: tx2;
 	white-space: nowrap;
 }
@@ -904,7 +918,7 @@ Label
 .k4-btn-big
 {
 	height: 40px;
-	min-width: 200px;
+	padding: 0px 26px;
 }
 
 .k4-btn-big .k4-btn-label
@@ -915,6 +929,74 @@ Label
 .k4-gap
 {
 	margin-left: 8px;
+}
+
+/* A button that is only its picture (accept, decline, swap, challenge): the caption stays for the server, hidden. */
+.k4-btn-icon-only
+{
+	width: 36px;
+	padding: 0px;
+}
+
+.k4-btn-sm.k4-btn-icon-only
+{
+	width: 30px;
+	height: 30px;
+}
+
+.k4-btn-icon-only .k4-btn-label
+{
+	visibility: collapse;
+}
+
+.k4-btn-icon-only .k4-btn-icon
+{
+	margin-right: 0px;
+	horizontal-align: center;
+}
+
+/* Chips: a choice on its own (filters, the Players / Ranks switch, stakes); the picked one is lighter with a grey outline */
+.k4-chip
+{
+	height: 32px;
+	padding: 0px 12px;
+	vertical-align: center;
+	border-radius: 4px;
+	background-color: s1;
+	border: 1px solid line-hi;
+	transition-property: background-color, border;
+	transition-duration: fast;
+}
+
+.k4-chip-label
+{
+	vertical-align: center;
+	font-size: 14px;
+	font-weight: bold;
+	color: tx2;
+	white-space: nowrap;
+}
+
+.k4-chip:hover
+{
+	background-color: s2;
+	sound: "UIPanorama.generic_button_rollover";
+}
+
+.k4-chip:active
+{
+	sound: "UIPanorama.inventory_item_select";
+}
+
+.k4-chip.k4-active, .k4-chip.k4-active:hover
+{
+	background-color: s3;
+	border: 1px solid line-sel;
+}
+
+.k4-chip:hover .k4-chip-label, .k4-chip.k4-active .k4-chip-label
+{
+	color: tx;
 }
 
 /* Switch: one box, items split by 1px lines; the picked item is lighter grey with a grey outline */
@@ -1052,7 +1134,10 @@ Label
 }
 
 /* Rank emblems: the game's 2.46 : 1 */
-.k4-em-xl { width: 192px; height: 78px; }
+.k4-em-hero { width: 320px; height: 130px; vertical-align: center; }
+.k4-em-pf { width: 216px; height: 88px; horizontal-align: center; margin-top: 14px; }
+.k4-em-dp { width: 70px; height: 28px; horizontal-align: center; }
+.k4-em-ss { width: 54px; height: 22px; vertical-align: center; }
 .k4-em-l { width: 128px; height: 52px; vertical-align: center; }
 .k4-em-rk { width: 96px; height: 39px; vertical-align: center; margin-right: 16px; }
 .k4-em-m { width: 72px; height: 29px; vertical-align: center; }
@@ -1065,7 +1150,7 @@ Label
 	vertical-align: center;
 }
 
-.k4-ring-48 { width: 48px; height: 48px; padding: 4px; }
+.k4-ring-32 { width: 32px; height: 32px; padding: 3px; }
 .k4-ring-64 { width: 64px; height: 64px; padding: 5px; }
 .k4-ring-toast { width: 56px; height: 56px; padding: 4px; horizontal-align: center; }
 
@@ -1119,6 +1204,22 @@ Label
 	opacity: 1;
 }
 
+.k4-tip-body
+{
+	width: 90%;
+	horizontal-align: center;
+	vertical-align: center;
+	flow-children: down;
+}
+
+.k4-tip-line
+{
+	width: 100%;
+	text-align: center;
+	font-size: 13px;
+	color: tx;
+}
+
 .k4-tip-text
 {
 	width: 90%;
@@ -1164,45 +1265,34 @@ Label
 }
 
 /* Gold, silver, bronze place marks (leaderboard rows 1-3, Home's top 3) and the white "you" mark */
-.k4-p1 .k4-lb-pos, .k4-h-p-1 .k4-h-p-pos { color: gold; }
-.k4-p2 .k4-lb-pos, .k4-h-p-2 .k4-h-p-pos { color: silver; }
-.k4-p3 .k4-lb-pos, .k4-h-p-3 .k4-h-p-pos { color: bronze; }
-.k4-lb-row.k4-p1, .k4-h-p.k4-h-p-1 { border-left: 3px solid gold; }
-.k4-lb-row.k4-p2, .k4-h-p.k4-h-p-2 { border-left: 3px solid silver; }
-.k4-lb-row.k4-p3, .k4-h-p.k4-h-p-3 { border-left: 3px solid bronze; }
+.k4-p1 .k4-lb-pos { color: gold; }
+.k4-p2 .k4-lb-pos { color: silver; }
+.k4-p3 .k4-lb-pos { color: bronze; }
+.k4-lb-row.k4-p1 { border-left: 3px solid gold; }
+.k4-lb-row.k4-p2 { border-left: 3px solid silver; }
+.k4-lb-row.k4-p3 { border-left: 3px solid bronze; }
 
 /* ---------------------------------------------------------------- Home */
 
+/* The simple look (owner 2026-11-21): the rank as a big hero; today's missions as tiles, the top 3 podium and
+   "next to do" as medals; the player's big numbers. Pictures and numbers in front, the sentences on hover. */
 .k4-home
 {
-	flow-children: right;
-}
-
-.k4-h-left
-{
-	width: 380px;
-	height: 100%;
 	flow-children: down;
 }
 
 .k4-h-rank
 {
 	width: 100%;
-	height: 152px;
-	padding: 20px;
-	flow-children: down;
-}
-
-.k4-h-rank-top
-{
-	width: 100%;
+	height: 150px;
+	padding: 0px 8px;
 	flow-children: right;
 }
 
 .k4-h-rank-text
 {
 	width: fill-parent-flow( 1.0 );
-	margin-left: 16px;
+	margin-left: 28px;
 	vertical-align: center;
 	flow-children: down;
 }
@@ -1210,142 +1300,82 @@ Label
 .k4-h-rank-name
 {
 	width: 100%;
-	font-size: 28px;
+	font-size: 54px;
 	white-space: nowrap;
 	text-overflow: shrink;
 }
 
 .k4-h-points
 {
-	font-size: 18px;
+	font-size: 22px;
 	white-space: nowrap;
 }
 
 .k4-h-place
 {
-	margin-left: 10px;
+	margin-left: 12px;
 	vertical-align: bottom;
-	font-size: 14px;
-	color: tx2;
+	font-size: 18px;
+	color: gold;
 	white-space: nowrap;
 }
 
-.k4-h-bar-track
+.k4-bar.k4-h-bar-track
 {
-	margin-top: 18px;
+	width: 520px;
+	margin-top: 14px;
 }
 
 .k4-h-next-row
 {
-	margin-top: 10px;
+	visibility: collapse;
 }
 
-.k4-h-nextrank
+/* Labels the server still fills but the simple look leaves out (their boxes are collapsed) */
+.k4-h-nextrank, .k4-h-togo, .k4-streak-count, .k4-streak-hint, .k4-dp-points, .k4-dp-state
 {
-	font-size: 13px;
-	color: tx2;
-	white-space: nowrap;
-	text-overflow: shrink;
-	max-width: 220px;
-}
-
-.k4-h-togo
-{
-	font-size: 13px;
-	font-weight: bold;
 	white-space: nowrap;
 }
 
-.k4-h-top
+.k4-h-mid
 {
 	width: 100%;
 	height: fill-parent-flow( 1.0 );
 	margin-top: 16px;
-	padding: 16px 20px;
-	flow-children: down;
-}
-
-.k4-h-p
-{
-	width: 100%;
-	height: 40px;
 	flow-children: right;
-	padding-left: 12px;
-	border-left: 3px solid #00000000;
-}
-
-.k4-h-p-pos
-{
-	width: 40px;
-	vertical-align: center;
-	font-size: 18px;
-	color: tx3;
-	white-space: nowrap;
-}
-
-.k4-h-p-name
-{
-	width: fill-parent-flow( 1.0 );
-	margin-left: 12px;
-	vertical-align: center;
-	font-size: 15px;
-	white-space: nowrap;
-	text-overflow: ellipsis;
-}
-
-.k4-h-p-points
-{
-	margin-left: 12px;
-	vertical-align: center;
-	font-size: 15px;
-	color: tx2;
-	white-space: nowrap;
-}
-
-.k4-h-me
-{
-	margin-top: 8px;
-	border-radius: 4px;
-	background-color: s3;
-	border-left: 3px solid acc;
-	padding-right: 12px;
-}
-
-.k4-h-me .k4-h-p-pos
-{
-	color: tx;
-}
-
-.k4-h-me-points
-{
-	vertical-align: center;
-	font-size: 16px;
-	white-space: nowrap;
 }
 
 .k4-h-today
 {
-	width: fill-parent-flow( 1.0 );
+	width: 440px;
 	height: 100%;
-	margin-left: 20px;
-	padding: 16px 20px;
+	padding: 14px 16px 16px 16px;
 	flow-children: down;
 }
 
-.k4-h-m
+.k4-h-tiles
 {
 	width: 100%;
-	height: 68px;
+	height: fill-parent-flow( 1.0 );
+	margin-top: 10px;
 	flow-children: right;
-	padding: 0px 4px;
-	border-top: 1px solid line;
-	transition-property: background-color;
+}
+
+/* A mission tile: picture, progress, bar; green when done. Its text and reward show on hover. */
+.k4-h-m
+{
+	width: fill-parent-flow( 1.0 );
+	height: 100%;
+	border-radius: 4px;
+	background-color: s2;
+	border: 1px solid line;
+	transition-property: background-color, border;
 	transition-duration: fast;
 }
 
 .k4-h-m:hover
 {
-	background-color: s2;
+	border: 1px solid line-hi;
 	sound: "UIPanorama.generic_button_rollover";
 }
 
@@ -1354,105 +1384,69 @@ Label
 	sound: "UIPanorama.generic_button_press";
 }
 
-.k4-h-m-icon
+.k4-h-m-body
 {
-	width: 32px;
-	height: 32px;
-	vertical-align: center;
-	wash-color: tx2;
-}
-
-.k4-h-m-text
-{
-	width: fill-parent-flow( 1.0 );
-	margin: 0px 12px;
+	width: 100%;
 	vertical-align: center;
 	flow-children: down;
 }
 
-.k4-h-m-desc
+.k4-h-m-icon
 {
-	width: 100%;
-	max-height: 38px;
-	font-size: 14px;
-	text-overflow: ellipsis;
-}
-
-.k4-h-m-line
-{
-	margin-top: 6px;
-}
-
-.k4-h-m-bar
-{
-	width: fill-parent-flow( 1.0 );
-	vertical-align: center;
+	width: 40px;
+	height: 40px;
+	horizontal-align: center;
+	wash-color: tx;
 }
 
 .k4-h-m-progress
 {
-	width: 64px;
-	vertical-align: center;
-	text-align: right;
-	font-size: 14px;
-	color: tx2;
+	max-width: 100%;
+	margin-top: 14px;
+	horizontal-align: center;
+	font-size: 18px;
 	white-space: nowrap;
 	text-overflow: shrink;
 }
 
-.k4-h-m-reward
+.k4-bar.k4-h-m-bar
 {
-	width: 64px;
-	vertical-align: center;
-	text-align: right;
-	font-size: 16px;
-	white-space: nowrap;
-	text-overflow: shrink;
+	width: 60%;
+	margin-top: 10px;
+	horizontal-align: center;
 }
 
-.k4-h-m.k4-done .k4-h-m-progress { color: ok; }
-.k4-h-m.k4-done .k4-h-m-icon { wash-color: ok; }
+.k4-h-m.k4-done, .k4-m.k4-done, .k4-mw.k4-done
+{
+	background-color: #6FA8861A;
+	border: 1px solid #6FA88659;
+}
 
+.k4-done .k4-h-m-progress, .k4-done .k4-m-progress, .k4-done .k4-mw-progress { color: ok; }
+
+/* Home's streak days: the parts stay for the server; the week is shown on Missions. */
 .k4-h-streak
 {
-	width: 100%;
-	height: 32px;
-	flow-children: right;
-	margin-top: 12px;
+	visibility: collapse;
 }
 
 .k4-h-sd
 {
-	width: fill-parent-flow( 1.0 );
-	height: 100%;
 	flow-children: right;
-	padding-left: 8px;
-	border-radius: 2px;
-	background-color: s0;
-	border: 1px solid line;
 }
 
 .k4-h-sd-day
 {
-	vertical-align: center;
 	font-size: 14px;
-	color: tx3;
-	white-space: nowrap;
 }
 
 .k4-sd-check
 {
-	width: 12px;
-	height: 12px;
-	margin-right: 4px;
-	vertical-align: center;
+	width: 16px;
+	height: 16px;
+	horizontal-align: center;
 	wash-color: ok;
 	visibility: collapse;
-}
-
-.k4-h-sd.k4-on, .k4-sd.k4-on
-{
-	background-color: s3;
 }
 
 .k4-on .k4-sd-check
@@ -1460,87 +1454,211 @@ Label
 	visibility: visible;
 }
 
-.k4-on .k4-h-sd-day, .k4-on .k4-sd-day
+.k4-h-top
 {
-	color: ok;
-}
-
-/* Today is "where you are", not a pick: a dashed grey edge, so a streak of 0 never looks like day 1 was chosen. */
-.k4-h-sd.k4-today, .k4-sd.k4-today
-{
-	border: 1px dashed line-hi;
-}
-
-.k4-today .k4-h-sd-day, .k4-today .k4-sd-day
-{
-	color: tx;
-}
-
-.k4-h-next
-{
-	width: 320px;
+	width: fill-parent-flow( 1.0 );
 	height: 100%;
-	margin-left: 20px;
+	margin-left: 16px;
+	padding: 14px 16px;
 	flow-children: down;
 }
 
-.k4-h-next-cap
+.k4-h-podium
 {
-	height: 28px;
-	padding-top: 4px;
+	width: fit-children;
+	height: fill-parent-flow( 1.0 );
+	horizontal-align: center;
+	flow-children: right;
+}
+
+.k4-h-p
+{
+	width: 104px;
+	height: fit-children;
+	margin-left: 10px;
+	vertical-align: bottom;
+	flow-children: down;
+}
+
+.k4-h-p.k4-h-p-2
+{
+	margin-left: 0px;
+}
+
+.k4-h-p .k4-em-m
+{
+	horizontal-align: center;
+}
+
+.k4-h-p-name
+{
+	width: 100%;
+	margin-top: 4px;
+	margin-bottom: 6px;
+	horizontal-align: center;
+	text-align: center;
+	font-size: 14px;
+	font-weight: bold;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+}
+
+.k4-h-p-points
+{
+	visibility: collapse;
+}
+
+.k4-h-step
+{
+	width: 100%;
+	border-radius: 2px;
+}
+
+.k4-h-p-1 .k4-h-step { height: 86px; background-color: gradient( linear, 0% 0%, 0% 100%, from( #C8A45C ), to( #6E5A2E ) ); }
+.k4-h-p-2 .k4-h-step { height: 62px; background-color: gradient( linear, 0% 0%, 0% 100%, from( #B4B4B4 ), to( #5A5A5A ) ); }
+.k4-h-p-3 .k4-h-step { height: 46px; background-color: gradient( linear, 0% 0%, 0% 100%, from( #A97F5E ), to( #523B2A ) ); }
+
+.k4-h-p-pos
+{
+	horizontal-align: center;
+	margin-top: 6px;
+	font-size: 22px;
+	color: s0;
+	white-space: nowrap;
+}
+
+.k4-h-me
+{
+	width: 100%;
+	height: 34px;
+	margin-top: 10px;
+	padding: 0px 12px 0px 10px;
+	flow-children: right;
+	border-radius: 4px;
+	background-color: s3;
+	border-left: 3px solid acc;
+}
+
+.k4-h-me-pos, .k4-h-me-points
+{
+	vertical-align: center;
+	font-size: 15px;
+	white-space: nowrap;
+}
+
+/* "Next to do": medal rings with a title; the ring's colour says what kind of thing it is (generated below). */
+.k4-h-next
+{
+	width: 332px;
+	height: 100%;
+	margin-left: 16px;
+	padding: 14px 16px;
+	flow-children: down;
+}
+
+.k4-h-medals
+{
+	width: 100%;
+	height: fill-parent-flow( 1.0 );
+	flow-children: right;
 }
 
 .k4-h-n
 {
-	width: 100%;
-	height: 76px;
-	margin-bottom: 10px;
-	flow-children: right;
-	padding: 0px 14px 0px 14px;
-	border-left: 3px solid tx2;
-}
-
-"""
-
-css += ".k4-h-n:hover { border-left: 3px solid tx2; }\n"
-for kind, color in NEXT_KINDS.items():
-    css += f".k4-h-n.k4-n-{kind}, .k4-h-n.k4-n-{kind}:hover {{ border-left: 3px solid {color}; }}\n"
-
-css += r"""
-.k4-h-n-icon
-{
-	width: 32px;
-	height: 32px;
-	vertical-align: center;
-}
-
-.k4-h-n-text
-{
 	width: fill-parent-flow( 1.0 );
-	margin-left: 12px;
+	height: 140px;
+	vertical-align: center;
+	border-radius: 4px;
+	border: 1px solid #00000000;
+}
+
+.k4-h-n-body
+{
+	width: 100%;
 	vertical-align: center;
 	flow-children: down;
+}
+
+.k4-h-n-ring
+{
+	width: 76px;
+	height: 76px;
+	horizontal-align: center;
+	border-radius: 50%;
+	background-color: s2;
+	border: 3px solid tx3;
+}
+
+.k4-h-n-icon
+{
+	width: 34px;
+	height: 34px;
+	horizontal-align: center;
+	vertical-align: center;
+	wash-color: tx;
 }
 
 .k4-h-n-title
 {
 	width: 100%;
-	font-size: 15px;
+	margin-top: 10px;
+	padding: 0px 4px;
+	text-align: center;
+	font-size: 13px;
 	font-weight: bold;
 	white-space: nowrap;
 	text-overflow: shrink;
 }
 
-.k4-h-n-msg
+/* The big numbers: a picture and a value; the name shows on hover. */
+.k4-h-stats
 {
 	width: 100%;
-	max-height: 36px;
-	margin-top: 2px;
-	font-size: 13px;
-	color: tx2;
-	text-overflow: ellipsis;
+	height: 78px;
+	margin-top: 16px;
+	flow-children: right;
 }
 
+.k4-h-s
+{
+	width: fill-parent-flow( 1.0 );
+	height: 100%;
+	border-radius: 4px;
+	background-color: s1;
+	border: 1px solid line;
+}
+
+.k4-h-s-body
+{
+	height: 100%;
+	horizontal-align: center;
+	flow-children: right;
+}
+
+.k4-h-s-icon
+{
+	width: 30px;
+	height: 30px;
+	vertical-align: center;
+	wash-color: tx2;
+}
+
+.k4-h-s-value
+{
+	margin-left: 16px;
+	vertical-align: center;
+	font-size: 32px;
+	white-space: nowrap;
+	text-overflow: shrink;
+	max-width: 150px;
+}
+
+"""
+
+for kind, color in NEXT_KINDS.items():
+    css += f".k4-h-n.k4-n-{kind} .k4-h-n-ring {{ border: 3px solid {color}; }}\n"
+
+css += r"""
 /* ---------------------------------------------------------------- Missions */
 
 .k4-missions
@@ -1548,162 +1666,176 @@ css += r"""
 	flow-children: down;
 }
 
+.k4-title-icon
+{
+	width: 14px;
+	height: 14px;
+	margin-left: 16px;
+	vertical-align: center;
+	wash-color: tx3;
+}
+
+.k4-title-fact.k4-m-reset
+{
+	margin-left: 6px;
+	font-size: 13px;
+	color: tx3;
+}
+
+/* Swaps left: a picture and a number */
+.k4-tag.k4-m-swaps
+{
+	height: 32px;
+	border-radius: 4px;
+	background-color: s1;
+	border: 1px solid line-hi;
+}
+
+.k4-m-swaps .k4-tag-icon
+{
+	width: 14px;
+	height: 14px;
+	wash-color: tx;
+}
+
+.k4-m-swaps .k4-tag-label
+{
+	font-size: 15px;
+	color: tx;
+}
+
 .k4-m-cards
 {
 	width: 100%;
 	height: fill-parent-flow( 1.0 );
-	margin-top: 16px;
+	margin-top: 14px;
 	flow-children: right;
 }
 
+/* A mission card: the difficulty strip on top (easy green, medium gold, hard red), the reward top right, a big
+   picture, the progress and its bar; green when done. Difficulty and text show on hover. */
 .k4-m
 {
 	width: fill-parent-flow( 1.0 );
 	height: 100%;
-	padding: 20px;
+}
+
+.k4-m-strip
+{
+	width: 100%;
+	height: 3px;
+	border-radius: 2px;
+	background-color: tx3;
+}
+
+.k4-easy .k4-m-strip { background-color: ok; }
+.k4-medium .k4-m-strip { background-color: gold; }
+.k4-hard .k4-m-strip { background-color: bad; }
+
+.k4-m-body
+{
+	width: 100%;
+	vertical-align: center;
 	flow-children: down;
+}
+
+.k4-m-icon
+{
+	width: 84px;
+	height: 84px;
+	horizontal-align: center;
+	wash-color: tx;
+}
+
+.k4-m-progress
+{
+	max-width: 90%;
+	margin-top: 16px;
+	horizontal-align: center;
+	font-size: 30px;
+	white-space: nowrap;
+	text-overflow: shrink;
+}
+
+.k4-bar.k4-m-bar
+{
+	width: 72%;
+	margin-top: 12px;
+	horizontal-align: center;
+}
+
+.k4-m-top
+{
+	width: 100%;
+	height: 44px;
+	flow-children: right;
+	padding: 10px 14px 0px 10px;
 }
 
 .k4-m-reward
 {
 	vertical-align: center;
-	font-size: 22px;
+	font-size: 18px;
+	color: gold;
 	white-space: nowrap;
 }
 
-/* Difficulty tag: easy grey, medium brighter grey, hard outlined. Done: green check tag. */
-.k4-easy .k4-m-diff .k4-tag-label { color: tx2; }
-.k4-medium .k4-m-diff .k4-tag-label { color: tx; }
-
-.k4-hard .k4-m-diff
-{
-	background-color: #00000000;
-	border: 1px solid tx3;
-}
-
-.k4-hard .k4-m-diff .k4-tag-label { color: tx; }
-
-.k4-m-check
-{
-	wash-color: ok;
-	visibility: collapse;
-}
-
-.k4-done .k4-m-diff, .k4-hard.k4-done .k4-m-diff
-{
-	background-color: #6FA88626;
-	border: 0px solid #00000000;
-}
-
-.k4-done .k4-m-diff .k4-tag-label { color: ok; }
-.k4-done .k4-m-check { visibility: visible; }
-
-.k4-m-icon
-{
-	width: 56px;
-	height: 56px;
-	margin: 18px 0px 12px 0px;
-	wash-color: tx2;
-}
-
-.k4-m-desc
-{
-	width: 100%;
-	max-height: 72px;
-	font-size: 17px;
-	text-overflow: ellipsis;
-}
-
-.k4-m-progress-row
-{
-	margin-top: 12px;
-}
-
-.k4-m-progress
-{
-	width: 84px;
-	vertical-align: center;
-	font-size: 20px;
-	white-space: nowrap;
-	text-overflow: shrink;
-}
-
-.k4-m-bar
-{
-	width: fill-parent-flow( 1.0 );
-	vertical-align: center;
-}
-
-.k4-done .k4-m-progress, .k4-done .k4-mw-progress { color: ok; }
-
-/* Button row; the swap question lies over it */
-.k4-m-foot
-{
-	width: 100%;
-	height: 36px;
-	margin-top: 14px;
-}
-
-.k4-m-foot-row
-{
-	height: 100%;
-}
-
-.k4-m-paid
-{
-	vertical-align: center;
-	font-size: 13px;
-	color: tx3;
-	white-space: nowrap;
-	text-overflow: shrink;
-	visibility: collapse;
-}
-
-.k4-done .k4-m-paid
-{
-	visibility: visible;
-}
-
+/* The swap question, over the bottom of the card */
 .k4-m-ask
 {
 	width: 100%;
-	height: 100%;
-	flow-children: right;
+	vertical-align: bottom;
+	flow-children: down;
+	padding: 14px;
+	border-radius: 4px;
 	background-color: s1;
+	border-top: 1px solid line-hi;
 }
 
 .k4-m-ask-text
 {
-	width: fill-parent-flow( 1.0 );
-	vertical-align: center;
+	width: 100%;
+	text-align: center;
 	font-size: 14px;
 	font-weight: bold;
-	white-space: nowrap;
-	text-overflow: shrink;
+}
+
+.k4-row.k4-m-ask-row
+{
+	width: fit-children;
+	margin-top: 10px;
+	horizontal-align: center;
 }
 
 .k4-m-bottom
 {
 	width: 100%;
-	height: 96px;
+	height: 88px;
 	margin-top: 16px;
 	flow-children: right;
 }
 
+/* The weekly mission in one line: picture, "Weekly" and the time left, bar, progress and reward */
 .k4-mw
 {
 	width: fill-parent-flow( 1.0 );
 	height: 100%;
-	padding: 0px 24px;
+}
+
+.k4-mw-body
+{
+	width: 100%;
+	height: 100%;
 	flow-children: right;
+	padding: 0px 20px;
 }
 
 .k4-mw-icon
 {
-	width: 48px;
-	height: 48px;
+	width: 40px;
+	height: 40px;
 	vertical-align: center;
-	wash-color: tx2;
+	wash-color: tx;
 }
 
 .k4-mw-text
@@ -1714,18 +1846,29 @@ css += r"""
 	flow-children: down;
 }
 
-.k4-mw-desc
+.k4-mw-title
 {
-	width: 100%;
-	margin: 6px 0px 8px 0px;
 	font-size: 17px;
 	white-space: nowrap;
-	text-overflow: shrink;
+}
+
+.k4-mw-left
+{
+	margin-left: 8px;
+	vertical-align: bottom;
+	font-size: 13px;
+	color: tx3;
+	white-space: nowrap;
+}
+
+.k4-bar.k4-mw-track
+{
+	margin-top: 10px;
 }
 
 .k4-mw-side
 {
-	width: 140px;
+	width: 120px;
 	vertical-align: center;
 	flow-children: down;
 }
@@ -1733,86 +1876,89 @@ css += r"""
 .k4-mw-progress
 {
 	horizontal-align: right;
-	font-size: 28px;
+	font-size: 26px;
 	white-space: nowrap;
+	text-overflow: shrink;
+	max-width: 120px;
 }
 
 .k4-mw-reward
 {
 	horizontal-align: right;
-	font-size: 14px;
-	color: tx2;
+	font-size: 16px;
+	color: gold;
 	white-space: nowrap;
 }
 
+/* The streak week: the day's number and its bonus, never a sentence, so it fits in every language. Done days are
+   green with a check; today has a dashed edge ("where you are", not a pick). */
 .k4-streak
 {
-	width: 520px;
+	width: fit-children;
 	height: 100%;
-	margin-left: 20px;
-	padding: 12px 16px;
-	flow-children: down;
+	margin-left: 16px;
+	padding: 0px 16px;
+	flow-children: right;
 }
 
-.k4-streak-count
+.k4-streak-head
 {
-	font-size: 14px;
-	font-weight: bold;
-	white-space: nowrap;
-}
-
-.k4-streak-hint
-{
-	width: fill-parent-flow( 1 );
-	margin-left: 6px;
-	font-size: 13px;
-	color: tx2;
-	text-overflow: ellipsis;
-}
-
-.k4-streak-days
-{
-	height: 44px;
-	margin-top: 8px;
+	visibility: collapse;
 }
 
 .k4-sd
 {
-	width: fill-parent-flow( 1.0 );
-	height: 100%;
-	border-radius: 2px;
-	background-color: s0;
+	width: 58px;
+	height: 58px;
+	vertical-align: center;
+	border-radius: 4px;
+	background-color: s1;
 	border: 1px solid line;
 }
 
 .k4-sd-body
 {
 	width: 100%;
-	height: 100%;
+	vertical-align: center;
 	flow-children: down;
-	padding-top: 4px;
-}
-
-.k4-sd-top
-{
-	horizontal-align: center;
-	flow-children: right;
 }
 
 .k4-sd-day
 {
-	font-size: 15px;
-	color: tx3;
+	horizontal-align: center;
+	font-size: 17px;
 }
 
 .k4-sd-bonus
 {
+	max-width: 54px;
+	margin-top: 2px;
 	horizontal-align: center;
 	font-size: 11px;
 	color: tx3;
 	white-space: nowrap;
 	text-overflow: shrink;
-	max-width: 60px;
+}
+
+.k4-sd.k4-on
+{
+	background-color: #6FA8861A;
+	border: 1px solid #6FA88659;
+}
+
+.k4-sd.k4-on .k4-sd-day
+{
+	visibility: collapse;
+}
+
+.k4-sd.k4-on .k4-sd-bonus
+{
+	color: ok;
+}
+
+.k4-sd.k4-today
+{
+	border: 1px dashed tx2;
 }
 
 /* ---------------------------------------------------------------- Achievements */
@@ -1822,67 +1968,57 @@ css += r"""
 	flow-children: down;
 }
 
+/* The three medals on the player's profile, small, next to the count. A click takes one off. */
 .k4-a-showcase
 {
-	width: 100%;
-	height: 76px;
-	margin-top: 12px;
-	padding: 0px 20px;
+	height: 100%;
+	margin-right: 20px;
 	flow-children: right;
 }
 
 .k4-a-sc-cap
 {
-	width: 220px;
-	vertical-align: center;
-	font-size: 15px;
-	font-weight: bold;
-	color: tx2;
-	white-space: nowrap;
-	text-overflow: shrink;
-}
-
-.k4-a-sc
-{
-	width: 240px;
-	height: 60px;
-	vertical-align: center;
-	flow-children: right;
-	padding: 0px 12px 0px 8px;
-	border-radius: 4px;
-	border: 1px solid line;
-}
-
-.k4-a-sc-name
-{
-	width: fill-parent-flow( 1.0 );
-	margin-left: 12px;
-	vertical-align: center;
-	font-size: 14px;
-	font-weight: bold;
-	white-space: nowrap;
-	text-overflow: shrink;
-}
-
-.k4-a-sc-empty
-{
-	margin-left: 12px;
+	margin-right: 6px;
 	vertical-align: center;
 	font-size: 13px;
 	color: tx3;
 	white-space: nowrap;
+}
+
+.k4-a-sc
+{
+	width: 40px;
+	height: 40px;
+	margin-left: 4px;
+	vertical-align: center;
+	border-radius: 4px;
+	border: 1px solid #00000000;
+}
+
+.k4-a-sc .k4-ring
+{
+	horizontal-align: center;
+}
+
+.k4-a-sc-name, .k4-a-sc-empty
+{
 	visibility: collapse;
 }
 
-.k4-a-sc.k4-empty .k4-a-sc-name { visibility: collapse; }
-.k4-a-sc.k4-empty .k4-a-sc-empty { visibility: visible; }
 .k4-a-sc.k4-empty .k4-ring { opacity: 0.5; }
+
+.k4-a-count
+{
+	vertical-align: center;
+	font-size: 17px;
+	white-space: nowrap;
+}
 
 .k4-a-list
 {
 	width: 100%;
 	height: fill-parent-flow( 1.0 );
-	margin-top: 12px;
+	margin-top: 14px;
 	flow-children: right-wrap;
 }
 
@@ -1904,69 +2040,74 @@ css += r"""
 	horizontal-align: center;
 }
 
+/* A medal tile: ring, name, bar; unlocked ones get the metal ring and a check. The text shows on hover. */
 .k4-a
 {
-	width: 283px;
-	height: 112px;
+	width: 186px;
+	height: 132px;
 	margin: 0px 12px 12px 0px;
 }
 
 .k4-a-body
 {
 	width: 100%;
-	height: 100%;
-	flow-children: right;
-	padding: 14px;
+	vertical-align: center;
+	flow-children: down;
 }
 
-.k4-a-text
+.k4-a-body .k4-ring
 {
-	width: fill-parent-flow( 1.0 );
-	height: 100%;
-	margin-left: 14px;
-	flow-children: down;
+	horizontal-align: center;
 }
 
 .k4-a-name
 {
 	width: 100%;
-	padding-right: 18px;
-	font-size: 15px;
+	margin-top: 10px;
+	padding: 0px 8px;
+	text-align: center;
+	font-size: 14px;
 	font-weight: bold;
-	color: tx2;
 	white-space: nowrap;
 	text-overflow: shrink;
 }
 
-.k4-a-goal
+.k4-bar.k4-a-bar
 {
-	font-size: 14px;
-	color: tx2;
-	white-space: nowrap;
+	width: 64%;
+	margin-top: 8px;
+	horizontal-align: center;
 }
 
-.k4-a-desc
+.k4-a-check
 {
-	width: 100%;
-	height: 32px;
-	font-size: 12px;
-	color: tx3;
-	text-overflow: ellipsis;
+	width: 14px;
+	height: 14px;
+	margin-top: 6px;
+	horizontal-align: center;
+	wash-color: ok;
+	visibility: collapse;
 }
 
-.k4-a-bar
+.k4-a-goal, .k4-a-desc
 {
-	margin-top: 4px;
+	visibility: collapse;
 }
 
-.k4-a.k4-done .k4-a-name { color: tx; }
+.k4-a.k4-done
+{
+	border: 1px solid line-hi;
+}
+
+.k4-a.k4-done .k4-a-bar { visibility: collapse; }
+.k4-a.k4-done .k4-a-check { visibility: visible; }
 
 .k4-a-pin
 {
 	width: 14px;
 	height: 14px;
 	horizontal-align: right;
-	margin: 12px 12px 0px 0px;
+	margin: 10px 10px 0px 0px;
 	wash-color: tx;
 	visibility: collapse;
 }
@@ -1990,7 +2131,7 @@ css += r"""
 
 .k4-lb-switch
 {
-	margin-left: 24px;
+	margin-left: 20px;
 	vertical-align: center;
 	flow-children: right;
 }
@@ -2018,7 +2159,7 @@ css += r"""
 {
 	width: 100%;
 	height: fill-parent-flow( 1.0 );
-	margin-top: 12px;
+	margin-top: 14px;
 	flow-children: down;
 }
 
@@ -2027,15 +2168,14 @@ css += r"""
 	width: 100%;
 	height: fill-parent-flow( 1.0 );
 	flow-children: down;
-	padding: 4px 0px;
 }
 
+/* A row: place, emblem, name, points, and a small challenge button. The rest of the row opens the profile. */
 .k4-lb-row
 {
 	width: 100%;
-	height: 44px;
+	height: 42px;
 	flow-children: right;
-	padding: 0px 16px 0px 16px;
 	border-left: 3px solid #00000000;
 	border-bottom: 1px solid line;
 	transition-property: background-color;
@@ -2047,11 +2187,24 @@ css += r"""
 	background-color: s2;
 }
 
+.k4-lb-open
+{
+	width: fill-parent-flow( 1.0 );
+	height: 100%;
+	flow-children: right;
+	padding-left: 16px;
+}
+
+.k4-lb-open:active
+{
+	sound: "UIPanorama.generic_button_press";
+}
+
 .k4-lb-pos
 {
-	width: 52px;
+	width: 40px;
 	vertical-align: center;
-	font-size: 20px;
+	font-size: 17px;
 	color: tx3;
 	white-space: nowrap;
 	text-overflow: shrink;
@@ -2063,19 +2216,14 @@ css += r"""
 	margin-left: 16px;
 	vertical-align: center;
 	font-size: 15px;
+	font-weight: bold;
 	white-space: nowrap;
 	text-overflow: ellipsis;
 }
 
-.k4-lb-rank
+.k4-lb-rank, .k4-lb-caption
 {
-	width: 220px;
-	margin-left: 12px;
-	vertical-align: center;
-	font-size: 14px;
-	color: tx2;
-	white-space: nowrap;
-	text-overflow: shrink;
+	visibility: collapse;
 }
 
 .k4-lb-points
@@ -2083,17 +2231,21 @@ css += r"""
 	width: 120px;
 	vertical-align: center;
 	text-align: right;
-	font-size: 18px;
+	font-size: 17px;
 	white-space: nowrap;
 	text-overflow: shrink;
 }
 
 .k4-lb-btns
 {
-	width: 232px;
+	width: 62px;
 	height: 100%;
-	margin-left: 16px;
-	flow-children: right;
+}
+
+.k4-lb-duel
+{
+	horizontal-align: center;
+	vertical-align: center;
 }
 
 /* The player's own row: in the list, and pinned under it */
@@ -2110,8 +2262,8 @@ css += r"""
 
 .k4-lb-me
 {
-	height: 48px;
-	margin-top: 8px;
+	height: 44px;
+	margin-top: 16px;
 	border-radius: 4px;
 	border-bottom: 0px solid #00000000;
 }
@@ -2227,79 +2379,60 @@ css += r"""
 
 .k4-d-build
 {
-	width: 740px;
+	width: 846px;
 	height: 100%;
 	flow-children: down;
 }
 
+/* The step captions stay with the server; the choices speak for themselves. */
+.k4-duels .k4-sub
+{
+	visibility: collapse;
+}
+
+/* Three rows of players show; more scroll. The rules, stakes and challenge sit right under them. */
 .k4-dp-list
 {
 	width: 100%;
-	height: fill-parent-flow( 1.0 );
+	height: 246px;
 	flow-children: right-wrap;
-	margin-bottom: 8px;
+	margin-bottom: 4px;
 }
 
+/* A player: emblem and name. One who cannot be challenged now is dimmed (k4-disabled). */
 .k4-dp
 {
-	width: 174px;
-	height: 56px;
-	margin: 0px 8px 8px 0px;
-	flow-children: right;
-	padding: 0px 10px;
-}
-
-.k4-dp-text
-{
-	width: fill-parent-flow( 1.0 );
-	margin-left: 10px;
-	vertical-align: center;
+	width: 158px;
+	height: 72px;
+	margin: 0px 10px 10px 0px;
 	flow-children: down;
+	padding-top: 11px;
 }
 
 .k4-dp-name
 {
 	width: 100%;
-	font-size: 14px;
+	margin-top: 6px;
+	padding: 0px 8px;
+	text-align: center;
+	font-size: 13px;
 	font-weight: bold;
 	white-space: nowrap;
 	text-overflow: shrink;
 }
 
-.k4-dp-points
-{
-	font-size: 12px;
-	color: tx3;
-	white-space: nowrap;
-}
-
-.k4-dp-state
-{
-	width: fill-parent-flow( 1.0 );
-	margin-left: 6px;
-	font-size: 12px;
-	color: tx2;
-	white-space: nowrap;
-	text-overflow: ellipsis;
-}
-
-/* A player who cannot be challenged shows why ("In a duel") in place of the points, so the reason fits the card. */
-.k4-dp.k4-disabled .k4-dp-points
+.k4-dp-extra
 {
 	visibility: collapse;
 }
 
-.k4-dp.k4-disabled .k4-dp-state
-{
-	margin-left: 0px;
-}
-
+/* A rule: its picture; the name and what counts show on hover. */
 .k4-d-types
 {
 	width: 100%;
-	height: 76px;
+	height: 70px;
 	flow-children: right;
-	margin-bottom: 16px;
+	margin-bottom: 14px;
 }
 
 .k4-dt
@@ -2312,82 +2445,91 @@ css += r"""
 {
 	width: 100%;
 	height: 100%;
-	flow-children: down;
 }
 
 .k4-dt-icon
 {
-	width: 56px;
-	height: 26px;
-	margin-top: 12px;
+	width: 64px;
+	height: 30px;
 	horizontal-align: center;
+	vertical-align: center;
 	wash-color: tx2;
 }
 
-/* Centered like its icon: the label shrinks to its text and the label itself is centered (a 100% wide label kept
-   its text on the left in game). */
 .k4-dt-name
 {
-	max-width: 100%;
-	margin-top: 8px;
-	horizontal-align: center;
-	text-align: center;
-	font-size: 13px;
-	font-weight: bold;
-	color: tx2;
-	white-space: nowrap;
-	text-overflow: shrink;
+	visibility: collapse;
 }
 
-.k4-dt.k4-active .k4-dt-name { color: tx; }
 .k4-dt.k4-active .k4-dt-icon { wash-color: tx; }
 
-.k4-d-stakes .k4-seg-label
+.k4-d-stakes
 {
-	font-size: 15px;
+	width: 100%;
+	flow-children: right;
 }
 
+/* The challenge in one line: emblem, name, the rule's picture, the stake; why it cannot be sent yet; Challenge. */
 .k4-d-sum
 {
 	width: 100%;
 	height: 64px;
-	margin-top: 16px;
+	margin-top: 14px;
 	flow-children: right;
 	padding: 0px 12px 0px 16px;
 }
 
-.k4-d-sum-text
+.k4-d-pick
 {
-	width: fill-parent-flow( 1.0 );
-	vertical-align: center;
-	flow-children: down;
-	margin-right: 16px;
+	height: 100%;
+	flow-children: right;
 }
 
-.k4-d-summary
+.k4-d-pick-name
 {
-	width: 100%;
-	font-size: 15px;
+	margin-left: 12px;
+	vertical-align: center;
+	font-size: 16px;
 	font-weight: bold;
 	white-space: nowrap;
 	text-overflow: shrink;
+	max-width: 220px;
+}
+
+.k4-d-pick-type
+{
+	width: 22px;
+	height: 22px;
+	margin-left: 14px;
+	vertical-align: center;
+	wash-color: tx;
+}
+
+.k4-d-pick-stake
+{
+	margin-left: 10px;
+	vertical-align: center;
+	font-size: 18px;
+	color: gold;
+	white-space: nowrap;
 }
 
 .k4-d-status
 {
-	width: 100%;
-	margin-top: 2px;
+	margin-left: 14px;
+	vertical-align: center;
 	font-size: 13px;
 	color: tx2;
 	white-space: nowrap;
 	text-overflow: shrink;
+	max-width: 420px;
 }
 
 .k4-d-side
 {
 	width: fill-parent-flow( 1.0 );
 	height: 100%;
-	margin-left: 20px;
+	margin-left: 16px;
 	flow-children: down;
 }
 
@@ -2428,7 +2570,7 @@ css += r"""
 	font-weight: bold;
 	white-space: nowrap;
 	text-overflow: shrink;
-	max-width: 240px;
+	max-width: 180px;
 }
 
 .k4-d-mine-score
@@ -2452,16 +2594,23 @@ css += r"""
 {
 	width: 100%;
 	height: fill-parent-flow( 1.0 );
-	padding: 12px 16px;
+	padding: 14px 16px;
 	flow-children: down;
 }
 
+/* A running duel: the rule's picture, who, the score; the rule, stake and time left on hover. */
 .k4-dl
 {
 	width: 100%;
-	height: 48px;
+	height: 52px;
+	border-bottom: 1px solid line;
+}
+
+.k4-dl-body
+{
+	width: 100%;
+	height: 100%;
 	flow-children: right;
-	border-top: 1px solid line;
 }
 
 .k4-dl-icon
@@ -2469,31 +2618,16 @@ css += r"""
 	width: 24px;
 	height: 24px;
 	vertical-align: center;
-	wash-color: tx2;
-}
-
-.k4-dl-text
-{
-	width: fill-parent-flow( 1.0 );
-	margin-left: 10px;
-	vertical-align: center;
-	flow-children: down;
+	wash-color: tx;
 }
 
 .k4-dl-names
 {
-	width: 100%;
+	width: fill-parent-flow( 1.0 );
+	margin-left: 12px;
+	vertical-align: center;
 	font-size: 14px;
 	font-weight: bold;
-	white-space: nowrap;
-	text-overflow: shrink;
-}
-
-.k4-dl-info
-{
-	width: 100%;
-	font-size: 12px;
-	color: tx3;
 	white-space: nowrap;
 	text-overflow: shrink;
 }
@@ -2503,7 +2637,7 @@ css += r"""
 	width: 64px;
 	vertical-align: center;
 	text-align: right;
-	font-size: 18px;
+	font-size: 20px;
 	white-space: nowrap;
 }
 
@@ -2514,34 +2648,35 @@ css += r"""
 	flow-children: right;
 }
 
+/* Left: name and place, the big emblem, rank, points, bar, and the showcase medals with their names */
 .k4-pf-left
 {
-	width: 380px;
+	width: 340px;
 	height: 100%;
 	padding: 20px;
 	flow-children: down;
 }
 
+.k4-pf-head
+{
+	horizontal-align: center;
+	flow-children: right;
+}
+
 .k4-pf-name
 {
-	max-width: 240px;
-	font-size: 22px;
+	max-width: 220px;
+	font-size: 20px;
 	white-space: nowrap;
 	text-overflow: shrink;
 }
 
 .k4-pf-place
 {
-	margin-left: 10px;
-	vertical-align: center;
-	font-size: 14px;
-	color: tx2;
+	margin-left: 8px;
+	font-size: 20px;
+	color: gold;
 	white-space: nowrap;
-}
-
-#k4-pf-icon
-{
-	margin-top: 16px;
 }
 
 .k4-pf-badge
@@ -2549,6 +2684,7 @@ css += r"""
 	height: 40px;
 	margin-top: 16px;
 	padding: 0px 14px;
+	horizontal-align: center;
 	border-radius: 2px;
 	background-color: s3;
 }
@@ -2563,7 +2699,8 @@ css += r"""
 .k4-pf-rank
 {
 	width: 100%;
-	margin-top: 10px;
+	margin-top: 12px;
+	text-align: center;
 	font-size: 30px;
 	white-space: nowrap;
 	text-overflow: shrink;
@@ -2571,42 +2708,38 @@ css += r"""
 
 .k4-pf-points
 {
-	font-size: 15px;
-	color: tx2;
+	margin-top: 6px;
+	horizontal-align: center;
+	font-size: 16px;
 	white-space: nowrap;
 }
 
-.k4-pf-bar-track
+.k4-bar.k4-pf-bar-track
 {
 	margin-top: 12px;
 }
 
 .k4-pf-next
 {
-	width: 100%;
-	margin-top: 8px;
-	font-size: 13px;
-	color: tx3;
-	white-space: nowrap;
-	text-overflow: shrink;
+	visibility: collapse;
 }
 
 .k4-pf-challenge
 {
-	margin-top: 14px;
-	horizontal-align: left;
+	margin-top: 16px;
+	horizontal-align: center;
 }
 
 .k4-pf-showcase
 {
-	width: 100%;
+	horizontal-align: center;
 	flow-children: right;
 }
 
 .k4-pf-sc
 {
-	width: 104px;
-	height: 112px;
+	width: 92px;
+	height: 104px;
 	border-radius: 4px;
 	border: 1px solid #00000000;
 }
@@ -2614,9 +2747,8 @@ css += r"""
 .k4-pf-sc-body
 {
 	width: 100%;
-	height: 100%;
+	vertical-align: center;
 	flow-children: down;
-	padding-top: 4px;
 }
 
 .k4-pf-sc-body .k4-ring
@@ -2626,46 +2758,45 @@ css += r"""
 
 .k4-pf-sc-name
 {
-	max-width: 100%;
+	width: 100%;
 	margin-top: 8px;
-	horizontal-align: center;
+	padding: 0px 4px;
 	text-align: center;
 	font-size: 13px;
 	font-weight: bold;
 	white-space: nowrap;
-	text-overflow: ellipsis;
+	text-overflow: shrink;
 }
 
-/* Two lines at most at one size; long goals wrap instead of shrinking to an unreadable size. */
 .k4-pf-sc-desc
 {
-	max-width: 100%;
-	max-height: 34px;
-	horizontal-align: center;
-	text-align: center;
-	font-size: 12px;
-	color: tx3;
-	text-overflow: ellipsis;
+	visibility: collapse;
 }
 
 .k4-pf-sc-hint
 {
 	width: 100%;
-	margin-top: 8px;
 }
 
+.k4-pf-sc-hint .k4-empty-text
+{
+	text-align: center;
+	font-size: 13px;
+}
+
+/* Right: eight numbers (picture and value; the name on hover), the weapons and time per side, past seasons */
 .k4-pf-right
 {
 	width: fill-parent-flow( 1.0 );
 	height: 100%;
-	margin-left: 20px;
+	margin-left: 16px;
 	flow-children: down;
 }
 
 .k4-pf-tiles
 {
 	width: 100%;
-	height: 80px;
+	height: 72px;
 	flow-children: right;
 }
 
@@ -2677,38 +2808,31 @@ css += r"""
 
 .k4-pf-st-body
 {
-	width: 100%;
 	height: 100%;
-	flow-children: down;
-	padding: 12px 14px;
+	horizontal-align: center;
+	flow-children: right;
 }
 
 .k4-pf-st-icon
 {
-	width: 14px;
-	height: 14px;
-	margin-right: 8px;
+	width: 26px;
+	height: 26px;
 	vertical-align: center;
 	wash-color: tx2;
 }
 
 .k4-pf-st-label
 {
-	width: fill-parent-flow( 1.0 );
-	vertical-align: center;
-	font-size: 13px;
-	font-weight: bold;
-	color: tx2;
-	white-space: nowrap;
-	text-overflow: shrink;
+	visibility: collapse;
 }
 
 /* One line, shrunk to fit: a long value (big playtime, a long translation) wrapped and was cut off. */
 .k4-tile-value
 {
-	width: 100%;
-	margin-top: 6px;
-	font-size: 28px;
+	max-width: 150px;
+	margin-left: 14px;
+	vertical-align: center;
+	font-size: 30px;
 	color: tx;
 	white-space: nowrap;
 	text-overflow: shrink;
@@ -2717,16 +2841,36 @@ css += r"""
 .k4-pf-pair
 {
 	width: 100%;
-	height: 190px;
+	height: fill-parent-flow( 1.0 );
 	margin-top: 16px;
 	flow-children: right;
 }
 
-.k4-pf-weapons, .k4-pf-pt
+.k4-pf-col
 {
 	width: fill-parent-flow( 1.0 );
 	height: 100%;
-	padding: 14px 18px;
+	flow-children: down;
+}
+
+.k4-pf-weapons
+{
+	width: 100%;
+	padding: 8px 18px;
+	flow-children: down;
+}
+
+.k4-pf-weapons .k4-pf-card-head, .k4-pf-weapons .k4-pf-line-name
+{
+	visibility: collapse;
+}
+
+.k4-pf-pt
+{
+	width: 100%;
+	height: fill-parent-flow( 1.0 );
+	margin-top: 16px;
+	padding: 12px 18px;
 	flow-children: down;
 }
 
@@ -2747,9 +2891,7 @@ css += r"""
 .k4-pf-card-title
 {
 	vertical-align: center;
-	font-size: 13px;
-	font-weight: bold;
-	color: tx2;
+	font-size: 15px;
 	white-space: nowrap;
 	text-overflow: shrink;
 	max-width: 220px;
@@ -2766,16 +2908,16 @@ css += r"""
 .k4-pf-line
 {
 	width: 100%;
-	height: 46px;
+	height: 44px;
 	flow-children: right;
 }
 
 .k4-pf-sw-icon
 {
-	width: 72px;
-	height: 22px;
+	width: 86px;
+	height: 26px;
 	vertical-align: center;
-	wash-color: tx2;
+	wash-color: tx;
 }
 
 .k4-pf-side-icon
@@ -2787,32 +2929,25 @@ css += r"""
 
 .k4-pf-line-name
 {
-	width: 96px;
+	width: 110px;
 	margin-left: 12px;
 	vertical-align: center;
 	font-size: 14px;
 	font-weight: bold;
 	white-space: nowrap;
-	text-overflow: ellipsis;
-}
-
-/* Only the time card's side names get more room ("Terörle Mücadele", "Antiterroristes"): the weapon card is
-   narrower, and the same width there squeezed its bars to a few pixels. */
-.k4-side-t .k4-pf-line-name, .k4-side-ct .k4-pf-line-name, .k4-side-spec .k4-pf-line-name
-{
-	width: 150px;
+	text-overflow: shrink;
 }
 
 .k4-pf-line-bar
 {
 	width: fill-parent-flow( 1.0 );
-	margin: 0px 12px;
+	margin: 0px 14px;
 	vertical-align: center;
 }
 
 .k4-pf-line-value
 {
-	width: 76px;
+	width: 70px;
 	vertical-align: center;
 	text-align: right;
 	font-size: 15px;
@@ -2828,19 +2963,20 @@ css += r"""
 .k4-side-spec .k4-bar-fill { background-color: tx3; }
 .k4-side-spec .k4-pf-side-icon { wash-color: tx2; }
 
+/* Past seasons: emblem, season, place */
 .k4-pf-ss-list
 {
-	width: 100%;
-	height: fill-parent-flow( 1.0 );
-	margin-top: 16px;
+	width: fill-parent-flow( 1.0 );
+	height: 100%;
+	margin-left: 16px;
 	flow-children: down;
-	padding: 4px 0px;
+	padding: 8px 0px;
 }
 
 .k4-pf-ss
 {
 	width: 100%;
-	height: 36px;
+	height: 40px;
 	flow-children: right;
 	padding: 0px 16px;
 	border-bottom: 1px solid line;
@@ -2849,19 +2985,19 @@ css += r"""
 .k4-pf-ss-season
 {
 	width: fill-parent-flow( 1.0 );
+	margin-left: 14px;
 	vertical-align: center;
 	font-size: 14px;
-	color: tx2;
 	white-space: nowrap;
 	text-overflow: shrink;
 }
 
 .k4-pf-ss-pos
 {
-	width: 140px;
+	width: 90px;
 	vertical-align: center;
 	text-align: right;
-	font-size: 17px;
+	font-size: 16px;
 	white-space: nowrap;
 }
 
