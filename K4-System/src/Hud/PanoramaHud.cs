@@ -84,7 +84,10 @@ internal sealed class PanoramaHud
 	internal const int WeaponBars = 3;
 	internal const int StreakDays = 7;
 	internal const int NextCards = 3;
-	internal const int HomeTop = 5;
+	// The Home podium (owner 2026-11-21, was a top 5 list).
+	internal const int HomeTop = 3;
+	// The big numbers under Home: K/D, headshots, accuracy, playtime and kills.
+	internal const int HomeStats = 5;
 	private const int DuelTypeCards = 6;
 	private const int DuelStakeButtons = 5;
 
@@ -1307,6 +1310,39 @@ internal sealed class PanoramaHud
 
 		// Do this next.
 		DrawNext(player, state, pen);
+
+		// The big numbers: the player's own stats, as on the profile.
+		List<(string Label, string Value, string Icon)> numbers = HomeNumbers(player);
+		pen.Gone("k4-h-stats", numbers.Count == 0);
+		for (int i = 0; i < HomeStats; i++)
+		{
+			string tile = $"k4-h-s{i}";
+			pen.Show(tile, i < numbers.Count);
+			if (i >= numbers.Count)
+				continue;
+			pen.Var(tile, "label", numbers[i].Label);
+			pen.Var(tile, "value", numbers[i].Value);
+			SetPicture(pen, $"{tile}-icon", numbers[i].Icon);
+		}
+	}
+
+	private List<(string Label, string Value, string Icon)> HomeNumbers(K4Player player)
+	{
+		CultureInfo invariant = CultureInfo.InvariantCulture;
+		List<(string Label, string Value, string Icon)> numbers = [];
+		if (player.Stats?.ToArray() is int[] stats)
+		{
+			int kills = stats[(int)StatField.Kills];
+			int shots = stats[(int)StatField.Shoots];
+			numbers.Add((Text(player, "hud.stat.kd"), StatCounters.KillDeathRatio(kills, stats[(int)StatField.Deaths]).ToString("0.00", invariant), "ic-stats"));
+			numbers.Add((Text(player, "hud.stat.headshots"), $"{StatService.HeadshotPercentage(stats[(int)StatField.Headshots], kills).ToString("0", invariant)}%", "ic-stat_headshots"));
+			numbers.Add((Text(player, "hud.stat.accuracy"), $"{(shots > 0 ? stats[(int)StatField.HitsGiven] * 100.0 / shots : 0).ToString("0", invariant)}%", "ic-crosshair_circle"));
+		}
+		if (player.Playtime is not null && playtime.CurrentSeconds(player) is int[] seconds)
+			numbers.Add((Text(player, "hud.stat.playtime"), playtime.Format(seconds[(int)PlaytimeField.All], StatTimeUnits), "ic-clock"));
+		if (player.Stats?.ToArray() is int[] counted)
+			numbers.Add((Text(player, "hud.stat.kills"), Number(counted[(int)StatField.Kills]), "ic-kill"));
+		return numbers;
 	}
 
 	private void DrawHomeMe(K4Player player, HudPen pen, (int Placement, int Total) placed)

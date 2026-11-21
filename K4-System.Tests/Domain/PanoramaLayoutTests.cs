@@ -67,7 +67,7 @@ public partial class PanoramaLayoutTests(ITestOutputHelper output)
 		// Home
 		Add(B, ["k4-h-rank", "k4-h-top"], Range("k4-h-m{i}", 4), Range("k4-h-n{i}", 3));
 		Add(L, ["k4-h-rank-name"]);
-		Add(P, ["k4-h-rank-icon", "k4-h-bar", "k4-h-me", "k4-h-today", "k4-h-next"], Range("k4-h-p{i}", 5), Range("k4-h-p{i}-icon", 5),
+		Add(P, ["k4-h-rank-icon", "k4-h-bar", "k4-h-me", "k4-h-today", "k4-h-next", "k4-h-stats"], Range("k4-h-p{i}", 3), Range("k4-h-p{i}-icon", 3), Range("k4-h-s{i}", 5), Range("k4-h-s{i}-icon", 5),
 			Range("k4-h-m{i}-icon", 4), Range("k4-h-m{i}-bar", 4), Range("k4-h-sd{i}", 7), Range("k4-h-n{i}-icon", 3));
 
 		// Missions
@@ -125,7 +125,7 @@ public partial class PanoramaLayoutTests(ITestOutputHelper output)
 			"k4-pf-challenge", "k4-pf-sc-hint", "k4-pf-pt", "k4-pf-ss-none", "k4-set-mode-lock", "k4-set-points", "k4-set-tag",
 			"k4-t-more", "k4-promo",
 		];
-		gone.AddRange(Range("k4-h-p{i}", 5).Concat(Range("k4-h-m{i}", 4)).Concat(Range("k4-h-n{i}", 3)));
+		gone.AddRange(new[] { "k4-h-stats" }.Concat(Range("k4-h-p{i}", 3)).Concat(Range("k4-h-s{i}", 5)).Concat(Range("k4-h-m{i}", 4)).Concat(Range("k4-h-n{i}", 3)));
 		gone.AddRange(Range("k4-m{i}", 3).Concat(Range("k4-reroll-{i}", 3)).Concat(Range("k4-m{i}-ask", 3)));
 		gone.AddRange(Range("k4-a{i}", 64));
 		gone.AddRange(Range("k4-lb-r{i}", 100).Concat(Range("k4-lb-r{i}-duel", 100)));
@@ -247,7 +247,7 @@ public partial class PanoramaLayoutTests(ITestOutputHelper output)
 	{
 		Dictionary<string, XElement> ids = ById;
 		List<(string Id, string Class)> expected = [];
-		expected.AddRange(Range("k4-h-p{i}-icon", 5).Concat(Range("k4-lb-r{i}-icon", 100)).Concat(Range("k4-rk{i}-icon", 40))
+		expected.AddRange(Range("k4-h-p{i}-icon", 3).Concat(Range("k4-lb-r{i}-icon", 100)).Concat(Range("k4-rk{i}-icon", 40))
 			.Concat(Range("k4-pf-ss{i}-icon", 24)).Concat(Range("k4-dp{i}-icon", 64)).Select(id => (id, "sg-0")));
 		expected.AddRange(Range("k4-a-sc{i}-ring", 3).Concat(Range("k4-pf-sc{i}-ring", 3)).Concat(Range("k4-a{i}-ring", 64))
 			.Concat(Range("k4-t{i}-ring", 3)).Select(id => (id, "t-locked")));

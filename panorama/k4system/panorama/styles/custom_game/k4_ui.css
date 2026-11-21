@@ -91,7 +91,7 @@ Label
 	transition-timing-function: ease-out;
 }
 
-/* Behind the menu (owner 2026-11-21, from 7.x): CS2's season art in grey, dimmed from 90% on the left to 60% on the
+/* Behind the menu (owner 2026-11-21, from 7.x): CS2's season art in grey, dimmed as in 7.x: 97% on the left, 92% at 45%, 76% on the
    right. The frame on top holds the menu itself, top to bottom. */
 .k4-bg, .k4-shade, .k4-frame
 {
@@ -114,7 +114,7 @@ Label
 
 .k4-shade
 {
-	background-color: gradient( linear, 0% 0%, 100% 0%, from( #0B0B0CE6 ), to( #0B0B0C99 ) );
+	background-color: gradient( linear, 0% 0%, 100% 0%, from( #0B0B0CF7 ), color-stop( 0.45, #0B0B0CEB ), to( #0B0B0CC2 ) );
 }
 
 .k4-frame
@@ -1104,45 +1104,41 @@ Label
 }
 
 /* Gold, silver, bronze place marks (leaderboard rows 1-3, Home's top 3) and the white "you" mark */
-.k4-p1 .k4-lb-pos, .k4-h-p-1 .k4-h-p-pos { color: gold; }
-.k4-p2 .k4-lb-pos, .k4-h-p-2 .k4-h-p-pos { color: silver; }
-.k4-p3 .k4-lb-pos, .k4-h-p-3 .k4-h-p-pos { color: bronze; }
-.k4-lb-row.k4-p1, .k4-h-p.k4-h-p-1 { border-left: 3px solid gold; }
-.k4-lb-row.k4-p2, .k4-h-p.k4-h-p-2 { border-left: 3px solid silver; }
-.k4-lb-row.k4-p3, .k4-h-p.k4-h-p-3 { border-left: 3px solid bronze; }
+.k4-p1 .k4-lb-pos { color: gold; }
+.k4-p2 .k4-lb-pos { color: silver; }
+.k4-p3 .k4-lb-pos { color: bronze; }
+.k4-lb-row.k4-p1 { border-left: 3px solid gold; }
+.k4-lb-row.k4-p2 { border-left: 3px solid silver; }
+.k4-lb-row.k4-p3 { border-left: 3px solid bronze; }
 
 /* ---------------------------------------------------------------- Home */
 
 .k4-home
 {
-	flow-children: right;
-}
-
-.k4-h-left
-{
-	width: 380px;
-	height: 100%;
 	flow-children: down;
 }
 
+/* Home (owner 2026-11-21): the rank as a big hero, then missions, the top 3 podium and "next to do", then the
+   player's big numbers. */
 .k4-h-rank
 {
 	width: 100%;
-	height: 152px;
-	padding: 20px;
-	flow-children: down;
+	height: 150px;
+	padding: 4px 8px;
+	flow-children: right;
 }
 
-.k4-h-rank-top
+.k4-h-rank .k4-em-xl
 {
-	width: 100%;
-	flow-children: right;
+	width: 320px;
+	height: 130px;
+	vertical-align: center;
 }
 
 .k4-h-rank-text
 {
 	width: fill-parent-flow( 1.0 );
-	margin-left: 16px;
+	margin-left: 28px;
 	vertical-align: center;
 	flow-children: down;
 }
@@ -1150,124 +1146,221 @@ Label
 .k4-h-rank-name
 {
 	width: 100%;
-	font-size: 28px;
+	font-size: 54px;
 	white-space: nowrap;
 	text-overflow: shrink;
 }
 
 .k4-h-points
 {
-	font-size: 18px;
+	font-size: 22px;
 	white-space: nowrap;
 }
 
 .k4-h-place
 {
-	margin-left: 10px;
+	margin-left: 12px;
 	vertical-align: bottom;
-	font-size: 14px;
+	font-size: 18px;
 	color: tx2;
 	white-space: nowrap;
 }
 
 .k4-h-bar-track
 {
-	margin-top: 18px;
+	width: 520px;
+	margin-top: 14px;
 }
 
 .k4-h-next-row
 {
-	margin-top: 10px;
+	width: 520px;
+	margin-top: 8px;
 }
 
 .k4-h-nextrank
 {
-	font-size: 13px;
+	font-size: 14px;
 	color: tx2;
 	white-space: nowrap;
 	text-overflow: shrink;
-	max-width: 220px;
+	max-width: 360px;
 }
 
 .k4-h-togo
 {
-	font-size: 13px;
+	font-size: 14px;
 	font-weight: bold;
 	white-space: nowrap;
 }
 
-.k4-h-top
+.k4-h-mid
 {
 	width: 100%;
 	height: fill-parent-flow( 1.0 );
 	margin-top: 16px;
-	padding: 16px 20px;
+	flow-children: right;
+}
+
+.k4-h-top
+{
+	width: fill-parent-flow( 1.0 );
+	height: 100%;
+	margin-left: 16px;
+	padding: 14px 16px;
 	flow-children: down;
+}
+
+.k4-h-podium
+{
+	width: fit-children;
+	height: fill-parent-flow( 1.0 );
+	horizontal-align: center;
+	flow-children: right;
 }
 
 .k4-h-p
 {
-	width: 100%;
-	height: 40px;
-	flow-children: right;
-	padding-left: 12px;
-	border-left: 3px solid #00000000;
+	width: 104px;
+	height: fit-children;
+	margin-left: 10px;
+	vertical-align: bottom;
+	flow-children: down;
 }
 
-.k4-h-p-pos
+.k4-h-p.k4-h-p-2
 {
-	width: 40px;
-	vertical-align: center;
-	font-size: 18px;
-	color: tx3;
-	white-space: nowrap;
+	margin-left: 0px;
+}
+
+.k4-h-p .k4-em-m
+{
+	horizontal-align: center;
 }
 
 .k4-h-p-name
 {
-	width: fill-parent-flow( 1.0 );
-	margin-left: 12px;
-	vertical-align: center;
-	font-size: 15px;
+	width: 100%;
+	margin-top: 4px;
+	margin-bottom: 6px;
+	horizontal-align: center;
+	text-align: center;
+	font-size: 14px;
+	font-weight: bold;
 	white-space: nowrap;
 	text-overflow: ellipsis;
 }
 
 .k4-h-p-points
 {
-	margin-left: 12px;
-	vertical-align: center;
-	font-size: 15px;
-	color: tx2;
+	visibility: collapse;
+}
+
+.k4-h-step
+{
+	width: 100%;
+	border-radius: 2px;
+}
+
+.k4-h-p-1 .k4-h-step { height: 86px; background-color: gradient( linear, 0% 0%, 0% 100%, from( #C8A45C ), to( #6E5A2E ) ); }
+.k4-h-p-2 .k4-h-step { height: 62px; background-color: gradient( linear, 0% 0%, 0% 100%, from( #B4B4B4 ), to( #5A5A5A ) ); }
+.k4-h-p-3 .k4-h-step { height: 46px; background-color: gradient( linear, 0% 0%, 0% 100%, from( #A97F5E ), to( #523B2A ) ); }
+
+.k4-h-p-pos
+{
+	horizontal-align: center;
+	margin-top: 6px;
+	font-size: 22px;
+	color: s0;
 	white-space: nowrap;
 }
 
 .k4-h-me
 {
-	margin-top: 8px;
+	width: 100%;
+	height: 34px;
+	margin-top: 10px;
+	padding: 0px 12px 0px 10px;
+	flow-children: right;
 	border-radius: 4px;
 	background-color: s3;
 	border-left: 3px solid acc;
-	padding-right: 12px;
 }
 
 .k4-h-me .k4-h-p-pos
 {
+	horizontal-align: left;
+	vertical-align: center;
+	margin-top: 0px;
+	font-size: 15px;
 	color: tx;
 }
 
 .k4-h-me-points
 {
 	vertical-align: center;
-	font-size: 16px;
+	font-size: 15px;
+	white-space: nowrap;
+}
+
+.k4-h-stats
+{
+	width: 100%;
+	height: 78px;
+	margin-top: 16px;
+	flow-children: right;
+}
+
+.k4-h-s
+{
+	width: fill-parent-flow( 1.0 );
+	height: 100%;
+	margin-left: 16px;
+	flow-children: right;
+	background-color: s1;
+	border: 1px solid line;
+	border-radius: 4px;
+}
+
+.k4-h-s.k4-first
+{
+	margin-left: 0px;
+}
+
+.k4-h-s-icon
+{
+	width: 30px;
+	height: 30px;
+	margin-left: 24px;
+	vertical-align: center;
+	wash-color: tx2;
+}
+
+.k4-h-s-text
+{
+	margin-left: 14px;
+	vertical-align: center;
+	flow-children: down;
+}
+
+.k4-h-s-value
+{
+	font-size: 30px;
+	white-space: nowrap;
+}
+
+.k4-h-s-label
+{
+	font-size: 12px;
+	color: tx3;
 	white-space: nowrap;
 }
 
 .k4-h-today
 {
-	width: fill-parent-flow( 1.0 );
+	width: fill-parent-flow( 1.2 );
 	height: 100%;
-	margin-left: 20px;
+	margin-left: 0px;
 	padding: 16px 20px;
 	flow-children: down;
 }
@@ -1275,7 +1368,7 @@ Label
 .k4-h-m
 {
 	width: 100%;
-	height: 68px;
+	height: 52px;
 	flow-children: right;
 	padding: 0px 4px;
 	border-top: 1px solid line;
@@ -1418,9 +1511,9 @@ Label
 
 .k4-h-next
 {
-	width: 320px;
+	width: 300px;
 	height: 100%;
-	margin-left: 20px;
+	margin-left: 16px;
 	flow-children: down;
 }
 

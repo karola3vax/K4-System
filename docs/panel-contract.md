@@ -82,11 +82,13 @@ The copyright line "© 2026 karola3vax" is fixed text in the footer, always visi
 | Id | Kind | Variables and classes |
 | --- | --- | --- |
 | `k4-h-rank` | Button, opens Leaderboard on the rank list | `{s:rank}` (label `k4-h-rank-name`, rank color group), `{s:points}`, `{s:place}` (for example "#12 of 340"), `{s:next}` (next rank, empty at the top), `{s:togo}`; icon `k4-h-rank-icon` (rank emblem group); bar `k4-h-bar` |
-| `k4-h-top` | Button, opens Leaderboard | `{s:title}`; rows `k4-h-p0` … `k4-h-p4`, the top 5 (start `k4-gone`): `{s:pos}`, `{s:name}`, `{s:points}`; icon `k4-h-p{i}-icon`; row `k4-h-me` (starts `k4-gone`): `{s:pos}`, `{s:points}` |
+| `k4-h-top` | Button, opens Leaderboard | `{s:title}`; rows `k4-h-p0` … `k4-h-p2`, the top 3 as a podium, laid out 2-1-3 (start `k4-gone`): `{s:pos}`, `{s:name}`, `{s:points}`; icon `k4-h-p{i}-icon`; row `k4-h-me` (starts `k4-gone`): `{s:pos}`, `{s:points}` |
 | `k4-h-today` | Panel | `{s:title}`, `{s:reset}` |
 | `k4-h-m0` … `k4-h-m3` | Button, opens Missions, start `k4-gone` | `k4-h-m3` is the weekly mission. `{s:desc}`, `{s:progress}`, `{s:reward}`; icon `k4-h-m{i}-icon`; bar `k4-h-m{i}-bar`; `k4-done` |
 | `k4-h-sd0` … `k4-h-sd6` | Panel | `{s:day}`; `k4-on` for a finished day, `k4-today` for today |
 | `k4-h-next` | Panel | `{s:title}` |
+| `k4-h-stats` | Panel, the row of big numbers under Home, starts `k4-gone` (a server without the big numbers never fills it) | none |
+| `k4-h-s0` … `k4-h-s4` | Panel, start `k4-gone` | one big number of the player's own stats: `{s:value}`, `{s:label}`; icon `k4-h-s{i}-icon` (picture group) |
 | `k4-h-n0` … `k4-h-n2` | Button, start `k4-gone` | a "do this next" card, only real items: `{s:title}`, `{s:text}`; icon `k4-h-n{i}-icon` (picture group); next card kind group. The server keeps what each card opens |
 
 ## Missions
